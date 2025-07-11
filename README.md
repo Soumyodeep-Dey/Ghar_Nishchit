@@ -87,12 +87,4 @@ This is **version 0.1** — our MVP focused on **matchmaking only**. Once tenant
 
 This project is currently under active development by a small team. PRs and issues are welcome post-MVP.
 
----
-
-## 📃 License
-
-[MIT License](LICENSE)
-
----
-
 > Built with ❤️ for Indian renters and landlords who deserve a smoother experience.
