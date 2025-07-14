@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import propertyRoutes from "./routes/property.routes.js";
-import userRoutes from "./routes/user.routes.js";
+// import userRoutes from "./routes/user.routes.js"; // Removed, file does not exist
 
 dotenv.config(); // Load environment variables
 
@@ -21,7 +21,7 @@ app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 
 app.use("/api/properties", propertyRoutes);
-app.use("/api/users", userRoutes);
+// app.use("/api/users", userRoutes); // Removed, file does not exist
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
