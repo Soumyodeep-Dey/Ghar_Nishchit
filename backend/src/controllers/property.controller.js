@@ -1,5 +1,3 @@
-
-
 import Property from '../models/property.model.js';
 
 // Create new property
