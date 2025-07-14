@@ -13,4 +13,4 @@ router.post("/login", loginUser);
 // Get User Details (protected)
 router.get("/user", verifyToken, getUserDetails);
 
-export default router;
+export default router;  
