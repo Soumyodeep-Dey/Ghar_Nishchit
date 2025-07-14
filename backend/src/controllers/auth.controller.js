@@ -9,19 +9,29 @@ const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key";
 // Register a New User
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, phone, email, role, password } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    // Validate required fields
+    if (!name || !phone || !role || !password) {
+      return res.status(400).json({ error: "All fields (name, phone, role, password) are required" });
+    }
+
+    // Check if user already exists by email or phone
+    const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
     if (existingUser) {
-      return res.status(400).json({ error: "Email already registered" });
+      if (existingUser.email === email) {
+        return res.status(400).json({ error: "Email already registered" });
+      }
+      if (existingUser.phone === phone) {
+        return res.status(400).json({ error: "Phone already registered" });
+      }
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Save user to DB
-    const newUser = new User({ name, email, password: hashedPassword });
+    const newUser = new User({ name, phone, email, role, password: hashedPassword });
     await newUser.save();
 
     res.status(201).json({ message: "User registered successfully" });
