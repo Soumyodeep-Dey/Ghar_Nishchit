@@ -1,4 +1,5 @@
 import Property from '../models/property.model.js';
+import Favorite from '../models/favourites.model.js';
 
 // Create new property
 export const createProperty = async (req, res) => {
@@ -47,6 +48,21 @@ export const deleteProperty = async (req, res) => {
   try {
     await Property.findByIdAndDelete(req.params.id);
     res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get all users who favourited a property
+export const getUsersWhoFavourited = async (req, res) => {
+  try {
+    const { propertyId } = req.params;
+    const favs = await Favorite.find().populate('seeker', 'name email');
+    console.log(favs);
+    const users = favs
+      .map(fav => fav.seeker)
+      .filter(user => user !== null); // Filter out nulls
+    res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
