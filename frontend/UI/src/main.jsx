@@ -2,10 +2,10 @@ import './index.css'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { Route, RouterProvider, createBrowserRouter, createRoutesFromElements } from 'react-router-dom'
-import Layout from './layout.jsx'
-import Home from './components/home/home.jsx'
+import Layout from './Layout.jsx'
+import Home from './components/home/Home.jsx'
 import NotFound from './components/notFound/NotFound.jsx'
-import { ThemeProvider } from './components/contexts/theme'
+import { ThemeProvider } from './components/contexts/theme.jsx'
  
 const router = createBrowserRouter(
   createRoutesFromElements(
