@@ -47,8 +47,11 @@ export const updateProperty = async (req, res) => {
 // Delete property
 export const deleteProperty = async (req, res) => {
   try {
-    await Property.findByIdAndDelete(req.params.id);
-    res.status(204).send();
+    const deleted = await Property.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ message: 'Property not found' });
+    }
+    res.status(200).json({ message: 'Property deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

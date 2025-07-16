@@ -41,9 +41,13 @@ export const removeFavourite = async (req, res) => {
     if (!propertyId) return res.status(400).json({ message: 'Property ID required' });
     const fav = await Favorite.findOne({ seeker: req.user.userId });
     if (!fav) return res.status(404).json({ message: 'No favourites found' });
+    const initialLength = fav.properties.length;
     fav.properties = fav.properties.filter(
       (id) => id.toString() !== propertyId
     );
+    if (fav.properties.length === initialLength) {
+      return res.status(404).json({ message: 'Property not found in favourites' });
+    }
     await fav.save();
     res.status(200).json({ message: 'Removed from favourites', favourites: fav.properties });
   } catch (error) {
