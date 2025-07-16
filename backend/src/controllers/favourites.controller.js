@@ -4,7 +4,7 @@ import Property from '../models/property.model.js';
 // Get all favourites for the logged-in user
 export const getFavourites = async (req, res) => {
   try {
-    const fav = await Favorite.findOne({ seeker: req.user.id }).populate('properties');
+    const fav = await Favorite.findOne({ seeker: req.user.userId }).populate('properties');
     res.status(200).json(fav ? fav.properties : []);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -18,9 +18,9 @@ export const addFavourite = async (req, res) => {
     if (!propertyId) return res.status(400).json({ message: 'Property ID required' });
     const property = await Property.findById(propertyId);
     if (!property) return res.status(404).json({ message: 'Property not found' });
-    let fav = await Favorite.findOne({ seeker: req.user.id });
+    let fav = await Favorite.findOne({ seeker: req.user.userId });
     if (!fav) {
-      fav = new Favorite({ seeker: req.user.id, properties: [propertyId] });
+      fav = new Favorite({ seeker: req.user.userId, properties: [propertyId] });
     } else {
       if (fav.properties.includes(propertyId)) {
         return res.status(409).json({ message: 'Property already in favourites' });
@@ -39,7 +39,7 @@ export const removeFavourite = async (req, res) => {
   try {
     const { propertyId } = req.body;
     if (!propertyId) return res.status(400).json({ message: 'Property ID required' });
-    const fav = await Favorite.findOne({ seeker: req.user.id });
+    const fav = await Favorite.findOne({ seeker: req.user.userId });
     if (!fav) return res.status(404).json({ message: 'No favourites found' });
     fav.properties = fav.properties.filter(
       (id) => id.toString() !== propertyId
@@ -55,7 +55,7 @@ export const removeFavourite = async (req, res) => {
 export const isFavourited = async (req, res) => {
   try {
     const { propertyId } = req.params;
-    const fav = await Favorite.findOne({ seeker: req.user.id });
+    const fav = await Favorite.findOne({ seeker: req.user.userId });
     const isFav = fav && fav.properties.some(
       (id) => id.toString() === propertyId
     );
