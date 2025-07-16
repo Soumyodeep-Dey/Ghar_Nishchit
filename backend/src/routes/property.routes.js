@@ -9,7 +9,9 @@ import {
 
   updateProperty,
 
-  deleteProperty
+  deleteProperty,
+  
+  searchPropertiesByLocation
 } 
 
 from '../controllers/property.controller.js';
@@ -18,6 +20,7 @@ const router = Router();
 
 // CRUD routes
 router.post('/', createProperty);
+router.get('/search', searchPropertiesByLocation);
 router.get('/', getAllProperties);
 router.get('/:id', getPropertyById);
 router.put('/:id', updateProperty);

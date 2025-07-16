@@ -67,3 +67,24 @@ export const getUsersWhoFavourited = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Search properties by location (city, state, zip)
+export const searchPropertiesByLocation = async (req, res) => {
+  try {
+    const { city, state, zip } = req.query;
+    const query = {};
+    if (city) {
+      query["address.city"] = { $regex: city, $options: "i" };
+    }
+    if (state) {
+      query["address.state"] = { $regex: state, $options: "i" };
+    }
+    if (zip) {
+      query["address.zip"] = zip;
+    }
+    const properties = await Property.find(query).populate('postedBy', 'name email');
+    res.status(200).json(properties);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
