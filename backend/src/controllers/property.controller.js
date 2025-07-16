@@ -88,3 +88,25 @@ export const searchPropertiesByLocation = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Search properties by proximity (nearby search)
+export const searchPropertiesNearby = async (req, res) => {
+  try {
+    const { lat, lng, distance } = req.query;
+    if (!lat || !lng) {
+      return res.status(400).json({ message: 'Latitude (lat) and longitude (lng) are required.' });
+    }
+    const maxDistance = distance ? parseInt(distance) : 10000; // default 5km
+    const properties = await Property.find({
+      location: {
+        $near: {
+          $geometry: { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] },
+          $maxDistance: maxDistance
+        }
+      }
+    }).populate('postedBy', 'name email');
+    res.status(200).json(properties);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
