@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { User, Mail, Lock, Phone } from 'lucide-react';
+import { useDarkMode } from '../DarkModeContext';
 
 export default function SignUp() {
-  const [darkMode, setDarkMode] = useState(false);
+  // const [darkMode, setDarkMode] = useState(false);
+  const { darkMode, toggleDarkMode } = useDarkMode();
 
   return (
     <div className={`min-h-screen flex items-center justify-center transition-colors duration-500 ${
@@ -12,7 +14,7 @@ export default function SignUp() {
         : 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500'
     }`}>
       <button
-        onClick={() => setDarkMode(!darkMode)}
+        onClick={toggleDarkMode}
         className={`absolute top-6 right-6 p-2 rounded-full shadow-lg transition ${
           darkMode
             ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300'

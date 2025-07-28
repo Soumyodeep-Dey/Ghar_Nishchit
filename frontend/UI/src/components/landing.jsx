@@ -1,4 +1,5 @@
-﻿﻿import React, { useState, useEffect, useRef } from 'react';
+﻿﻿import React, { useEffect, useRef, useState } from 'react';
+import { useDarkMode } from '../DarkModeContext';
 import { Link } from 'react-router-dom';
 import { Home, Building, Info, DollarSign, Users, HelpCircle, Menu, X, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 
@@ -47,7 +48,10 @@ export default function Landing() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState(null);
-  const [darkMode, setDarkMode] = useState(false);
+  // Remove local darkMode state
+  // const [darkMode, setDarkMode] = useState(false);
+
+  const { darkMode, toggleDarkMode } = useDarkMode();
 
   const carouselRef = useRef(null);
 
@@ -199,7 +203,7 @@ export default function Landing() {
           </Link>
           {/* Dark Mode Toggle Button */}
           <button
-            onClick={() => setDarkMode(!darkMode)}
+            onClick={toggleDarkMode}
             className="ml-4 p-2 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition"
             aria-label="Toggle dark mode"
           >
