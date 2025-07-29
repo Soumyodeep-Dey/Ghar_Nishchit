@@ -163,25 +163,43 @@ export default function Landing() {
 
   // Add state for selected article in Blog & Resources
   const [selectedArticle, setSelectedArticle] = useState(null);
-  
+
 
   // Add state for selected quick link in Blog & Resources
   const [selectedQuickLink, setSelectedQuickLink] = useState(null);
-  
+
+
+  // Define your menu items as an array at the top (outside the component)
+  const desktopMenu = [
+    { href: "#properties", label: "Properties", icon: Building },
+    { href: "#about", label: "About", icon: Info },
+    { href: "#pricing", label: "Pricing", icon: DollarSign },
+    { href: "#customers", label: "Customers", icon: Users },
+    { href: "#blog", label: "Blog & Resources", icon: BookOpen },
+    { href: "#help", label: "Help", icon: HelpCircle },
+  ];
+
+  // Define your mobile menu items as an array (reuse desktopMenu if you want the same items)
+  const mobileMenu = [
+    { href: "#properties", label: "Properties" },
+    { href: "#about", label: "About" },
+    { href: "#pricing", label: "Pricing" },
+    { href: "#customers", label: "Customers" },
+    { href: "#blog", label: "Blog & Resources" },
+    { href: "#help", label: "Help" },
+  ];
 
   return (
     <div
-      className={`min-h-screen transition-colors duration-500 ${
-        darkMode
-          ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100'
-          : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 text-gray-900'
-      }`}
+      className={`min-h-screen transition-colors duration-500 ${darkMode
+        ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100'
+        : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 text-gray-900'
+        }`}
     >
       {/* Navbar */}
       <nav
-        className={`sticky top-0 z-50 backdrop-blur-md bg-opacity-80 shadow-md ${
-          darkMode ? 'bg-gradient-to-r from-blue-950 via-slate-900 to-gray-900 text-slate-100' : 'bg-white'
-        }`}
+        className={`sticky top-0 z-50 backdrop-blur-md bg-opacity-80 shadow-md ${darkMode ? 'bg-gradient-to-r from-blue-950 via-slate-900 to-gray-900 text-slate-100' : 'bg-white'
+          }`}
         role="navigation"
         aria-label="Main navigation"
       >
@@ -192,72 +210,19 @@ export default function Landing() {
           </div>
           {/* Desktop Menu */}
           <ul className="hidden md:flex space-x-8" role="menubar">
-            <li role="none">
-              <a
-                href="#properties"
-                role="menuitem"
-                tabIndex={0}
-                className="flex items-center space-x-1 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded transition-transform transform hover:scale-110"
-              >
-                <Building size={18} aria-hidden="true" />
-                <span>Properties</span>
-              </a>
-            </li>
-            <li role="none">
-              <a
-                href="#about"
-                role="menuitem"
-                tabIndex={0}
-                className="flex items-center space-x-1 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded transition-transform transform hover:scale-110"
-              >
-                <Info size={18} aria-hidden="true" />
-                <span>About</span>
-              </a>
-            </li>
-            <li role="none">
-              <a
-                href="#pricing"
-                role="menuitem"
-                tabIndex={0}
-                className="flex items-center space-x-1 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded transition-transform transform hover:scale-110"
-              >
-                <DollarSign size={18} aria-hidden="true" />
-                <span>Pricing</span>
-              </a>
-            </li>
-            <li role="none">
-              <a
-                href="#customers"
-                role="menuitem"
-                tabIndex={0}
-                className="flex items-center space-x-1 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded transition-transform transform hover:scale-110"
-              >
-                <Users size={18} aria-hidden="true" />
-                <span>Customers</span>
-              </a>
-            </li>
-            <li role="none">
-              <a
-                href="#blog"
-                role="menuitem"
-                tabIndex={0}
-                className="flex items-center space-x-1 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded transition-transform transform hover:scale-110"
-              >
-                <BookOpen size={18} aria-hidden="true" />
-                <span>Blog & Resources</span>
-              </a>
-            </li>
-            <li role="none">
-              <a
-                href="#help"
-                role="menuitem"
-                tabIndex={0}
-                className="flex items-center space-x-1 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded transition-transform transform hover:scale-110"
-              >
-                <HelpCircle size={18} aria-hidden="true" />
-                <span>Help</span>
-              </a>
-            </li>
+            {desktopMenu.map(({ href, label, icon: Icon }, idx) => (
+              <li role="none" key={href}>
+                <a
+                  href={href}
+                  role="menuitem"
+                  tabIndex={0}
+                  className="flex items-center space-x-1 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded transition-transform transform hover:scale-110"
+                >
+                  <Icon size={18} aria-hidden="true" />
+                  <span>{label}</span>
+                </a>
+              </li>
+            ))}
           </ul>
           {/* Mobile Menu Button */}
           <button
@@ -294,72 +259,19 @@ export default function Landing() {
             role="menu"
             aria-label="Mobile menu"
           >
-            <li role="none">
-              <a
-                href="#properties"
-                role="menuitem"
-                tabIndex={0}
-                className="block px-6 py-3 text-gray-700 hover:bg-indigo-200 focus:outline-none focus:bg-indigo-200 transition-colors"
-                onClick={() => setMenuOpen(false)}
-              >
-                Properties
-              </a>
-            </li>
-            <li role="none">
-              <a
-                href="#about"
-                role="menuitem"
-                tabIndex={0}
-                className="block px-6 py-3 text-gray-700 hover:bg-indigo-200 focus:outline-none focus:bg-indigo-200 transition-colors"
-                onClick={() => setMenuOpen(false)}
-              >
-                About
-              </a>
-            </li>
-            <li role="none">
-              <a
-                href="#pricing"
-                role="menuitem"
-                tabIndex={0}
-                className="block px-6 py-3 text-gray-700 hover:bg-indigo-200 focus:outline-none focus:bg-indigo-200 transition-colors"
-                onClick={() => setMenuOpen(false)}
-              >
-                Pricing
-              </a>
-            </li>
-            <li role="none">
-              <a
-                href="#customers"
-                role="menuitem"
-                tabIndex={0}
-                className="block px-6 py-3 text-gray-700 hover:bg-indigo-200 focus:outline-none focus:bg-indigo-200 transition-colors"
-                onClick={() => setMenuOpen(false)}
-              >
-                Customers
-              </a>
-            </li>
-<li role="none">
-  <a
-    href="#blog"
-    role="menuitem"
-    tabIndex={0}
-    className="block px-6 py-3 text-gray-700 hover:bg-indigo-200 focus:outline-none focus:bg-indigo-200 transition-colors items-center space-x-2"
-    onClick={() => setMenuOpen(false)}
-  >
-    <span>Blog & Resources</span>
-  </a>
-</li>
-            <li role="none">
-              <a
-                href="#help"
-                role="menuitem"
-                tabIndex={0}
-                className="block px-6 py-3 text-gray-700 hover:bg-indigo-200 focus:outline-none focus:bg-indigo-200 transition-colors"
-                onClick={() => setMenuOpen(false)}
-              >
-                Help
-              </a>
-            </li>
+            {mobileMenu.map(({ href, label }) => (
+              <li role="none" key={href}>
+                <a
+                  href={href}
+                  role="menuitem"
+                  tabIndex={0}
+                  className="block px-6 py-3 text-gray-700 hover:bg-indigo-200 focus:outline-none focus:bg-indigo-200 transition-colors"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {label}
+                </a>
+              </li>
+            ))}
             <li role="none" className="px-6 py-3">
               <Link
                 to="/signup"
@@ -389,7 +301,7 @@ export default function Landing() {
             <path fill="#a5b4fc" fillOpacity="0.2" d="M0,160L80,170.7C160,181,320,203,480,197.3C640,192,800,160,960,133.3C1120,107,1280,85,1360,74.7L1440,64L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
           </svg>
         </div>
-          <div className="container mx-auto px-4 sm:px-6 md:px-6 flex flex-col items-center justify-center text-center relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 md:px-6 flex flex-col items-center justify-center text-center relative z-10">
           <h1 className={`text-3xl sm:text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg ${darkMode ? 'text-cyan-300' : 'text-white'}`}>Find Your Perfect Rental Property</h1>
           <p className={`text-base sm:text-lg md:text-xl mb-8 ${darkMode ? 'text-blue-200' : 'text-indigo-100'}`}>Ghar_Nishchit makes property management easy, efficient, and rewarding for owners and tenants.</p>
           <Link to="/signup" className={`px-6 py-3 sm:px-8 sm:py-4 rounded-full font-semibold text-base sm:text-lg shadow-lg transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-white text-indigo-600 hover:bg-indigo-100'}`}>Get Started</Link>
@@ -481,7 +393,7 @@ export default function Landing() {
             type="button"
             onClick={() => setCurrentIndex((currentIndex - 1 + properties.length) % properties.length)}
             onKeyDown={(e) => handleKeyDownCarousel(e, 'prev')}
-          className="absolute top-1/2 left-2 sm:left-4 transform -translate-y-1/2 bg-indigo-600 text-white p-3 sm:p-4 rounded-full hover:bg-indigo-700 transition opacity-0 group-hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="absolute top-1/2 left-2 sm:left-4 transform -translate-y-1/2 bg-indigo-600 text-white p-3 sm:p-4 rounded-full hover:bg-indigo-700 transition opacity-0 group-hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             aria-label="Previous Property"
           >
             &#8592;
@@ -490,7 +402,7 @@ export default function Landing() {
             type="button"
             onClick={() => setCurrentIndex((currentIndex + 1) % properties.length)}
             onKeyDown={(e) => handleKeyDownCarousel(e, 'next')}
-          className="absolute top-1/2 right-2 sm:right-4 transform -translate-y-1/2 bg-indigo-600 text-white p-3 sm:p-4 rounded-full hover:bg-indigo-700 transition opacity-0 group-hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="absolute top-1/2 right-2 sm:right-4 transform -translate-y-1/2 bg-indigo-600 text-white p-3 sm:p-4 rounded-full hover:bg-indigo-700 transition opacity-0 group-hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             aria-label="Next Property"
           >
             &#8594;
@@ -518,7 +430,7 @@ export default function Landing() {
           Featured Properties
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {featuredProperties.map((property) => (
+          {featuredProperties.map((property) => (
             <div
               key={property.id}
               className="relative rounded-lg overflow-hidden shadow-lg group cursor-pointer hover:shadow-2xl transition-shadow duration-300"
@@ -588,9 +500,8 @@ export default function Landing() {
               </div>
             </div>
             <button
-              className={`mt-6 px-6 py-3 rounded transition ${
-                darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'
-              }`}
+              className={`mt-6 px-6 py-3 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                }`}
               onClick={() => alert('Please login first')}
             >
               Learn More
@@ -631,9 +542,8 @@ export default function Landing() {
               </li>
             </ul>
             <button
-              className={`px-4 py-2 rounded transition ${
-                darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'
-              }`}
+              className={`px-4 py-2 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                }`}
               onClick={() => alert('Please login first to choose a plan')}
             >
               Choose Plan
@@ -697,9 +607,8 @@ export default function Landing() {
               </li>
             </ul>
             <button
-              className={`px-4 py-2 rounded transition ${
-                darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'
-              }`}
+              className={`px-4 py-2 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                }`}
               onClick={() => alert('Please login first to choose a plan')}
             >
               Choose Plan
@@ -732,7 +641,7 @@ export default function Landing() {
                   ))}
                 </div>
                 {/* Replace initials with avatar images */}
-                <img src={`https://randomuser.me/api/portraits/men/${customer.id}.jpg`} alt={customer.name} className="w-16 h-16 rounded-full mb-4 border-2 border-indigo-400" onError={(e) => {e.target.onerror=null;e.target.src='https://ui-avatars.com/api/?name='+encodeURIComponent(customer.name);}} />
+                <img src={`https://randomuser.me/api/portraits/men/${customer.id}.jpg`} alt={customer.name} className="w-16 h-16 rounded-full mb-4 border-2 border-indigo-400" onError={(e) => { e.target.onerror = null; e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(customer.name); }} />
               </div>
             ))}
           </div>
@@ -846,17 +755,17 @@ export default function Landing() {
                 </button>
               </form>
             </div>
-          {/* Help Section */}
-          <div id="help" className="text-white">
-            <h2 className="text-3xl font-semibold mb-4">Help</h2>
-            <p className="mb-2">
-              Need assistance? Contact our support team at{' '}
-              <a href="mailto:support@ghar_nishchit.com" className="underline hover:text-indigo-300">
-                support@ghar_nishchit.com
-              </a>{' '}
-              or call us at (123) 456-7890.
-            </p>
-          </div>
+            {/* Help Section */}
+            <div id="help" className="text-white">
+              <h2 className="text-3xl font-semibold mb-4">Help</h2>
+              <p className="mb-2">
+                Need assistance? Contact our support team at{' '}
+                <a href="mailto:support@ghar_nishchit.com" className="underline hover:text-indigo-300">
+                  support@ghar_nishchit.com
+                </a>{' '}
+                or call us at (123) 456-7890.
+              </p>
+            </div>
             {/* Social Media */}
             <div className="flex flex-col justify-between">
               <div className="flex space-x-6 mb-6 md:mb-0 justify-center md:justify-end">
