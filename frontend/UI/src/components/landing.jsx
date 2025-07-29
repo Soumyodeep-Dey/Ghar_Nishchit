@@ -173,6 +173,37 @@ function FaqItem({ faq, expandedFaq, toggleFaq }) {
   );
 }
 
+function BlogItem({ item, selected, setSelected, darkMode }) {
+  return (
+    <li>
+      <button
+        className={`block text-left w-full font-semibold focus:outline-none ${darkMode
+          ? 'text-cyan-300 hover:text-cyan-200'
+          : 'text-indigo-600 hover:text-indigo-900'
+          }`}
+        onClick={() => setSelected(selected === item.id ? null : item.id)}
+      >
+        {item.title}
+      </button>
+      {selected === item.id && (
+        <div className={`mt-2 p-3 rounded shadow ${darkMode ? 'bg-slate-800 text-cyan-100' : 'bg-white text-gray-800'
+          }`}>
+          {item.answer}
+        </div>
+      )}
+    </li>
+  );
+}
+
+function StatCard({ value, label, darkMode }) {
+  return (
+    <div className="flex flex-col items-center">
+      <div className={`text-4xl font-bold ${darkMode ? 'text-cyan-400' : 'text-indigo-600'}`}>{value}</div>
+      <div className={`font-semibold ${darkMode ? 'text-blue-200' : 'text-gray-700'}`}>{label}</div>
+    </div>
+  );
+}
+
 export default function Landing() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -423,18 +454,9 @@ export default function Landing() {
       )}
       {/* Social Proof/Stats Bar */}
       <div className="container mx-auto px-6 py-6 flex flex-wrap items-center justify-center gap-8">
-        <div className="flex flex-col items-center">
-          <span className="text-3xl font-bold text-indigo-600 dark:text-cyan-400">10,000+</span>
-          <span className="font-semibold text-gray-700 dark:text-blue-200">Active Users</span>
-        </div>
-        <div className="flex flex-col items-center">
-          <span className="text-3xl font-bold text-indigo-600 dark:text-cyan-400">500+</span>
-          <span className="font-semibold text-gray-700 dark:text-blue-200">Properties Listed</span>
-        </div>
-        <div className="flex flex-col items-center">
-          <span className="text-3xl font-bold text-indigo-600 dark:text-cyan-400">4.9/5</span>
-          <span className="font-semibold text-gray-700 dark:text-blue-200">Average Rating</span>
-        </div>
+        <StatCard value="10,000+" label="Active Users" darkMode={darkMode} />
+        <StatCard value="500+" label="Properties Listed" darkMode={darkMode} />
+        <StatCard value="4.9/5" label="Average Rating" darkMode={darkMode} />
       </div>
       {/* Properties Section */}
       <section id="properties" ref={propertiesRef} className={`container mx-auto px-6 py-12 rounded-lg shadow-md transition-all duration-700 ${propertiesVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${darkMode ? 'bg-gradient-to-r from-blue-950 via-slate-900 to-gray-900' : 'bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200'}`}>
@@ -572,18 +594,9 @@ export default function Landing() {
               Our expert team continuously updates the platform with advanced features to ensure you stay ahead in the competitive rental market. Trust Ghar_Nishchit to simplify your property management journey and help you achieve your investment goals with confidence and ease.
             </p>
             <div className="flex space-x-6">
-              <div className="flex flex-col items-center">
-                <div className={`text-4xl font-bold ${darkMode ? 'text-cyan-400' : 'text-indigo-600'}`}>10+</div>
-                <div className={`font-semibold ${darkMode ? 'text-blue-200' : 'text-gray-700'}`}>Years of Experience</div>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className={`text-4xl font-bold ${darkMode ? 'text-cyan-400' : 'text-indigo-600'}`}>500+</div>
-                <div className={`font-semibold ${darkMode ? 'text-blue-200' : 'text-gray-700'}`}>Properties Managed</div>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className={`text-4xl font-bold ${darkMode ? 'text-cyan-400' : 'text-indigo-600'}`}>1000+</div>
-                <div className={`font-semibold ${darkMode ? 'text-blue-200' : 'text-gray-700'}`}>Happy Clients</div>
-              </div>
+              <StatCard value="10+" label="Years of Experience" darkMode={darkMode} />
+              <StatCard value="500+" label="Properties Managed" darkMode={darkMode} />
+              <StatCard value="1000+" label="Happy Clients" darkMode={darkMode} />
             </div>
             <button
               className={`mt-6 px-6 py-3 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'
@@ -681,19 +694,13 @@ export default function Landing() {
             <h3 className="text-xl font-bold mb-4 text-indigo-700 dark:text-indigo-400">Latest Articles</h3>
             <ul className="space-y-4">
               {articles.map((article) => (
-                <li key={article.id}>
-                  <button
-                    className="block text-left w-full text-indigo-600 hover:text-indigo-900 dark:text-cyan-300 dark:hover:text-cyan-200 font-semibold focus:outline-none"
-                    onClick={() => setSelectedArticle(selectedArticle === article.id ? null : article.id)}
-                  >
-                    {article.title}
-                  </button>
-                  {selectedArticle === article.id && (
-                    <div className="mt-2 p-3 bg-white rounded shadow text-gray-800 dark:bg-slate-800 dark:text-cyan-100">
-                      {article.answer}
-                    </div>
-                  )}
-                </li>
+                <BlogItem
+                  key={article.id}
+                  item={article}
+                  selected={selectedArticle}
+                  setSelected={setSelectedArticle}
+                  darkMode={darkMode}
+                />
               ))}
             </ul>
           </div>
@@ -701,19 +708,13 @@ export default function Landing() {
             <h3 className="text-xl font-bold mb-4 text-indigo-700 dark:text-indigo-400">Quick Links</h3>
             <ul className="space-y-4">
               {quickLinks.map((link) => (
-                <li key={link.id}>
-                  <button
-                    className="block text-left w-full text-indigo-600 hover:text-indigo-900 dark:text-cyan-300 dark:hover:text-cyan-200 font-semibold focus:outline-none"
-                    onClick={() => setSelectedQuickLink(selectedQuickLink === link.id ? null : link.id)}
-                  >
-                    {link.title}
-                  </button>
-                  {selectedQuickLink === link.id && (
-                    <div className="mt-2 p-3 bg-white rounded shadow text-gray-800 dark:bg-slate-800 dark:text-cyan-100">
-                      {link.answer}
-                    </div>
-                  )}
-                </li>
+                <BlogItem
+                  key={link.id}
+                  item={link}
+                  selected={selectedQuickLink}
+                  setSelected={setSelectedQuickLink}
+                  darkMode={darkMode}
+                />
               ))}
             </ul>
           </div>
@@ -729,7 +730,7 @@ export default function Landing() {
               <h2 className="text-3xl font-semibold mb-4">Subscribe to our Newsletter</h2>
               <p className="mb-6">Get the latest updates and offers delivered to your inbox.</p>
               <form
-                onSubmit={(e) => {
+                onSubmit={e => {
                   e.preventDefault();
                   alert('Thank you for subscribing!');
                 }}
