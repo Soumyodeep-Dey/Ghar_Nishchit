@@ -296,7 +296,7 @@ export default function Landing() {
                 href="#properties"
                 role="menuitem"
                 tabIndex={0}
-                className="block px-6 py-3 text-gray-700 hover:bg-indigo-100 focus:outline-none focus:bg-indigo-100"
+                className="block px-6 py-3 text-gray-700 hover:bg-indigo-200 focus:outline-none focus:bg-indigo-200 transition-colors"
                 onClick={() => setMenuOpen(false)}
               >
                 Properties
@@ -307,7 +307,7 @@ export default function Landing() {
                 href="#about"
                 role="menuitem"
                 tabIndex={0}
-                className="block px-6 py-3 text-gray-700 hover:bg-indigo-100 focus:outline-none focus:bg-indigo-100"
+                className="block px-6 py-3 text-gray-700 hover:bg-indigo-200 focus:outline-none focus:bg-indigo-200 transition-colors"
                 onClick={() => setMenuOpen(false)}
               >
                 About
@@ -318,7 +318,7 @@ export default function Landing() {
                 href="#pricing"
                 role="menuitem"
                 tabIndex={0}
-                className="block px-6 py-3 text-gray-700 hover:bg-indigo-100 focus:outline-none focus:bg-indigo-100"
+                className="block px-6 py-3 text-gray-700 hover:bg-indigo-200 focus:outline-none focus:bg-indigo-200 transition-colors"
                 onClick={() => setMenuOpen(false)}
               >
                 Pricing
@@ -329,7 +329,7 @@ export default function Landing() {
                 href="#customers"
                 role="menuitem"
                 tabIndex={0}
-                className="block px-6 py-3 text-gray-700 hover:bg-indigo-100 focus:outline-none focus:bg-indigo-100"
+                className="block px-6 py-3 text-gray-700 hover:bg-indigo-200 focus:outline-none focus:bg-indigo-200 transition-colors"
                 onClick={() => setMenuOpen(false)}
               >
                 Customers
@@ -340,7 +340,7 @@ export default function Landing() {
     href="#blog"
     role="menuitem"
     tabIndex={0}
-    className="block px-6 py-3 text-gray-700 hover:bg-indigo-100 focus:outline-none focus:bg-indigo-100 items-center space-x-2"
+    className="block px-6 py-3 text-gray-700 hover:bg-indigo-200 focus:outline-none focus:bg-indigo-200 transition-colors items-center space-x-2"
     onClick={() => setMenuOpen(false)}
   >
     <span>Blog & Resources</span>
@@ -351,7 +351,7 @@ export default function Landing() {
                 href="#help"
                 role="menuitem"
                 tabIndex={0}
-                className="block px-6 py-3 text-gray-700 hover:bg-indigo-100 focus:outline-none focus:bg-indigo-100"
+                className="block px-6 py-3 text-gray-700 hover:bg-indigo-200 focus:outline-none focus:bg-indigo-200 transition-colors"
                 onClick={() => setMenuOpen(false)}
               >
                 Help
