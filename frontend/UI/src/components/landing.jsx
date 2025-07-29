@@ -181,12 +181,12 @@ export default function Landing() {
 
   // Define your mobile menu items as an array (reuse desktopMenu if you want the same items)
   const mobileMenu = [
-    { href: "#properties", label: "Properties" },
-    { href: "#about", label: "About" },
-    { href: "#pricing", label: "Pricing" },
-    { href: "#customers", label: "Customers" },
-    { href: "#blog", label: "Blog & Resources" },
-    { href: "#help", label: "Help" },
+    { href: "#properties", label: "Properties", icon: Building },
+    { href: "#about", label: "About", icon: Info },
+    { href: "#pricing", label: "Pricing", icon: DollarSign },
+    { href: "#customers", label: "Customers", icon: Users },
+    { href: "#blog", label: "Blog & Resources", icon: BookOpen },
+    { href: "#help", label: "Help", icon: HelpCircle },
   ];
 
   return (
@@ -259,23 +259,24 @@ export default function Landing() {
             role="menu"
             aria-label="Mobile menu"
           >
-            {mobileMenu.map(({ href, label }) => (
+            {mobileMenu.map(({ href, label, icon: Icon }) => (
               <li role="none" key={href}>
                 <a
                   href={href}
                   role="menuitem"
                   tabIndex={0}
-                  className="block px-6 py-3 text-gray-700 hover:bg-indigo-200 focus:outline-none focus:bg-indigo-200 transition-colors"
+                  className="flex items-center space-x-3 px-6 py-3 text-gray-700 hover:bg-indigo-100 focus:outline-none focus:bg-indigo-200 transition-colors text-lg"
                   onClick={() => setMenuOpen(false)}
                 >
-                  {label}
+                  <Icon size={20} className="text-indigo-600" aria-hidden="true" />
+                  <span>{label}</span>
                 </a>
               </li>
             ))}
             <li role="none" className="px-6 py-3">
               <Link
                 to="/signup"
-                className="block bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition text-center"
+                className="block bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition text-center font-semibold"
                 onClick={() => setMenuOpen(false)}
               >
                 SignUp
