@@ -93,6 +93,36 @@ function useFadeInOnScroll() {
   return [ref, isVisible];
 }
 
+function PricingCard({ title, price, features, buttonClass, onClick, highlight, darkMode }) {
+  return (
+    <div className={`rounded-lg shadow-md p-6 text-center transition-shadow duration-300 hover:ring-4
+      ${highlight
+        ? darkMode
+          ? 'bg-gradient-to-r from-cyan-700 to-blue-900 border-cyan-400 text-white hover:shadow-2xl border-2 scale-105'
+          : 'bg-gradient-to-r from-emerald-400 to-emerald-600 border-emerald-700 text-white hover:shadow-2xl border-2 scale-105'
+        : darkMode
+          ? 'bg-blue-950 hover:ring-cyan-400'
+          : 'bg-white hover:ring-indigo-400'
+      }`}>
+      <h3 className={`text-xl font-semibold mb-4 ${highlight ? '' : darkMode ? 'text-cyan-300' : 'text-indigo-600 dark:text-indigo-300'}`}>{title}</h3>
+      <p className={`mb-6 ${highlight ? 'text-lg font-semibold' : darkMode ? 'text-blue-200' : 'text-gray-600'}`}>{price}</p>
+      <ul className={`${highlight ? '' : 'text-gray-600'} mb-6 space-y-2`}>
+        {features.map((f, i) => (
+          <li key={i} className="flex items-center justify-center space-x-2">
+            <svg className={`w-5 h-5 ${highlight ? '' : 'text-indigo-600'}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>{f}</span>
+          </li>
+        ))}
+      </ul>
+      <button className={buttonClass} onClick={onClick}>
+        Choose Plan
+      </button>
+    </div>
+  );
+}
+
 export default function Landing() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -209,7 +239,7 @@ export default function Landing() {
             <Home size={28} aria-hidden="true" />
             <span>Ghar_Nishchit</span>
           </div>
-          
+
           {/* Desktop Menu */}
           <ul className="hidden md:flex space-x-8" role="menubar">
             {menu.map(({ href, label, icon: Icon }, idx) => (
@@ -245,6 +275,7 @@ export default function Landing() {
           >
             SignUp
           </Link>
+
           {/* Dark Mode Toggle Button */}
           <button
             onClick={toggleDarkMode}
@@ -254,6 +285,7 @@ export default function Landing() {
             {darkMode ? '🌙' : '☀️'}
           </button>
         </div>
+
         {/* Mobile Menu */}
         {menuOpen && (
           <ul
@@ -518,106 +550,46 @@ export default function Landing() {
         <h2 className={`text-3xl font-semibold mb-8 text-center ${darkMode ? 'text-cyan-300' : 'text-indigo-700 dark:text-indigo-400'}`}>
           Pricing
         </h2>
+
+        {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Basic Plan */}
-          <div className={`rounded-lg shadow-md p-6 text-center transition-shadow duration-300 hover:ring-4 ${darkMode ? 'bg-blue-950 hover:ring-cyan-400' : 'bg-white hover:ring-indigo-400'}`}>
-            <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-cyan-300' : 'text-indigo-600 dark:text-indigo-300'}`}>
-              Basic
-            </h3>
-            <p className={`mb-6 ${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>₹ 2,900/month</p>
-            <ul className="text-gray-600 mb-6 space-y-2">
-              <li className="flex items-center justify-center space-x-2">
-                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Manage up to 5 properties</span>
-              </li>
-              <li className="flex items-center justify-center space-x-2">
-                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Email support</span>
-              </li>
-              <li className="flex items-center justify-center space-x-2">
-                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Basic analytics</span>
-              </li>
-            </ul>
-            <button
-              className={`px-4 py-2 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                }`}
-              onClick={() => alert('Please login first to choose a plan')}
-            >
-              Choose Plan
-            </button>
-          </div>
-          {/* Pro Plan - Featured */}
-          <div className={`rounded-lg shadow-lg p-6 text-center transform scale-105 border-2 transition duration-300 ${darkMode ? 'bg-gradient-to-r from-cyan-700 to-blue-900 border-cyan-400 text-white hover:shadow-2xl' : 'bg-gradient-to-r from-emerald-400 to-emerald-600 border-emerald-700 text-white hover:shadow-2xl'}`}>
-            <h3 className="text-xl font-semibold mb-4">Pro</h3>
-            <p className="mb-6 text-lg font-semibold">₹ 6,900/month</p>
-            <ul className="mb-6 space-y-2">
-              <li className="flex items-center justify-center space-x-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Manage up to 20 properties</span>
-              </li>
-              <li className="flex items-center justify-center space-x-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Priority email support</span>
-              </li>
-              <li className="flex items-center justify-center space-x-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Advanced analytics</span>
-              </li>
-            </ul>
-            <button
-              className={`px-4 py-2 rounded transition ${darkMode ? 'bg-white text-cyan-700 hover:bg-gray-100' : 'bg-white text-emerald-600 hover:bg-gray-100'}`}
-              onClick={() => alert('Please login first to choose a plan')}
-            >
-              Choose Plan
-            </button>
-          </div>
-          {/* Enterprise Plan */}
-          <div className={`rounded-lg shadow-md p-6 text-center transition-shadow duration-300 hover:ring-4 ${darkMode ? 'bg-blue-950 hover:ring-cyan-400' : 'bg-white hover:ring-indigo-400'}`}>
-            <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-cyan-300' : 'text-indigo-600 dark:text-indigo-300'}`}>
-              Enterprise
-            </h3>
-            <p className={`mb-6 ${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>₹ 15,900/month</p>
-            <ul className="text-gray-600 mb-6 space-y-2">
-              <li className="flex items-center justify-center space-x-2">
-                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Unlimited properties</span>
-              </li>
-              <li className="flex items-center justify-center space-x-2">
-                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Dedicated support</span>
-              </li>
-              <li className="flex items-center justify-center space-x-2">
-                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>Custom analytics</span>
-              </li>
-            </ul>
-            <button
-              className={`px-4 py-2 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'
-                }`}
-              onClick={() => alert('Please login first to choose a plan')}
-            >
-              Choose Plan
-            </button>
-          </div>
+          <PricingCard
+            title="Basic"
+            price="₹ 2,900/month"
+            features={[
+              "Manage up to 5 properties",
+              "Email support",
+              "Basic analytics"
+            ]}
+            buttonClass={`px-4 py-2 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+            onClick={() => alert('Please login first to choose a plan')}
+            darkMode={darkMode}
+          />
+          <PricingCard
+            title="Pro"
+            price="₹ 6,900/month"
+            features={[
+              "Manage up to 20 properties",
+              "Priority email support",
+              "Advanced analytics"
+            ]}
+            buttonClass={`px-4 py-2 rounded transition ${darkMode ? 'bg-white text-cyan-700 hover:bg-gray-100' : 'bg-white text-emerald-600 hover:bg-gray-100'}`}
+            onClick={() => alert('Please login first to choose a plan')}
+            highlight
+            darkMode={darkMode}
+          />
+          <PricingCard
+            title="Enterprise"
+            price="₹ 15,900/month"
+            features={[
+              "Unlimited properties",
+              "Dedicated support",
+              "Custom analytics"
+            ]}
+            buttonClass={`px-4 py-2 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+            onClick={() => alert('Please login first to choose a plan')}
+            darkMode={darkMode}
+          />
         </div>
       </section>
 
