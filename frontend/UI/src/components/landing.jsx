@@ -1,7 +1,10 @@
 ﻿﻿import { useEffect, useRef, useState } from 'react';
 import { useDarkMode } from '../DarkModeContext';
 import { Link } from 'react-router-dom';
-import { Home, Building, Info, DollarSign, Users, HelpCircle, Menu, X, Facebook, Twitter, Instagram, Linkedin, BookOpen } from 'lucide-react';
+import { Home, Building, Info, DollarSign, Users, HelpCircle, Menu, X, BookOpen } from 'lucide-react';
+
+import { SiFacebook, SiTwitter, SiInstagram, SiLinkedin } from "react-icons/si";
+
 
 import p1 from '../assets/p1.jpg';
 import p2 from '../assets/p2.jpg';
@@ -771,16 +774,16 @@ export default function Landing() {
             <div className="flex flex-col justify-between">
               <div className="flex space-x-6 mb-6 md:mb-0 justify-center md:justify-end">
                 <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                  <Facebook size={24} />
+                  <SiFacebook size={24} />
                 </a>
                 <a href="https://twitter.com" aria-label="Twitter" target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                  <Twitter size={24} />
+                  <SiTwitter size={24} />
                 </a>
                 <a href="https://instagram.com" aria-label="Instagram" target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                  <Instagram size={24} />
+                  <SiInstagram size={24} />
                 </a>
                 <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                  <Linkedin size={24} />
+                  <SiLinkedin size={24} />
                 </a>
               </div>
             </div>
