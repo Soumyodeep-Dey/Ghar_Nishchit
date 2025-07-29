@@ -4,6 +4,22 @@ import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import p1 from '../assets/p1.jpg';
 import { useDarkMode } from '../DarkModeContext';
 
+const GoogleIcon = () => (
+  <span
+    className="bg-white rounded-full flex items-center justify-center"
+    style={{ width: 26, height: 26, boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}
+  >
+    <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+      <g>
+        <path fill="#4285F4" d="M43.6 20.5h-1.9V20H24v8h11.3c-1.6 4.3-5.7 7-11.3 7-6.6 0-12-5.4-12-12s5.4-12 12-12c2.7 0 5.2.9 7.2 2.5l6-6C34.1 5.1 29.3 3 24 3 12.9 3 4 11.9 4 23s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.3-4z" />
+        <path fill="#34A853" d="M6.3 14.7l6.6 4.8C14.3 16.1 18.7 13 24 13c2.7 0 5.2.9 7.2 2.5l6-6C34.1 5.1 29.3 3 24 3 15.3 3 7.9 8.6 6.3 14.7z" />
+        <path fill="#FBBC05" d="M24 43c5.3 0 10.1-1.7 13.8-4.7l-6.4-5.2c-2 1.4-4.5 2.2-7.4 2.2-5.6 0-10.3-3.8-12-9l-6.6 5.1C7.9 39.4 15.3 45 24 45z" />
+        <path fill="#EA4335" d="M43.6 20.5h-1.9V20H24v8h11.3c-1.1 3-3.5 5.4-6.7 6.7l6.4 5.2C39.7 37.2 44 32.2 44 24c0-1.3-.1-2.7-.4-3.5z" />
+      </g>
+    </svg>
+  </span>
+);
+
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const { darkMode, toggleDarkMode } = useDarkMode();
@@ -18,11 +34,10 @@ export default function Login() {
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center px-2 sm:px-4 ${
-        darkMode
+      className={`min-h-screen flex items-center justify-center px-2 sm:px-4 ${darkMode
           ? 'bg-gray-950'
           : 'bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100'
-      }`}
+        }`}
     >
       <div
         className={`relative flex flex-col md:flex-row rounded-2xl shadow-2xl overflow-hidden max-w-lg sm:max-w-xl md:max-w-3xl w-full transition-colors duration-300
@@ -49,11 +64,10 @@ export default function Login() {
         {/* Dark Mode Toggle */}
         <button
           onClick={toggleDarkMode}
-          className={`absolute top-3 right-3 sm:top-6 sm:right-6 z-40 px-3 py-2 sm:px-4 sm:py-2 rounded-full font-semibold shadow transition-colors duration-300 ${
-            darkMode
+          className={`absolute top-3 right-3 sm:top-6 sm:right-6 z-40 px-3 py-2 sm:px-4 sm:py-2 rounded-full font-semibold shadow transition-colors duration-300 ${darkMode
               ? 'bg-gray-800 text-indigo-300 hover:bg-gray-700'
               : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
-          }`}
+            }`}
           aria-label="Toggle dark mode"
         >
           {darkMode ? '🌙' : '☀️'}
@@ -91,22 +105,28 @@ export default function Login() {
           {/* Mobile only: add top gap below trust */}
           <div className="block md:hidden h-4" />
           <h2
-            className={`text-xl sm:text-2xl font-bold mb-2 ${
-              darkMode ? 'text-gray-200' : 'text-indigo-700'
-            }`}
+            className={`text-xl sm:text-2xl font-bold mb-2 ${darkMode ? 'text-gray-200' : 'text-indigo-700'
+              }`}
           >
             Login to Your Account
           </h2>
           <p
-            className={`mb-4 sm:mb-6 ${
-              darkMode ? 'text-gray-400' : 'text-gray-500'
-            }`}
+            className={`mb-4 sm:mb-6 ${darkMode ? 'text-gray-400' : 'text-gray-500'
+              }`}
           >
             Access your dashboard and manage your rentals.
           </p>
           {/* Social Login */}
-          <button className="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-2 rounded mb-3 sm:mb-4 hover:bg-red-600 hover:shadow-lg transition-transform duration-300 hover:scale-105">
-            {/* <GoogleIcon /> */} Login with Google
+          <button
+            className={`w-full flex items-center justify-center gap-2 py-2 rounded mb-3 sm:mb-4 font-semibold text-sm sm:text-base transition-transform duration-300 hover:scale-105 hover:shadow-lg
+    ${darkMode
+                ? 'bg-white text-gray-800 hover:bg-gray-100 border border-cyan-700'
+                : 'bg-white text-gray-800 hover:bg-gray-100 border border-gray-200'
+              }`}
+            type="button"
+          >
+            <GoogleIcon />
+            <span>Login with Google</span>
           </button>
           <div className="flex items-center my-2 sm:my-4">
             <hr
@@ -121,9 +141,8 @@ export default function Login() {
             <div>
               <label
                 htmlFor="email"
-                className={`flex items-center gap-1 font-semibold mb-1 ${
-                  darkMode ? 'text-gray-300' : 'text-gray-700'
-                }`}
+                className={`flex items-center gap-1 font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'
+                  }`}
               >
                 <Mail size={18} /> Email
               </label>
@@ -132,11 +151,10 @@ export default function Login() {
                 id="email"
                 name="email"
                 autoComplete="email"
-                className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-sm transition-shadow duration-300 hover:shadow-lg ${
-                  darkMode
+                className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-sm transition-shadow duration-300 hover:shadow-lg ${darkMode
                     ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-400'
                     : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                }`}
+                  }`}
                 placeholder="you@example.com"
                 required
               />
@@ -144,9 +162,8 @@ export default function Login() {
             <div>
               <label
                 htmlFor="password"
-                className={`flex items-center gap-1 font-semibold mb-1 ${
-                  darkMode ? 'text-gray-300' : 'text-gray-700'
-                }`}
+                className={`flex items-center gap-1 font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'
+                  }`}
               >
                 <Lock size={18} /> Password
               </label>
@@ -156,22 +173,20 @@ export default function Login() {
                   id="password"
                   name="password"
                   autoComplete="current-password"
-                  className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-sm transition-shadow duration-300 hover:shadow-lg ${
-                    darkMode
+                  className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-sm transition-shadow duration-300 hover:shadow-lg ${darkMode
                       ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-400'
                       : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  }`}
+                    }`}
                   placeholder="********"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${
-                    darkMode
+                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${darkMode
                       ? 'text-gray-400 hover:text-gray-200'
                       : 'text-gray-400 hover:text-gray-700'
-                  }`}
+                    }`}
                   tabIndex={-1}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
@@ -181,20 +196,18 @@ export default function Login() {
             </div>
             <div className="flex items-center justify-between">
               <label
-                className={`flex items-center gap-2 ${
-                  darkMode ? 'text-gray-300' : 'text-gray-600'
-                }`}
+                className={`flex items-center gap-2 ${darkMode ? 'text-gray-300' : 'text-gray-600'
+                  }`}
               >
                 <input type="checkbox" className="form-checkbox text-indigo-600" />
                 <span className="text-xs sm:text-sm">Remember Me</span>
               </label>
               <a
                 href="/forgot-password"
-                className={`text-xs sm:text-sm ${
-                  darkMode
+                className={`text-xs sm:text-sm ${darkMode
                     ? 'text-indigo-400 hover:text-indigo-300'
                     : 'text-indigo-600 hover:underline'
-                }`}
+                  }`}
               >
                 Forgot Password?
               </a>
@@ -204,26 +217,23 @@ export default function Login() {
             </button>
           </form>
           <p
-            className={`mt-3 text-xs sm:text-sm text-center ${
-              darkMode ? 'text-gray-400' : 'text-gray-500'
-            }`}
+            className={`mt-3 text-xs sm:text-sm text-center ${darkMode ? 'text-gray-400' : 'text-gray-500'
+              }`}
           >
             Don’t have an account?{' '}
             <Link
               to="/signup"
-              className={`${
-                darkMode
+              className={`${darkMode
                   ? 'text-indigo-400 hover:text-indigo-300'
                   : 'text-indigo-600 hover:underline'
-              }`}
+                }`}
             >
               Sign Up
             </Link>
           </p>
           <p
-            className={`mt-2 text-xs text-center ${
-              darkMode ? 'text-gray-500' : 'text-gray-400'
-            }`}
+            className={`mt-2 text-xs text-center ${darkMode ? 'text-gray-500' : 'text-gray-400'
+              }`}
           >
             We respect your privacy. No spam ever.
           </p>
