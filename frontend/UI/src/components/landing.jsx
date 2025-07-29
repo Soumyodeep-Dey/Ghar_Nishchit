@@ -123,6 +123,56 @@ function PricingCard({ title, price, features, buttonClass, onClick, highlight, 
   );
 }
 
+function CustomerCard({ customer, darkMode }) {
+  return (
+    <div className={`flex flex-col items-center p-8 rounded-xl shadow-lg ${darkMode ? 'bg-gradient-to-r from-blue-900 via-slate-800 to-blue-950' : 'bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100'}`}>
+      <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mb-4 ${darkMode ? 'bg-cyan-400 text-blue-950' : 'bg-indigo-600 text-white'}`}>
+        {customer.name.charAt(0)}
+      </div>
+      <p className={`font-semibold text-lg mb-2 ${darkMode ? 'text-cyan-300' : 'text-indigo-700'}`}>{customer.name}</p>
+      <blockquote className={`relative italic pl-6 before:content-['“'] before:absolute before:left-0 before:text-4xl ${darkMode ? 'text-blue-200 before:text-cyan-400' : 'text-gray-800 before:text-indigo-400'}`}>
+        {customer.feedback}
+      </blockquote>
+      <div className={`mt-4 flex items-center space-x-1 ${darkMode ? 'text-cyan-400' : 'text-yellow-400'}`}>
+        {[...Array(5)].map((_, i) => (
+          <svg key={i} className="w-5 h-5 fill-current" viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M10 15l-5.878 3.09 1.123-6.545L.49 6.91l6.561-.955L10 0l2.949 5.955 6.561.955-4.755 4.635 1.123 6.545z" />
+          </svg>
+        ))}
+      </div>
+      <img
+        src={`https://randomuser.me/api/portraits/men/${customer.id}.jpg`}
+        alt={customer.name}
+        className="w-16 h-16 rounded-full mb-4 border-2 border-indigo-400"
+        onError={e => {
+          e.target.onerror = null;
+          e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(customer.name);
+        }}
+      />
+    </div>
+  );
+}
+
+function FaqItem({ faq, expandedFaq, toggleFaq }) {
+  return (
+    <div className="border rounded-lg p-4">
+      <button
+        onClick={() => toggleFaq(faq.id)}
+        aria-expanded={expandedFaq === faq.id}
+        aria-controls={`faq-answer-${faq.id}`}
+        className="w-full text-left text-indigo-600 font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      >
+        {faq.question}
+      </button>
+      {expandedFaq === faq.id && (
+        <p id={`faq-answer-${faq.id}`} className="mt-2 text-gray-700">
+          {faq.answer}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default function Landing() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -601,24 +651,7 @@ export default function Landing() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {customers.map((customer) => (
-              <div key={customer.id} className={`flex flex-col items-center p-8 rounded-xl shadow-lg ${darkMode ? 'bg-gradient-to-r from-blue-900 via-slate-800 to-blue-950' : 'bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100'}`}>
-                <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mb-4 ${darkMode ? 'bg-cyan-400 text-blue-950' : 'bg-indigo-600 text-white'}`}>
-                  {customer.name.charAt(0)}
-                </div>
-                <p className={`font-semibold text-lg mb-2 ${darkMode ? 'text-cyan-300' : 'text-indigo-700'}`}>{customer.name}</p>
-                <blockquote className={`relative italic pl-6 before:content-['“'] before:absolute before:left-0 before:text-4xl ${darkMode ? 'text-blue-200 before:text-cyan-400' : 'text-gray-800 before:text-indigo-400'}`}>
-                  {customer.feedback}
-                </blockquote>
-                <div className={`mt-4 flex items-center space-x-1 ${darkMode ? 'text-cyan-400' : 'text-yellow-400'}`}>
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5 fill-current" viewBox="0 0 20 20" aria-hidden="true">
-                      <path d="M10 15l-5.878 3.09 1.123-6.545L.49 6.91l6.561-.955L10 0l2.949 5.955 6.561.955-4.755 4.635 1.123 6.545z" />
-                    </svg>
-                  ))}
-                </div>
-                {/* Replace initials with avatar images */}
-                <img src={`https://randomuser.me/api/portraits/men/${customer.id}.jpg`} alt={customer.name} className="w-16 h-16 rounded-full mb-4 border-2 border-indigo-400" onError={(e) => { e.target.onerror = null; e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(customer.name); }} />
-              </div>
+              <CustomerCard key={customer.id} customer={customer} darkMode={darkMode} />
             ))}
           </div>
         </div>
@@ -632,21 +665,7 @@ export default function Landing() {
           </h2>
           <div className="space-y-4">
             {faqs.map((faq) => (
-              <div key={faq.id} className="border rounded-lg p-4">
-                <button
-                  onClick={() => toggleFaq(faq.id)}
-                  aria-expanded={expandedFaq === faq.id}
-                  aria-controls={`faq-answer-${faq.id}`}
-                  className="w-full text-left text-indigo-600 font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  {faq.question}
-                </button>
-                {expandedFaq === faq.id && (
-                  <p id={`faq-answer-${faq.id}`} className="mt-2 text-gray-700">
-                    {faq.answer}
-                  </p>
-                )}
-              </div>
+              <FaqItem key={faq.id} faq={faq} expandedFaq={expandedFaq} toggleFaq={toggleFaq} />
             ))}
           </div>
         </div>
