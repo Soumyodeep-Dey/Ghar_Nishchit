@@ -94,15 +94,17 @@ function useFadeInOnScroll() {
 
 function PricingCard({ title, price, features, buttonClass, onClick, highlight, darkMode }) {
   return (
-    <div className={`rounded-lg shadow-md p-6 text-center transition-shadow duration-300 hover:ring-4
-      ${highlight
-        ? darkMode
-          ? 'bg-gradient-to-r from-cyan-700 to-blue-900 border-cyan-400 text-white hover:shadow-2xl border-2 scale-105'
-          : 'bg-gradient-to-r from-emerald-400 to-emerald-600 border-emerald-700 text-white hover:shadow-2xl border-2 scale-105'
-        : darkMode
-          ? 'bg-blue-950 hover:ring-cyan-400'
-          : 'bg-white hover:ring-indigo-400'
-      }`}>
+    <div
+      className={`rounded-lg shadow-md p-6 text-center transition-all duration-300 hover:ring-4 hover:scale-105
+        ${highlight
+          ? darkMode
+            ? 'bg-gradient-to-r from-cyan-700 to-blue-900 border-cyan-400 text-white hover:shadow-2xl border-2'
+            : 'bg-gradient-to-r from-emerald-400 to-emerald-600 border-emerald-700 text-white hover:shadow-2xl border-2'
+          : darkMode
+            ? 'bg-blue-950 hover:ring-cyan-400'
+            : 'bg-white hover:ring-indigo-400'
+        }
+      `}>
       <h3 className={`text-xl font-semibold mb-4 ${highlight ? '' : darkMode ? 'text-cyan-300' : 'text-indigo-600 dark:text-indigo-300'}`}>{title}</h3>
       <p className={`mb-6 ${highlight ? 'text-lg font-semibold' : darkMode ? 'text-blue-200' : 'text-gray-600'}`}>{price}</p>
       <ul className={`${highlight ? '' : 'text-gray-600'} mb-6 space-y-2`}>
