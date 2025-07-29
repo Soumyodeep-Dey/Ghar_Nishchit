@@ -2,7 +2,6 @@
 import { useDarkMode } from '../DarkModeContext';
 import { Link } from 'react-router-dom';
 import { Home, Building, Info, DollarSign, Users, HelpCircle, Menu, X, BookOpen } from 'lucide-react';
-
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 
 
@@ -498,6 +497,7 @@ export default function Landing() {
               </div>
             ))}
           </div>
+
           {/* Carousel Controls */}
           <button
             type="button"
@@ -508,6 +508,7 @@ export default function Landing() {
           >
             &#8592;
           </button>
+
           <button
             type="button"
             onClick={() => setCurrentIndex((currentIndex + 1) % properties.length)}
@@ -517,6 +518,7 @@ export default function Landing() {
           >
             &#8594;
           </button>
+
           {/* Carousel Indicators */}
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2" role="tablist" aria-label="Property carousel indicators">
             {properties.map((_, idx) => (
@@ -610,6 +612,7 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
       {/* Pricing Section */}
       <section id="pricing" ref={pricingRef} className={`container mx-auto px-6 py-12 transition-all duration-700 ${pricingVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${darkMode ? 'bg-slate-900' : ''}`}>
         <h2 className={`text-3xl font-semibold mb-8 text-center ${darkMode ? 'text-cyan-300' : 'text-indigo-700 dark:text-indigo-400'}`}>
