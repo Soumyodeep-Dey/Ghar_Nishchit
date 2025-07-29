@@ -172,18 +172,8 @@ export default function Landing() {
   const [selectedQuickLink, setSelectedQuickLink] = useState(null);
 
 
-  // Define your menu items as an array at the top (outside the component)
-  const desktopMenu = [
-    { href: "#properties", label: "Properties", icon: Building },
-    { href: "#about", label: "About", icon: Info },
-    { href: "#pricing", label: "Pricing", icon: DollarSign },
-    { href: "#customers", label: "Customers", icon: Users },
-    { href: "#blog", label: "Blog & Resources", icon: BookOpen },
-    { href: "#help", label: "Help", icon: HelpCircle },
-  ];
-
-  // Define your mobile menu items as an array (reuse desktopMenu if you want the same items)
-  const mobileMenu = [
+  // Define a single menu array outside the component
+  const menu = [
     { href: "#properties", label: "Properties", icon: Building },
     { href: "#about", label: "About", icon: Info },
     { href: "#pricing", label: "Pricing", icon: DollarSign },
@@ -219,9 +209,10 @@ export default function Landing() {
             <Home size={28} aria-hidden="true" />
             <span>Ghar_Nishchit</span>
           </div>
+          
           {/* Desktop Menu */}
           <ul className="hidden md:flex space-x-8" role="menubar">
-            {desktopMenu.map(({ href, label, icon: Icon }, idx) => (
+            {menu.map(({ href, label, icon: Icon }, idx) => (
               <li role="none" key={href}>
                 <a
                   href={href}
@@ -246,6 +237,7 @@ export default function Landing() {
           >
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
+
           {/* SignUp Button */}
           <Link
             to="/signup"
@@ -270,7 +262,7 @@ export default function Landing() {
             role="menu"
             aria-label="Mobile menu"
           >
-            {mobileMenu.map(({ href, label, icon: Icon }) => (
+            {menu.map(({ href, label, icon: Icon }) => (
               <li role="none" key={href}>
                 <a
                   href={href}
