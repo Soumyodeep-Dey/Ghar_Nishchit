@@ -3,7 +3,7 @@ import { useDarkMode } from '../DarkModeContext';
 import { Link } from 'react-router-dom';
 import { Home, Building, Info, DollarSign, Users, HelpCircle, Menu, X, BookOpen } from 'lucide-react';
 
-import { SiFacebook, SiTwitter, SiInstagram, SiLinkedin } from "react-icons/si";
+import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 
 
 import p1 from '../assets/p1.jpg';
@@ -774,16 +774,16 @@ export default function Landing() {
             <div className="flex flex-col justify-between">
               <div className="flex space-x-6 mb-6 md:mb-0 justify-center md:justify-end">
                 <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                  <SiFacebook size={24} />
+                  <FaFacebook size={24} />
                 </a>
                 <a href="https://twitter.com" aria-label="Twitter" target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                  <SiTwitter size={24} />
+                  <FaTwitter size={24} />
                 </a>
                 <a href="https://instagram.com" aria-label="Instagram" target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                  <SiInstagram size={24} />
+                  <FaInstagram size={24} />
                 </a>
                 <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                  <SiLinkedin size={24} />
+                  <FaLinkedin size={24} />
                 </a>
               </div>
             </div>
