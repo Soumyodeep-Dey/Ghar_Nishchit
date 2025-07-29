@@ -117,7 +117,7 @@ function PricingCard({ title, price, features, buttonClass, onClick, highlight, 
           </li>
         ))}
       </ul>
-      <button className={buttonClass} onClick={onClick}>
+      <button className={`${buttonClass} transition-transform hover:scale-105`} onClick={onClick}>
         Choose Plan
       </button>
     </div>
@@ -154,6 +154,7 @@ function CustomerCard({ customer, darkMode }) {
   );
 }
 
+// 3. FAQ item component
 function FaqItem({ faq, expandedFaq, toggleFaq }) {
   return (
     <div className="border rounded-lg p-4">
@@ -161,12 +162,15 @@ function FaqItem({ faq, expandedFaq, toggleFaq }) {
         onClick={() => toggleFaq(faq.id)}
         aria-expanded={expandedFaq === faq.id}
         aria-controls={`faq-answer-${faq.id}`}
-        className="w-full text-left text-indigo-600 font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className="w-full text-left text-indigo-600 font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 "
       >
         {faq.question}
       </button>
       {expandedFaq === faq.id && (
-        <p id={`faq-answer-${faq.id}`} className="mt-2 text-gray-700">
+        <p
+          id={`faq-answer-${faq.id}`}
+          className={`mt-2 ${darkMode ? 'text-white' : 'text-gray-700'}`}
+        >
           {faq.answer}
         </p>
       )}
@@ -187,7 +191,7 @@ function BlogItem({ item, selected, setSelected, darkMode }) {
         {item.title}
       </button>
       {selected === item.id && (
-        <div className={`mt-2 p-3 rounded shadow ${darkMode ? 'bg-slate-800 text-cyan-100' : 'bg-white text-gray-800'
+        <div className={`mt-2 p-3 rounded shadow ${darkMode ? 'bg-slate-900 text-white' : 'bg-white text-gray-800'
           }`}>
           {item.answer}
         </div>
@@ -353,7 +357,7 @@ export default function Landing() {
           {/* SignUp Button */}
           <Link
             to="/signup"
-            className="hidden md:inline-block bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-700 dark:hover:bg-indigo-600 transition"
+            className="hidden md:inline-block bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-700 dark:hover:bg-indigo-600 transition transition-transform hover:scale-105"
           >
             SignUp
           </Link>
@@ -406,7 +410,7 @@ export default function Landing() {
       {/* Floating Contact Button */}
       <a
         href="#help"
-        className="fixed bottom-6 right-6 bg-indigo-600 text-white p-4 rounded-full shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className="fixed bottom-6 right-6 z-50 bg-indigo-600 text-white p-4 rounded-full shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-transform hover:scale-105 animate-pulse"
         aria-label="Contact Us"
       >
         Contact Us
@@ -419,19 +423,30 @@ export default function Landing() {
             <path fill="#a5b4fc" fillOpacity="0.2" d="M0,160L80,170.7C160,181,320,203,480,197.3C640,192,800,160,960,133.3C1120,107,1280,85,1360,74.7L1440,64L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
           </svg>
         </div>
+
         <div className="container mx-auto px-4 sm:px-6 md:px-6 flex flex-col items-center justify-center text-center relative z-10">
+
           <h1 className={`text-3xl sm:text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg ${darkMode ? 'text-cyan-300' : 'text-white'}`}>Find Your Perfect Rental Property</h1>
-          <p className={`text-base sm:text-lg md:text-xl mb-8 ${darkMode ? 'text-blue-200' : 'text-indigo-100'}`}>Ghar_Nishchit makes property management easy, efficient, and rewarding for owners and tenants.</p>
-          <Link to="/signup" className={`px-6 py-3 sm:px-8 sm:py-4 rounded-full font-semibold text-base sm:text-lg shadow-lg transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-white text-indigo-600 hover:bg-indigo-100'}`}>Get Started</Link>
+
+          <p className={`text-base sm:text-lg md:text-xl mb-8 ${darkMode ? 'text-blue-200' : 'text-indigo-100'}`}>Ghar_Nishchit makes property management easy, efficient, and rewarding for owners and tenants.
+          </p>
+
+          {/* Primary CTA */}
+          <Link to="/signup"
+            className={`px-6 py-3 sm:px-8 sm:py-4 rounded-full font-semibold text-base sm:text-lg shadow-lg transition transition-transform hover:scale-105 ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-white text-indigo-600 hover:bg-indigo-100 transition-transform hover:scale-105'}`}>
+            Get Started
+          </Link>
+
           {/* Secondary CTA */}
           <button
-            className={`mt-4 px-6 py-3 sm:px-8 sm:py-4 rounded-full font-semibold text-base sm:text-lg shadow-lg transition ${darkMode ? 'bg-indigo-900 text-cyan-200 hover:bg-indigo-800' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+            className={`mt-4 px-6 py-3 sm:px-8 sm:py-4 rounded-full font-semibold text-base sm:text-lg shadow-lg transition transition-transform hover:scale-105 ${darkMode ? 'bg-indigo-900 text-cyan-200 hover:bg-indigo-800' : 'bg-indigo-600 text-white hover:bg-indigo-700 transition-transform hover:scale-105'}`}
             onClick={() => setShowHowItWorks(true)}
           >
             See How It Works
           </button>
         </div>
       </div>
+
       {showHowItWorks && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className={`bg-white dark:bg-slate-900 rounded-lg shadow-lg p-8 max-w-lg w-full relative`}>
@@ -444,11 +459,26 @@ export default function Landing() {
             </button>
             <h2 className="text-2xl font-bold mb-4 text-indigo-700 dark:text-cyan-300">How Ghar_Nishchit Works</h2>
             <ol className="list-decimal list-inside space-y-3 text-gray-700 dark:text-cyan-100">
-              <li><span className="font-semibold">Sign Up:</span> Create your free account as a landlord or tenant.</li>
-              <li><span className="font-semibold">Browse or List Properties:</span> Tenants can browse listings, landlords can add new properties.</li>
-              <li><span className="font-semibold">Connect:</span> Use our secure messaging to contact landlords or tenants.</li>
-              <li><span className="font-semibold">Manage & Track:</span> Handle inquiries, favorites, and property details from your dashboard.</li>
-              <li><span className="font-semibold">Move In:</span> Finalize agreements and enjoy a smooth rental experience!</li>
+              <li>
+                <span className="font-semibold dark:text-cyan-300">Sign Up:</span>
+                <span className="dark:text-cyan-200"> Create your free account as a landlord or tenant.</span>
+              </li>
+              <li>
+                <span className="font-semibold dark:text-cyan-300">Browse or List Properties:</span>
+                <span className="dark:text-cyan-200"> Tenants can browse listings, landlords can add new properties.</span>
+              </li>
+              <li>
+                <span className="font-semibold dark:text-cyan-300">Connect:</span>
+                <span className="dark:text-cyan-200"> Use our secure messaging to contact landlords or tenants.</span>
+              </li>
+              <li>
+                <span className="font-semibold dark:text-cyan-300">Manage & Track:</span>
+                <span className="dark:text-cyan-200"> Handle inquiries, favorites, and property details from your dashboard.</span>
+              </li>
+              <li>
+                <span className="font-semibold dark:text-cyan-300">Move In:</span>
+                <span className="dark:text-cyan-200"> Finalize agreements and enjoy a smooth rental experience!</span>
+              </li>
             </ol>
           </div>
         </div>
@@ -539,7 +569,8 @@ export default function Landing() {
       </section>
 
       {/* Featured Properties Section */}
-      <section id="featured" ref={featuredRef} className={`container mx-auto px-6 py-16 mb-12 rounded-lg shadow-md mt-20 transition-all duration-700 ${featuredVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${darkMode ? 'bg-slate-900 via-blue-950 to-gray-900' : 'bg-white'}`}>
+      <section id="featured" ref={featuredRef}
+        className={`container mx-auto px-6 py-16 mb-12 rounded-lg shadow-md mt-20 transition-all duration-700 ${featuredVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${darkMode ? 'bg-slate-900 via-blue-950 to-gray-900' : 'bg-white'}`}>
         <h2 className={`text-3xl font-semibold mb-8 ${darkMode ? 'text-cyan-300' : 'text-indigo-700 dark:text-indigo-400'}`}>
           Featured Properties
         </h2>
@@ -557,10 +588,10 @@ export default function Landing() {
                 loading="lazy"
                 className="w-full h-64 object-cover rounded-t-lg transform transition-transform duration-300 group-hover:scale-105 group-hover:shadow-2xl"
               />
-              <div className="p-6 bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 rounded-b-lg">
+              <div className={`p-6 bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 rounded-b-lg`}>
                 <h3 className="text-2xl font-bold text-indigo-700">{property.name}</h3>
                 <p className="text-sm text-indigo-600">{property.location}</p>
-                <p className="text-sm font-semibold mt-1">₹{property.price} / month</p>
+                <p className={`text-sm font-semibold mt-1 ${darkMode ? 'text-black' : ''}`}>₹{property.price} / month</p>
                 <span className="inline-block mt-2 px-3 py-1 text-xs font-semibold rounded-full bg-indigo-600 text-white">{property.type}</span>
               </div>
               <div className="absolute top-4 right-4 bg-pink-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
@@ -591,10 +622,7 @@ export default function Landing() {
               About Us
             </h2>
             <p className="text-gray-600 mb-4 hover:bg-indigo-100 hover:text-indigo-900 transition duration-300 p-2 rounded cursor-pointer">
-              Ghar_Nishchit is your trusted partner in rental property management, dedicated to providing comprehensive and innovative solutions tailored to meet the unique needs of property owners and tenants alike. Our platform offers a seamless experience, enabling efficient management of rental properties through user-friendly tools and real-time insights.
-            </p>
-            <p className="text-gray-600 mb-4 hover:bg-indigo-100 hover:text-indigo-900 transition duration-300 p-2 rounded cursor-pointer">
-              We strive to maximize your rental income while minimizing the hassles associated with property management. With a commitment to transparency, reliability, and customer satisfaction, Ghar_Nishchit supports you every step of the way, from listing and tenant screening to maintenance and financial reporting.
+
             </p>
             <p className="text-gray-600 hover:bg-indigo-100 hover:text-indigo-900 transition duration-300 p-2 rounded cursor-pointer">
               Our expert team continuously updates the platform with advanced features to ensure you stay ahead in the competitive rental market. Trust Ghar_Nishchit to simplify your property management journey and help you achieve your investment goals with confidence and ease.
@@ -605,7 +633,7 @@ export default function Landing() {
               <StatCard value="1000+" label="Happy Clients" darkMode={darkMode} />
             </div>
             <button
-              className={`mt-6 px-6 py-3 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'
+              className={`mt-6 px-6 py-3 rounded transition transition-transform hover:scale-105 ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700 transition-transform hover:scale-105'
                 }`}
               onClick={() => alert('Please login first')}
             >
@@ -619,7 +647,7 @@ export default function Landing() {
       <section
         id="pricing"
         ref={pricingRef}
-        className={`container mx-auto px-6 py-12 transition-all duration-700 rounded-lg shadow-md
+        className={`container mx-auto px-6 py-12 transition-all duration-700 rounded-lg shadow-md mt-6 mb-6
     ${pricingVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
     ${darkMode
             ? 'bg-slate-900 border border-slate-800'
@@ -688,50 +716,132 @@ export default function Landing() {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" ref={faqRef} className={`py-8 transition-all duration-700 ${faqVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${darkMode ? 'bg-slate-900' : 'bg-white'}`}>
-        <div className="container mx-auto px-6 max-w-4xl">
-          <h2 className="text-3xl font-semibold text-indigo-700 dark:text-indigo-400 mb-6">
+      <section
+        id="faq"
+        ref={faqRef}
+        className={`py-8 transition-all duration-700 ${faqVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          } ${darkMode ? 'bg-slate-900' : 'bg-white'}`}
+      >
+        <div className="container mx-auto px-6 max-w-4xl mx-w-2xl">
+          <h2 className="text-3xl font-semibold text-indigo-700 dark:text-cyan-300 mb-6 mb-8">
             Frequently Asked Questions
           </h2>
           <div className="space-y-4">
             {faqs.map((faq) => (
-              <FaqItem key={faq.id} faq={faq} expandedFaq={expandedFaq} toggleFaq={toggleFaq} />
+              <div
+                key={faq.id}
+                className={`border rounded-lg p-4 transition ${darkMode
+                  ? 'bg-slate-800 border-slate-700 text-cyan-100'
+                  : 'bg-white border-indigo-200 text-gray-700'
+                  }`}
+              >
+                <button
+                  onClick={() => toggleFaq(faq.id)}
+                  aria-expanded={expandedFaq === faq.id}
+                  aria-controls={`faq-answer-${faq.id}`}
+                  className={`w-full text-left font-semibold focus:outline-none focus:ring-2 ${darkMode
+                    ? 'text-cyan-300 focus:ring-cyan-400'
+                    : 'text-indigo-600 focus:ring-indigo-500'
+                    }`}
+                >
+                  {faq.question}
+                </button>
+                {expandedFaq === faq.id && (
+                  <p
+                    id={`faq-answer-${faq.id}`}
+                    className={`mt-2 ${darkMode ? 'text-white' : 'text-gray-700'}`}
+                  >
+                    {faq.answer}
+                  </p>
+                )}
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* Blog/Resources Section */}
-      <section id="blog" ref={blogRef} className={`container mx-auto px-6 py-8 mt-8 transition-all duration-700 ${blogVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${darkMode ? 'bg-slate-900' : 'bg-white'}`}>
-        <h2 className="text-3xl font-semibold text-indigo-700 dark:text-indigo-400 mb-6">
+      <section
+        id="blog"
+        ref={blogRef}
+        className={`container mx-auto px-6 py-8 mt-8 transition-all duration-700 ${blogVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          } ${darkMode ? 'bg-slate-900' : 'bg-white'}`}
+      >
+        <h2 className="text-3xl font-semibold mb-6 text-indigo-700 dark:text-cyan-300">
           Blog & Resources
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-indigo-100 p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-bold mb-4 text-indigo-700 dark:text-indigo-400">Latest Articles</h3>
+          <div
+            className={`p-6 rounded-lg shadow-md transition ${darkMode
+              ? 'bg-slate-800 text-cyan-100'
+              : 'bg-indigo-100 text-indigo-700'
+              }`}
+          >
+            <h3 className="text-xl font-bold mb-4 text-indigo-700 dark:text-cyan-300">
+              Latest Articles
+            </h3>
             <ul className="space-y-4">
               {articles.map((article) => (
-                <BlogItem
-                  key={article.id}
-                  item={article}
-                  selected={selectedArticle}
-                  setSelected={setSelectedArticle}
-                  darkMode={darkMode}
-                />
+                <li key={article.id}>
+                  <button
+                    className={`block text-left w-full font-semibold focus:outline-none ${darkMode
+                      ? 'text-cyan-300 hover:text-cyan-200'
+                      : 'text-indigo-600 hover:text-indigo-900'
+                      }`}
+                    onClick={() =>
+                      setSelectedArticle(selectedArticle === article.id ? null : article.id)
+                    }
+                  >
+                    {article.title}
+                  </button>
+                  {selectedArticle === article.id && (
+                    <div
+                      className={`mt-2 p-3 rounded shadow ${darkMode
+                        ? 'bg-slate-900 text-white'
+                        : 'bg-white text-gray-800'
+                        }`}
+                    >
+                      {article.answer}
+                    </div>
+                  )}
+                </li>
               ))}
             </ul>
           </div>
-          <div className="bg-indigo-100 p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-bold mb-4 text-indigo-700 dark:text-indigo-400">Quick Links</h3>
+          <div
+            className={`p-6 rounded-lg shadow-md transition ${darkMode
+              ? 'bg-slate-800 text-cyan-100'
+              : 'bg-indigo-100 text-indigo-700'
+              }`}
+          >
+            <h3 className="text-xl font-bold mb-4 text-indigo-700 dark:text-cyan-300">
+              Quick Links
+            </h3>
             <ul className="space-y-4">
               {quickLinks.map((link) => (
-                <BlogItem
-                  key={link.id}
-                  item={link}
-                  selected={selectedQuickLink}
-                  setSelected={setSelectedQuickLink}
-                  darkMode={darkMode}
-                />
+                <li key={link.id}>
+                  <button
+                    className={`block text-left w-full font-semibold focus:outline-none ${darkMode
+                      ? 'text-cyan-300 hover:text-cyan-200'
+                      : 'text-indigo-600 hover:text-indigo-900'
+                      }`}
+                    onClick={() =>
+                      setSelectedQuickLink(selectedQuickLink === link.id ? null : link.id)
+                    }
+                  >
+                    {link.title}
+                  </button>
+                  {selectedQuickLink === link.id && (
+                    <div
+                      className={`mt-2 p-3 rounded shadow ${darkMode
+                        ? 'bg-slate-900 text-white'
+                        : 'bg-white text-gray-800'
+                        }`}
+                    >
+                      {link.answer}
+                    </div>
+                  )}
+                </li>
               ))}
             </ul>
           </div>
