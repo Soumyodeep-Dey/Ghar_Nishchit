@@ -1,7 +1,7 @@
-﻿﻿import React, { useEffect, useRef, useState } from 'react';
+﻿﻿﻿﻿import React, { useEffect, useRef, useState } from 'react';
 import { useDarkMode } from '../DarkModeContext';
 import { Link } from 'react-router-dom';
-import { Home, Building, Info, DollarSign, Users, HelpCircle, Menu, X, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
+import { Home, Building, Info, DollarSign, Users, HelpCircle, Menu, X, Facebook, Twitter, Instagram, Linkedin, BookOpen } from 'lucide-react';
 
 import p1 from './assets/p1.jpg';
 import p2 from './assets/p2.jpg';
@@ -44,6 +44,21 @@ const faqs = [
   { id: 3, question: 'Can I manage multiple properties?', answer: 'Yes, depending on your subscription plan, you can manage multiple properties.' },
 ];
 
+// 2. Fade-in on scroll hook
+function useFadeInOnScroll() {
+  const ref = useRef();
+  const [isVisible, setIsVisible] = useState(false);
+  useEffect(() => {
+    const observer = new window.IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+  return [ref, isVisible];
+}
+
 export default function Landing() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -54,6 +69,18 @@ export default function Landing() {
   const { darkMode, toggleDarkMode } = useDarkMode();
 
   const carouselRef = useRef(null);
+
+  // Add fade-in refs for each section
+  const [propertiesRef, propertiesVisible] = useFadeInOnScroll();
+  const [featuredRef, featuredVisible] = useFadeInOnScroll();
+  const [aboutRef, aboutVisible] = useFadeInOnScroll();
+  const [pricingRef, pricingVisible] = useFadeInOnScroll();
+  const [customersRef, customersVisible] = useFadeInOnScroll();
+  const [faqRef, faqVisible] = useFadeInOnScroll();
+  const [blogRef, blogVisible] = useFadeInOnScroll();
+
+  // Add state for 'How It Works' modal
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -103,6 +130,41 @@ export default function Landing() {
   const toggleFaq = (id) => {
     setExpandedFaq(expandedFaq === id ? null : id);
   };
+
+  // Add state for selected article in Blog & Resources
+  const [selectedArticle, setSelectedArticle] = useState(null);
+  const articles = [
+    {
+      id: 1,
+      title: 'How to Choose the Right Rental Property',
+      answer: 'Consider location, budget, amenities, and landlord reputation. Visit the property and review the rental agreement carefully before making a decision.'
+    },
+    {
+      id: 2,
+      title: 'Tips for Tenants: What to Look for in a Rental',
+      answer: 'Look for safety features, proximity to work/school, fair rent, and responsive property management. Always inspect the property and clarify maintenance responsibilities.'
+    },
+    {
+      id: 3,
+      title: 'Understanding Rental Agreements',
+      answer: 'A rental agreement should clearly state rent, duration, deposit, maintenance, and exit clauses. Read all terms and ask questions before signing.'
+    }
+  ];
+
+  // Add state for selected quick link in Blog & Resources
+  const [selectedQuickLink, setSelectedQuickLink] = useState(null);
+  const quickLinks = [
+    {
+      id: 1,
+      title: 'Terms of Service',
+      answer: 'Our Terms of Service outline the rules and regulations for using Ghar_Nishchit. Please read them carefully to understand your rights and responsibilities.'
+    },
+    {
+      id: 2,
+      title: 'Privacy Policy',
+      answer: 'Our Privacy Policy explains how we collect, use, and protect your personal information. Your privacy is important to us.'
+    }
+  ];
 
   return (
     <div
@@ -169,6 +231,17 @@ export default function Landing() {
               >
                 <Users size={18} aria-hidden="true" />
                 <span>Customers</span>
+              </a>
+            </li>
+            <li role="none">
+              <a
+                href="#blog"
+                role="menuitem"
+                tabIndex={0}
+                className="flex items-center space-x-1 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded transition-transform transform hover:scale-110"
+              >
+                <BookOpen size={18} aria-hidden="true" />
+                <span>Blog & Resources</span>
               </a>
             </li>
             <li role="none">
@@ -262,6 +335,17 @@ export default function Landing() {
                 Customers
               </a>
             </li>
+<li role="none">
+  <a
+    href="#blog"
+    role="menuitem"
+    tabIndex={0}
+    className="block px-6 py-3 text-gray-700 hover:bg-indigo-100 focus:outline-none focus:bg-indigo-100 items-center space-x-2"
+    onClick={() => setMenuOpen(false)}
+  >
+    <span>Blog & Resources</span>
+  </a>
+</li>
             <li role="none">
               <a
                 href="#help"
@@ -295,44 +379,64 @@ export default function Landing() {
         Contact Us
       </a>
 
-      {/* Hero Section */}
-      <div
-        className={`relative py-20 mb-12 ${
-          darkMode
-            ? 'bg-gradient-to-r from-blue-950 via-slate-900 to-gray-900'
-            : 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500'
-        }`}
-      >
-        <div className="container mx-auto px-6 flex flex-col items-center justify-center text-center">
-          <h1 className={`text-5xl font-bold mb-4 drop-shadow-lg ${darkMode ? 'text-cyan-300' : 'text-white'}`}>
-            Find Your Perfect Rental Property
-          </h1>
-          <p className={`text-xl mb-8 ${darkMode ? 'text-blue-200' : 'text-indigo-100'}`}>
-            Ghar_Nishchit makes property management easy, efficient, and rewarding for owners and tenants.
-          </p>
-          <Link
-            to="/signup"
-            className={`px-8 py-4 rounded-full font-semibold text-lg shadow-lg transition ${
-              darkMode
-                ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300'
-                : 'bg-white text-indigo-600 hover:bg-indigo-100'
-            }`}
+      {/* Hero Section with SVG background */}
+      <div className="relative py-20 mb-12 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none z-0">
+          <svg width="100%" height="100%" viewBox="0 0 1440 320" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+            <path fill="#a5b4fc" fillOpacity="0.2" d="M0,160L80,170.7C160,181,320,203,480,197.3C640,192,800,160,960,133.3C1120,107,1280,85,1360,74.7L1440,64L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+          </svg>
+        </div>
+          <div className="container mx-auto px-4 sm:px-6 md:px-6 flex flex-col items-center justify-center text-center relative z-10">
+          <h1 className={`text-3xl sm:text-4xl md:text-5xl font-bold mb-4 drop-shadow-lg ${darkMode ? 'text-cyan-300' : 'text-white'}`}>Find Your Perfect Rental Property</h1>
+          <p className={`text-base sm:text-lg md:text-xl mb-8 ${darkMode ? 'text-blue-200' : 'text-indigo-100'}`}>Ghar_Nishchit makes property management easy, efficient, and rewarding for owners and tenants.</p>
+          <Link to="/signup" className={`px-6 py-3 sm:px-8 sm:py-4 rounded-full font-semibold text-base sm:text-lg shadow-lg transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-white text-indigo-600 hover:bg-indigo-100'}`}>Get Started</Link>
+          {/* Secondary CTA */}
+          <button
+            className={`mt-4 px-6 py-3 sm:px-8 sm:py-4 rounded-full font-semibold text-base sm:text-lg shadow-lg transition ${darkMode ? 'bg-indigo-900 text-cyan-200 hover:bg-indigo-800' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+            onClick={() => setShowHowItWorks(true)}
           >
-            Get Started
-          </Link>
+            See How It Works
+          </button>
         </div>
       </div>
-
+      {showHowItWorks && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className={`bg-white dark:bg-slate-900 rounded-lg shadow-lg p-8 max-w-lg w-full relative`}>
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-indigo-600 dark:hover:text-cyan-300 text-2xl font-bold focus:outline-none"
+              onClick={() => setShowHowItWorks(false)}
+              aria-label="Close"
+            >
+              &times;
+            </button>
+            <h2 className="text-2xl font-bold mb-4 text-indigo-700 dark:text-cyan-300">How Ghar_Nishchit Works</h2>
+            <ol className="list-decimal list-inside space-y-3 text-gray-700 dark:text-cyan-100">
+              <li><span className="font-semibold">Sign Up:</span> Create your free account as a landlord or tenant.</li>
+              <li><span className="font-semibold">Browse or List Properties:</span> Tenants can browse listings, landlords can add new properties.</li>
+              <li><span className="font-semibold">Connect:</span> Use our secure messaging to contact landlords or tenants.</li>
+              <li><span className="font-semibold">Manage & Track:</span> Handle inquiries, favorites, and property details from your dashboard.</li>
+              <li><span className="font-semibold">Move In:</span> Finalize agreements and enjoy a smooth rental experience!</li>
+            </ol>
+          </div>
+        </div>
+      )}
+      {/* Social Proof/Stats Bar */}
+      <div className="container mx-auto px-6 py-6 flex flex-wrap items-center justify-center gap-8">
+        <div className="flex flex-col items-center">
+          <span className="text-3xl font-bold text-indigo-600 dark:text-cyan-400">10,000+</span>
+          <span className="font-semibold text-gray-700 dark:text-blue-200">Active Users</span>
+        </div>
+        <div className="flex flex-col items-center">
+          <span className="text-3xl font-bold text-indigo-600 dark:text-cyan-400">500+</span>
+          <span className="font-semibold text-gray-700 dark:text-blue-200">Properties Listed</span>
+        </div>
+        <div className="flex flex-col items-center">
+          <span className="text-3xl font-bold text-indigo-600 dark:text-cyan-400">4.9/5</span>
+          <span className="font-semibold text-gray-700 dark:text-blue-200">Average Rating</span>
+        </div>
+      </div>
       {/* Properties Section */}
-      <section
-        id="properties"
-        className={`container mx-auto px-6 py-12 rounded-lg shadow-md ${
-          darkMode
-            ? 'bg-gradient-to-r from-blue-950 via-slate-900 to-gray-900'
-            : 'bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200'
-        }`}
-        aria-label="Properties carousel"
-      >
+      <section id="properties" ref={propertiesRef} className={`container mx-auto px-6 py-12 rounded-lg shadow-md transition-all duration-700 ${propertiesVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${darkMode ? 'bg-gradient-to-r from-blue-950 via-slate-900 to-gray-900' : 'bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200'}`}>
         <h2 className={`text-3xl font-semibold mb-8 text-center ${darkMode ? 'text-cyan-300' : 'text-indigo-700 dark:text-indigo-400'}`}>
           Properties
         </h2>
@@ -355,13 +459,13 @@ export default function Landing() {
                   src={property.image}
                   alt={property.name}
                   loading="lazy"
-                  className="w-full h-[500px] object-cover rounded-lg transform transition-transform duration-300 group-hover:scale-110 group-hover:shadow-2xl"
+                  className="w-full max-h-[300px] sm:max-h-[400px] md:h-[500px] object-cover rounded-lg transform transition-transform duration-300 group-hover:scale-110 group-hover:shadow-2xl"
                 />
-                <div className="absolute bottom-4 left-4 bg-gradient-to-r from-indigo-900 via-indigo-700 to-indigo-900 bg-opacity-80 text-white p-4 rounded-lg transition-opacity duration-300 opacity-90 group-hover:opacity-100">
-                  <h3 className="text-2xl font-bold">{property.name}</h3>
-                  <p className="text-sm">{property.location}</p>
-                  <p className="text-sm font-semibold">₹{property.price} / month</p>
-                  <span className="inline-block mt-2 px-3 py-1 text-xs font-semibold rounded-full bg-indigo-600">{property.type}</span>
+                <div className="absolute bottom-4 left-4 bg-gradient-to-r from-indigo-900 via-indigo-700 to-indigo-900 bg-opacity-80 text-white p-3 rounded-lg transition-opacity duration-300 opacity-90 group-hover:opacity-100">
+                  <h3 className="text-lg sm:text-xl font-bold">{property.name}</h3>
+                  <p className="text-[9px] sm:text-xs">{property.location}</p>
+                  <p className="text-[9px] sm:text-xs font-semibold">₹{property.price} / month</p>
+                  <span className="inline-block mt-1 px-2 py-0.5 text-[10px] sm:text-xs font-semibold rounded-full bg-indigo-600">{property.type}</span>
                 </div>
                 <div className="absolute top-4 right-4 bg-indigo-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
                   New
@@ -374,7 +478,7 @@ export default function Landing() {
             type="button"
             onClick={() => setCurrentIndex((currentIndex - 1 + properties.length) % properties.length)}
             onKeyDown={(e) => handleKeyDownCarousel(e, 'prev')}
-          className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-indigo-600 text-white p-4 rounded-full hover:bg-indigo-700 transition opacity-0 group-hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="absolute top-1/2 left-2 sm:left-4 transform -translate-y-1/2 bg-indigo-600 text-white p-3 sm:p-4 rounded-full hover:bg-indigo-700 transition opacity-0 group-hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             aria-label="Previous Property"
           >
             &#8592;
@@ -383,7 +487,7 @@ export default function Landing() {
             type="button"
             onClick={() => setCurrentIndex((currentIndex + 1) % properties.length)}
             onKeyDown={(e) => handleKeyDownCarousel(e, 'next')}
-          className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-indigo-600 text-white p-4 rounded-full hover:bg-indigo-700 transition opacity-0 group-hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="absolute top-1/2 right-2 sm:right-4 transform -translate-y-1/2 bg-indigo-600 text-white p-3 sm:p-4 rounded-full hover:bg-indigo-700 transition opacity-0 group-hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             aria-label="Next Property"
           >
             &#8594;
@@ -406,13 +510,7 @@ export default function Landing() {
       </section>
 
       {/* Featured Properties Section */}
-      <section
-        id="featured"
-        className={`container mx-auto px-6 py-16 mb-12 rounded-lg shadow-md mt-20 ${
-          darkMode ? 'bg-gradient-to-r from-slate-900 via-blue-950 to-gray-900' : 'bg-white'
-        }`}
-        aria-label="Featured properties"
-      >
+      <section id="featured" ref={featuredRef} className={`container mx-auto px-6 py-16 mb-12 rounded-lg shadow-md mt-20 transition-all duration-700 ${featuredVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${darkMode ? 'bg-slate-900 via-blue-950 to-gray-900' : 'bg-white'}`}>
         <h2 className={`text-3xl font-semibold mb-8 ${darkMode ? 'text-cyan-300' : 'text-indigo-700 dark:text-indigo-400'}`}>
           Featured Properties
         </h2>
@@ -445,7 +543,7 @@ export default function Landing() {
       </section>
 
       {/* About Section */}
-      <section id="about" className={`${darkMode ? 'bg-slate-900' : 'bg-white'} py-12`}>
+      <section id="about" ref={aboutRef} className={`py-12 transition-all duration-700 ${aboutVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${darkMode ? 'bg-slate-900' : 'bg-white'}`}>
         <div className="container mx-auto px-6 max-w-6xl flex flex-col md:flex-row items-center gap-12">
           <div className="md:w-1/2 relative overflow-hidden rounded-lg shadow-lg">
             <img
@@ -497,9 +595,8 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
       {/* Pricing Section */}
-      <section id="pricing" className={`container mx-auto px-6 py-12 ${darkMode ? 'bg-slate-900' : ''}`}>
+      <section id="pricing" ref={pricingRef} className={`container mx-auto px-6 py-12 transition-all duration-700 ${pricingVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${darkMode ? 'bg-slate-900' : ''}`}>
         <h2 className={`text-3xl font-semibold mb-8 text-center ${darkMode ? 'text-cyan-300' : 'text-indigo-700 dark:text-indigo-400'}`}>
           Pricing
         </h2>
@@ -608,8 +705,8 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Customers Section */}
-      <section id="customers" className={`${darkMode ? 'bg-gradient-to-r from-blue-950 via-slate-900 to-gray-900' : 'bg-white'} py-12`}>
+      {/* Customers Section (testimonials with avatars) */}
+      <section id="customers" ref={customersRef} className={`py-12 transition-all duration-700 ${customersVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${darkMode ? 'bg-gradient-to-r from-blue-950 via-slate-900 to-gray-900' : 'bg-white'}`}>
         <div className="container mx-auto px-6 max-w-4xl">
           <h2 className={`text-3xl font-semibold mb-6 text-center ${darkMode ? 'text-cyan-300' : 'text-indigo-700 dark:text-indigo-400'}`}>
             Our Customers
@@ -631,6 +728,8 @@ export default function Landing() {
                     </svg>
                   ))}
                 </div>
+                {/* Replace initials with avatar images */}
+                <img src={`https://randomuser.me/api/portraits/men/${customer.id}.jpg`} alt={customer.name} className="w-16 h-16 rounded-full mb-4 border-2 border-indigo-400" onError={(e) => {e.target.onerror=null;e.target.src='https://ui-avatars.com/api/?name='+encodeURIComponent(customer.name);}} />
               </div>
             ))}
           </div>
@@ -638,7 +737,7 @@ export default function Landing() {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className={`${darkMode ? 'bg-slate-900' : 'bg-white'} py-12`}>
+      <section id="faq" ref={faqRef} className={`py-8 transition-all duration-700 ${faqVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${darkMode ? 'bg-slate-900' : 'bg-white'}`}>
         <div className="container mx-auto px-6 max-w-4xl">
           <h2 className="text-3xl font-semibold text-indigo-700 dark:text-indigo-400 mb-6">
             Frequently Asked Questions
@@ -665,8 +764,57 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Blog/Resources Section */}
+      <section id="blog" ref={blogRef} className={`container mx-auto px-6 py-8 mt-8 transition-all duration-700 ${blogVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${darkMode ? 'bg-slate-900' : 'bg-white'}`}>
+        <h2 className="text-3xl font-semibold text-indigo-700 dark:text-indigo-400 mb-6">
+          Blog & Resources
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-indigo-100 p-6 rounded-lg shadow-md">
+            <h3 className="text-xl font-bold mb-4 text-indigo-700 dark:text-indigo-400">Latest Articles</h3>
+            <ul className="space-y-4">
+              {articles.map((article) => (
+                <li key={article.id}>
+                  <button
+                    className="block text-left w-full text-indigo-600 hover:text-indigo-900 dark:text-cyan-300 dark:hover:text-cyan-200 font-semibold focus:outline-none"
+                    onClick={() => setSelectedArticle(selectedArticle === article.id ? null : article.id)}
+                  >
+                    {article.title}
+                  </button>
+                  {selectedArticle === article.id && (
+                    <div className="mt-2 p-3 bg-white rounded shadow text-gray-800 dark:bg-slate-800 dark:text-cyan-100">
+                      {article.answer}
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="bg-indigo-100 p-6 rounded-lg shadow-md">
+            <h3 className="text-xl font-bold mb-4 text-indigo-700 dark:text-indigo-400">Quick Links</h3>
+            <ul className="space-y-4">
+              {quickLinks.map((link) => (
+                <li key={link.id}>
+                  <button
+                    className="block text-left w-full text-indigo-600 hover:text-indigo-900 dark:text-cyan-300 dark:hover:text-cyan-200 font-semibold focus:outline-none"
+                    onClick={() => setSelectedQuickLink(selectedQuickLink === link.id ? null : link.id)}
+                  >
+                    {link.title}
+                  </button>
+                  {selectedQuickLink === link.id && (
+                    <div className="mt-2 p-3 bg-white rounded shadow text-gray-800 dark:bg-slate-800 dark:text-cyan-100">
+                      {link.answer}
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer className={`${darkMode ? 'bg-gradient-to-r from-blue-950 via-slate-900 to-gray-900 text-cyan-200' : 'bg-indigo-900 text-indigo-200'} py-12 mt-12`}>
+      <footer className={`${darkMode ? 'bg-gradient-to-r from-blue-950 via-slate-900 to-gray-900 text-cyan-200' : 'bg-indigo-900 text-indigo-200'} py-8 mt-4`}>
         <div className="container mx-auto px-6 max-w-6xl">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Newsletter Subscription */}
