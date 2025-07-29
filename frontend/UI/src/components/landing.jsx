@@ -1,4 +1,4 @@
-﻿﻿﻿﻿import React, { useEffect, useRef, useState } from 'react';
+﻿﻿import { useEffect, useRef, useState } from 'react';
 import { useDarkMode } from '../DarkModeContext';
 import { Link } from 'react-router-dom';
 import { Home, Building, Info, DollarSign, Users, HelpCircle, Menu, X, Facebook, Twitter, Instagram, Linkedin, BookOpen } from 'lucide-react';
@@ -44,6 +44,37 @@ const faqs = [
   { id: 3, question: 'Can I manage multiple properties?', answer: 'Yes, depending on your subscription plan, you can manage multiple properties.' },
 ];
 
+const articles = [
+  {
+    id: 1,
+    title: 'How to Choose the Right Rental Property',
+    answer: 'Consider location, budget, amenities, and landlord reputation. Visit the property and review the rental agreement carefully before making a decision.'
+  },
+  {
+    id: 2,
+    title: 'Tips for Tenants: What to Look for in a Rental',
+    answer: 'Look for safety features, proximity to work/school, fair rent, and responsive property management. Always inspect the property and clarify maintenance responsibilities.'
+  },
+  {
+    id: 3,
+    title: 'Understanding Rental Agreements',
+    answer: 'A rental agreement should clearly state rent, duration, deposit, maintenance, and exit clauses. Read all terms and ask questions before signing.'
+  }
+];
+
+const quickLinks = [
+  {
+    id: 1,
+    title: 'Terms of Service',
+    answer: 'Our Terms of Service outline the rules and regulations for using Ghar_Nishchit. Please read them carefully to understand your rights and responsibilities.'
+  },
+  {
+    id: 2,
+    title: 'Privacy Policy',
+    answer: 'Our Privacy Policy explains how we collect, use, and protect your personal information. Your privacy is important to us.'
+  }
+];
+
 // 2. Fade-in on scroll hook
 function useFadeInOnScroll() {
   const ref = useRef();
@@ -64,7 +95,6 @@ export default function Landing() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [expandedFaq, setExpandedFaq] = useState(null);
   // Remove local darkMode state
-  // const [darkMode, setDarkMode] = useState(false);
 
   const { darkMode, toggleDarkMode } = useDarkMode();
 
@@ -133,38 +163,11 @@ export default function Landing() {
 
   // Add state for selected article in Blog & Resources
   const [selectedArticle, setSelectedArticle] = useState(null);
-  const articles = [
-    {
-      id: 1,
-      title: 'How to Choose the Right Rental Property',
-      answer: 'Consider location, budget, amenities, and landlord reputation. Visit the property and review the rental agreement carefully before making a decision.'
-    },
-    {
-      id: 2,
-      title: 'Tips for Tenants: What to Look for in a Rental',
-      answer: 'Look for safety features, proximity to work/school, fair rent, and responsive property management. Always inspect the property and clarify maintenance responsibilities.'
-    },
-    {
-      id: 3,
-      title: 'Understanding Rental Agreements',
-      answer: 'A rental agreement should clearly state rent, duration, deposit, maintenance, and exit clauses. Read all terms and ask questions before signing.'
-    }
-  ];
+  
 
   // Add state for selected quick link in Blog & Resources
   const [selectedQuickLink, setSelectedQuickLink] = useState(null);
-  const quickLinks = [
-    {
-      id: 1,
-      title: 'Terms of Service',
-      answer: 'Our Terms of Service outline the rules and regulations for using Ghar_Nishchit. Please read them carefully to understand your rights and responsibilities.'
-    },
-    {
-      id: 2,
-      title: 'Privacy Policy',
-      answer: 'Our Privacy Policy explains how we collect, use, and protect your personal information. Your privacy is important to us.'
-    }
-  ];
+  
 
   return (
     <div
