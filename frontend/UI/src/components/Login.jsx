@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import p1 from './assets/p1.jpg';
+import p1 from '../assets/p1.jpg';
 import { useDarkMode } from '../DarkModeContext';
 
 export default function Login() {

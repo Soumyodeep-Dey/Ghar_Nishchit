@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { User, Mail, Lock, Phone, Eye, EyeOff } from 'lucide-react';
 import { useDarkMode } from '../DarkModeContext';
-import p1 from './assets/p1.jpg';
+import p1 from '../assets/p1.jpg';
 
 export default function SignUp() {
   const { darkMode, toggleDarkMode } = useDarkMode();
