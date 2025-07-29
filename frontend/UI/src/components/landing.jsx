@@ -95,22 +95,22 @@ function useFadeInOnScroll() {
 function PricingCard({ title, price, features, buttonClass, onClick, highlight, darkMode }) {
   return (
     <div
-      className={`rounded-lg shadow-md p-6 text-center transition-all duration-300 hover:ring-4 hover:scale-105
+      className={`rounded-lg shadow-lg p-6 text-center transition-all duration-300 hover:ring-4 hover:scale-105
         ${highlight
           ? darkMode
             ? 'bg-gradient-to-r from-cyan-700 to-blue-900 border-cyan-400 text-white hover:shadow-2xl border-2'
-            : 'bg-gradient-to-r from-emerald-400 to-emerald-600 border-emerald-700 text-white hover:shadow-2xl border-2'
+            : 'bg-gradient-to-r from-emerald-300 via-emerald-400 to-emerald-600 border-emerald-500 text-white hover:shadow-2xl border-2'
           : darkMode
             ? 'bg-blue-950 hover:ring-cyan-400'
-            : 'bg-white hover:ring-indigo-400'
+            : 'bg-gradient-to-br from-white via-indigo-50 to-indigo-100 border border-indigo-200 hover:ring-indigo-400'
         }
       `}>
-      <h3 className={`text-xl font-semibold mb-4 ${highlight ? '' : darkMode ? 'text-cyan-300' : 'text-indigo-600 dark:text-indigo-300'}`}>{title}</h3>
-      <p className={`mb-6 ${highlight ? 'text-lg font-semibold' : darkMode ? 'text-blue-200' : 'text-gray-600'}`}>{price}</p>
-      <ul className={`${highlight ? '' : 'text-gray-600'} mb-6 space-y-2`}>
+      <h3 className={`text-xl font-semibold mb-4 ${highlight ? '' : darkMode ? 'text-cyan-300' : 'text-indigo-700'}`}>{title}</h3>
+      <p className={`mb-6 ${highlight ? 'text-lg font-semibold' : darkMode ? 'text-blue-200' : 'text-indigo-600 font-semibold'}`}>{price}</p>
+      <ul className={`${highlight ? '' : 'text-indigo-700'} mb-6 space-y-2`}>
         {features.map((f, i) => (
           <li key={i} className="flex items-center justify-center space-x-2">
-            <svg className={`w-5 h-5 ${highlight ? '' : 'text-indigo-600'}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
+            <svg className={`w-5 h-5 ${highlight ? '' : 'text-indigo-500'}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
             <span>{f}</span>
@@ -616,7 +616,17 @@ export default function Landing() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" ref={pricingRef} className={`container mx-auto px-6 py-12 transition-all duration-700 ${pricingVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${darkMode ? 'bg-slate-900' : ''}`}>
+      <section
+        id="pricing"
+        ref={pricingRef}
+        className={`container mx-auto px-6 py-12 transition-all duration-700 rounded-lg shadow-md
+    ${pricingVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
+    ${darkMode
+            ? 'bg-slate-900 border border-slate-800'
+            : 'bg-white'
+          }`
+        }
+      >
         <h2 className={`text-3xl font-semibold mb-8 text-center ${darkMode ? 'text-cyan-300' : 'text-indigo-700 dark:text-indigo-400'}`}>
           Pricing
         </h2>
