@@ -192,6 +192,14 @@ export default function Landing() {
     { href: "#help", label: "Help", icon: HelpCircle },
   ];
 
+  // Define this array near your other menu arrays (outside the component)
+  const socialLinks = [
+    { href: "https://facebook.com", label: "Facebook", icon: FaFacebook },
+    { href: "https://twitter.com", label: "Twitter", icon: FaTwitter },
+    { href: "https://instagram.com", label: "Instagram", icon: FaInstagram },
+    { href: "https://linkedin.com", label: "LinkedIn", icon: FaLinkedin },
+  ];
+
   return (
     <div
       className={`min-h-screen transition-colors duration-500 ${darkMode
@@ -773,18 +781,18 @@ export default function Landing() {
             {/* Social Media */}
             <div className="flex flex-col justify-between">
               <div className="flex space-x-6 mb-6 md:mb-0 justify-center md:justify-end">
-                <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                  <FaFacebook size={24} />
-                </a>
-                <a href="https://twitter.com" aria-label="Twitter" target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                  <FaTwitter size={24} />
-                </a>
-                <a href="https://instagram.com" aria-label="Instagram" target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                  <FaInstagram size={24} />
-                </a>
-                <a href="https://linkedin.com" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer" className="hover:text-white">
-                  <FaLinkedin size={24} />
-                </a>
+                {socialLinks.map(({ href, label, icon: Icon }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    aria-label={label}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                  >
+                    <Icon size={24} />
+                  </a>
+                ))}
               </div>
             </div>
           </div>
