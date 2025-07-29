@@ -452,12 +452,14 @@ export default function Landing() {
           </div>
         </div>
       )}
+
       {/* Social Proof/Stats Bar */}
       <div className="container mx-auto px-6 py-6 flex flex-wrap items-center justify-center gap-8">
         <StatCard value="10,000+" label="Active Users" darkMode={darkMode} />
         <StatCard value="500+" label="Properties Listed" darkMode={darkMode} />
         <StatCard value="4.9/5" label="Average Rating" darkMode={darkMode} />
       </div>
+      
       {/* Properties Section */}
       <section id="properties" ref={propertiesRef} className={`container mx-auto px-6 py-12 rounded-lg shadow-md transition-all duration-700 ${propertiesVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${darkMode ? 'bg-gradient-to-r from-blue-950 via-slate-900 to-gray-900' : 'bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200'}`}>
         <h2 className={`text-3xl font-semibold mb-8 text-center ${darkMode ? 'text-cyan-300' : 'text-indigo-700 dark:text-indigo-400'}`}>
@@ -730,7 +732,7 @@ export default function Landing() {
               <h2 className="text-3xl font-semibold mb-4">Subscribe to our Newsletter</h2>
               <p className="mb-6">Get the latest updates and offers delivered to your inbox.</p>
               <form
-                onSubmit={e => {
+                onSubmit={(e) => {
                   e.preventDefault();
                   alert('Thank you for subscribing!');
                 }}
