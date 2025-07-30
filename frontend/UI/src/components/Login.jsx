@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import p1 from '../assets/p1.jpg';
+import { Link, useNavigate } from 'react-router-dom';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useDarkMode } from '../DarkModeContext';
 import { signInWithGoogle, handleGoogleRedirectResult } from '../firebase';
-import { useNavigate } from 'react-router-dom';
 
 const GoogleIcon = () => (
   <span
@@ -24,27 +23,59 @@ const GoogleIcon = () => (
 
 export default function Login() {
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
   const { darkMode, toggleDarkMode } = useDarkMode();
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [message, setMessage] = useState('');
 
   // Welcome overlay animation state
   const [welcomeOut, setWelcomeOut] = useState(false);
-
-  // Handle Google redirect result
-  useEffect(() => {
-    (async () => {
-      const user = await handleGoogleRedirectResult();
-      if (user) {
-        alert(`Welcome back, ${user.displayName || user.email}!`);
-        navigate('/'); // redirect to homepage/dashboard
-      }
-    })();
-  }, [navigate]);
 
   useEffect(() => {
     const timeout = setTimeout(() => setWelcomeOut(true), 900);
     return () => clearTimeout(timeout);
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      const user = await handleGoogleRedirectResult();
+      if (user) {
+        alert(`Welcome back, ${user.displayName || user.email}!`);
+        navigate('/');
+      }
+    })();
+  }, [navigate]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const { email, password } = formData;
+    if (!email || !password) {
+      setMessage('Please fill in all fields.');
+      return;
+    }
+    try {
+      const apiUrl = `${import.meta.env.VITE_BACKEND_URL}/api/auth/login`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!response.ok) throw new Error('Login failed');
+      const { token, user } = await response.json();
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      setMessage('Login successful! Redirecting...');
+      setTimeout(() => navigate('/'), 1000);
+    } catch (err) {
+      console.error(err);
+      setMessage('Invalid credentials.');
+    }
+  };
 
   return (
     <div
@@ -79,10 +110,8 @@ export default function Login() {
         {/* Dark Mode Toggle */}
         <button
           onClick={toggleDarkMode}
-          className={`absolute top-4 right-4 z-40 px-4 py-2 rounded-full font-semibold shadow transition-colors duration-300 ${darkMode
-            ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300'
-            : 'bg-white text-indigo-600 hover:bg-indigo-100'
-            }`}
+          className={`absolute top-4 right-4 z-40 px-4 py-2 rounded-full ${darkMode ? 'bg-cyan-400 text-blue-950' : 'bg-white text-indigo-600'
+            } shadow transition-colors duration-300`}
           aria-label="Toggle dark mode"
         >
           {darkMode ? '🌙' : '☀️'}
@@ -131,6 +160,14 @@ export default function Login() {
           >
             Access your dashboard and manage your rentals.
           </p>
+
+          {message && (
+            <div className={`mb-4 text-sm text-center font-medium ${message.includes('successful') ? 'text-green-500' : 'text-red-500'
+              }`}>
+              {message}
+            </div>
+          )}
+
           {/* Social Login */}
           <button
             className={`w-full flex items-center justify-center gap-2 py-2 rounded mb-3 sm:mb-4 font-semibold text-sm sm:text-base transition-transform duration-300 hover:scale-105 hover:shadow-lg
@@ -153,7 +190,7 @@ export default function Login() {
               className={`flex-grow ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}
             />
           </div>
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
               <label
                 htmlFor="email"
@@ -167,6 +204,8 @@ export default function Login() {
                 id="email"
                 name="email"
                 autoComplete="email"
+                value={formData.email}
+                onChange={handleChange}
                 className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-sm transition-shadow duration-300 hover:shadow-lg ${darkMode
                   ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-400'
                   : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
@@ -189,6 +228,8 @@ export default function Login() {
                   id="password"
                   name="password"
                   autoComplete="current-password"
+                  value={formData.password}
+                  onChange={handleChange}
                   className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-sm transition-shadow duration-300 hover:shadow-lg ${darkMode
                     ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-400'
                     : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
@@ -228,7 +269,10 @@ export default function Login() {
                 Forgot Password?
               </a>
             </div>
-            <button className="w-full bg-indigo-600 text-white py-2 sm:py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors duration-300 hover:shadow-xl hover:scale-105 text-sm sm:text-base">
+            <button
+              type="submit"
+              className="w-full bg-indigo-600 text-white py-2 sm:py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors duration-300 hover:shadow-xl hover:scale-105 text-sm sm:text-base"
+            >
               Login
             </button>
           </form>
