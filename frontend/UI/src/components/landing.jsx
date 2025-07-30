@@ -357,7 +357,7 @@ export default function Landing() {
           {/* SignUp Button */}
           <Link
             to="/signup"
-            className="hidden md:inline-block bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-700 dark:hover:bg-indigo-600 transition transition-transform hover:scale-105"
+            className="hidden md:inline-block bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-transform hover:scale-105"
           >
             SignUp
           </Link>
@@ -433,13 +433,13 @@ export default function Landing() {
 
           {/* Primary CTA */}
           <Link to="/signup"
-            className={`px-6 py-3 sm:px-8 sm:py-4 rounded-full font-semibold text-base sm:text-lg shadow-lg transition transition-transform hover:scale-105 ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-white text-indigo-600 hover:bg-indigo-100 transition-transform hover:scale-105'}`}>
+            className={`px-6 py-3 sm:px-8 sm:py-4 rounded-full font-semibold text-base sm:text-lg shadow-lg transition-transform hover:scale-105 ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-white text-indigo-600 hover:bg-indigo-100 transition-transform hover:scale-105'}`}>
             Get Started
           </Link>
 
           {/* Secondary CTA */}
           <button
-            className={`mt-4 px-6 py-3 sm:px-8 sm:py-4 rounded-full font-semibold text-base sm:text-lg shadow-lg transition transition-transform hover:scale-105 ${darkMode ? 'bg-indigo-900 text-cyan-200 hover:bg-indigo-800' : 'bg-indigo-600 text-white hover:bg-indigo-700 transition-transform hover:scale-105'}`}
+            className={`mt-4 px-6 py-3 sm:px-8 sm:py-4 rounded-full font-semibold text-base sm:text-lg shadow-lg transition-transform hover:scale-105 ${darkMode ? 'bg-indigo-900 text-cyan-200 hover:bg-indigo-800' : 'bg-indigo-600 text-white hover:bg-indigo-700 transition-transform hover:scale-105'}`}
             onClick={() => setShowHowItWorks(true)}
           >
             See How It Works
@@ -633,7 +633,7 @@ export default function Landing() {
               <StatCard value="1000+" label="Happy Clients" darkMode={darkMode} />
             </div>
             <button
-              className={`mt-6 px-6 py-3 rounded transition transition-transform hover:scale-105 ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700 transition-transform hover:scale-105'
+              className={`mt-6 px-6 py-3 rounded transition-transform hover:scale-105 ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700 transition-transform hover:scale-105'
                 }`}
               onClick={() => alert('Please login first')}
             >
@@ -723,7 +723,7 @@ export default function Landing() {
           } ${darkMode ? 'bg-slate-900' : 'bg-white'}`}
       >
         <div className="container mx-auto px-6 max-w-4xl mx-w-2xl">
-          <h2 className="text-3xl font-semibold text-indigo-700 dark:text-cyan-300 mb-6 mb-8">
+          <h2 className="text-3xl font-semibold text-indigo-700 dark:text-cyan-300 mb-8">
             Frequently Asked Questions
           </h2>
           <div className="space-y-4">
