@@ -36,8 +36,8 @@ export default function Login() {
   return (
     <div
       className={`min-h-screen flex items-center justify-center px-2 sm:px-4 ${darkMode
-          ? 'bg-gray-950'
-          : 'bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100'
+        ? 'bg-gray-950'
+        : 'bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100'
         }`}
     >
       <div
@@ -64,23 +64,23 @@ export default function Login() {
         </div>
         {/* Dark Mode Toggle */}
         <button
-  // ...existing classes
-  type="button"
-  onClick={async () => {
-    try {
-      const result = await signInWithGoogle();
-      const user = result.user;
-      // You can now send user info (user.email, user.displayName, user.uid) to your backend if needed
-      alert(`Welcome, ${user.displayName || user.email}!`);
-      // Optionally: redirect or update UI
-    } catch (err) {
-      alert('Google sign-in failed');
-    }
-  }}
->
-  <GoogleIcon />
-  <span>Sign up with Google</span>
-</button>
+          // ...existing classes
+          type="button"
+          onClick={async () => {
+            try {
+              const result = await signInWithGoogle();
+              const user = result.user;
+              // You can now send user info (user.email, user.displayName, user.uid) to your backend if needed
+              alert(`Welcome, ${user.displayName || user.email}!`);
+              // Optionally: redirect or update UI
+            } catch (err) {
+              alert('Google sign-in failed');
+            }
+          }}
+        >
+          <GoogleIcon />
+          <span>Sign up with Google</span>
+        </button>
 
         {/* WELCOME/TRUST BANNER (always visible, position varies) */}
         {/* MOBILE: On top. DESKTOP: On left */}
@@ -161,8 +161,8 @@ export default function Login() {
                 name="email"
                 autoComplete="email"
                 className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-sm transition-shadow duration-300 hover:shadow-lg ${darkMode
-                    ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-400'
-                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                  ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-400'
+                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
                   }`}
                 placeholder="you@example.com"
                 required
@@ -183,8 +183,8 @@ export default function Login() {
                   name="password"
                   autoComplete="current-password"
                   className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-sm transition-shadow duration-300 hover:shadow-lg ${darkMode
-                      ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-400'
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                    ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-400'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
                     }`}
                   placeholder="********"
                   required
@@ -193,8 +193,8 @@ export default function Login() {
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
                   className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${darkMode
-                      ? 'text-gray-400 hover:text-gray-200'
-                      : 'text-gray-400 hover:text-gray-700'
+                    ? 'text-gray-400 hover:text-gray-200'
+                    : 'text-gray-400 hover:text-gray-700'
                     }`}
                   tabIndex={-1}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
@@ -214,8 +214,8 @@ export default function Login() {
               <a
                 href="/forgot-password"
                 className={`text-xs sm:text-sm ${darkMode
-                    ? 'text-indigo-400 hover:text-indigo-300'
-                    : 'text-indigo-600 hover:underline'
+                  ? 'text-indigo-400 hover:text-indigo-300'
+                  : 'text-indigo-600 hover:underline'
                   }`}
               >
                 Forgot Password?
@@ -233,8 +233,8 @@ export default function Login() {
             <Link
               to="/signup"
               className={`${darkMode
-                  ? 'text-indigo-400 hover:text-indigo-300'
-                  : 'text-indigo-600 hover:underline'
+                ? 'text-indigo-400 hover:text-indigo-300'
+                : 'text-indigo-600 hover:underline'
                 }`}
             >
               Sign Up

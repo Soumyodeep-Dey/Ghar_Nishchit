@@ -227,26 +227,26 @@ export default function SignUp() {
 
             {/* Social Signup */}
             <button
-  className={`w-full flex items-center justify-center gap-2 py-2 rounded mb-3 sm:mb-4 font-semibold text-sm sm:text-base transition-transform duration-300 hover:scale-105 hover:shadow-lg
+              className={`w-full flex items-center justify-center gap-2 py-2 rounded mb-3 sm:mb-4 font-semibold text-sm sm:text-base transition-transform duration-300 hover:scale-105 hover:shadow-lg
     ${darkMode
-      ? 'bg-white text-gray-800 hover:bg-gray-100 border border-cyan-700'
-      : 'bg-white text-gray-800 hover:bg-gray-100 border border-gray-200'
-    }`}
-  type="button"
-  onClick={async () => {
-    try {
-      const result = await signInWithGoogle();
-      const user = result.user;
-      alert(`Welcome, ${user.displayName || user.email}!`);
-      navigate('/'); // Redirect to homepage
-    } catch (err) {
-      alert('Google sign-up failed');
-    }
-  }}
->
-  <GoogleIcon />
-  <span>Sign up with Google</span>
-</button>
+                  ? 'bg-white text-gray-800 hover:bg-gray-100 border border-cyan-700'
+                  : 'bg-white text-gray-800 hover:bg-gray-100 border border-gray-200'
+                }`}
+              type="button"
+              onClick={async () => {
+                try {
+                  const result = await signInWithGoogle();
+                  const user = result.user;
+                  alert(`Welcome, ${user.displayName || user.email}!`);
+                  navigate('/'); // Redirect to homepage
+                } catch (err) {
+                  alert('Google sign-up failed');
+                }
+              }}
+            >
+              <GoogleIcon />
+              <span>Sign up with Google</span>
+            </button>
             <div className="flex items-center my-2 sm:my-4">
               <hr className={`flex-grow ${darkMode ? 'border-cyan-700' : 'border-gray-300'}`} />
               <span className={`mx-2 ${darkMode ? 'text-cyan-400' : 'text-gray-400'}`}>or</span>
