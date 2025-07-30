@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import p1 from '../assets/p1.jpg';
 import { useDarkMode } from '../DarkModeContext';
+import { signInWithGoogle } from '../firebase';
 
 const GoogleIcon = () => (
   <span
@@ -63,15 +64,23 @@ export default function Login() {
         </div>
         {/* Dark Mode Toggle */}
         <button
-          onClick={toggleDarkMode}
-          className={`absolute top-3 right-3 sm:top-6 sm:right-6 z-40 px-3 py-2 sm:px-4 sm:py-2 rounded-full font-semibold shadow transition-colors duration-300 ${darkMode
-              ? 'bg-gray-800 text-indigo-300 hover:bg-gray-700'
-              : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
-            }`}
-          aria-label="Toggle dark mode"
-        >
-          {darkMode ? '🌙' : '☀️'}
-        </button>
+  // ...existing classes
+  type="button"
+  onClick={async () => {
+    try {
+      const result = await signInWithGoogle();
+      const user = result.user;
+      // You can now send user info (user.email, user.displayName, user.uid) to your backend if needed
+      alert(`Welcome, ${user.displayName || user.email}!`);
+      // Optionally: redirect or update UI
+    } catch (err) {
+      alert('Google sign-in failed');
+    }
+  }}
+>
+  <GoogleIcon />
+  <span>Sign up with Google</span>
+</button>
 
         {/* WELCOME/TRUST BANNER (always visible, position varies) */}
         {/* MOBILE: On top. DESKTOP: On left */}
