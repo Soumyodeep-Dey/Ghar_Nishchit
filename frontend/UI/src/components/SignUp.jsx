@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { User, Mail, Lock, Phone, Eye, EyeOff } from 'lucide-react';
 import { useDarkMode } from '../DarkModeContext';
 import p1 from '../assets/p1.jpg';
-import { signInWithGoogle } from '../firebase';
+import { signInWithGoogle, handleGoogleRedirectResult } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 
 // Update the GoogleIcon to add a white background and rounded style for visibility
@@ -41,6 +41,17 @@ export default function SignUp() {
 
   // Welcome overlay animation
   const [welcomeOut, setWelcomeOut] = useState(false);
+
+  // Handle Google redirect result
+  useEffect(() => {
+    (async () => {
+      const user = await handleGoogleRedirectResult();
+      if (user) {
+        alert(`Welcome, ${user.displayName || user.email}!`);
+        navigate('/'); // redirect to homepage
+      }
+    })();
+  }, [navigate]);
 
   // Password strength logic
   const checkStrength = (pwd) => {
@@ -233,16 +244,7 @@ export default function SignUp() {
                   : 'bg-white text-gray-800 hover:bg-gray-100 border border-gray-200'
                 }`}
               type="button"
-              onClick={async () => {
-                try {
-                  const result = await signInWithGoogle();
-                  const user = result.user;
-                  alert(`Welcome, ${user.displayName || user.email}!`);
-                  navigate('/'); // Redirect to homepage
-                } catch (err) {
-                  alert('Google sign-up failed');
-                }
-              }}
+              onClick={signInWithGoogle}
             >
               <GoogleIcon />
               <span>Sign up with Google</span>

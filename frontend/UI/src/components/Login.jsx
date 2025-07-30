@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import p1 from '../assets/p1.jpg';
 import { useDarkMode } from '../DarkModeContext';
-import { signInWithGoogle } from '../firebase';
+import { signInWithGoogle, handleGoogleRedirectResult } from '../firebase';
+import { useNavigate } from 'react-router-dom';
 
 const GoogleIcon = () => (
   <span
@@ -22,11 +23,23 @@ const GoogleIcon = () => (
 );
 
 export default function Login() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const { darkMode, toggleDarkMode } = useDarkMode();
 
   // Welcome overlay animation state
   const [welcomeOut, setWelcomeOut] = useState(false);
+
+  // Handle Google redirect result
+  useEffect(() => {
+    (async () => {
+      const user = await handleGoogleRedirectResult();
+      if (user) {
+        alert(`Welcome back, ${user.displayName || user.email}!`);
+        navigate('/'); // redirect to homepage/dashboard
+      }
+    })();
+  }, [navigate]);
 
   useEffect(() => {
     const timeout = setTimeout(() => setWelcomeOut(true), 900);
@@ -62,24 +75,17 @@ export default function Login() {
           <p className="mb-2 text-sm sm:mb-4 sm:text-base">Trusted by 10,000+ users</p>
           <img src={p1} alt="Login" className="rounded-xl shadow-lg w-40 h-28 sm:w-48 sm:h-32 object-cover mt-2 sm:mt-4" />
         </div>
+
         {/* Dark Mode Toggle */}
         <button
-          // ...existing classes
-          type="button"
-          onClick={async () => {
-            try {
-              const result = await signInWithGoogle();
-              const user = result.user;
-              // You can now send user info (user.email, user.displayName, user.uid) to your backend if needed
-              alert(`Welcome, ${user.displayName || user.email}!`);
-              // Optionally: redirect or update UI
-            } catch (err) {
-              alert('Google sign-in failed');
-            }
-          }}
+          onClick={toggleDarkMode}
+          className={`absolute top-4 right-4 z-40 px-4 py-2 rounded-full font-semibold shadow transition-colors duration-300 ${darkMode
+            ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300'
+            : 'bg-white text-indigo-600 hover:bg-indigo-100'
+            }`}
+          aria-label="Toggle dark mode"
         >
-          <GoogleIcon />
-          <span>Sign up with Google</span>
+          {darkMode ? '🌙' : '☀️'}
         </button>
 
         {/* WELCOME/TRUST BANNER (always visible, position varies) */}
@@ -133,6 +139,7 @@ export default function Login() {
                 : 'bg-white text-gray-800 hover:bg-gray-100 border border-gray-200'
               }`}
             type="button"
+            onClick={signInWithGoogle}
           >
             <GoogleIcon />
             <span>Login with Google</span>
@@ -229,7 +236,7 @@ export default function Login() {
             className={`mt-3 text-xs sm:text-sm text-center ${darkMode ? 'text-gray-400' : 'text-gray-500'
               }`}
           >
-            Don’t have an account?{' '}
+            Don't have an account?{' '}
             <Link
               to="/signup"
               className={`${darkMode
