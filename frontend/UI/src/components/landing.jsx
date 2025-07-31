@@ -77,6 +77,26 @@ const quickLinks = [
   }
 ];
 
+
+// Define a single menu array outside the component
+const menu = [
+  { href: "#properties", label: "Properties", icon: Building },
+  { href: "#about", label: "About", icon: Info },
+  { href: "#pricing", label: "Pricing", icon: DollarSign },
+  { href: "#customers", label: "Customers", icon: Users },
+  { href: "#blog", label: "Blog & Resources", icon: BookOpen },
+  { href: "#help", label: "Help", icon: HelpCircle },
+];
+
+
+// Define this array near your other menu arrays (outside the component)
+const socialLinks = [
+  { href: "https://facebook.com", label: "Facebook", icon: FaFacebook },
+  { href: "https://twitter.com", label: "Twitter", icon: FaTwitter },
+  { href: "https://instagram.com", label: "Instagram", icon: FaInstagram },
+  { href: "https://linkedin.com", label: "LinkedIn", icon: FaLinkedin },
+];
+
 // 2. Fade-in on scroll hook
 function useFadeInOnScroll() {
   const ref = useRef();
@@ -288,24 +308,6 @@ export default function Landing() {
   const [selectedQuickLink, setSelectedQuickLink] = useState(null);
 
 
-  // Define a single menu array outside the component
-  const menu = [
-    { href: "#properties", label: "Properties", icon: Building },
-    { href: "#about", label: "About", icon: Info },
-    { href: "#pricing", label: "Pricing", icon: DollarSign },
-    { href: "#customers", label: "Customers", icon: Users },
-    { href: "#blog", label: "Blog & Resources", icon: BookOpen },
-    { href: "#help", label: "Help", icon: HelpCircle },
-  ];
-
-  // Define this array near your other menu arrays (outside the component)
-  const socialLinks = [
-    { href: "https://facebook.com", label: "Facebook", icon: FaFacebook },
-    { href: "https://twitter.com", label: "Twitter", icon: FaTwitter },
-    { href: "https://instagram.com", label: "Instagram", icon: FaInstagram },
-    { href: "https://linkedin.com", label: "LinkedIn", icon: FaLinkedin },
-  ];
-
   return (
     <div
       className={`min-h-screen transition-colors duration-500 ${darkMode
@@ -334,7 +336,7 @@ export default function Landing() {
                   href={href}
                   role="menuitem"
                   tabIndex={0}
-                  className="flex items-center space-x-1 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded transition-transform transform hover:scale-110"
+                  className="flex items-center space-x-1 text-gray-300 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded transition-transform transform hover:scale-110"
                 >
                   <Icon size={18} aria-hidden="true" />
                   <span>{label}</span>

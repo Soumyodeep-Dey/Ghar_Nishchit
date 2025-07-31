@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import p1 from '../assets/p1.jpg';
+import { Link, useNavigate } from 'react-router-dom';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useDarkMode } from '../DarkModeContext';
+import { signInWithGoogle, handleGoogleRedirectResult } from '../firebase';
 
 const GoogleIcon = () => (
   <span
@@ -21,8 +22,11 @@ const GoogleIcon = () => (
 );
 
 export default function Login() {
-  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
   const { darkMode, toggleDarkMode } = useDarkMode();
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [message, setMessage] = useState('');
 
   // Welcome overlay animation state
   const [welcomeOut, setWelcomeOut] = useState(false);
@@ -32,11 +36,52 @@ export default function Login() {
     return () => clearTimeout(timeout);
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      const user = await handleGoogleRedirectResult();
+      if (user) {
+        alert(`Welcome back, ${user.displayName || user.email}!`);
+        navigate('/');
+      }
+    })();
+  }, [navigate]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const { email, password } = formData;
+    if (!email || !password) {
+      setMessage('Please fill in all fields.');
+      return;
+    }
+    try {
+      const apiUrl = `${import.meta.env.VITE_BACKEND_URL}/api/auth/login`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!response.ok) throw new Error('Login failed');
+      const { token, user } = await response.json();
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      setMessage('Login successful! Redirecting...');
+      setTimeout(() => navigate('/'), 1000);
+    } catch (err) {
+      console.error(err);
+      setMessage('Invalid credentials.');
+    }
+  };
+
   return (
     <div
       className={`min-h-screen flex items-center justify-center px-2 sm:px-4 ${darkMode
-          ? 'bg-gray-950'
-          : 'bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100'
+        ? 'bg-gray-950'
+        : 'bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100'
         }`}
     >
       <div
@@ -61,13 +106,12 @@ export default function Login() {
           <p className="mb-2 text-sm sm:mb-4 sm:text-base">Trusted by 10,000+ users</p>
           <img src={p1} alt="Login" className="rounded-xl shadow-lg w-40 h-28 sm:w-48 sm:h-32 object-cover mt-2 sm:mt-4" />
         </div>
+
         {/* Dark Mode Toggle */}
         <button
           onClick={toggleDarkMode}
-          className={`absolute top-3 right-3 sm:top-6 sm:right-6 z-40 px-3 py-2 sm:px-4 sm:py-2 rounded-full font-semibold shadow transition-colors duration-300 ${darkMode
-              ? 'bg-gray-800 text-indigo-300 hover:bg-gray-700'
-              : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
-            }`}
+          className={`absolute top-4 right-4 z-40 px-4 py-2 rounded-full ${darkMode ? 'bg-cyan-400 text-blue-950' : 'bg-white text-indigo-600'
+            } shadow transition-colors duration-300`}
           aria-label="Toggle dark mode"
         >
           {darkMode ? '🌙' : '☀️'}
@@ -116,6 +160,14 @@ export default function Login() {
           >
             Access your dashboard and manage your rentals.
           </p>
+
+          {message && (
+            <div className={`mb-4 text-sm text-center font-medium ${message.includes('successful') ? 'text-green-500' : 'text-red-500'
+              }`}>
+              {message}
+            </div>
+          )}
+
           {/* Social Login */}
           <button
             className={`w-full flex items-center justify-center gap-2 py-2 rounded mb-3 sm:mb-4 font-semibold text-sm sm:text-base transition-transform duration-300 hover:scale-105 hover:shadow-lg
@@ -124,6 +176,7 @@ export default function Login() {
                 : 'bg-white text-gray-800 hover:bg-gray-100 border border-gray-200'
               }`}
             type="button"
+            onClick={signInWithGoogle}
           >
             <GoogleIcon />
             <span>Login with Google</span>
@@ -137,7 +190,7 @@ export default function Login() {
               className={`flex-grow ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}
             />
           </div>
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
               <label
                 htmlFor="email"
@@ -151,9 +204,11 @@ export default function Login() {
                 id="email"
                 name="email"
                 autoComplete="email"
+                value={formData.email}
+                onChange={handleChange}
                 className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-sm transition-shadow duration-300 hover:shadow-lg ${darkMode
-                    ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-400'
-                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                  ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-400'
+                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
                   }`}
                 placeholder="you@example.com"
                 required
@@ -173,9 +228,11 @@ export default function Login() {
                   id="password"
                   name="password"
                   autoComplete="current-password"
+                  value={formData.password}
+                  onChange={handleChange}
                   className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-sm transition-shadow duration-300 hover:shadow-lg ${darkMode
-                      ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-400'
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                    ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-400'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
                     }`}
                   placeholder="********"
                   required
@@ -184,8 +241,8 @@ export default function Login() {
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
                   className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${darkMode
-                      ? 'text-gray-400 hover:text-gray-200'
-                      : 'text-gray-400 hover:text-gray-700'
+                    ? 'text-gray-400 hover:text-gray-200'
+                    : 'text-gray-400 hover:text-gray-700'
                     }`}
                   tabIndex={-1}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
@@ -205,14 +262,17 @@ export default function Login() {
               <a
                 href="/forgot-password"
                 className={`text-xs sm:text-sm ${darkMode
-                    ? 'text-indigo-400 hover:text-indigo-300'
-                    : 'text-indigo-600 hover:underline'
+                  ? 'text-indigo-400 hover:text-indigo-300'
+                  : 'text-indigo-600 hover:underline'
                   }`}
               >
                 Forgot Password?
               </a>
             </div>
-            <button className="w-full bg-indigo-600 text-white py-2 sm:py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors duration-300 hover:shadow-xl hover:scale-105 text-sm sm:text-base">
+            <button
+              type="submit"
+              className="w-full bg-indigo-600 text-white py-2 sm:py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors duration-300 hover:shadow-xl hover:scale-105 text-sm sm:text-base"
+            >
               Login
             </button>
           </form>
@@ -220,12 +280,12 @@ export default function Login() {
             className={`mt-3 text-xs sm:text-sm text-center ${darkMode ? 'text-gray-400' : 'text-gray-500'
               }`}
           >
-            Don’t have an account?{' '}
+            Don't have an account?{' '}
             <Link
               to="/signup"
               className={`${darkMode
-                  ? 'text-indigo-400 hover:text-indigo-300'
-                  : 'text-indigo-600 hover:underline'
+                ? 'text-indigo-400 hover:text-indigo-300'
+                : 'text-indigo-600 hover:underline'
                 }`}
             >
               Sign Up

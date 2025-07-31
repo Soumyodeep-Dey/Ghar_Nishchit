@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { User, Mail, Lock, Phone, Eye, EyeOff } from 'lucide-react';
 import { useDarkMode } from '../DarkModeContext';
 import p1 from '../assets/p1.jpg';
+import { signInWithGoogle, handleGoogleRedirectResult } from '../firebase';
+import { useNavigate } from 'react-router-dom';
 
 // Update the GoogleIcon to add a white background and rounded style for visibility
 const GoogleIcon = () => (
@@ -21,11 +23,20 @@ const GoogleIcon = () => (
   </span>
 );
 
+
 export default function SignUp() {
+  const navigate = useNavigate();
   const { darkMode, toggleDarkMode } = useDarkMode();
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [passwordStrength, setPasswordStrength] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    phone: '',
+    role: '',
+  });
 
   // Animation state management
   const [animationState, setAnimationState] = useState({
@@ -37,6 +48,17 @@ export default function SignUp() {
 
   // Welcome overlay animation
   const [welcomeOut, setWelcomeOut] = useState(false);
+
+  // Handle Google redirect result
+  useEffect(() => {
+    (async () => {
+      const user = await handleGoogleRedirectResult();
+      if (user) {
+        alert(`Welcome, ${user.displayName || user.email}!`);
+        navigate('/'); // redirect to homepage
+      }
+    })();
+  }, [navigate]);
 
   // Password strength logic
   const checkStrength = (pwd) => {
@@ -98,6 +120,53 @@ export default function SignUp() {
       clearTimeout(welcomeTimeout);
     };
   }, []);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const { name, email, password, phone, role } = formData;
+
+    if (!name || !email || !password || !phone || !role) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    const apiUrl = `${import.meta.env.VITE_BACKEND_URL}/api/auth/register`;
+
+    fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Registration failed.");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        const { token, user } = data;
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+        alert("Registered successfully!");
+        navigate("/");
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("Error during registration.");
+      });
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
 
   return (
     <div
@@ -229,21 +298,21 @@ export default function SignUp() {
                   : 'bg-white text-gray-800 hover:bg-gray-100 border border-gray-200'
                 }`}
               type="button"
+              onClick={signInWithGoogle}
             >
               <GoogleIcon />
               <span>Sign up with Google</span>
             </button>
+
             <div className="flex items-center my-2 sm:my-4">
               <hr className={`flex-grow ${darkMode ? 'border-cyan-700' : 'border-gray-300'}`} />
               <span className={`mx-2 ${darkMode ? 'text-cyan-400' : 'text-gray-400'}`}>or</span>
               <hr className={`flex-grow ${darkMode ? 'border-cyan-700' : 'border-gray-300'}`} />
             </div>
-            <form className="space-y-4">
+
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div>
-                <label
-                  htmlFor="name"
-                  className={`flex items-center gap-1 font-semibold mb-1 ${darkMode ? 'text-cyan-200' : 'text-gray-700'}`}
-                >
+                <label htmlFor="name" className={`flex items-center gap-1 font-semibold mb-1 ${darkMode ? 'text-cyan-200' : 'text-gray-700'}`}>
                   <User size={18} /> Name
                 </label>
                 <input
@@ -251,17 +320,16 @@ export default function SignUp() {
                   id="name"
                   name="name"
                   autoComplete="name"
-                  className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${darkMode ? 'bg-slate-900 border-cyan-700 text-cyan-100 placeholder-cyan-300 focus:ring-cyan-400' : 'border-gray-300 focus:ring-indigo-400'
-                    }`}
+                  value={formData.name}
+                  onChange={handleChange}
+                  className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${darkMode ? 'bg-slate-900 border-cyan-700 text-cyan-100 placeholder-cyan-300 focus:ring-cyan-400' : 'border-gray-300 focus:ring-indigo-400'}`}
                   placeholder="Your full name"
                   required
                 />
               </div>
+
               <div>
-                <label
-                  htmlFor="email"
-                  className={`flex items-center gap-1 font-semibold mb-1 ${darkMode ? 'text-cyan-200' : 'text-gray-700'}`}
-                >
+                <label htmlFor="email" className={`flex items-center gap-1 font-semibold mb-1 ${darkMode ? 'text-cyan-200' : 'text-gray-700'}`}>
                   <Mail size={18} /> Email
                 </label>
                 <input
@@ -269,17 +337,16 @@ export default function SignUp() {
                   id="email"
                   name="email"
                   autoComplete="email"
-                  className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${darkMode ? 'bg-slate-900 border-cyan-700 text-cyan-100 placeholder-cyan-300 focus:ring-cyan-400' : 'border-gray-300 focus:ring-indigo-400'
-                    }`}
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${darkMode ? 'bg-slate-900 border-cyan-700 text-cyan-100 placeholder-cyan-300 focus:ring-cyan-400' : 'border-gray-300 focus:ring-indigo-400'}`}
                   placeholder="you@example.com"
                   required
                 />
               </div>
+
               <div>
-                <label
-                  htmlFor="phone"
-                  className={`flex items-center gap-1 font-semibold mb-1 ${darkMode ? 'text-cyan-200' : 'text-gray-700'}`}
-                >
+                <label htmlFor="phone" className={`flex items-center gap-1 font-semibold mb-1 ${darkMode ? 'text-cyan-200' : 'text-gray-700'}`}>
                   <Phone size={18} /> Phone Number
                 </label>
                 <input
@@ -287,12 +354,14 @@ export default function SignUp() {
                   id="phone"
                   name="phone"
                   autoComplete="tel"
-                  className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${darkMode ? 'bg-slate-900 border-cyan-700 text-cyan-100 placeholder-cyan-300 focus:ring-cyan-400' : 'border-gray-300 focus:ring-indigo-400'
-                    }`}
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${darkMode ? 'bg-slate-900 border-cyan-700 text-cyan-100 placeholder-cyan-300 focus:ring-cyan-400' : 'border-gray-300 focus:ring-indigo-400'}`}
                   placeholder="Your phone number"
                   required
                 />
               </div>
+
               <div>
                 <span className={`font-semibold ${darkMode ? 'text-cyan-200' : 'text-gray-700'}`}>Registering as:</span>
                 <div className="flex items-center gap-5 sm:gap-7 mt-2">
@@ -301,6 +370,8 @@ export default function SignUp() {
                       type="radio"
                       name="role"
                       value="landlord"
+                      checked={formData.role === 'landlord'}
+                      onChange={handleChange}
                       className={`form-radio ${darkMode ? 'text-cyan-400 focus:ring-cyan-500' : 'text-indigo-600 focus:ring-indigo-500'}`}
                       required
                     />
@@ -311,6 +382,8 @@ export default function SignUp() {
                       type="radio"
                       name="role"
                       value="tenant"
+                      checked={formData.role === 'tenant'}
+                      onChange={handleChange}
                       className={`form-radio ${darkMode ? 'text-cyan-400 focus:ring-cyan-500' : 'text-indigo-600 focus:ring-indigo-500'}`}
                       required
                     />
@@ -318,11 +391,9 @@ export default function SignUp() {
                   </label>
                 </div>
               </div>
+
               <div>
-                <label
-                  htmlFor="password"
-                  className={`flex items-center gap-1 font-semibold mb-1 ${darkMode ? 'text-cyan-200' : 'text-gray-700'}`}
-                >
+                <label htmlFor="password" className={`flex items-center gap-1 font-semibold mb-1 ${darkMode ? 'text-cyan-200' : 'text-gray-700'}`}>
                   <Lock size={18} /> Password
                 </label>
                 <div className="relative">
@@ -331,12 +402,14 @@ export default function SignUp() {
                     id="password"
                     name="password"
                     autoComplete="new-password"
-                    className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${darkMode ? 'bg-slate-900 border-cyan-700 text-cyan-100 placeholder-cyan-300 focus:ring-cyan-400' : 'border-gray-300 focus:ring-indigo-400'
-                      }`}
+                    value={formData.password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      handleChange(e);
+                    }}
+                    className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${darkMode ? 'bg-slate-900 border-cyan-700 text-cyan-100 placeholder-cyan-300 focus:ring-cyan-400' : 'border-gray-300 focus:ring-indigo-400'}`}
                     placeholder="Create a password"
                     required
-                    value={password}
-                    onChange={handlePasswordChange}
                   />
                   <button
                     type="button"
@@ -364,7 +437,9 @@ export default function SignUp() {
                   </div>
                 )}
               </div>
+
               <button
+                type="submit"
                 className={`w-full py-2 sm:py-3 rounded-lg font-semibold transition-colors duration-300 hover:shadow-xl hover:scale-105 text-sm sm:text-base ${darkMode
                   ? 'bg-gradient-to-r from-cyan-500 via-blue-700 to-slate-900 text-white hover:from-blue-900 hover:via-cyan-700 hover:to-slate-800'
                   : 'bg-indigo-600 text-white hover:bg-indigo-700'
@@ -373,6 +448,7 @@ export default function SignUp() {
                 Sign Up
               </button>
             </form>
+
             <p className={`mt-3 text-xs sm:text-sm text-center ${darkMode ? 'text-cyan-200' : 'text-gray-500'}`}>
               Already have an account?{' '}
               <Link

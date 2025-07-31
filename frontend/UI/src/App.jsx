@@ -1,6 +1,6 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
-import Landing from './components/landing';
+import Landing from './components/Landing';
 import Login from './components/Login';
 import SignUp from './components/SignUp';
 import { DarkModeProvider } from './DarkModeContext';
