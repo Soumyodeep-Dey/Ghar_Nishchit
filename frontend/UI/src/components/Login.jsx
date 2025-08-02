@@ -41,7 +41,13 @@ export default function Login() {
       const user = await handleGoogleRedirectResult();
       if (user) {
         alert(`Welcome back, ${user.displayName || user.email}!`);
-        navigate('/');
+        // Check user role and redirect accordingly
+        const userRole = (user && (user.role || (user.roles && user.roles[0]))) || '';
+        if (userRole.toLowerCase() === 'tenant') {
+          navigate('/tenant');
+        } else {
+          navigate('/');
+        }
       }
     })();
   }, [navigate]);
@@ -67,10 +73,18 @@ export default function Login() {
       });
       if (!response.ok) throw new Error('Login failed');
       const { token, user } = await response.json();
+      console.log('Login response user:', user);
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       setMessage('Login successful! Redirecting...');
-      setTimeout(() => navigate('/'), 1000);
+      const userRole = (user && (user.role || (user.roles && user.roles[0]))) || '';
+      setTimeout(() => {
+        if (userRole.toLowerCase() === 'tenant') {
+          navigate('/tenant');
+        } else {
+          navigate('/'); // or other route for non-tenants
+        }
+      }, 1000);
     } catch (err) {
       console.error(err);
       setMessage('Invalid credentials.');

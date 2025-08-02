@@ -323,7 +323,12 @@ export default function Landing() {
         aria-label="Main navigation"
       >
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400 cursor-pointer flex items-center space-x-2">
+          <div
+            className="text-2xl font-bold cursor-pointer flex items-center space-x-2"
+            style={{
+              color: darkMode ? '#38bdf8' : '#1e293b'
+            }}
+          >
             <Home size={28} aria-hidden="true" />
             <span>Ghar_Nishchit</span>
           </div>
@@ -336,7 +341,11 @@ export default function Landing() {
                   href={href}
                   role="menuitem"
                   tabIndex={0}
-                  className="flex items-center space-x-1 text-gray-300 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded transition-transform transform hover:scale-110"
+                  className={`flex items-center space-x-1
+          ${darkMode
+            ? 'text-cyan-200 hover:text-cyan-400'
+            : 'text-indigo-700 hover:text-indigo-900'}
+          cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded transition-transform transform hover:scale-110`}
                 >
                   <Icon size={18} aria-hidden="true" />
                   <span>{label}</span>
@@ -359,7 +368,7 @@ export default function Landing() {
           {/* SignUp Button */}
           <Link
             to="/signup"
-            className="hidden md:inline-block bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-700 dark:hover:bg-indigo-600 transition transition-transform hover:scale-105"
+            className="hidden md:inline-block bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-transform hover:scale-105"
           >
             SignUp
           </Link>
@@ -435,13 +444,13 @@ export default function Landing() {
 
           {/* Primary CTA */}
           <Link to="/signup"
-            className={`px-6 py-3 sm:px-8 sm:py-4 rounded-full font-semibold text-base sm:text-lg shadow-lg transition transition-transform hover:scale-105 ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-white text-indigo-600 hover:bg-indigo-100 transition-transform hover:scale-105'}`}>
+            className={`px-6 py-3 sm:px-8 sm:py-4 rounded-full font-semibold text-base sm:text-lg shadow-lg transition-transform hover:scale-105 ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-white text-indigo-600 hover:bg-indigo-100 transition-transform hover:scale-105'}`}>
             Get Started
           </Link>
 
           {/* Secondary CTA */}
           <button
-            className={`mt-4 px-6 py-3 sm:px-8 sm:py-4 rounded-full font-semibold text-base sm:text-lg shadow-lg transition transition-transform hover:scale-105 ${darkMode ? 'bg-indigo-900 text-cyan-200 hover:bg-indigo-800' : 'bg-indigo-600 text-white hover:bg-indigo-700 transition-transform hover:scale-105'}`}
+            className={`mt-4 px-6 py-3 sm:px-8 sm:py-4 rounded-full font-semibold text-base sm:text-lg shadow-lg transition-transform hover:scale-105 ${darkMode ? 'bg-indigo-900 text-cyan-200 hover:bg-indigo-800' : 'bg-indigo-600 text-white hover:bg-indigo-700 transition-transform hover:scale-105'}`}
             onClick={() => setShowHowItWorks(true)}
           >
             See How It Works
@@ -635,7 +644,7 @@ export default function Landing() {
               <StatCard value="1000+" label="Happy Clients" darkMode={darkMode} />
             </div>
             <button
-              className={`mt-6 px-6 py-3 rounded transition transition-transform hover:scale-105 ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700 transition-transform hover:scale-105'
+              className={`mt-6 px-6 py-3 rounded transition-transform hover:scale-105 ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700 transition-transform hover:scale-105'
                 }`}
               onClick={() => alert('Please login first')}
             >
@@ -725,7 +734,7 @@ export default function Landing() {
           } ${darkMode ? 'bg-slate-900' : 'bg-white'}`}
       >
         <div className="container mx-auto px-6 max-w-4xl mx-w-2xl">
-          <h2 className="text-3xl font-semibold text-indigo-700 dark:text-cyan-300 mb-6 mb-8">
+          <h2 className="text-3xl font-semibold text-indigo-700 dark:text-cyan-300 mb-8">
             Frequently Asked Questions
           </h2>
           <div className="space-y-4">
@@ -855,7 +864,7 @@ export default function Landing() {
         <div className="container mx-auto px-6 max-w-6xl">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Newsletter Subscription */}
-            <div className="text-white">
+            <div className={`${darkMode ? 'text-cyan-200' : 'text-white'}`}>
               <h2 className="text-3xl font-semibold mb-4">Subscribe to our Newsletter</h2>
               <p className="mb-6">Get the latest updates and offers delivered to your inbox.</p>
               <form
@@ -870,18 +879,18 @@ export default function Landing() {
                   aria-label="Email address"
                   required
                   placeholder="Enter your email"
-                  className="p-3 rounded text-gray-900 w-full md:w-64"
+                  className={`p-3 rounded w-full md:w-64 ${darkMode ? 'bg-slate-800 text-cyan-200 placeholder:text-cyan-400' : 'bg-white text-gray-900'}`}
                 />
                 <button
                   type="submit"
-                  className="bg-white text-indigo-600 px-6 py-3 rounded hover:bg-gray-100 transition"
+                  className={`px-6 py-3 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-white text-indigo-600 hover:bg-gray-100'}`}
                 >
                   Subscribe
                 </button>
               </form>
             </div>
             {/* Help Section */}
-            <div id="help" className="text-white">
+            <div id="help" className={`${darkMode ? 'text-cyan-200' : 'text-white'}`}>
               <h2 className="text-3xl font-semibold mb-4">Help</h2>
               <p className="mb-2">
                 Need assistance? Contact our support team at{' '}

@@ -148,10 +148,18 @@ export default function SignUp() {
       })
       .then((data) => {
         const { token, user } = data;
+        console.log('Signup response user:', user);
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(user));
         alert("Registered successfully!");
-        navigate("/");
+        const userRole = user.role || (user.roles && user.roles[0]) || '';
+        setTimeout(() => {
+          if (userRole.toLowerCase() === 'tenant') {
+            navigate('/tenant');
+          } else {
+            navigate('/'); // or other route for non-tenants
+          }
+        }, 1000);
       })
       .catch((err) => {
         console.error(err);
