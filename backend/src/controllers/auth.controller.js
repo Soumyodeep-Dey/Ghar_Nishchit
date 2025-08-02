@@ -59,8 +59,22 @@ export const loginUser = async (req, res) => {
     }
 
     // Generate JWT token
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "7d" });
-    res.status(200).json({ message: "Login successful", token });
+    const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: "7d" });
+    
+    // Return user data without password
+    const userData = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role
+    };
+    
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      user: userData
+    });
   } catch (error) {
     console.error("Error in user login:", error);
     res.status(500).json({ error: "Internal Server Error" });

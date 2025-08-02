@@ -323,7 +323,12 @@ export default function Landing() {
         aria-label="Main navigation"
       >
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400 cursor-pointer flex items-center space-x-2">
+          <div
+            className="text-2xl font-bold cursor-pointer flex items-center space-x-2"
+            style={{
+              color: darkMode ? '#38bdf8' : '#1e293b'
+            }}
+          >
             <Home size={28} aria-hidden="true" />
             <span>Ghar_Nishchit</span>
           </div>
@@ -336,7 +341,11 @@ export default function Landing() {
                   href={href}
                   role="menuitem"
                   tabIndex={0}
-                  className="flex items-center space-x-1 text-gray-300 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded transition-transform transform hover:scale-110"
+                  className={`flex items-center space-x-1
+          ${darkMode
+            ? 'text-cyan-200 hover:text-cyan-400'
+            : 'text-indigo-700 hover:text-indigo-900'}
+          cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded transition-transform transform hover:scale-110`}
                 >
                   <Icon size={18} aria-hidden="true" />
                   <span>{label}</span>
@@ -855,7 +864,7 @@ export default function Landing() {
         <div className="container mx-auto px-6 max-w-6xl">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Newsletter Subscription */}
-            <div className="text-white">
+            <div className={`${darkMode ? 'text-cyan-200' : 'text-white'}`}>
               <h2 className="text-3xl font-semibold mb-4">Subscribe to our Newsletter</h2>
               <p className="mb-6">Get the latest updates and offers delivered to your inbox.</p>
               <form
@@ -870,18 +879,18 @@ export default function Landing() {
                   aria-label="Email address"
                   required
                   placeholder="Enter your email"
-                  className="p-3 rounded text-gray-900 w-full md:w-64"
+                  className={`p-3 rounded w-full md:w-64 ${darkMode ? 'bg-slate-800 text-cyan-200 placeholder:text-cyan-400' : 'bg-white text-gray-900'}`}
                 />
                 <button
                   type="submit"
-                  className="bg-white text-indigo-600 px-6 py-3 rounded hover:bg-gray-100 transition"
+                  className={`px-6 py-3 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-white text-indigo-600 hover:bg-gray-100'}`}
                 >
                   Subscribe
                 </button>
               </form>
             </div>
             {/* Help Section */}
-            <div id="help" className="text-white">
+            <div id="help" className={`${darkMode ? 'text-cyan-200' : 'text-white'}`}>
               <h2 className="text-3xl font-semibold mb-4">Help</h2>
               <p className="mb-2">
                 Need assistance? Contact our support team at{' '}
