@@ -1,29 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import TenantSideBar from '../../Pages/TENANT/TenantSideBar';
 import TenantNavBar from '../../Pages/TENANT/TenantNavBar';
-import { 
-  HeartIcon, 
-  BellIcon, 
-  ChatBubbleLeftRightIcon, 
-  WrenchScrewdriverIcon, 
-  CreditCardIcon, 
-  PlusIcon, 
-  TrashIcon, 
-  EyeIcon, 
-  XMarkIcon, 
-  ChartBarIcon,
-  ChevronUpIcon,
-  ChevronDownIcon,
-  ExclamationTriangleIcon,
-  SparklesIcon,
-  FireIcon,
-  TrophyIcon,
-  ClockIcon,
-  DocumentArrowDownIcon,
-  CheckCircleIcon,
-  ArrowTrendingUpIcon,
-  CurrencyDollarIcon
-} from '@heroicons/react/24/outline';
+import { HeartIcon, BellIcon, ChatBubbleLeftRightIcon, WrenchScrewdriverIcon, CreditCardIcon, PlusIcon, TrashIcon, EyeIcon, XMarkIcon, ChartBarIcon, ChevronUpIcon, ChevronDownIcon, ExclamationTriangleIcon, SparklesIcon, FireIcon, TrophyIcon, ClockIcon, DocumentArrowDownIcon, CheckCircleIcon, ArrowTrendingUpIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon, StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, Area, AreaChart } from 'recharts';
 

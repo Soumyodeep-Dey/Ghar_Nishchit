@@ -9,6 +9,12 @@ import TenantProperty from './components/Pages/TENANT/TenantProperty';
 import TenantMessage from './components/Pages/TENANT/TenantMessage';
 import TenantMaintenance from './components/Pages/TENANT/TenantMaintenance';
 import TenantPayment from './components/Pages/TENANT/TenantPayment';
+import LandlordDashboard from './components/Pages/LANDLORD/LandlordDashboard';
+import LandlordProperty from './components/Pages/LANDLORD/LandlordProperty';
+import LandlordMessage from './components/Pages/LANDLORD/LandlordMessage';
+import LandlordMaintenance from './components/Pages/LANDLORD/LandlordMaintenance';
+import LandlordPayment from './components/Pages/LANDLORD/LandlordPayment';
+import LandlordTenant from './components/Pages/LANDLORD/LandlordTenant';
 import ProtectedRoute from './components/ProtectedRoute';
 
 
@@ -57,6 +63,54 @@ export default function App() {
             element={
               <ProtectedRoute requiredRole="tenant">
                 <TenantPayment />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/landlord"
+            element={
+              <ProtectedRoute requiredRole="landlord">
+                <LandlordDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/landlord/properties"
+            element={
+              <ProtectedRoute requiredRole="landlord">
+                <LandlordProperty />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/landlord/messages"
+            element={
+              <ProtectedRoute requiredRole="landlord">
+                <LandlordMessage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/landlord/maintenance"
+            element={
+              <ProtectedRoute requiredRole="landlord">
+                <LandlordMaintenance />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/landlord/payment"
+            element={
+              <ProtectedRoute requiredRole="landlord">
+                <LandlordPayment />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/landlord/tenants"
+            element={
+              <ProtectedRoute requiredRole="landlord">
+                <LandlordTenant />
               </ProtectedRoute>
             }
           />
