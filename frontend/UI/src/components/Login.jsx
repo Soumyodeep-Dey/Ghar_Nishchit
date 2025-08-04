@@ -45,6 +45,8 @@ export default function Login() {
         const userRole = (user && (user.role || (user.roles && user.roles[0]))) || '';
         if (userRole.toLowerCase() === 'tenant') {
           navigate('/tenant');
+        } else if (userRole.toLowerCase() === 'landlord') {
+          navigate('/landlord');
         } else {
           navigate('/');
         }
@@ -81,6 +83,8 @@ export default function Login() {
       setTimeout(() => {
         if (userRole.toLowerCase() === 'tenant') {
           navigate('/tenant');
+        } else if (userRole.toLowerCase() === 'landlord') {
+          navigate('/landlord');
         } else {
           navigate('/'); // or other route for non-tenants
         }

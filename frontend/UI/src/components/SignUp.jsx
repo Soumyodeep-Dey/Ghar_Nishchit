@@ -55,7 +55,15 @@ export default function SignUp() {
       const user = await handleGoogleRedirectResult();
       if (user) {
         alert(`Welcome, ${user.displayName || user.email}!`);
-        navigate('/'); // redirect to homepage
+        // Check user role and redirect accordingly
+        const userRole = (user && (user.role || (user.roles && user.roles[0]))) || '';
+        if (userRole.toLowerCase() === 'tenant') {
+          navigate('/tenant');
+        } else if (userRole.toLowerCase() === 'landlord') {
+          navigate('/landlord');
+        } else {
+          navigate('/');
+        }
       }
     })();
   }, [navigate]);
@@ -156,6 +164,8 @@ export default function SignUp() {
         setTimeout(() => {
           if (userRole.toLowerCase() === 'tenant') {
             navigate('/tenant');
+          } else if (userRole.toLowerCase() === 'landlord') {
+            navigate('/landlord');
           } else {
             navigate('/'); // or other route for non-tenants
           }

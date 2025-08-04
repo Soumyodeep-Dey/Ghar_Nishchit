@@ -1,0 +1,1608 @@
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import LandlordSideBar from './LandlordSideBar';
+import LandlordNavBar from './LandlordNavBar';
+import { 
+  CreditCard, 
+  DollarSign, 
+  TrendingUp, 
+  TrendingDown, 
+  Calendar, 
+  Clock, 
+  CheckCircle, 
+  XCircle, 
+  AlertCircle, 
+  Download, 
+  Receipt, 
+  Star, 
+  Crown, 
+  Shield, 
+  Zap, 
+  Building2, 
+  Users, 
+  BarChart3, 
+  PieChart, 
+  Activity, 
+  ArrowUp, 
+  ArrowDown, 
+  Plus, 
+  Minus, 
+  Eye, 
+  EyeOff, 
+  Settings, 
+  Bell, 
+  BellOff, 
+  RefreshCw, 
+  Search, 
+  Filter, 
+  MoreVertical, 
+  Edit, 
+  Trash2, 
+  Copy, 
+  Share2, 
+  ExternalLink, 
+  FileText, 
+  Image as ImageIcon, 
+  Upload, 
+  Phone, 
+  Mail, 
+  MessageCircle, 
+  Bookmark, 
+  Flag, 
+  Archive, 
+  Lock, 
+  Unlock, 
+  Gift, 
+  Tag, 
+  Percent, 
+  Calculator, 
+  Wallet, 
+  Banknote, 
+  PiggyBank, 
+  Coins, 
+  HandCoins, 
+  BadgeCheck, 
+  Award, 
+  Trophy, 
+  Target, 
+  Sparkles, 
+  Heart, 
+  ThumbsUp, 
+  Save, 
+  X, 
+  Check, 
+  ChevronDown, 
+  ChevronUp, 
+  ChevronLeft, 
+  ChevronRight, 
+  Info, 
+  HelpCircle, 
+  Globe, 
+  Smartphone, 
+  Tablet, 
+  Monitor, 
+  Laptop, 
+  Wifi, 
+  Database, 
+  Server, 
+  Cloud, 
+  ShieldCheck, 
+  Key, 
+  Fingerprint, 
+  Scan, 
+  QrCode, 
+  Link, 
+  Paperclip, 
+  Loader, 
+  RotateCcw, 
+  PlayCircle, 
+  PauseCircle, 
+  StopCircle
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Custom Hooks
+const useLocalStorage = (key, initialValue) => {
+  const [storedValue, setStoredValue] = useState(() => {
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    } catch (error) {
+      return initialValue;
+    }
+  });
+
+  const setValue = (value) => {
+    try {
+      setStoredValue(value);
+      window.localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
+    }
+  };
+
+  return [storedValue, setValue];
+};
+
+const useIntersectionObserver = (options = {}) => {
+  const [isIntersecting, setIsIntersecting] = useState(false);
+  const [element, setElement] = useState(null);
+
+  useEffect(() => {
+    if (!element) return;
+    
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsIntersecting(entry.isIntersecting);
+    }, options);
+    
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [element, options]);
+
+  return [setElement, isIntersecting];
+};
+
+const useCountUp = (end, duration = 2000, start = 0) => {
+  const [count, setCount] = useState(start);
+  
+  useEffect(() => {
+    if (end === start) return;
+    
+    const startTime = Date.now();
+    const endTime = startTime + duration;
+    
+    const updateCount = () => {
+      const now = Date.now();
+      const progress = Math.min((now - startTime) / duration, 1);
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      
+      const currentCount = start + (end - start) * easeOutQuart;
+      setCount(currentCount);
+      
+      if (progress < 1) {
+        requestAnimationFrame(updateCount);
+      }
+    };
+    
+    requestAnimationFrame(updateCount);
+  }, [end, duration, start]);
+  
+  return count;
+};
+
+const useNotification = () => {
+  const [notifications, setNotifications] = useState([]);
+
+  const addNotification = (notification) => {
+    const id = Date.now();
+    setNotifications(prev => [...prev, { ...notification, id }]);
+    
+    setTimeout(() => {
+      removeNotification(id);
+    }, notification.duration || 5000);
+  };
+
+  const removeNotification = (id) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  return { notifications, addNotification, removeNotification };
+};
+
+// Animated Components
+const AnimatedCard = ({ children, delay = 0, className = '', ...props }) => {
+  const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
+  
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 30, scale: 0.95 }}
+      animate={isVisible ? { opacity: 1, y: 0, scale: 1 } : {}}
+      transition={{ 
+        duration: 0.5, 
+        delay, 
+        type: "spring",
+        stiffness: 100,
+        damping: 15
+      }}
+      className={className}
+      {...props}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+// Payment Method Card Component
+const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  
+  const getCardIcon = (type) => {
+    switch (type?.toLowerCase()) {
+      case 'visa':
+        return <div className="text-blue-600 font-bold text-lg">VISA</div>;
+      case 'mastercard':
+        return <div className="text-red-600 font-bold text-lg">MC</div>;
+      case 'amex':
+        return <div className="text-blue-800 font-bold text-lg">AMEX</div>;
+      case 'paypal':
+        return <div className="text-blue-500 font-bold text-lg">PP</div>;
+      case 'bank':
+        return <Building2 className="w-6 h-6 text-green-600" />;
+      default:
+        return <CreditCard className="w-6 h-6 text-gray-600" />;
+    }
+  };
+
+  return (
+    <motion.div
+      whileHover={{ scale: 1.02, y: -5 }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={() => onSelect(method.id)}
+      className={`relative p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer overflow-hidden ${
+        isSelected 
+          ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20' 
+          : 'border-white/20 bg-white/5 hover:border-white/40 hover:bg-white/10'
+      }`}
+    >
+      {/* Background pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-white to-transparent rounded-full" />
+        <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-gradient-to-tr from-white to-transparent rounded-full" />
+      </div>
+      
+      <div className="relative z-10">
+        <div className="flex items-center justify-between mb-4">
+          {getCardIcon(method.type)}
+          
+          <div className="flex items-center space-x-2">
+            {method.isDefault && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="px-2 py-1 bg-green-500/20 rounded-full"
+              >
+                <span className="text-xs text-green-300 font-semibold">Default</span>
+              </motion.div>
+            )}
+            
+            {isSelected && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center"
+              >
+                <Check className="w-4 h-4 text-white" />
+              </motion.div>
+            )}
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <div className="text-white font-medium">
+            {method.type === 'bank' ? method.bankName : `•••• •••• •••• ${method.last4}`}
+          </div>
+          
+          <div className="flex items-center justify-between text-white/60 text-sm">
+            <span>{method.name || method.holderName}</span>
+            {method.expiryDate && (
+              <span>{method.expiryDate}</span>
+            )}
+          </div>
+          
+          {method.type === 'bank' && (
+            <div className="text-white/50 text-xs">
+              Account: •••••••{method.accountNumber?.slice(-4)}
+            </div>
+          )}
+        </div>
+        
+        {/* Quick actions */}
+        <AnimatePresence>
+          {isHovered && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="absolute top-4 right-4 flex space-x-1"
+            >
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(method);
+                }}
+                className="p-1 bg-white/20 rounded-lg hover:bg-white/30 transition-colors"
+              >
+                <Edit className="w-3 h-3 text-white/70" />
+              </motion.button>
+              
+              {!method.isDefault && (
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(method.id);
+                  }}
+                  className="p-1 bg-red-500/20 rounded-lg hover:bg-red-500/30 transition-colors"
+                >
+                  <Trash2 className="w-3 h-3 text-red-400" />
+                </motion.button>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
+};
+
+// Subscription Plan Card Component
+const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular = false }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const isCurrentPlan = currentPlan?.id === plan.id;
+  const canUpgrade = currentPlan && plan.tier > currentPlan.tier;
+  const canDowngrade = currentPlan && plan.tier < currentPlan.tier;
+  
+  return (
+    <motion.div
+      whileHover={{ scale: 1.02, y: -10 }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className={`relative p-8 rounded-3xl border-2 transition-all duration-500 overflow-hidden ${
+        popular 
+          ? 'border-gradient-to-r from-purple-500 to-pink-500 bg-gradient-to-br from-purple-500/10 to-pink-500/10' 
+          : isCurrentPlan
+            ? 'border-green-500 bg-green-500/10'
+            : 'border-white/20 bg-white/5 hover:border-white/40 hover:bg-white/10'
+      }`}
+    >
+      {/* Popular badge */}
+      {popular && (
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="absolute -top-3 left-1/2 transform -translate-x-1/2 px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
+        >
+          <span className="text-white text-sm font-bold flex items-center space-x-1">
+            <Crown className="w-4 h-4" />
+            <span>Most Popular</span>
+          </span>
+        </motion.div>
+      )}
+      
+      {/* Current plan badge */}
+      {isCurrentPlan && (
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="absolute top-4 right-4 px-3 py-1 bg-green-500/20 rounded-full border border-green-500/30"
+        >
+          <span className="text-green-300 text-xs font-semibold">Current Plan</span>
+        </motion.div>
+      )}
+      
+      {/* Background effects */}
+      <div className="absolute inset-0 opacity-10">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full blur-2xl"
+        />
+      </div>
+      
+      <div className="relative z-10">
+        {/* Plan header */}
+        <div className="text-center mb-8">
+          <motion.div
+            whileHover={{ scale: 1.1, rotate: 10 }}
+            className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center"
+          >
+            {plan.icon}
+          </motion.div>
+          
+          <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
+          <p className="text-white/60 text-sm">{plan.description}</p>
+        </div>
+        
+        {/* Pricing */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center space-x-2 mb-2">
+            <span className="text-4xl font-bold text-white">
+              ${plan.monthlyPrice}
+            </span>
+            <div className="text-white/60">
+              <div className="text-sm">/month</div>
+              <div className="text-xs">per property</div>
+            </div>
+          </div>
+          
+          {plan.yearlyPrice && (
+            <div className="flex items-center justify-center space-x-2 text-sm">
+              <span className="text-white/50 line-through">
+                ${plan.monthlyPrice * 12}/year
+              </span>
+              <span className="text-green-400 font-semibold">
+                ${plan.yearlyPrice}/year
+              </span>
+              <span className="px-2 py-1 bg-green-500/20 rounded-full text-xs text-green-300">
+                Save ${(plan.monthlyPrice * 12 - plan.yearlyPrice)}
+              </span>
+            </div>
+          )}
+        </div>
+        
+        {/* Features */}
+        <div className="space-y-4 mb-8">
+          {plan.features.map((feature, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="flex items-center space-x-3"
+            >
+              <div className="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center">
+                <Check className="w-3 h-3 text-green-400" />
+              </div>
+              <span className="text-white/80 text-sm">{feature}</span>
+            </motion.div>
+          ))}
+        </div>
+        
+        {/* Limits */}
+        <div className="bg-white/5 rounded-xl p-4 mb-8">
+          <div className="grid grid-cols-2 gap-4 text-center">
+            <div>
+              <div className="text-2xl font-bold text-blue-400">{plan.propertyLimit}</div>
+              <div className="text-xs text-white/60">Properties</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-purple-400">{plan.supportLevel}</div>
+              <div className="text-xs text-white/60">Support</div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Action button */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => {
+            if (isCurrentPlan) return;
+            if (canUpgrade) onUpgrade(plan);
+            else onSelect(plan);
+          }}
+          disabled={isCurrentPlan}
+          className={`w-full py-4 rounded-xl font-semibold transition-all duration-300 ${
+            isCurrentPlan
+              ? 'bg-gray-500/20 text-gray-400 cursor-not-allowed'
+              : popular
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/25'
+                : canUpgrade
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 shadow-lg shadow-green-500/25'
+                  : canDowngrade
+                    ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 shadow-lg shadow-orange-500/25'
+                    : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 shadow-lg shadow-blue-500/25'
+          }`}
+        >
+          {isCurrentPlan 
+            ? 'Current Plan' 
+            : canUpgrade 
+              ? 'Upgrade Now'
+              : canDowngrade
+                ? 'Downgrade'
+                : 'Select Plan'
+          }
+        </motion.button>
+        
+        {/* Additional info */}
+        {plan.trialDays && !isCurrentPlan && (
+          <p className="text-center text-white/50 text-xs mt-3">
+            {plan.trialDays}-day free trial included
+          </p>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
+// Payment History Item Component
+const PaymentHistoryItem = ({ payment, onDownloadReceipt, onViewDetails }) => {
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'completed':
+        return <CheckCircle className="w-5 h-5 text-green-400" />;
+      case 'pending':
+        return <Clock className="w-5 h-5 text-yellow-400" />;
+      case 'failed':
+        return <XCircle className="w-5 h-5 text-red-400" />;
+      case 'refunded':
+        return <RotateCcw className="w-5 h-5 text-blue-400" />;
+      default:
+        return <AlertCircle className="w-5 h-5 text-gray-400" />;
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-500/20 text-green-300 border-green-500/30';
+      case 'pending':
+        return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
+      case 'failed':
+        return 'bg-red-500/20 text-red-300 border-red-500/30';
+      case 'refunded':
+        return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+      default:
+        return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.01, boxShadow: "0 10px 30px rgba(0,0,0,0.2)" }}
+      className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6 hover:border-white/20 transition-all duration-300"
+    >
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-4">
+          <motion.div
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center"
+          >
+            <Receipt className="w-6 h-6 text-white" />
+          </motion.div>
+          
+          <div>
+            <h4 className="font-semibold text-white">{payment.description}</h4>
+            <p className="text-white/60 text-sm">
+              {new Date(payment.date).toLocaleDateString()} • {payment.method}
+            </p>
+          </div>
+        </div>
+        
+        <div className="text-right">
+          <div className="text-xl font-bold text-white mb-1">
+            ${payment.amount.toFixed(2)}
+          </div>
+          <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs border ${getStatusColor(payment.status)}`}>
+            {getStatusIcon(payment.status)}
+            <span className="capitalize">{payment.status}</span>
+          </div>
+        </div>
+      </div>
+      
+      {payment.invoiceId && (
+        <div className="flex items-center justify-between pt-4 border-t border-white/10">
+          <div className="text-white/60 text-sm">
+            Invoice #{payment.invoiceId}
+          </div>
+          
+          <div className="flex space-x-2">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => onViewDetails(payment)}
+              className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-lg hover:bg-blue-500/30 transition-colors text-sm"
+            >
+              View Details
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => onDownloadReceipt(payment)}
+              className="px-3 py-1 bg-green-500/20 text-green-300 rounded-lg hover:bg-green-500/30 transition-colors text-sm flex items-center space-x-1"
+            >
+              <Download className="w-3 h-3" />
+              <span>Receipt</span>
+            </motion.button>
+          </div>
+        </div>
+      )}
+    </motion.div>
+  );
+};
+
+// Billing Summary Component
+const BillingSummary = ({ summary, onPayNow }) => {
+  const daysUntilDue = Math.ceil((new Date(summary.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
+  const isOverdue = daysUntilDue < 0;
+  const isDueSoon = daysUntilDue <= 3 && daysUntilDue > 0;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className={`relative overflow-hidden rounded-2xl p-8 ${
+        isOverdue 
+          ? 'bg-gradient-to-br from-red-500/20 to-red-600/20 border-2 border-red-500/50'
+          : isDueSoon
+            ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/50'
+            : 'bg-gradient-to-br from-blue-500/20 to-purple-500/20 border-2 border-blue-500/50'
+      }`}
+    >
+      {/* Background animation */}
+      <div className="absolute inset-0 opacity-20">
+        <motion.div
+          animate={{ 
+            scale: [1, 1.2, 1],
+            rotate: [0, 180, 360] 
+          }}
+          transition={{ 
+            duration: 8, 
+            repeat: Infinity, 
+            ease: "easeInOut" 
+          }}
+          className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-white to-transparent rounded-full"
+        />
+      </div>
+      
+      <div className="relative z-10">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-2xl font-bold text-white mb-2">Current Bill</h3>
+            <p className="text-white/70">
+              {summary.planName} • {summary.propertiesCount} properties
+            </p>
+          </div>
+          
+          <motion.div
+            whileHover={{ scale: 1.05, rotate: 5 }}
+            className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center"
+          >
+            <DollarSign className="w-8 h-8 text-white" />
+          </motion.div>
+        </div>
+        
+        <div className="space-y-4 mb-6">
+          <div className="flex justify-between">
+            <span className="text-white/70">Subscription Fee</span>
+            <span className="text-white font-semibold">${summary.subscriptionFee.toFixed(2)}</span>
+          </div>
+          
+          {summary.additionalFees > 0 && (
+            <div className="flex justify-between">
+              <span className="text-white/70">Additional Features</span>
+              <span className="text-white font-semibold">${summary.additionalFees.toFixed(2)}</span>
+            </div>
+          )}
+          
+          {summary.discount > 0 && (
+            <div className="flex justify-between">
+              <span className="text-green-400">Discount Applied</span>
+              <span className="text-green-400 font-semibold">-${summary.discount.toFixed(2)}</span>
+            </div>
+          )}
+          
+          <div className="flex justify-between">
+            <span className="text-white/70">Tax</span>
+            <span className="text-white font-semibold">${summary.tax.toFixed(2)}</span>
+          </div>
+          
+          <div className="h-px bg-white/20"></div>
+          
+          <div className="flex justify-between text-xl">
+            <span className="text-white font-bold">Total Amount</span>
+            <span className="text-white font-bold">${summary.totalAmount.toFixed(2)}</span>
+          </div>
+        </div>
+        
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <div className="text-white/70 text-sm">Due Date</div>
+            <div className={`text-lg font-semibold ${
+              isOverdue ? 'text-red-400' : isDueSoon ? 'text-yellow-400' : 'text-white'
+            }`}>
+              {new Date(summary.dueDate).toLocaleDateString()}
+            </div>
+          </div>
+          
+          <div className="text-right">
+            <div className="text-white/70 text-sm">
+              {isOverdue ? 'Overdue by' : 'Due in'}
+            </div>
+            <div className={`text-lg font-semibold ${
+              isOverdue ? 'text-red-400' : isDueSoon ? 'text-yellow-400' : 'text-white'
+            }`}>
+              {Math.abs(daysUntilDue)} days
+            </div>
+          </div>
+        </div>
+        
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onPayNow}
+          className={`w-full py-4 rounded-xl font-bold text-white transition-all duration-300 ${
+            isOverdue
+              ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-lg shadow-red-500/25'
+              : isDueSoon
+                ? 'bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 shadow-lg shadow-yellow-500/25'
+                : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-lg shadow-blue-500/25'
+          }`}
+        >
+          {isOverdue ? 'Pay Overdue Amount' : 'Pay Now'}
+        </motion.button>
+        
+        {isOverdue && (
+          <p className="text-red-300 text-sm text-center mt-3">
+            Late fees may apply. Please pay immediately to avoid service interruption.
+          </p>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
+// Payment Modal Component
+const PaymentModal = ({ isOpen, onClose, amount, onPayment }) => {
+  const [selectedMethod, setSelectedMethod] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [cardDetails, setCardDetails] = useState({
+    number: '',
+    expiry: '',
+    cvv: '',
+    name: ''
+  });
+  
+  if (!isOpen) return null;
+
+  const handlePayment = async () => {
+    setIsProcessing(true);
+    
+    // Simulate payment processing
+    setTimeout(() => {
+      setIsProcessing(false);
+      onPayment({
+        amount,
+        method: selectedMethod,
+        cardDetails
+      });
+      onClose();
+    }, 3000);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl w-full max-w-md overflow-hidden"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="p-6 border-b border-white/20">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-white">Complete Payment</h2>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={onClose}
+              className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+            >
+              <X className="w-6 h-6 text-white/70" />
+            </motion.button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6">
+          {/* Amount */}
+          <div className="text-center mb-8">
+            <div className="text-4xl font-bold text-white mb-2">
+              ${amount?.toFixed(2)}
+            </div>
+            <div className="text-white/60">
+              Payment to Ghar_Nishchit
+            </div>
+          </div>
+
+          {/* Payment Methods */}
+          <div className="space-y-4 mb-6">
+            <h3 className="text-lg font-semibold text-white mb-4">Payment Method</h3>
+            
+            {/* Credit Card */}
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              onClick={() => setSelectedMethod('card')}
+              className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                selectedMethod === 'card' 
+                  ? 'border-blue-500 bg-blue-500/10' 
+                  : 'border-white/20 hover:border-white/40'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <CreditCard className="w-6 h-6 text-blue-400" />
+                <div>
+                  <div className="text-white font-medium">Credit/Debit Card</div>
+                  <div className="text-white/60 text-sm">Visa, Mastercard, Amex</div>
+                </div>
+                {selectedMethod === 'card' && (
+                  <Check className="w-5 h-5 text-blue-400 ml-auto" />
+                )}
+              </div>
+            </motion.div>
+
+            {/* PayPal */}
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              onClick={() => setSelectedMethod('paypal')}
+              className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                selectedMethod === 'paypal' 
+                  ? 'border-blue-500 bg-blue-500/10' 
+                  : 'border-white/20 hover:border-white/40'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <Wallet className="w-6 h-6 text-blue-400" />
+                <div>
+                  <div className="text-white font-medium">PayPal</div>
+                  <div className="text-white/60 text-sm">Pay with PayPal account</div>
+                </div>
+                {selectedMethod === 'paypal' && (
+                  <Check className="w-5 h-5 text-blue-400 ml-auto" />
+                )}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Card Details Form */}
+          {selectedMethod === 'card' && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="space-y-4 mb-6"
+            >
+              <div>
+                <label className="block text-white/70 text-sm mb-2">Card Number</label>
+                <input
+                  type="text"
+                  placeholder="1234 5678 9012 3456"
+                  value={cardDetails.number}
+                  onChange={(e) => setCardDetails(prev => ({ ...prev, number: e.target.value }))}
+                  className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-white/70 text-sm mb-2">Expiry Date</label>
+                  <input
+                    type="text"
+                    placeholder="MM/YY"
+                    value={cardDetails.expiry}
+                    onChange={(e) => setCardDetails(prev => ({ ...prev, expiry: e.target.value }))}
+                    className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-white/70 text-sm mb-2">CVV</label>
+                  <input
+                    type="text"
+                    placeholder="123"
+                    value={cardDetails.cvv}
+                    onChange={(e) => setCardDetails(prev => ({ ...prev, cvv: e.target.value }))}
+                    className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-white/70 text-sm mb-2">Cardholder Name</label>
+                <input
+                  type="text"
+                  placeholder="John Doe"
+                  value={cardDetails.name}
+                  onChange={(e) => setCardDetails(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
+                />
+              </div>
+            </motion.div>
+          )}
+
+          {/* Security Info */}
+          <div className="flex items-center space-x-2 mb-6 p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+            <ShieldCheck className="w-5 h-5 text-green-400" />
+            <span className="text-green-300 text-sm">
+              Your payment is secured with 256-bit SSL encryption
+            </span>
+          </div>
+
+          {/* Pay Button */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handlePayment}
+            disabled={!selectedMethod || isProcessing}
+            className="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-bold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+          >
+            {isProcessing ? (
+              <>
+                <Loader className="w-5 h-5 animate-spin" />
+                <span>Processing...</span>
+              </>
+            ) : (
+              <>
+                <span>Pay ${amount?.toFixed(2)}</span>
+                <ArrowRight className="w-5 h-5" />
+              </>
+            )}
+          </motion.button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+// Notification Toast Component
+const NotificationToast = ({ notifications, onRemove }) => {
+  return (
+    <div className="fixed top-4 right-4 z-50 space-y-2">
+      <AnimatePresence>
+        {notifications.map((notification) => (
+          <motion.div
+            key={notification.id}
+            initial={{ opacity: 0, x: 300 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 300 }}
+            className={`p-4 rounded-lg shadow-lg backdrop-blur-xl border max-w-sm ${
+              notification.type === 'success' ? 'bg-green-500/20 border-green-500/30 text-green-300' :
+              notification.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-300' :
+              notification.type === 'warning' ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-300' :
+              'bg-blue-500/20 border-blue-500/30 text-blue-300'
+            }`}
+          >
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0">
+                {notification.type === 'success' && <CheckCircle className="w-5 h-5" />}
+                {notification.type === 'error' && <XCircle className="w-5 h-5" />}
+                {notification.type === 'warning' && <AlertCircle className="w-5 h-5" />}
+                {notification.type === 'info' && <Info className="w-5 h-5" />}
+              </div>
+              
+              <div className="flex-1">
+                <h4 className="font-semibold">{notification.title}</h4>
+                {notification.message && (
+                  <p className="text-sm opacity-90 mt-1">{notification.message}</p>
+                )}
+              </div>
+              
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => onRemove(notification.id)}
+                className="flex-shrink-0 opacity-50 hover:opacity-100"
+              >
+                <X className="w-4 h-4" />
+              </motion.button>
+            </div>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+// Main Component
+const LandlordPayment = () => {
+  const [currentSection] = useState('Payments');
+  const [activeTab, setActiveTab] = useState('billing');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState(0);
+  
+  const { notifications, addNotification, removeNotification } = useNotification();
+  
+  // Sample data
+  const [subscriptionPlans] = useState([
+    {
+      id: 1,
+      name: 'Starter',
+      description: 'Perfect for individual landlords',
+      monthlyPrice: 29,
+      yearlyPrice: 290,
+      propertyLimit: '1-5',
+      supportLevel: 'Email',
+      tier: 1,
+      icon: <Building2 className="w-8 h-8 text-white" />,
+      features: [
+        'Up to 5 properties',
+        'Basic tenant management',
+        'Payment tracking',
+        'Email support',
+        'Mobile app access',
+        'Document storage (1GB)'
+      ],
+      trialDays: 14
+    },
+    {
+      id: 2,
+      name: 'Professional',
+      description: 'Ideal for growing portfolios',
+      monthlyPrice: 59,
+      yearlyPrice: 590,
+      propertyLimit: '6-25',
+      supportLevel: 'Priority',
+      tier: 2,
+      icon: <Crown className="w-8 h-8 text-white" />,
+      features: [
+        'Up to 25 properties',
+        'Advanced analytics',
+        'Automated rent collection',
+        'Priority support',
+        'Custom branding',
+        'Document storage (10GB)',
+        'Financial reporting',
+        'Maintenance tracking'
+      ],
+      trialDays: 14
+    },
+    {
+      id: 3,
+      name: 'Enterprise',
+      description: 'For large property portfolios',
+      monthlyPrice: 99,
+      yearlyPrice: 990,
+      propertyLimit: 'Unlimited',
+      supportLevel: '24/7',
+      tier: 3,
+      icon: <Trophy className="w-8 h-8 text-white" />,
+      features: [
+        'Unlimited properties',
+        'Advanced AI insights',
+        'Multi-user access',
+        '24/7 phone support',
+        'White-label solution',
+        'Unlimited storage',
+        'API access',
+        'Dedicated account manager',
+        'Custom integrations'
+      ],
+      trialDays: 30
+    }
+  ]);
+
+  const [currentPlan] = useState(subscriptionPlans[1]); // Professional plan
+  
+  const [paymentMethods, setPaymentMethods] = useLocalStorage('landlord_payment_methods', [
+    {
+      id: 1,
+      type: 'visa',
+      last4: '4242',
+      expiryDate: '12/25',
+      holderName: 'John Doe',
+      isDefault: true
+    },
+    {
+      id: 2,
+      type: 'mastercard',
+      last4: '5555',
+      expiryDate: '08/26',
+      holderName: 'John Doe',
+      isDefault: false
+    },
+    {
+      id: 3,
+      type: 'bank',
+      bankName: 'Chase Bank',
+      accountNumber: '****1234',
+      holderName: 'John Doe',
+      isDefault: false
+    }
+  ]);
+
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(paymentMethods[0]?.id);
+
+  const [paymentHistory] = useState([
+    {
+      id: 1,
+      description: 'Professional Plan - Monthly',
+      amount: 59.00,
+      date: '2025-07-15',
+      status: 'completed',
+      method: 'Visa •••• 4242',
+      invoiceId: 'INV-2025-001'
+    },
+    {
+      id: 2,
+      description: 'Professional Plan - Monthly',
+      amount: 59.00,
+      date: '2025-06-15',
+      status: 'completed',
+      method: 'Visa •••• 4242',
+      invoiceId: 'INV-2025-002'
+    },
+    {
+      id: 3,
+      description: 'Starter Plan - Monthly',
+      amount: 29.00,
+      date: '2025-05-15',
+      status: 'completed',
+      method: 'Visa •••• 4242',
+      invoiceId: 'INV-2025-003'
+    }
+  ]);
+
+  const [billingSummary] = useState({
+    planName: 'Professional Plan',
+    propertiesCount: 12,
+    subscriptionFee: 59.00,
+    additionalFees: 0,
+    discount: 0,
+    tax: 5.31,
+    totalAmount: 64.31,
+    dueDate: '2025-08-15'
+  });
+
+  // Calculate stats
+  const stats = useMemo(() => {
+    const totalPaid = paymentHistory
+      .filter(p => p.status === 'completed')
+      .reduce((sum, p) => sum + p.amount, 0);
+    
+    const avgMonthlySpend = totalPaid / Math.max(paymentHistory.length, 1);
+    const nextPaymentDate = new Date(billingSummary.dueDate);
+    const daysUntilPayment = Math.ceil((nextPaymentDate - new Date()) / (1000 * 60 * 60 * 24));
+    
+    return {
+      totalPaid,
+      avgMonthlySpend,
+      nextPaymentDate: nextPaymentDate.toLocaleDateString(),
+      daysUntilPayment,
+      activeSubscription: currentPlan?.name || 'None'
+    };
+  }, [paymentHistory, billingSummary, currentPlan]);
+
+  // Event handlers
+  const handleSelectPlan = (plan) => {
+    setPaymentAmount(plan.monthlyPrice);
+    setShowPaymentModal(true);
+  };
+
+  const handleUpgradePlan = (plan) => {
+    const currentTier = currentPlan?.tier || 0;
+    const upgradeCost = plan.monthlyPrice - (currentPlan?.monthlyPrice || 0);
+    
+    addNotification({
+      type: 'info',
+      title: 'Plan Upgrade',
+      message: `Upgrading to ${plan.name} will cost an additional $${upgradeCost.toFixed(2)}`
+    });
+    
+    setPaymentAmount(upgradeCost);
+    setShowPaymentModal(true);
+  };
+
+  const handlePayment = (paymentData) => {
+    addNotification({
+      type: 'success',
+      title: 'Payment Successful',
+      message: `Payment of $${paymentData.amount.toFixed(2)} has been processed successfully`
+    });
+  };
+
+  const handlePayNow = () => {
+    setPaymentAmount(billingSummary.totalAmount);
+    setShowPaymentModal(true);
+  };
+
+  const handleDownloadReceipt = (payment) => {
+    addNotification({
+      type: 'info',
+      title: 'Receipt Download',
+      message: `Downloading receipt for payment #${payment.invoiceId}`
+    });
+  };
+
+  const handleViewDetails = (payment) => {
+    addNotification({
+      type: 'info',
+      title: 'Payment Details',
+      message: `Viewing details for payment #${payment.invoiceId}`
+    });
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex relative overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div
+          animate={{ rotate: 360, scale: [1, 1.1, 1] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{ rotate: -360, scale: [1.1, 1, 1.1] }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-full blur-3xl"
+        />
+      </div>
+
+      <LandlordSideBar currentSection={currentSection} />
+      
+      <div className="flex-1 flex flex-col relative z-10">
+        <LandlordNavBar />
+        
+        <main className="flex-1 overflow-y-auto">
+          <div className="p-8 space-y-8">
+            {/* Header */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <motion.h1
+                className="text-5xl font-bold text-white mb-4 bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent"
+              >
+                Payment & Billing
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.6 }}
+                className="text-xl text-white/70 max-w-2xl mx-auto"
+              >
+                Manage your subscription, payments, and billing with Ghar_Nishchit
+              </motion.p>
+            </motion.div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+              <AnimatedCard className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center">
+                <motion.div
+                  whileHover={{ scale: 1.05, rotate: 5 }}
+                  className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center"
+                >
+                  <DollarSign className="w-6 h-6 text-white" />
+                </motion.div>
+                <div className="text-2xl font-bold text-white mb-1">
+                  ${Math.round(useCountUp(stats.totalPaid, 2000, 0))}
+                </div>
+                <div className="text-white/60 text-sm">Total Paid</div>
+              </AnimatedCard>
+              
+              <AnimatedCard delay={0.1} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center">
+                <motion.div
+                  whileHover={{ scale: 1.05, rotate: 5 }}
+                  className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center"
+                >
+                  <TrendingUp className="w-6 h-6 text-white" />
+                </motion.div>
+                <div className="text-2xl font-bold text-white mb-1">
+                  ${Math.round(useCountUp(stats.avgMonthlySpend, 2000, 0))}
+                </div>
+                <div className="text-white/60 text-sm">Avg Monthly</div>
+              </AnimatedCard>
+              
+              <AnimatedCard delay={0.2} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center">
+                <motion.div
+                  whileHover={{ scale: 1.05, rotate: 5 }}
+                  className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center"
+                >
+                  <Crown className="w-6 h-6 text-white" />
+                </motion.div>
+                <div className="text-lg font-bold text-white mb-1">{stats.activeSubscription}</div>
+                <div className="text-white/60 text-sm">Current Plan</div>
+              </AnimatedCard>
+              
+              <AnimatedCard delay={0.3} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center">
+                <motion.div
+                  whileHover={{ scale: 1.05, rotate: 5 }}
+                  className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center"
+                >
+                  <Calendar className="w-6 h-6 text-white" />
+                </motion.div>
+                <div className="text-2xl font-bold text-white mb-1">{stats.daysUntilPayment}</div>
+                <div className="text-white/60 text-sm">Days to Payment</div>
+              </AnimatedCard>
+              
+              <AnimatedCard delay={0.4} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center">
+                <motion.div
+                  whileHover={{ scale: 1.05, rotate: 5 }}
+                  className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center"
+                >
+                  <CreditCard className="w-6 h-6 text-white" />
+                </motion.div>
+                <div className="text-2xl font-bold text-white mb-1">{paymentMethods.length}</div>
+                <div className="text-white/60 text-sm">Payment Methods</div>
+              </AnimatedCard>
+            </div>
+
+            {/* Tab Navigation */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="flex space-x-1 mb-8 bg-white/5 p-1 rounded-2xl backdrop-blur-xl border border-white/10"
+            >
+              {[
+                { key: 'billing', label: 'Current Bill', icon: Receipt },
+                { key: 'plans', label: 'Subscription Plans', icon: Crown },
+                { key: 'methods', label: 'Payment Methods', icon: CreditCard },
+                { key: 'history', label: 'Payment History', icon: Clock }
+              ].map(({ key, label, icon: Icon }) => (
+                <motion.button
+                  key={key}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setActiveTab(key)}
+                  className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                    activeTab === key
+                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
+                      : 'text-white/70 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span>{label}</span>
+                </motion.button>
+              ))}
+            </motion.div>
+
+            {/* Tab Content */}
+            <AnimatePresence mode="wait">
+              {activeTab === 'billing' && (
+                <motion.div
+                  key="billing"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.5 }}
+                  className="space-y-8"
+                >
+                  <AnimatedCard>
+                    <BillingSummary
+                      summary={billingSummary}
+                      onPayNow={handlePayNow}
+                    />
+                  </AnimatedCard>
+                  
+                  {/* Usage Details */}
+                  <AnimatedCard delay={0.2} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8">
+                    <h3 className="text-2xl font-bold text-white mb-6">Usage This Month</h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="text-center p-6 bg-white/5 rounded-xl">
+                        <Building2 className="w-8 h-8 mx-auto mb-3 text-blue-400" />
+                        <div className="text-3xl font-bold text-white mb-1">12</div>
+                        <div className="text-white/60">Properties Listed</div>
+                        <div className="text-xs text-blue-400 mt-1">of 25 allowed</div>
+                      </div>
+                      
+                      <div className="text-center p-6 bg-white/5 rounded-xl">
+                        <Users className="w-8 h-8 mx-auto mb-3 text-green-400" />
+                        <div className="text-3xl font-bold text-white mb-1">34</div>
+                        <div className="text-white/60">Active Tenants</div>
+                        <div className="text-xs text-green-400 mt-1">Unlimited</div>
+                      </div>
+                      
+                      <div className="text-center p-6 bg-white/5 rounded-xl">
+                        <Database className="w-8 h-8 mx-auto mb-3 text-purple-400" />
+                        <div className="text-3xl font-bold text-white mb-1">7.2</div>
+                        <div className="text-white/60">GB Storage Used</div>
+                        <div className="text-xs text-purple-400 mt-1">of 10 GB</div>
+                      </div>
+                    </div>
+                  </AnimatedCard>
+                </motion.div>
+              )}
+
+              {activeTab === 'plans' && (
+                <motion.div
+                  key="plans"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <AnimatedCard>
+                    <div className="text-center mb-12">
+                      <h2 className="text-3xl font-bold text-white mb-4">Choose Your Plan</h2>
+                      <p className="text-white/70 max-w-2xl mx-auto">
+                        Select the perfect plan for your property management needs
+                      </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                      {subscriptionPlans.map((plan, index) => (
+                        <SubscriptionPlanCard
+                          key={plan.id}
+                          plan={plan}
+                          currentPlan={currentPlan}
+                          onSelect={handleSelectPlan}
+                          onUpgrade={handleUpgradePlan}
+                          popular={index === 1}
+                        />
+                      ))}
+                    </div>
+                    
+                    {/* Plan Comparison */}
+                    <div className="mt-16">
+                      <h3 className="text-2xl font-bold text-white mb-8 text-center">Feature Comparison</h3>
+                      
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b border-white/20">
+                              <th className="text-left py-4 text-white/80 font-semibold">Feature</th>
+                              {subscriptionPlans.map((plan) => (
+                                <th key={plan.id} className="text-center py-4 text-white/80 font-semibold">
+                                  {plan.name}
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {[
+                              { feature: 'Properties', values: ['1-5', '6-25', 'Unlimited'] },
+                              { feature: 'Storage', values: ['1GB', '10GB', 'Unlimited'] },
+                              { feature: 'Support', values: ['Email', 'Priority', '24/7 Phone'] },
+                              { feature: 'Analytics', values: ['Basic', 'Advanced', 'AI Powered'] },
+                              { feature: 'Branding', values: ['❌', '✅', '✅'] },
+                              { feature: 'API Access', values: ['❌', '❌', '✅'] }
+                            ].map((row, index) => (
+                              <tr key={index} className="border-b border-white/10 hover:bg-white/5">
+                                <td className="py-4 text-white font-medium">{row.feature}</td>
+                                {row.values.map((value, valueIndex) => (
+                                  <td key={valueIndex} className="py-4 text-center text-white/80">
+                                    {value}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </AnimatedCard>
+                </motion.div>
+              )}
+
+              {activeTab === 'methods' && (
+                <motion.div
+                  key="methods"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <AnimatedCard>
+                    <div className="flex justify-between items-center mb-8">
+                      <div>
+                        <h2 className="text-3xl font-bold text-white mb-2">Payment Methods</h2>
+                        <p className="text-white/70">Manage your saved payment methods</p>
+                      </div>
+                      
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 flex items-center space-x-2"
+                      >
+                        <Plus className="w-5 h-5" />
+                        <span>Add Payment Method</span>
+                      </motion.button>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {paymentMethods.map((method, index) => (
+                        <PaymentMethodCard
+                          key={method.id}
+                          method={method}
+                          isSelected={selectedPaymentMethod === method.id}
+                          onSelect={setSelectedPaymentMethod}
+                          onEdit={(method) => {
+                            addNotification({
+                              type: 'info',
+                              title: 'Edit Payment Method',
+                              message: `Editing ${method.type} ending in ${method.last4}`
+                            });
+                          }}
+                          onDelete={(methodId) => {
+                            setPaymentMethods(prev => prev.filter(m => m.id !== methodId));
+                            addNotification({
+                              type: 'success',
+                              title: 'Payment Method Deleted',
+                              message: 'Payment method has been removed successfully'
+                            });
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </AnimatedCard>
+                </motion.div>
+              )}
+
+              {activeTab === 'history' && (
+                <motion.div
+                  key="history"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <AnimatedCard>
+                    <div className="flex justify-between items-center mb-8">
+                      <div>
+                        <h2 className="text-3xl font-bold text-white mb-2">Payment History</h2>
+                        <p className="text-white/70">View all your past transactions</p>
+                      </div>
+                      
+                      <div className="flex space-x-4">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/50" />
+                          <input
+                            type="text"
+                            placeholder="Search payments..."
+                            className="pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
+                          />
+                        </div>
+                        
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="px-4 py-2 bg-green-500/20 text-green-300 rounded-lg hover:bg-green-500/30 transition-colors flex items-center space-x-2"
+                        >
+                          <Download className="w-4 h-4" />
+                          <span>Export</span>
+                        </motion.button>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {paymentHistory.map((payment, index) => (
+                        <motion.div
+                          key={payment.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                        >
+                          <PaymentHistoryItem
+                            payment={payment}
+                            onDownloadReceipt={handleDownloadReceipt}
+                            onViewDetails={handleViewDetails}
+                          />
+                        </motion.div>
+                      ))}
+                    </div>
+                  </AnimatedCard>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </main>
+      </div>
+
+      {/* Payment Modal */}
+      <AnimatePresence>
+        {showPaymentModal && (
+          <PaymentModal
+            isOpen={showPaymentModal}
+            onClose={() => setShowPaymentModal(false)}
+            amount={paymentAmount}
+            onPayment={handlePayment}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Notifications */}
+      <NotificationToast
+        notifications={notifications}
+        onRemove={removeNotification}
+      />
+    </div>
+  );
+};
+
+export default LandlordPayment;
