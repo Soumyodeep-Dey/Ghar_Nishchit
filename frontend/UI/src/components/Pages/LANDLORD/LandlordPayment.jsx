@@ -353,7 +353,7 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
       onMouseLeave={() => setIsHovered(false)}
       className={`relative p-8 rounded-3xl border-2 transition-all duration-500 overflow-hidden ${
         popular 
-          ? 'border-gradient-to-r from-purple-500 to-pink-500 bg-gradient-to-br from-purple-500/10 to-pink-500/10' 
+          ? 'border-gradient-to-r from-purple-500 to-pink-500 bg-gradient-to-br ' 
           : isCurrentPlan
             ? 'border-green-500 bg-green-500/10'
             : 'border-white/20 bg-white/5 hover:border-white/40 hover:bg-white/10'
