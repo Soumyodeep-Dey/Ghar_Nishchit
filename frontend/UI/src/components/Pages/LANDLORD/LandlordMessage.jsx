@@ -1221,7 +1221,7 @@ const LandlordMessage = () => {
       <LandlordSideBar currentSection={currentSection} />
       
       <div className="flex-1 flex flex-col relative z-10">
-        <LandlordNavBar />
+        <LandlordNavBar currentSection={currentSection} />
         
         <main className="flex-1 overflow-hidden">
           <div className="h-full flex">

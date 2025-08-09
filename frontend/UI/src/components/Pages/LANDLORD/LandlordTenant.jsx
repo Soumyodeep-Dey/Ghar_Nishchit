@@ -1597,7 +1597,7 @@ const LandlordTenant = () => {
       <LandlordSideBar currentSection={currentSection} />
       
       <div className="flex-1 flex flex-col relative z-10">
-        <LandlordNavBar />
+        <LandlordNavBar currentSection={currentSection} />
         
         <main className="flex-1 overflow-y-auto">
           <div className="p-8 space-y-8">
