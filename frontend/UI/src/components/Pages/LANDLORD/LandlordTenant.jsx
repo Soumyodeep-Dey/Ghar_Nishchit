@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
+import { useDarkMode } from '../../../DarkModeContext';
 import { 
   Users, 
   Plus, 
@@ -1254,6 +1255,7 @@ const NotificationToast = ({ notifications, onRemove }) => {
 // Main Component
 const LandlordTenant = () => {
   const [currentSection] = useState('Tenants');
+  const { darkMode } = useDarkMode();
   
   // Sample tenants data with enhanced information
   const [tenants, setTenants] = useLocalStorage('landlord_tenants', [
@@ -1579,7 +1581,10 @@ const LandlordTenant = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex relative overflow-hidden">
+    <div className={`min-h-screen transition-colors duration-500 ${darkMode
+      ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100'
+      : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 text-gray-900'
+    } flex relative overflow-hidden`}>
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
