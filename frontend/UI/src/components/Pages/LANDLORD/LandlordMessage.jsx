@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
+import { useDarkMode } from '../../../DarkModeContext';
 import { 
   MessageSquare, 
   Send, 
@@ -183,7 +184,7 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
       {showAvatar && !isOwn && (
         <motion.div
           whileHover={{ scale: 1.1 }}
-          className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0"
+          className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 dark:from-cyan-500 dark:to-cyan-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0"
         >
           {message.sender?.charAt(0) || 'T'}
         </motion.div>
@@ -195,13 +196,13 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
           whileHover={{ scale: 1.02 }}
           className={`relative p-4 rounded-2xl shadow-lg ${
             isOwn
-              ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white'
-              : 'bg-white/10 backdrop-blur-xl border border-white/20 text-white'
-          } ${message.isForwarded ? 'border-l-4 border-yellow-400' : ''}`}
+              ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 dark:from-cyan-500 dark:to-cyan-600 text-white'
+              : 'bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-indigo-200 dark:border-slate-700 text-indigo-700 dark:text-cyan-100'
+          } ${message.isForwarded ? 'border-l-4 border-pink-400 dark:border-pink-500' : ''}`}
         >
           {/* Forwarded indicator */}
           {message.isForwarded && (
-            <div className="flex items-center space-x-1 text-xs text-yellow-400 mb-2">
+            <div className="flex items-center space-x-1 text-xs text-pink-400 dark:text-pink-300 mb-2">
               <Forward className="w-3 h-3" />
               <span>Forwarded</span>
             </div>
@@ -209,9 +210,9 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
 
           {/* Reply indicator */}
           {message.replyTo && (
-            <div className="bg-black/20 rounded-lg p-2 mb-3 border-l-2 border-white/30">
-              <div className="text-xs text-white/70">{message.replyTo.sender}</div>
-              <div className="text-sm text-white/90 truncate">{message.replyTo.content}</div>
+            <div className="bg-black/10 dark:bg-black/20 rounded-lg p-2 mb-3 border-l-2 border-indigo-300 dark:border-cyan-300">
+              <div className="text-xs text-indigo-600 dark:text-cyan-200">{message.replyTo.sender}</div>
+              <div className="text-sm text-indigo-700 dark:text-cyan-100 truncate">{message.replyTo.content}</div>
             </div>
           )}
 
@@ -225,7 +226,7 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
             {message.attachments && message.attachments.length > 0 && (
               <div className="space-y-2">
                 {message.attachments.map((attachment, index) => (
-                  <div key={index} className="flex items-center space-x-2 p-2 bg-black/20 rounded-lg">
+                  <div key={index} className="flex items-center space-x-2 p-2 bg-black/10 dark:bg-black/20 rounded-lg">
                     {attachment.type === 'image' ? (
                       <div className="relative">
                         <img
@@ -244,15 +245,15 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
                       </div>
                     ) : (
                       <div className="flex items-center space-x-2 flex-1">
-                        <File className="w-5 h-5 text-blue-400" />
+                        <File className="w-5 h-5 text-indigo-400 dark:text-cyan-400" />
                         <div className="flex-1">
                           <div className="text-sm font-medium">{attachment.name}</div>
-                          <div className="text-xs text-white/60">{attachment.size}</div>
+                          <div className="text-xs text-indigo-600 dark:text-cyan-200">{attachment.size}</div>
                         </div>
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          className="p-1 hover:bg-white/10 rounded"
+                          className="p-1 hover:bg-indigo-100 dark:hover:bg-cyan-500/20 rounded"
                         >
                           <Download className="w-4 h-4" />
                         </motion.button>
@@ -271,7 +272,7 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
                     key={index}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="px-3 py-1 bg-white/20 rounded-full text-xs font-medium hover:bg-white/30 transition-colors"
+                    className="px-3 py-1 bg-indigo-100 dark:bg-cyan-500/20 text-indigo-700 dark:text-cyan-300 rounded-full text-xs font-medium hover:bg-indigo-200 dark:hover:bg-cyan-500/30 transition-colors"
                   >
                     {action.label}
                   </motion.button>
@@ -282,18 +283,18 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
 
           {/* Message metadata */}
           <div className={`flex items-center justify-between mt-3 text-xs ${
-            isOwn ? 'text-white/70' : 'text-white/50'
+            isOwn ? 'text-white/70' : 'text-gray-500 dark:text-blue-300'
           }`}>
             <span>{message.time}</span>
             <div className="flex items-center space-x-1">
               {message.edited && <Edit3 className="w-3 h-3" />}
               {message.priority === 'high' && <AlertCircle className="w-3 h-3 text-red-400" />}
-              {message.pinned && <Pin className="w-3 h-3 text-yellow-400" />}
+              {message.pinned && <Pin className="w-3 h-3 text-pink-400 dark:text-pink-300" />}
               {isOwn && (
                 <div className="flex items-center">
                   {message.status === 'sent' && <Check className="w-3 h-3" />}
                   {message.status === 'delivered' && <CheckCheck className="w-3 h-3" />}
-                  {message.status === 'read' && <CheckCheck className="w-3 h-3 text-blue-400" />}
+                  {message.status === 'read' && <CheckCheck className="w-3 h-3 text-indigo-400 dark:text-cyan-400" />}
                 </div>
               )}
             </div>
@@ -307,7 +308,7 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
                   key={emoji}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  className="flex items-center space-x-1 px-2 py-1 bg-white/20 rounded-full text-xs"
+                  className="flex items-center space-x-1 px-2 py-1 bg-indigo-100 dark:bg-cyan-500/20 rounded-full text-xs"
                   onClick={() => onReact(message.id, emoji)}
                 >
                   <span>{emoji}</span>
@@ -331,25 +332,25 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setShowReactions(!showReactions)}
-                className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+                className="p-2 bg-white/80 dark:bg-slate-700/80 rounded-full hover:bg-white dark:hover:bg-slate-600 transition-colors"
               >
-                <Smile className="w-4 h-4 text-white/70" />
+                <Smile className="w-4 h-4 text-indigo-600 dark:text-cyan-300" />
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => onReply(message)}
-                className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+                className="p-2 bg-white/80 dark:bg-slate-700/80 rounded-full hover:bg-white dark:hover:bg-slate-600 transition-colors"
               >
-                <Reply className="w-4 h-4 text-white/70" />
+                <Reply className="w-4 h-4 text-indigo-600 dark:text-cyan-300" />
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => onForward(message)}
-                className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+                className="p-2 bg-white/80 dark:bg-slate-700/80 rounded-full hover:bg-white dark:hover:bg-slate-600 transition-colors"
               >
-                <Forward className="w-4 h-4 text-white/70" />
+                <Forward className="w-4 h-4 text-indigo-600 dark:text-cyan-300" />
               </motion.button>
               {isOwn && (
                 <motion.button
@@ -372,7 +373,7 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
               initial={{ opacity: 0, scale: 0.8, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8, y: 10 }}
-              className="flex items-center space-x-2 mt-2 p-2 bg-white/10 backdrop-blur-xl rounded-full border border-white/20"
+              className="flex items-center space-x-2 mt-2 p-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-full border border-indigo-200 dark:border-slate-700"
             >
               {reactions.map(({ emoji, label }) => (
                 <motion.button
@@ -383,7 +384,7 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
                     onReact(message.id, emoji);
                     setShowReactions(false);
                   }}
-                  className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                  className="p-2 hover:bg-indigo-100 dark:hover:bg-cyan-500/20 rounded-full transition-colors"
                   title={label}
                 >
                   <span className="text-lg">{emoji}</span>
@@ -418,8 +419,8 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
       onClick={onClick}
       className={`relative p-4 rounded-xl cursor-pointer transition-all duration-200 group ${
         isActive 
-          ? 'bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30' 
-          : 'hover:bg-white/10 border border-transparent'
+          ? 'bg-gradient-to-r from-indigo-500/20 to-indigo-600/20 dark:from-cyan-500/20 dark:to-cyan-600/20 border border-indigo-500/30 dark:border-cyan-500/30' 
+          : 'hover:bg-indigo-50 dark:hover:bg-slate-800/50 border border-transparent'
       }`}
     >
       <div className="flex items-center space-x-3">
@@ -427,18 +428,18 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
         <div className="relative">
           <motion.div
             whileHover={{ scale: 1.1 }}
-            className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold flex-shrink-0"
+            className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 dark:from-cyan-500 dark:to-cyan-600 flex items-center justify-center text-white font-semibold flex-shrink-0"
           >
             {conversation.avatar || conversation.name?.charAt(0) || 'T'}
           </motion.div>
           {conversation.online && (
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-800"></div>
           )}
           {conversation.unread > 0 && (
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs text-white font-bold"
+              className="absolute -top-1 -right-1 w-5 h-5 bg-pink-500 dark:bg-pink-400 rounded-full flex items-center justify-center text-xs text-white font-bold"
             >
               {conversation.unread > 99 ? '99+' : conversation.unread}
             </motion.div>
@@ -449,15 +450,15 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
             <h3 className={`font-semibold truncate ${
-              isActive ? 'text-white' : 'text-white/90'
+              isActive ? 'text-indigo-700 dark:text-cyan-100' : 'text-indigo-700 dark:text-cyan-100'
             }`}>
               {conversation.name}
-              {conversation.isPinned && <Pin className="w-3 h-3 inline ml-1 text-yellow-400" />}
-              {conversation.isMuted && <VolumeX className="w-3 h-3 inline ml-1 text-gray-400" />}
+              {conversation.isPinned && <Pin className="w-3 h-3 inline ml-1 text-pink-400 dark:text-pink-300" />}
+              {conversation.isMuted && <VolumeX className="w-3 h-3 inline ml-1 text-gray-400 dark:text-gray-500" />}
             </h3>
             <div className="flex items-center space-x-1">
               <span className={`text-xs ${
-                conversation.unread > 0 ? 'text-white font-medium' : 'text-white/50'
+                conversation.unread > 0 ? 'text-indigo-600 dark:text-cyan-300 font-medium' : 'text-gray-500 dark:text-blue-300'
               }`}>
                 {conversation.time}
               </span>
@@ -469,7 +470,7 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
           
           <div className="flex items-center justify-between">
             <p className={`text-sm truncate ${
-              conversation.unread > 0 ? 'text-white/90 font-medium' : 'text-white/60'
+              conversation.unread > 0 ? 'text-indigo-600 dark:text-cyan-200 font-medium' : 'text-gray-600 dark:text-blue-200'
             }`}>
               {conversation.lastMessage}
             </p>
@@ -481,20 +482,20 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
                   <motion.div
                     animate={{ scale: [1, 1.2, 1] }}
                     transition={{ repeat: Infinity, duration: 1, delay: 0 }}
-                    className="w-1 h-1 bg-blue-400 rounded-full"
+                    className="w-1 h-1 bg-indigo-400 dark:bg-cyan-400 rounded-full"
                   />
                   <motion.div
                     animate={{ scale: [1, 1.2, 1] }}
                     transition={{ repeat: Infinity, duration: 1, delay: 0.2 }}
-                    className="w-1 h-1 bg-blue-400 rounded-full"
+                    className="w-1 h-1 bg-indigo-400 dark:bg-cyan-400 rounded-full"
                   />
                   <motion.div
                     animate={{ scale: [1, 1.2, 1] }}
                     transition={{ repeat: Infinity, duration: 1, delay: 0.4 }}
-                    className="w-1 h-1 bg-blue-400 rounded-full"
+                    className="w-1 h-1 bg-indigo-400 dark:bg-cyan-400 rounded-full"
                   />
                 </div>
-                <span className="text-xs text-blue-400">typing...</span>
+                <span className="text-xs text-indigo-400 dark:text-cyan-400">typing...</span>
               </div>
             )}
           </div>
@@ -502,8 +503,8 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
           {/* Property info */}
           {conversation.property && (
             <div className="flex items-center space-x-1 mt-1">
-              <Building2 className="w-3 h-3 text-purple-400" />
-              <span className="text-xs text-purple-400">{conversation.property}</span>
+              <Building2 className="w-3 h-3 text-pink-400 dark:text-pink-300" />
+              <span className="text-xs text-pink-400 dark:text-pink-300">{conversation.property}</span>
             </div>
           )}
         </div>
@@ -517,9 +518,9 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
               e.stopPropagation();
               setShowMenu(!showMenu);
             }}
-            className="p-1 rounded-lg hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100"
+            className="p-1 rounded-lg hover:bg-indigo-100 dark:hover:bg-slate-700 transition-colors opacity-0 group-hover:opacity-100"
           >
-            <MoreVertical className="w-4 h-4 text-white/70" />
+            <MoreVertical className="w-4 h-4 text-indigo-600 dark:text-cyan-300" />
           </motion.button>
 
           <AnimatePresence>
@@ -528,7 +529,7 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
                 initial={{ opacity: 0, scale: 0.95, y: -10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                className="absolute right-0 top-full mt-2 w-48 bg-white/20 backdrop-blur-xl border border-white/30 rounded-xl shadow-xl z-50"
+                className="absolute right-0 top-full mt-2 w-48 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-indigo-200 dark:border-slate-700 rounded-xl shadow-xl z-50"
               >
                 <div className="p-2">
                   <button 
@@ -536,7 +537,7 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
                       // Toggle pin
                       setShowMenu(false);
                     }}
-                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-white/80"
+                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-indigo-100 dark:hover:bg-slate-700 transition-colors text-indigo-700 dark:text-cyan-100"
                   >
                     <Pin className="w-4 h-4" />
                     <span>{conversation.isPinned ? 'Unpin' : 'Pin'} Chat</span>
@@ -546,7 +547,7 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
                       // Toggle mute
                       setShowMenu(false);
                     }}
-                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-white/80"
+                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-indigo-100 dark:hover:bg-slate-700 transition-colors text-indigo-700 dark:text-cyan-100"
                   >
                     {conversation.isMuted ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
                     <span>{conversation.isMuted ? 'Unmute' : 'Mute'}</span>
@@ -556,7 +557,7 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
                       onArchive(conversation.id);
                       setShowMenu(false);
                     }}
-                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-white/80"
+                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-indigo-100 dark:hover:bg-slate-700 transition-colors text-indigo-700 dark:text-cyan-100"
                   >
                     <Archive className="w-4 h-4" />
                     <span>Archive</span>
@@ -566,7 +567,7 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
                       onDelete(conversation.id);
                       setShowMenu(false);
                     }}
-                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-red-500/20 transition-colors text-red-300"
+                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-red-500/20 transition-colors text-red-400"
                   >
                     <Trash2 className="w-4 h-4" />
                     <span>Delete</span>
@@ -698,25 +699,25 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
   };
 
   return (
-    <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 space-y-4">
+    <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-indigo-200 dark:border-slate-700 rounded-2xl p-4 space-y-4">
       {/* Reply indicator */}
       {replyTo && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between p-3 bg-white/10 rounded-lg border-l-4 border-blue-500"
+          className="flex items-center justify-between p-3 bg-indigo-50 dark:bg-cyan-500/10 rounded-lg border-l-4 border-indigo-500 dark:border-cyan-400"
         >
           <div className="flex-1">
-            <div className="text-sm text-blue-400 font-medium">Replying to {replyTo.sender}</div>
-            <div className="text-sm text-white/70 truncate">{replyTo.content}</div>
+            <div className="text-sm text-indigo-600 dark:text-cyan-400 font-medium">Replying to {replyTo.sender}</div>
+            <div className="text-sm text-gray-600 dark:text-blue-200 truncate">{replyTo.content}</div>
           </div>
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={onCancelReply}
-            className="p-1 hover:bg-white/10 rounded"
+            className="p-1 hover:bg-indigo-100 dark:hover:bg-cyan-500/20 rounded"
           >
-            <X className="w-4 h-4 text-white/70" />
+            <X className="w-4 h-4 text-indigo-600 dark:text-cyan-300" />
           </motion.button>
         </motion.div>
       )}
@@ -748,11 +749,11 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
                   </motion.button>
                 </div>
               ) : (
-                <div className="flex items-center space-x-2 p-2 bg-white/10 rounded-lg pr-8">
-                  <File className="w-5 h-5 text-blue-400" />
+                <div className="flex items-center space-x-2 p-2 bg-indigo-50 dark:bg-slate-700 rounded-lg pr-8">
+                  <File className="w-5 h-5 text-indigo-400 dark:text-cyan-400" />
                   <div>
-                    <div className="text-sm font-medium text-white truncate max-w-20">{attachment.name}</div>
-                    <div className="text-xs text-white/50">{attachment.size}</div>
+                    <div className="text-sm font-medium text-indigo-700 dark:text-cyan-100 truncate max-w-20">{attachment.name}</div>
+                    <div className="text-xs text-gray-500 dark:text-blue-300">{attachment.size}</div>
                   </div>
                   <motion.button
                     whileHover={{ scale: 1.1 }}
@@ -777,7 +778,7 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => handleQuickAction(action.action)}
-            className="flex items-center space-x-1 px-3 py-1 bg-white/10 rounded-full text-xs text-white/80 hover:bg-white/20 transition-colors"
+            className="flex items-center space-x-1 px-3 py-1 bg-indigo-100 dark:bg-cyan-500/20 rounded-full text-xs text-indigo-700 dark:text-cyan-300 hover:bg-indigo-200 dark:hover:bg-cyan-500/30 transition-colors"
           >
             <action.icon className="w-3 h-3" />
             <span>{action.label}</span>
@@ -804,9 +805,9 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => fileInputRef.current?.click()}
-                className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+                className="p-2 bg-indigo-100 dark:bg-slate-700 rounded-lg hover:bg-indigo-200 dark:hover:bg-slate-600 transition-colors"
               >
-                <Paperclip className="w-5 h-5 text-white/70" />
+                <Paperclip className="w-5 h-5 text-indigo-600 dark:text-cyan-300" />
               </motion.button>
             </div>
 
@@ -816,9 +817,9 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setShowTemplates(!showTemplates)}
-                className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+                className="p-2 bg-indigo-100 dark:bg-slate-700 rounded-lg hover:bg-indigo-200 dark:hover:bg-slate-600 transition-colors"
               >
-                <FileText className="w-5 h-5 text-white/70" />
+                <FileText className="w-5 h-5 text-indigo-600 dark:text-cyan-300" />
               </motion.button>
 
               <AnimatePresence>
@@ -827,21 +828,21 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
                     initial={{ opacity: 0, scale: 0.95, y: 10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                    className="absolute bottom-full mb-2 left-0 w-80 bg-white/20 backdrop-blur-xl border border-white/30 rounded-xl shadow-xl z-50"
+                    className="absolute bottom-full mb-2 left-0 w-80 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-indigo-200 dark:border-slate-700 rounded-xl shadow-xl z-50"
                   >
                     <div className="p-4">
-                      <h3 className="text-sm font-semibold text-white mb-3">Message Templates</h3>
+                      <h3 className="text-sm font-semibold text-indigo-700 dark:text-cyan-100 mb-3">Message Templates</h3>
                       <div className="space-y-2 max-h-60 overflow-y-auto">
                         {templates.map((template, index) => (
                           <motion.button
                             key={index}
                             whileHover={{ scale: 1.02 }}
                             onClick={() => insertTemplate(template)}
-                            className="w-full text-left p-3 rounded-lg hover:bg-white/10 transition-colors"
+                            className="w-full text-left p-3 rounded-lg hover:bg-indigo-100 dark:hover:bg-slate-700 transition-colors"
                           >
-                            <div className="text-sm font-medium text-white">{template.title}</div>
-                            <div className="text-xs text-white/60 mt-1">{template.category}</div>
-                            <div className="text-xs text-white/50 mt-1 line-clamp-2">{template.content}</div>
+                            <div className="text-sm font-medium text-indigo-700 dark:text-cyan-100">{template.title}</div>
+                            <div className="text-xs text-gray-600 dark:text-blue-300 mt-1">{template.category}</div>
+                            <div className="text-xs text-gray-500 dark:text-blue-200 mt-1 line-clamp-2">{template.content}</div>
                           </motion.button>
                         ))}
                       </div>
@@ -857,9 +858,9 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setShowEmoji(!showEmoji)}
-                className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+                className="p-2 bg-indigo-100 dark:bg-slate-700 rounded-lg hover:bg-indigo-200 dark:hover:bg-slate-600 transition-colors"
               >
-                <Smile className="w-5 h-5 text-white/70" />
+                <Smile className="w-5 h-5 text-indigo-600 dark:text-cyan-300" />
               </motion.button>
 
               <AnimatePresence>
@@ -868,7 +869,7 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
                     initial={{ opacity: 0, scale: 0.95, y: 10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                    className="absolute bottom-full mb-2 left-0 w-64 bg-white/20 backdrop-blur-xl border border-white/30 rounded-xl shadow-xl z-50"
+                    className="absolute bottom-full mb-2 left-0 w-64 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-indigo-200 dark:border-slate-700 rounded-xl shadow-xl z-50"
                   >
                     <div className="p-4">
                       <div className="grid grid-cols-6 gap-2">
@@ -881,7 +882,7 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
                               setMessage(prev => prev + emoji);
                               setShowEmoji(false);
                             }}
-                            className="p-2 hover:bg-white/10 rounded-lg transition-colors text-lg"
+                            className="p-2 hover:bg-indigo-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-lg"
                           >
                             {emoji}
                           </motion.button>
@@ -902,7 +903,7 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setIsBold(!isBold)}
-                className={`p-1 rounded ${isBold ? 'bg-blue-500 text-white' : 'hover:bg-white/10'}`}
+                className={`p-1 rounded ${isBold ? 'bg-indigo-500 dark:bg-cyan-500 text-white' : 'hover:bg-indigo-100 dark:hover:bg-slate-700'}`}
               >
                 <Bold className="w-4 h-4" />
               </motion.button>
@@ -910,7 +911,7 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setIsItalic(!isItalic)}
-                className={`p-1 rounded ${isItalic ? 'bg-blue-500 text-white' : 'hover:bg-white/10'}`}
+                className={`p-1 rounded ${isItalic ? 'bg-indigo-500 dark:bg-cyan-500 text-white' : 'hover:bg-indigo-100 dark:hover:bg-slate-700'}`}
               >
                 <Italic className="w-4 h-4" />
               </motion.button>
@@ -925,7 +926,7 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
               }}
               onKeyPress={handleKeyPress}
               placeholder={placeholder}
-              className={`w-full p-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:border-blue-500 focus:outline-none transition-colors resize-none ${
+              className={`w-full p-3 bg-indigo-50 dark:bg-slate-700 border border-indigo-200 dark:border-slate-600 rounded-xl text-indigo-700 dark:text-cyan-100 placeholder-gray-500 dark:placeholder-blue-300 focus:border-indigo-500 dark:focus:border-cyan-400 focus:outline-none transition-colors resize-none ${
                 isBold ? 'font-bold' : ''
               } ${isItalic ? 'italic' : ''}`}
               rows={1}
@@ -941,8 +942,8 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
             disabled={!message.trim() && attachments.length === 0}
             className={`p-3 rounded-xl font-semibold transition-all duration-300 ${
               message.trim() || attachments.length > 0
-                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 shadow-lg'
-                : 'bg-white/10 text-white/50 cursor-not-allowed'
+                ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 dark:from-cyan-500 dark:to-cyan-600 text-white hover:from-indigo-600 hover:to-indigo-700 dark:hover:from-cyan-600 dark:hover:to-cyan-700 shadow-lg'
+                : 'bg-indigo-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
             }`}
           >
             <Send className="w-5 h-5" />
@@ -955,6 +956,7 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
 
 // Main Component
 const LandlordMessage = () => {
+  const { darkMode, toggleDarkMode } = useDarkMode();
   const [currentSection] = useState('Messages');
   const [conversations, setConversations] = useLocalStorage('landlord_conversations', [
     {
@@ -1203,18 +1205,18 @@ const LandlordMessage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-white via-indigo-50 to-purple-100 dark:from-gray-900 dark:via-slate-900 dark:to-blue-950 flex relative overflow-hidden">
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
           animate={{ rotate: 360, scale: [1, 1.1, 1] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-3xl"
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-indigo-300/20 to-pink-300/20 dark:from-cyan-500/10 dark:to-blue-500/10 rounded-full blur-3xl"
         />
         <motion.div
           animate={{ rotate: -360, scale: [1.1, 1, 1.1] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-full blur-3xl"
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-purple-300/20 to-indigo-300/20 dark:from-blue-500/10 dark:to-cyan-500/10 rounded-full blur-3xl"
         />
       </div>
 
@@ -1226,26 +1228,26 @@ const LandlordMessage = () => {
         <main className="flex-1 overflow-hidden">
           <div className="h-full flex">
             {/* Conversations Sidebar */}
-            <div className="w-80 bg-white/5 backdrop-blur-xl border-r border-white/10 flex flex-col">
+            <div className="w-80 bg-white/70 dark:bg-slate-800/50 backdrop-blur-xl border-r border-indigo-200 dark:border-slate-700 flex flex-col">
               {/* Header */}
-              <div className="p-6 border-b border-white/10">
+              <div className="p-6 border-b border-indigo-200 dark:border-slate-700">
                 <motion.h1
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-2xl font-bold text-white mb-4"
+                  className="text-2xl font-bold text-indigo-700 dark:text-cyan-100 mb-4"
                 >
                   Messages
                 </motion.h1>
                 
                 {/* Search */}
                 <div className="relative mb-4">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/50" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-blue-300" />
                   <input
                     type="text"
                     placeholder="Search conversations..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:border-blue-500 focus:outline-none transition-colors"
+                    className="w-full pl-10 pr-4 py-2 bg-indigo-50 dark:bg-slate-700 border border-indigo-200 dark:border-slate-600 rounded-xl text-indigo-700 dark:text-cyan-100 placeholder-gray-500 dark:placeholder-blue-300 focus:border-indigo-500 dark:focus:border-cyan-400 focus:outline-none transition-colors"
                   />
                 </div>
                 
@@ -1264,8 +1266,8 @@ const LandlordMessage = () => {
                       onClick={() => setFilterStatus(key)}
                       className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
                         filterStatus === key
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-white/10 text-white/70 hover:bg-white/20'
+                          ? 'bg-indigo-500 dark:bg-cyan-500 text-white'
+                          : 'bg-indigo-100 dark:bg-slate-700 text-indigo-700 dark:text-cyan-200 hover:bg-indigo-200 dark:hover:bg-slate-600'
                       }`}
                     >
                       {label}
@@ -1298,8 +1300,8 @@ const LandlordMessage = () => {
                 
                 {filteredConversations.length === 0 && (
                   <div className="text-center py-8">
-                    <MessageSquare className="w-12 h-12 mx-auto text-white/30 mb-3" />
-                    <p className="text-white/50">No conversations found</p>
+                    <MessageSquare className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-600 mb-3" />
+                    <p className="text-gray-500 dark:text-gray-400">No conversations found</p>
                   </div>
                 )}
               </div>
@@ -1310,29 +1312,29 @@ const LandlordMessage = () => {
               {activeConversation ? (
                 <>
                   {/* Chat Header */}
-                  <div className="p-6 bg-white/5 backdrop-blur-xl border-b border-white/10">
+                  <div className="p-6 bg-white/70 dark:bg-slate-800/50 backdrop-blur-xl border-b border-indigo-200 dark:border-slate-700">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <motion.div
                           whileHover={{ scale: 1.1 }}
                           className="relative"
                         >
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 dark:from-cyan-500 dark:to-cyan-600 flex items-center justify-center text-white font-semibold">
                             {activeConversation.avatar || activeConversation.name?.charAt(0)}
                           </div>
                           {activeConversation.online && (
-                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-800"></div>
                           )}
                         </motion.div>
                         
                         <div>
-                          <h2 className="text-xl font-bold text-white flex items-center space-x-2">
+                          <h2 className="text-xl font-bold text-indigo-700 dark:text-cyan-100 flex items-center space-x-2">
                             <span>{activeConversation.name}</span>
-                            {activeConversation.isPinned && <Pin className="w-4 h-4 text-yellow-400" />}
+                            {activeConversation.isPinned && <Pin className="w-4 h-4 text-pink-400 dark:text-pink-300" />}
                             {activeConversation.isMuted && <VolumeX className="w-4 h-4 text-gray-400" />}
                           </h2>
-                          <div className="flex items-center space-x-2 text-sm text-white/60">
-                            <span className={activeConversation.online ? 'text-green-400' : ''}>
+                          <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-blue-200">
+                            <span className={activeConversation.online ? 'text-emerald-500' : ''}>
                               {activeConversation.online ? 'Online' : 'Last seen 2 hours ago'}
                             </span>
                             {activeConversation.property && (
@@ -1349,23 +1351,23 @@ const LandlordMessage = () => {
                             <motion.div
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
-                              className="flex items-center space-x-1 text-sm text-blue-400"
+                              className="flex items-center space-x-1 text-sm text-indigo-400 dark:text-cyan-400"
                             >
                               <div className="flex space-x-1">
                                 <motion.div
                                   animate={{ scale: [1, 1.2, 1] }}
                                   transition={{ repeat: Infinity, duration: 1, delay: 0 }}
-                                  className="w-1 h-1 bg-blue-400 rounded-full"
+                                  className="w-1 h-1 bg-indigo-400 dark:bg-cyan-400 rounded-full"
                                 />
                                 <motion.div
                                   animate={{ scale: [1, 1.2, 1] }}
                                   transition={{ repeat: Infinity, duration: 1, delay: 0.2 }}
-                                  className="w-1 h-1 bg-blue-400 rounded-full"
+                                  className="w-1 h-1 bg-indigo-400 dark:bg-cyan-400 rounded-full"
                                 />
                                 <motion.div
                                   animate={{ scale: [1, 1.2, 1] }}
                                   transition={{ repeat: Infinity, duration: 1, delay: 0.4 }}
-                                  className="w-1 h-1 bg-blue-400 rounded-full"
+                                  className="w-1 h-1 bg-indigo-400 dark:bg-cyan-400 rounded-full"
                                 />
                               </div>
                               <span>typing...</span>
@@ -1378,23 +1380,23 @@ const LandlordMessage = () => {
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          className="p-3 bg-white/10 rounded-xl hover:bg-white/20 transition-colors"
+                          className="p-3 bg-indigo-100 dark:bg-slate-700 rounded-xl hover:bg-indigo-200 dark:hover:bg-slate-600 transition-colors"
                         >
-                          <Phone className="w-5 h-5 text-white/70" />
+                          <Phone className="w-5 h-5 text-indigo-600 dark:text-cyan-300" />
                         </motion.button>
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          className="p-3 bg-white/10 rounded-xl hover:bg-white/20 transition-colors"
+                          className="p-3 bg-indigo-100 dark:bg-slate-700 rounded-xl hover:bg-indigo-200 dark:hover:bg-slate-600 transition-colors"
                         >
-                          <Video className="w-5 h-5 text-white/70" />
+                          <Video className="w-5 h-5 text-indigo-600 dark:text-cyan-300" />
                         </motion.button>
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          className="p-3 bg-white/10 rounded-xl hover:bg-white/20 transition-colors"
+                          className="p-3 bg-indigo-100 dark:bg-slate-700 rounded-xl hover:bg-indigo-200 dark:hover:bg-slate-600 transition-colors"
                         >
-                          <Info className="w-5 h-5 text-white/70" />
+                          <Info className="w-5 h-5 text-indigo-600 dark:text-cyan-300" />
                         </motion.button>
                       </div>
                     </div>
@@ -1420,7 +1422,7 @@ const LandlordMessage = () => {
                   </div>
 
                   {/* Message Input */}
-                  <div className="p-6 bg-white/5 backdrop-blur-xl border-t border-white/10">
+                  <div className="p-6 bg-white/70 dark:bg-slate-800/50 backdrop-blur-xl border-t border-indigo-200 dark:border-slate-700">
                     <MessageInput
                       onSend={handleSendMessage}
                       onTyping={handleTyping}
@@ -1433,9 +1435,9 @@ const LandlordMessage = () => {
               ) : (
                 <div className="flex-1 flex items-center justify-center">
                   <div className="text-center">
-                    <MessageSquare className="w-20 h-20 mx-auto text-white/30 mb-6" />
-                    <h3 className="text-2xl font-bold text-white mb-4">Select a Conversation</h3>
-                    <p className="text-white/60">Choose a conversation from the sidebar to start messaging</p>
+                    <MessageSquare className="w-20 h-20 mx-auto text-gray-400 dark:text-gray-600 mb-6" />
+                    <h3 className="text-2xl font-bold text-indigo-700 dark:text-cyan-100 mb-4">Select a Conversation</h3>
+                    <p className="text-gray-600 dark:text-blue-200">Choose a conversation from the sidebar to start messaging</p>
                   </div>
                 </div>
               )}

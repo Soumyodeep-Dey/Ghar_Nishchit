@@ -96,9 +96,13 @@ import {
   RotateCcw, 
   PlayCircle, 
   PauseCircle, 
-  StopCircle
+  StopCircle,
+  ArrowRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+
+// Import the shared DarkModeContext instead of using custom theme hook
+import { useDarkMode } from '../../../DarkModeContext';
 
 // Custom Hooks
 const useLocalStorage = (key, initialValue) => {
@@ -189,7 +193,7 @@ const useNotification = () => {
 };
 
 // Animated Components
-const AnimatedCard = ({ children, delay = 0, className = '', ...props }) => {
+const AnimatedCard = ({ children, delay = 0, className = '', darkMode, ...props }) => {
   const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
   
   return (
@@ -213,7 +217,7 @@ const AnimatedCard = ({ children, delay = 0, className = '', ...props }) => {
 };
 
 // Payment Method Card Component
-const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete }) => {
+const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete, darkMode }) => {
   const [isHovered, setIsHovered] = useState(false);
   
   const getCardIcon = (type) => {
@@ -227,9 +231,9 @@ const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete }) =
       case 'paypal':
         return <div className="text-blue-500 font-bold text-lg">PP</div>;
       case 'bank':
-        return <Building2 className="w-6 h-6 text-green-600" />;
+        return <Building2 className="w-6 h-6 text-emerald-600" />;
       default:
-        return <CreditCard className="w-6 h-6 text-gray-600" />;
+        return <CreditCard className={`w-6 h-6 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`} />;
     }
   };
 
@@ -241,14 +245,18 @@ const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete }) =
       onClick={() => onSelect(method.id)}
       className={`relative p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer overflow-hidden ${
         isSelected 
-          ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20' 
-          : 'border-white/20 bg-white/5 hover:border-white/40 hover:bg-white/10'
+          ? darkMode 
+            ? 'border-cyan-400 bg-cyan-400/10 shadow-lg shadow-cyan-400/20' 
+            : 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/20'
+          : darkMode
+            ? 'border-slate-700 bg-slate-800/50 hover:border-slate-600 hover:bg-slate-800/70'
+            : 'border-indigo-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/50'
       }`}
     >
       {/* Background pattern */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute -top-4 -right-4 w-32 h-32 bg-gradient-to-br from-white to-transparent rounded-full" />
-        <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-gradient-to-tr from-white to-transparent rounded-full" />
+        <div className={`absolute -top-4 -right-4 w-32 h-32 ${darkMode ? 'bg-gradient-to-br from-cyan-400' : 'bg-gradient-to-br from-indigo-500'} to-transparent rounded-full`} />
+        <div className={`absolute -bottom-4 -left-4 w-24 h-24 ${darkMode ? 'bg-gradient-to-tr from-cyan-400' : 'bg-gradient-to-tr from-indigo-500'} to-transparent rounded-full`} />
       </div>
       
       <div className="relative z-10">
@@ -260,9 +268,9 @@ const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete }) =
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="px-2 py-1 bg-green-500/20 rounded-full"
+                className="px-2 py-1 bg-emerald-500/20 rounded-full"
               >
-                <span className="text-xs text-green-300 font-semibold">Default</span>
+                <span className="text-xs text-emerald-400 font-semibold">Default</span>
               </motion.div>
             )}
             
@@ -270,7 +278,7 @@ const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete }) =
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center"
+                className={`w-6 h-6 ${darkMode ? 'bg-cyan-400' : 'bg-indigo-500'} rounded-full flex items-center justify-center`}
               >
                 <Check className="w-4 h-4 text-white" />
               </motion.div>
@@ -279,11 +287,11 @@ const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete }) =
         </div>
         
         <div className="space-y-2">
-          <div className="text-white font-medium">
+          <div className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-medium`}>
             {method.type === 'bank' ? method.bankName : `•••• •••• •••• ${method.last4}`}
           </div>
           
-          <div className="flex items-center justify-between text-white/60 text-sm">
+          <div className={`flex items-center justify-between ${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>
             <span>{method.name || method.holderName}</span>
             {method.expiryDate && (
               <span>{method.expiryDate}</span>
@@ -291,7 +299,7 @@ const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete }) =
           </div>
           
           {method.type === 'bank' && (
-            <div className="text-white/50 text-xs">
+            <div className={`${darkMode ? 'text-cyan-100' : 'text-gray-500'} text-xs`}>
               Account: •••••••{method.accountNumber?.slice(-4)}
             </div>
           )}
@@ -313,9 +321,9 @@ const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete }) =
                   e.stopPropagation();
                   onEdit(method);
                 }}
-                className="p-1 bg-white/20 rounded-lg hover:bg-white/30 transition-colors"
+                className={`p-1 ${darkMode ? 'bg-slate-600/70 hover:bg-slate-600' : 'bg-indigo-100/70 hover:bg-indigo-200'} rounded-lg transition-colors`}
               >
-                <Edit className="w-3 h-3 text-white/70" />
+                <Edit className={`w-3 h-3 ${darkMode ? 'text-cyan-300' : 'text-indigo-600'}`} />
               </motion.button>
               
               {!method.isDefault && (
@@ -340,7 +348,7 @@ const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete }) =
 };
 
 // Subscription Plan Card Component
-const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular = false }) => {
+const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular = false, darkMode }) => {
   const [isHovered, setIsHovered] = useState(false);
   const isCurrentPlan = currentPlan?.id === plan.id;
   const canUpgrade = currentPlan && plan.tier > currentPlan.tier;
@@ -353,10 +361,14 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
       onMouseLeave={() => setIsHovered(false)}
       className={`relative p-8 rounded-3xl border-2 transition-all duration-500 overflow-hidden ${
         popular 
-          ? 'border-gradient-to-r from-purple-500 to-pink-500 bg-gradient-to-br ' 
+          ? darkMode
+            ? 'border-cyan-400 bg-gradient-to-br from-cyan-400/10 to-blue-500/10'
+            : 'border-pink-500 bg-gradient-to-br from-pink-300/20 via-purple-300/20 to-indigo-400/20'
           : isCurrentPlan
-            ? 'border-green-500 bg-green-500/10'
-            : 'border-white/20 bg-white/5 hover:border-white/40 hover:bg-white/10'
+            ? 'border-emerald-500 bg-emerald-500/10'
+            : darkMode
+              ? 'border-slate-700 bg-slate-800/50 hover:border-slate-600 hover:bg-slate-800/70'
+              : 'border-indigo-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/50'
       }`}
     >
       {/* Popular badge */}
@@ -364,7 +376,11 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="absolute -top-3 left-1/2 transform -translate-x-1/2 px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
+          className={`absolute -top-3 left-1/2 transform -translate-x-1/2 px-6 py-2 ${
+            darkMode 
+              ? 'bg-gradient-to-r from-cyan-500 to-blue-500' 
+              : 'bg-gradient-to-r from-pink-500 to-purple-500'
+          } rounded-full`}
         >
           <span className="text-white text-sm font-bold flex items-center space-x-1">
             <Crown className="w-4 h-4" />
@@ -378,9 +394,9 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="absolute top-4 right-4 px-3 py-1 bg-green-500/20 rounded-full border border-green-500/30"
+          className="absolute top-4 right-4 px-3 py-1 bg-emerald-500/20 rounded-full border border-emerald-500/30"
         >
-          <span className="text-green-300 text-xs font-semibold">Current Plan</span>
+          <span className="text-emerald-400 text-xs font-semibold">Current Plan</span>
         </motion.div>
       )}
       
@@ -389,7 +405,11 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full blur-2xl"
+          className={`absolute -top-10 -right-10 w-40 h-40 ${
+            darkMode 
+              ? 'bg-gradient-to-br from-cyan-500 to-blue-500' 
+              : 'bg-gradient-to-br from-indigo-500 to-purple-500'
+          } rounded-full blur-2xl`}
         />
       </div>
       
@@ -398,22 +418,26 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
         <div className="text-center mb-8">
           <motion.div
             whileHover={{ scale: 1.1, rotate: 10 }}
-            className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center"
+            className={`w-16 h-16 mx-auto mb-4 rounded-2xl ${
+              darkMode 
+                ? 'bg-gradient-to-br from-cyan-500 to-blue-600' 
+                : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+            } flex items-center justify-center`}
           >
             {plan.icon}
           </motion.div>
           
-          <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
-          <p className="text-white/60 text-sm">{plan.description}</p>
+          <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-2`}>{plan.name}</h3>
+          <p className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>{plan.description}</p>
         </div>
         
         {/* Pricing */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-2 mb-2">
-            <span className="text-4xl font-bold text-white">
+            <span className={`text-4xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'}`}>
               ${plan.monthlyPrice}
             </span>
-            <div className="text-white/60">
+            <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>
               <div className="text-sm">/month</div>
               <div className="text-xs">per property</div>
             </div>
@@ -421,13 +445,13 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
           
           {plan.yearlyPrice && (
             <div className="flex items-center justify-center space-x-2 text-sm">
-              <span className="text-white/50 line-through">
+              <span className={`${darkMode ? 'text-blue-300' : 'text-gray-500'} line-through`}>
                 ${plan.monthlyPrice * 12}/year
               </span>
-              <span className="text-green-400 font-semibold">
+              <span className="text-emerald-400 font-semibold">
                 ${plan.yearlyPrice}/year
               </span>
-              <span className="px-2 py-1 bg-green-500/20 rounded-full text-xs text-green-300">
+              <span className="px-2 py-1 bg-emerald-500/20 rounded-full text-xs text-emerald-400">
                 Save ${(plan.monthlyPrice * 12 - plan.yearlyPrice)}
               </span>
             </div>
@@ -444,24 +468,24 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
               transition={{ delay: index * 0.1 }}
               className="flex items-center space-x-3"
             >
-              <div className="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center">
-                <Check className="w-3 h-3 text-green-400" />
+              <div className="w-5 h-5 bg-emerald-500/20 rounded-full flex items-center justify-center">
+                <Check className="w-3 h-3 text-emerald-400" />
               </div>
-              <span className="text-white/80 text-sm">{feature}</span>
+              <span className={`${darkMode ? 'text-blue-200' : 'text-gray-700'} text-sm`}>{feature}</span>
             </motion.div>
           ))}
         </div>
         
         {/* Limits */}
-        <div className="bg-white/5 rounded-xl p-4 mb-8">
+        <div className={`${darkMode ? 'bg-slate-800/50' : 'bg-indigo-50/50'} rounded-xl p-4 mb-8`}>
           <div className="grid grid-cols-2 gap-4 text-center">
             <div>
-              <div className="text-2xl font-bold text-blue-400">{plan.propertyLimit}</div>
-              <div className="text-xs text-white/60">Properties</div>
+              <div className={`text-2xl font-bold ${darkMode ? 'text-cyan-400' : 'text-indigo-500'}`}>{plan.propertyLimit}</div>
+              <div className={`text-xs ${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Properties</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-purple-400">{plan.supportLevel}</div>
-              <div className="text-xs text-white/60">Support</div>
+              <div className={`text-2xl font-bold ${darkMode ? 'text-blue-400' : 'text-purple-500'}`}>{plan.supportLevel}</div>
+              <div className={`text-xs ${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Support</div>
             </div>
           </div>
         </div>
@@ -480,12 +504,16 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
             isCurrentPlan
               ? 'bg-gray-500/20 text-gray-400 cursor-not-allowed'
               : popular
-                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 shadow-lg shadow-purple-500/25'
+                ? darkMode
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-600 hover:to-blue-600 shadow-lg shadow-cyan-500/25'
+                  : 'bg-gradient-to-r from-pink-500 to-purple-500 text-white hover:from-pink-600 hover:to-purple-600 shadow-lg shadow-pink-500/25'
                 : canUpgrade
-                  ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700 shadow-lg shadow-green-500/25'
+                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/25'
                   : canDowngrade
                     ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 shadow-lg shadow-orange-500/25'
-                    : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 shadow-lg shadow-blue-500/25'
+                    : darkMode
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-600 hover:to-blue-700 shadow-lg shadow-cyan-500/25'
+                      : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25'
           }`}
         >
           {isCurrentPlan 
@@ -500,7 +528,7 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
         
         {/* Additional info */}
         {plan.trialDays && !isCurrentPlan && (
-          <p className="text-center text-white/50 text-xs mt-3">
+          <p className={`text-center ${darkMode ? 'text-cyan-100' : 'text-gray-500'} text-xs mt-3`}>
             {plan.trialDays}-day free trial included
           </p>
         )}
@@ -510,11 +538,11 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
 };
 
 // Payment History Item Component
-const PaymentHistoryItem = ({ payment, onDownloadReceipt, onViewDetails }) => {
+const PaymentHistoryItem = ({ payment, onDownloadReceipt, onViewDetails, darkMode }) => {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle className="w-5 h-5 text-green-400" />;
+        return <CheckCircle className="w-5 h-5 text-emerald-400" />;
       case 'pending':
         return <Clock className="w-5 h-5 text-yellow-400" />;
       case 'failed':
@@ -529,15 +557,15 @@ const PaymentHistoryItem = ({ payment, onDownloadReceipt, onViewDetails }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-500/20 text-green-300 border-green-500/30';
+        return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
       case 'pending':
-        return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
+        return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
       case 'failed':
-        return 'bg-red-500/20 text-red-300 border-red-500/30';
+        return 'bg-red-500/20 text-red-400 border-red-500/30';
       case 'refunded':
-        return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+        return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
       default:
-        return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
+        return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     }
   };
 
@@ -545,28 +573,36 @@ const PaymentHistoryItem = ({ payment, onDownloadReceipt, onViewDetails }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.01, boxShadow: "0 10px 30px rgba(0,0,0,0.2)" }}
-      className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6 hover:border-white/20 transition-all duration-300"
+      whileHover={{ scale: 1.01, boxShadow: darkMode ? "0 10px 30px rgba(0,0,0,0.4)" : "0 10px 30px rgba(0,0,0,0.1)" }}
+      className={`${
+        darkMode 
+          ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700 hover:border-slate-600' 
+          : 'bg-white/90 backdrop-blur-xl border border-indigo-200 hover:border-indigo-300'
+      } rounded-xl p-6 transition-all duration-300`}
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-4">
           <motion.div
             whileHover={{ scale: 1.1, rotate: 5 }}
-            className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center"
+            className={`w-12 h-12 ${
+              darkMode 
+                ? 'bg-gradient-to-br from-cyan-500 to-blue-600' 
+                : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+            } rounded-xl flex items-center justify-center`}
           >
             <Receipt className="w-6 h-6 text-white" />
           </motion.div>
           
           <div>
-            <h4 className="font-semibold text-white">{payment.description}</h4>
-            <p className="text-white/60 text-sm">
+            <h4 className={`font-semibold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'}`}>{payment.description}</h4>
+            <p className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>
               {new Date(payment.date).toLocaleDateString()} • {payment.method}
             </p>
           </div>
         </div>
         
         <div className="text-right">
-          <div className="text-xl font-bold text-white mb-1">
+          <div className={`text-xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>
             ${payment.amount.toFixed(2)}
           </div>
           <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs border ${getStatusColor(payment.status)}`}>
@@ -577,8 +613,8 @@ const PaymentHistoryItem = ({ payment, onDownloadReceipt, onViewDetails }) => {
       </div>
       
       {payment.invoiceId && (
-        <div className="flex items-center justify-between pt-4 border-t border-white/10">
-          <div className="text-white/60 text-sm">
+        <div className={`flex items-center justify-between pt-4 border-t ${darkMode ? 'border-slate-700' : 'border-indigo-200'}`}>
+          <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>
             Invoice #{payment.invoiceId}
           </div>
           
@@ -587,7 +623,11 @@ const PaymentHistoryItem = ({ payment, onDownloadReceipt, onViewDetails }) => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => onViewDetails(payment)}
-              className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-lg hover:bg-blue-500/30 transition-colors text-sm"
+              className={`px-3 py-1 ${
+                darkMode 
+                  ? 'bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30' 
+                  : 'bg-indigo-500/20 text-indigo-600 hover:bg-indigo-500/30'
+              } rounded-lg transition-colors text-sm`}
             >
               View Details
             </motion.button>
@@ -596,7 +636,7 @@ const PaymentHistoryItem = ({ payment, onDownloadReceipt, onViewDetails }) => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => onDownloadReceipt(payment)}
-              className="px-3 py-1 bg-green-500/20 text-green-300 rounded-lg hover:bg-green-500/30 transition-colors text-sm flex items-center space-x-1"
+              className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 transition-colors text-sm flex items-center space-x-1"
             >
               <Download className="w-3 h-3" />
               <span>Receipt</span>
@@ -609,7 +649,7 @@ const PaymentHistoryItem = ({ payment, onDownloadReceipt, onViewDetails }) => {
 };
 
 // Billing Summary Component
-const BillingSummary = ({ summary, onPayNow }) => {
+const BillingSummary = ({ summary, onPayNow, darkMode }) => {
   const daysUntilDue = Math.ceil((new Date(summary.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
   const isOverdue = daysUntilDue < 0;
   const isDueSoon = daysUntilDue <= 3 && daysUntilDue > 0;
@@ -623,7 +663,9 @@ const BillingSummary = ({ summary, onPayNow }) => {
           ? 'bg-gradient-to-br from-red-500/20 to-red-600/20 border-2 border-red-500/50'
           : isDueSoon
             ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/50'
-            : 'bg-gradient-to-br from-blue-500/20 to-purple-500/20 border-2 border-blue-500/50'
+            : darkMode
+              ? 'bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-2 border-cyan-500/50'
+              : 'bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border-2 border-indigo-500/50'
       }`}
     >
       {/* Background animation */}
@@ -638,76 +680,80 @@ const BillingSummary = ({ summary, onPayNow }) => {
             repeat: Infinity, 
             ease: "easeInOut" 
           }}
-          className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-white to-transparent rounded-full"
+          className={`absolute -top-20 -right-20 w-40 h-40 ${
+            darkMode 
+              ? 'bg-gradient-to-br from-cyan-400' 
+              : 'bg-gradient-to-br from-indigo-400'
+          } to-transparent rounded-full`}
         />
       </div>
       
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-2xl font-bold text-white mb-2">Current Bill</h3>
-            <p className="text-white/70">
+            <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-2`}>Current Bill</h3>
+            <p className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>
               {summary.planName} • {summary.propertiesCount} properties
             </p>
           </div>
           
           <motion.div
             whileHover={{ scale: 1.05, rotate: 5 }}
-            className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center"
+            className={`w-16 h-16 ${darkMode ? 'bg-slate-700/50' : 'bg-indigo-100/50'} rounded-2xl flex items-center justify-center`}
           >
-            <DollarSign className="w-8 h-8 text-white" />
+            <DollarSign className={`w-8 h-8 ${darkMode ? 'text-cyan-300' : 'text-indigo-600'}`} />
           </motion.div>
         </div>
         
         <div className="space-y-4 mb-6">
           <div className="flex justify-between">
-            <span className="text-white/70">Subscription Fee</span>
-            <span className="text-white font-semibold">${summary.subscriptionFee.toFixed(2)}</span>
+            <span className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Subscription Fee</span>
+            <span className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-semibold`}>${summary.subscriptionFee.toFixed(2)}</span>
           </div>
           
           {summary.additionalFees > 0 && (
             <div className="flex justify-between">
-              <span className="text-white/70">Additional Features</span>
-              <span className="text-white font-semibold">${summary.additionalFees.toFixed(2)}</span>
+              <span className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Additional Features</span>
+              <span className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-semibold`}>${summary.additionalFees.toFixed(2)}</span>
             </div>
           )}
           
           {summary.discount > 0 && (
             <div className="flex justify-between">
-              <span className="text-green-400">Discount Applied</span>
-              <span className="text-green-400 font-semibold">-${summary.discount.toFixed(2)}</span>
+              <span className="text-emerald-400">Discount Applied</span>
+              <span className="text-emerald-400 font-semibold">-${summary.discount.toFixed(2)}</span>
             </div>
           )}
           
           <div className="flex justify-between">
-            <span className="text-white/70">Tax</span>
-            <span className="text-white font-semibold">${summary.tax.toFixed(2)}</span>
+            <span className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Tax</span>
+            <span className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-semibold`}>${summary.tax.toFixed(2)}</span>
           </div>
           
-          <div className="h-px bg-white/20"></div>
+          <div className={`h-px ${darkMode ? 'bg-slate-600' : 'bg-indigo-200'}`}></div>
           
           <div className="flex justify-between text-xl">
-            <span className="text-white font-bold">Total Amount</span>
-            <span className="text-white font-bold">${summary.totalAmount.toFixed(2)}</span>
+            <span className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-bold`}>Total Amount</span>
+            <span className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-bold`}>${summary.totalAmount.toFixed(2)}</span>
           </div>
         </div>
         
         <div className="flex items-center justify-between mb-6">
           <div>
-            <div className="text-white/70 text-sm">Due Date</div>
+            <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Due Date</div>
             <div className={`text-lg font-semibold ${
-              isOverdue ? 'text-red-400' : isDueSoon ? 'text-yellow-400' : 'text-white'
+              isOverdue ? 'text-red-400' : isDueSoon ? 'text-yellow-400' : darkMode ? 'text-cyan-100' : 'text-indigo-700'
             }`}>
               {new Date(summary.dueDate).toLocaleDateString()}
             </div>
           </div>
           
           <div className="text-right">
-            <div className="text-white/70 text-sm">
+            <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>
               {isOverdue ? 'Overdue by' : 'Due in'}
             </div>
             <div className={`text-lg font-semibold ${
-              isOverdue ? 'text-red-400' : isDueSoon ? 'text-yellow-400' : 'text-white'
+              isOverdue ? 'text-red-400' : isDueSoon ? 'text-yellow-400' : darkMode ? 'text-cyan-100' : 'text-indigo-700'
             }`}>
               {Math.abs(daysUntilDue)} days
             </div>
@@ -723,14 +769,16 @@ const BillingSummary = ({ summary, onPayNow }) => {
               ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-lg shadow-red-500/25'
               : isDueSoon
                 ? 'bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 shadow-lg shadow-yellow-500/25'
-                : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-lg shadow-blue-500/25'
+                : darkMode
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg shadow-cyan-500/25'
+                  : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25'
           }`}
         >
           {isOverdue ? 'Pay Overdue Amount' : 'Pay Now'}
         </motion.button>
         
         {isOverdue && (
-          <p className="text-red-300 text-sm text-center mt-3">
+          <p className="text-red-400 text-sm text-center mt-3">
             Late fees may apply. Please pay immediately to avoid service interruption.
           </p>
         )}
@@ -740,7 +788,7 @@ const BillingSummary = ({ summary, onPayNow }) => {
 };
 
 // Payment Modal Component
-const PaymentModal = ({ isOpen, onClose, amount, onPayment }) => {
+const PaymentModal = ({ isOpen, onClose, amount, onPayment, darkMode }) => {
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [cardDetails, setCardDetails] = useState({
@@ -779,20 +827,24 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment }) => {
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl w-full max-w-md overflow-hidden"
+        className={`${
+          darkMode 
+            ? 'bg-slate-800/90 backdrop-blur-xl border border-slate-700' 
+            : 'bg-white/90 backdrop-blur-xl border border-indigo-200'
+        } rounded-2xl w-full max-w-md overflow-hidden`}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-6 border-b border-white/20">
+        <div className={`p-6 border-b ${darkMode ? 'border-slate-700' : 'border-indigo-200'}`}>
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-white">Complete Payment</h2>
+            <h2 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'}`}>Complete Payment</h2>
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+              className={`p-2 rounded-lg ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-indigo-100'} transition-colors`}
             >
-              <X className="w-6 h-6 text-white/70" />
+              <X className={`w-6 h-6 ${darkMode ? 'text-cyan-300' : 'text-indigo-600'}`} />
             </motion.button>
           </div>
         </div>
@@ -801,17 +853,17 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment }) => {
         <div className="p-6">
           {/* Amount */}
           <div className="text-center mb-8">
-            <div className="text-4xl font-bold text-white mb-2">
+            <div className={`text-4xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-2`}>
               ${amount?.toFixed(2)}
             </div>
-            <div className="text-white/60">
+            <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>
               Payment to Ghar_Nishchit
             </div>
           </div>
 
           {/* Payment Methods */}
           <div className="space-y-4 mb-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Payment Method</h3>
+            <h3 className={`text-lg font-semibold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-4`}>Payment Method</h3>
             
             {/* Credit Card */}
             <motion.div
@@ -819,18 +871,22 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment }) => {
               onClick={() => setSelectedMethod('card')}
               className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
                 selectedMethod === 'card' 
-                  ? 'border-blue-500 bg-blue-500/10' 
-                  : 'border-white/20 hover:border-white/40'
+                  ? darkMode
+                    ? 'border-cyan-400 bg-cyan-400/10' 
+                    : 'border-indigo-500 bg-indigo-500/10'
+                  : darkMode
+                    ? 'border-slate-600 hover:border-slate-500'
+                    : 'border-indigo-200 hover:border-indigo-300'
               }`}
             >
               <div className="flex items-center space-x-3">
-                <CreditCard className="w-6 h-6 text-blue-400" />
+                <CreditCard className={`w-6 h-6 ${darkMode ? 'text-cyan-400' : 'text-indigo-500'}`} />
                 <div>
-                  <div className="text-white font-medium">Credit/Debit Card</div>
-                  <div className="text-white/60 text-sm">Visa, Mastercard, Amex</div>
+                  <div className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-medium`}>Credit/Debit Card</div>
+                  <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Visa, Mastercard, Amex</div>
                 </div>
                 {selectedMethod === 'card' && (
-                  <Check className="w-5 h-5 text-blue-400 ml-auto" />
+                  <Check className={`w-5 h-5 ${darkMode ? 'text-cyan-400' : 'text-indigo-500'} ml-auto`} />
                 )}
               </div>
             </motion.div>
@@ -841,18 +897,22 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment }) => {
               onClick={() => setSelectedMethod('paypal')}
               className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
                 selectedMethod === 'paypal' 
-                  ? 'border-blue-500 bg-blue-500/10' 
-                  : 'border-white/20 hover:border-white/40'
+                  ? darkMode
+                    ? 'border-cyan-400 bg-cyan-400/10' 
+                    : 'border-indigo-500 bg-indigo-500/10'
+                  : darkMode
+                    ? 'border-slate-600 hover:border-slate-500'
+                    : 'border-indigo-200 hover:border-indigo-300'
               }`}
             >
               <div className="flex items-center space-x-3">
-                <Wallet className="w-6 h-6 text-blue-400" />
+                <Wallet className={`w-6 h-6 ${darkMode ? 'text-cyan-400' : 'text-indigo-500'}`} />
                 <div>
-                  <div className="text-white font-medium">PayPal</div>
-                  <div className="text-white/60 text-sm">Pay with PayPal account</div>
+                  <div className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-medium`}>PayPal</div>
+                  <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Pay with PayPal account</div>
                 </div>
                 {selectedMethod === 'paypal' && (
-                  <Check className="w-5 h-5 text-blue-400 ml-auto" />
+                  <Check className={`w-5 h-5 ${darkMode ? 'text-cyan-400' : 'text-indigo-500'} ml-auto`} />
                 )}
               </div>
             </motion.div>
@@ -866,57 +926,73 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment }) => {
               className="space-y-4 mb-6"
             >
               <div>
-                <label className="block text-white/70 text-sm mb-2">Card Number</label>
+                <label className={`block ${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm mb-2`}>Card Number</label>
                 <input
                   type="text"
                   placeholder="1234 5678 9012 3456"
                   value={cardDetails.number}
                   onChange={(e) => setCardDetails(prev => ({ ...prev, number: e.target.value }))}
-                  className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
+                  className={`w-full p-3 ${
+                    darkMode 
+                      ? 'bg-slate-700/50 border border-slate-600 text-cyan-100 placeholder-blue-300' 
+                      : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700 placeholder-gray-500'
+                  } rounded-lg focus:${darkMode ? 'border-cyan-400' : 'border-indigo-500'} focus:outline-none`}
                 />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-white/70 text-sm mb-2">Expiry Date</label>
+                  <label className={`block ${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm mb-2`}>Expiry Date</label>
                   <input
                     type="text"
                     placeholder="MM/YY"
                     value={cardDetails.expiry}
                     onChange={(e) => setCardDetails(prev => ({ ...prev, expiry: e.target.value }))}
-                    className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
+                    className={`w-full p-3 ${
+                      darkMode 
+                        ? 'bg-slate-700/50 border border-slate-600 text-cyan-100 placeholder-blue-300' 
+                        : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700 placeholder-gray-500'
+                    } rounded-lg focus:${darkMode ? 'border-cyan-400' : 'border-indigo-500'} focus:outline-none`}
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-white/70 text-sm mb-2">CVV</label>
+                  <label className={`block ${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm mb-2`}>CVV</label>
                   <input
                     type="text"
                     placeholder="123"
                     value={cardDetails.cvv}
                     onChange={(e) => setCardDetails(prev => ({ ...prev, cvv: e.target.value }))}
-                    className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
+                    className={`w-full p-3 ${
+                      darkMode 
+                        ? 'bg-slate-700/50 border border-slate-600 text-cyan-100 placeholder-blue-300' 
+                        : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700 placeholder-gray-500'
+                    } rounded-lg focus:${darkMode ? 'border-cyan-400' : 'border-indigo-500'} focus:outline-none`}
                   />
                 </div>
               </div>
               
               <div>
-                <label className="block text-white/70 text-sm mb-2">Cardholder Name</label>
+                <label className={`block ${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm mb-2`}>Cardholder Name</label>
                 <input
                   type="text"
                   placeholder="John Doe"
                   value={cardDetails.name}
                   onChange={(e) => setCardDetails(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
+                  className={`w-full p-3 ${
+                    darkMode 
+                      ? 'bg-slate-700/50 border border-slate-600 text-cyan-100 placeholder-blue-300' 
+                      : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700 placeholder-gray-500'
+                  } rounded-lg focus:${darkMode ? 'border-cyan-400' : 'border-indigo-500'} focus:outline-none`}
                 />
               </div>
             </motion.div>
           )}
 
           {/* Security Info */}
-          <div className="flex items-center space-x-2 mb-6 p-3 bg-green-500/10 rounded-lg border border-green-500/20">
-            <ShieldCheck className="w-5 h-5 text-green-400" />
-            <span className="text-green-300 text-sm">
+          <div className="flex items-center space-x-2 mb-6 p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+            <ShieldCheck className="w-5 h-5 text-emerald-400" />
+            <span className="text-emerald-400 text-sm">
               Your payment is secured with 256-bit SSL encryption
             </span>
           </div>
@@ -927,7 +1003,11 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment }) => {
             whileTap={{ scale: 0.95 }}
             onClick={handlePayment}
             disabled={!selectedMethod || isProcessing}
-            className="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-bold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+            className={`w-full py-4 ${
+              darkMode 
+                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg shadow-cyan-500/25' 
+                : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25'
+            } text-white rounded-xl font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2`}
           >
             {isProcessing ? (
               <>
@@ -948,7 +1028,7 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment }) => {
 };
 
 // Notification Toast Component
-const NotificationToast = ({ notifications, onRemove }) => {
+const NotificationToast = ({ notifications, onRemove, darkMode }) => {
   return (
     <div className="fixed top-4 right-4 z-50 space-y-2">
       <AnimatePresence>
@@ -959,10 +1039,12 @@ const NotificationToast = ({ notifications, onRemove }) => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 300 }}
             className={`p-4 rounded-lg shadow-lg backdrop-blur-xl border max-w-sm ${
-              notification.type === 'success' ? 'bg-green-500/20 border-green-500/30 text-green-300' :
-              notification.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-300' :
-              notification.type === 'warning' ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-300' :
-              'bg-blue-500/20 border-blue-500/30 text-blue-300'
+              notification.type === 'success' ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' :
+              notification.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-400' :
+              notification.type === 'warning' ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-400' :
+              darkMode 
+                ? 'bg-cyan-500/20 border-cyan-500/30 text-cyan-400'
+                : 'bg-indigo-500/20 border-indigo-500/30 text-indigo-600'
             }`}
           >
             <div className="flex items-start space-x-3">
@@ -1003,6 +1085,7 @@ const LandlordPayment = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState(0);
   
+  const { darkMode, toggleDarkMode } = useDarkMode();
   const { notifications, addNotification, removeNotification } = useNotification();
   
   // Sample data
@@ -1215,25 +1298,37 @@ const LandlordPayment = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex relative overflow-hidden">
+    <div className={`min-h-screen ${
+      darkMode 
+        ? 'bg-gradient-to-br from-gray-900 via-slate-900 to-blue-950' 
+        : 'bg-gradient-to-br from-white via-indigo-50 to-purple-100'
+    } flex relative overflow-hidden`}>
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
           animate={{ rotate: 360, scale: [1, 1.1, 1] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-3xl"
+          className={`absolute -top-40 -right-40 w-80 h-80 ${
+            darkMode 
+              ? 'bg-gradient-to-r from-cyan-500/10 to-blue-500/10' 
+              : 'bg-gradient-to-r from-indigo-300/20 to-purple-300/20'
+          } rounded-full blur-3xl`}
         />
         <motion.div
           animate={{ rotate: -360, scale: [1.1, 1, 1.1] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-full blur-3xl"
+          className={`absolute -bottom-40 -left-40 w-80 h-80 ${
+            darkMode 
+              ? 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10' 
+              : 'bg-gradient-to-r from-purple-300/20 to-pink-300/20'
+          } rounded-full blur-3xl`}
         />
       </div>
 
-      <LandlordSideBar currentSection={currentSection} />
+      <LandlordSideBar currentSection={currentSection} darkMode={darkMode} />
       
       <div className="flex-1 flex flex-col relative z-10">
-        <LandlordNavBar currentSection={currentSection} />
+        <LandlordNavBar currentSection={currentSection} darkMode={darkMode} toggleTheme={toggleDarkMode} />
         
         <main className="flex-1 overflow-y-auto">
           <div className="p-8 space-y-8">
@@ -1245,7 +1340,11 @@ const LandlordPayment = () => {
               className="text-center mb-12"
             >
               <motion.h1
-                className="text-5xl font-bold text-white mb-4 bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent"
+                className={`text-5xl font-bold mb-4 ${
+                  darkMode 
+                    ? 'bg-gradient-to-r from-cyan-300 via-blue-300 to-cyan-300 bg-clip-text text-transparent' 
+                    : 'bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent'
+                }`}
               >
                 Payment & Billing
               </motion.h1>
@@ -1253,7 +1352,7 @@ const LandlordPayment = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.6 }}
-                className="text-xl text-white/70 max-w-2xl mx-auto"
+                className={`text-xl ${darkMode ? 'text-blue-200' : 'text-gray-600'} max-w-2xl mx-auto`}
               >
                 Manage your subscription, payments, and billing with Ghar_Nishchit
               </motion.p>
@@ -1261,63 +1360,114 @@ const LandlordPayment = () => {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-              <AnimatedCard className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center">
+              <AnimatedCard 
+                darkMode={darkMode}
+                className={`${
+                  darkMode 
+                    ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700' 
+                    : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
+                } rounded-2xl p-6 text-center`}
+              >
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
-                  className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center"
+                  className={`w-12 h-12 mx-auto mb-4 rounded-xl ${
+                    darkMode 
+                      ? 'bg-gradient-to-br from-cyan-500 to-blue-600' 
+                      : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+                  } flex items-center justify-center`}
                 >
                   <DollarSign className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className="text-2xl font-bold text-white mb-1">
+                <div className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>
                   ${Math.round(useCountUp(stats.totalPaid, 2000, 0))}
                 </div>
-                <div className="text-white/60 text-sm">Total Paid</div>
+                <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Total Paid</div>
               </AnimatedCard>
               
-              <AnimatedCard delay={0.1} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center">
+              <AnimatedCard 
+                delay={0.1} 
+                darkMode={darkMode}
+                className={`${
+                  darkMode 
+                    ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700' 
+                    : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
+                } rounded-2xl p-6 text-center`}
+              >
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
-                  className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center"
+                  className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center"
                 >
                   <TrendingUp className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className="text-2xl font-bold text-white mb-1">
+                <div className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>
                   ${Math.round(useCountUp(stats.avgMonthlySpend, 2000, 0))}
                 </div>
-                <div className="text-white/60 text-sm">Avg Monthly</div>
+                <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Avg Monthly</div>
               </AnimatedCard>
               
-              <AnimatedCard delay={0.2} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center">
+              <AnimatedCard 
+                delay={0.2} 
+                darkMode={darkMode}
+                className={`${
+                  darkMode 
+                    ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700' 
+                    : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
+                } rounded-2xl p-6 text-center`}
+              >
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
-                  className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center"
+                  className={`w-12 h-12 mx-auto mb-4 rounded-xl ${
+                    darkMode 
+                      ? 'bg-gradient-to-br from-blue-500 to-purple-600' 
+                      : 'bg-gradient-to-br from-purple-500 to-pink-600'
+                  } flex items-center justify-center`}
                 >
                   <Crown className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className="text-lg font-bold text-white mb-1">{stats.activeSubscription}</div>
-                <div className="text-white/60 text-sm">Current Plan</div>
+                <div className={`text-lg font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>{stats.activeSubscription}</div>
+                <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Current Plan</div>
               </AnimatedCard>
               
-              <AnimatedCard delay={0.3} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center">
+              <AnimatedCard 
+                delay={0.3} 
+                darkMode={darkMode}
+                className={`${
+                  darkMode 
+                    ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700' 
+                    : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
+                } rounded-2xl p-6 text-center`}
+              >
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center"
                 >
                   <Calendar className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className="text-2xl font-bold text-white mb-1">{stats.daysUntilPayment}</div>
-                <div className="text-white/60 text-sm">Days to Payment</div>
+                <div className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>{stats.daysUntilPayment}</div>
+                <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Days to Payment</div>
               </AnimatedCard>
               
-              <AnimatedCard delay={0.4} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center">
+              <AnimatedCard 
+                delay={0.4} 
+                darkMode={darkMode}
+                className={`${
+                  darkMode 
+                    ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700' 
+                    : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
+                } rounded-2xl p-6 text-center`}
+              >
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
-                  className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center"
+                  className={`w-12 h-12 mx-auto mb-4 rounded-xl ${
+                    darkMode 
+                      ? 'bg-gradient-to-br from-cyan-500 to-blue-600' 
+                      : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+                  } flex items-center justify-center`}
                 >
                   <CreditCard className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className="text-2xl font-bold text-white mb-1">{paymentMethods.length}</div>
-                <div className="text-white/60 text-sm">Payment Methods</div>
+                <div className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>{paymentMethods.length}</div>
+                <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Payment Methods</div>
               </AnimatedCard>
             </div>
 
@@ -1326,7 +1476,11 @@ const LandlordPayment = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="flex space-x-1 mb-8 bg-white/5 p-1 rounded-2xl backdrop-blur-xl border border-white/10"
+              className={`flex space-x-1 mb-8 ${
+                darkMode 
+                  ? 'bg-slate-800/50 border border-slate-700' 
+                  : 'bg-white/50 border border-indigo-200'
+              } p-1 rounded-2xl backdrop-blur-xl`}
             >
               {[
                 { key: 'billing', label: 'Current Bill', icon: Receipt },
@@ -1341,8 +1495,12 @@ const LandlordPayment = () => {
                   onClick={() => setActiveTab(key)}
                   className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
                     activeTab === key
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
-                      : 'text-white/70 hover:text-white hover:bg-white/10'
+                      ? darkMode
+                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
+                        : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
+                      : darkMode
+                        ? 'text-blue-200 hover:text-cyan-100 hover:bg-slate-700/50'
+                        : 'text-gray-600 hover:text-indigo-700 hover:bg-indigo-100/50'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -1362,37 +1520,46 @@ const LandlordPayment = () => {
                   transition={{ duration: 0.5 }}
                   className="space-y-8"
                 >
-                  <AnimatedCard>
+                  <AnimatedCard darkMode={darkMode}>
                     <BillingSummary
                       summary={billingSummary}
                       onPayNow={handlePayNow}
+                      darkMode={darkMode}
                     />
                   </AnimatedCard>
                   
                   {/* Usage Details */}
-                  <AnimatedCard delay={0.2} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8">
-                    <h3 className="text-2xl font-bold text-white mb-6">Usage This Month</h3>
+                  <AnimatedCard 
+                    delay={0.2} 
+                    darkMode={darkMode}
+                    className={`${
+                      darkMode 
+                        ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700' 
+                        : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
+                    } rounded-2xl p-8`}
+                  >
+                    <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-6`}>Usage This Month</h3>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="text-center p-6 bg-white/5 rounded-xl">
-                        <Building2 className="w-8 h-8 mx-auto mb-3 text-blue-400" />
-                        <div className="text-3xl font-bold text-white mb-1">12</div>
-                        <div className="text-white/60">Properties Listed</div>
-                        <div className="text-xs text-blue-400 mt-1">of 25 allowed</div>
+                      <div className={`text-center p-6 ${darkMode ? 'bg-slate-700/50' : 'bg-indigo-50/50'} rounded-xl`}>
+                        <Building2 className={`w-8 h-8 mx-auto mb-3 ${darkMode ? 'text-cyan-400' : 'text-indigo-500'}`} />
+                        <div className={`text-3xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>12</div>
+                        <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Properties Listed</div>
+                        <div className={`text-xs ${darkMode ? 'text-cyan-400' : 'text-indigo-500'} mt-1`}>of 25 allowed</div>
                       </div>
                       
-                      <div className="text-center p-6 bg-white/5 rounded-xl">
-                        <Users className="w-8 h-8 mx-auto mb-3 text-green-400" />
-                        <div className="text-3xl font-bold text-white mb-1">34</div>
-                        <div className="text-white/60">Active Tenants</div>
-                        <div className="text-xs text-green-400 mt-1">Unlimited</div>
+                      <div className={`text-center p-6 ${darkMode ? 'bg-slate-700/50' : 'bg-indigo-50/50'} rounded-xl`}>
+                        <Users className="w-8 h-8 mx-auto mb-3 text-emerald-400" />
+                        <div className={`text-3xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>34</div>
+                        <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Active Tenants</div>
+                        <div className="text-xs text-emerald-400 mt-1">Unlimited</div>
                       </div>
                       
-                      <div className="text-center p-6 bg-white/5 rounded-xl">
-                        <Database className="w-8 h-8 mx-auto mb-3 text-purple-400" />
-                        <div className="text-3xl font-bold text-white mb-1">7.2</div>
-                        <div className="text-white/60">GB Storage Used</div>
-                        <div className="text-xs text-purple-400 mt-1">of 10 GB</div>
+                      <div className={`text-center p-6 ${darkMode ? 'bg-slate-700/50' : 'bg-indigo-50/50'} rounded-xl`}>
+                        <Database className={`w-8 h-8 mx-auto mb-3 ${darkMode ? 'text-blue-400' : 'text-purple-500'}`} />
+                        <div className={`text-3xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>7.2</div>
+                        <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>GB Storage Used</div>
+                        <div className={`text-xs ${darkMode ? 'text-blue-400' : 'text-purple-500'} mt-1`}>of 10 GB</div>
                       </div>
                     </div>
                   </AnimatedCard>
@@ -1407,10 +1574,10 @@ const LandlordPayment = () => {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <AnimatedCard>
+                  <AnimatedCard darkMode={darkMode}>
                     <div className="text-center mb-12">
-                      <h2 className="text-3xl font-bold text-white mb-4">Choose Your Plan</h2>
-                      <p className="text-white/70 max-w-2xl mx-auto">
+                      <h2 className={`text-3xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-4`}>Choose Your Plan</h2>
+                      <p className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} max-w-2xl mx-auto`}>
                         Select the perfect plan for your property management needs
                       </p>
                     </div>
@@ -1424,21 +1591,22 @@ const LandlordPayment = () => {
                           onSelect={handleSelectPlan}
                           onUpgrade={handleUpgradePlan}
                           popular={index === 1}
+                          darkMode={darkMode}
                         />
                       ))}
                     </div>
                     
                     {/* Plan Comparison */}
                     <div className="mt-16">
-                      <h3 className="text-2xl font-bold text-white mb-8 text-center">Feature Comparison</h3>
+                      <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-8 text-center`}>Feature Comparison</h3>
                       
                       <div className="overflow-x-auto">
                         <table className="w-full">
                           <thead>
-                            <tr className="border-b border-white/20">
-                              <th className="text-left py-4 text-white/80 font-semibold">Feature</th>
+                            <tr className={`border-b ${darkMode ? 'border-slate-700' : 'border-indigo-200'}`}>
+                              <th className={`text-left py-4 ${darkMode ? 'text-blue-200' : 'text-gray-600'} font-semibold`}>Feature</th>
                               {subscriptionPlans.map((plan) => (
-                                <th key={plan.id} className="text-center py-4 text-white/80 font-semibold">
+                                <th key={plan.id} className={`text-center py-4 ${darkMode ? 'text-blue-200' : 'text-gray-600'} font-semibold`}>
                                   {plan.name}
                                 </th>
                               ))}
@@ -1453,10 +1621,10 @@ const LandlordPayment = () => {
                               { feature: 'Branding', values: ['❌', '✅', '✅'] },
                               { feature: 'API Access', values: ['❌', '❌', '✅'] }
                             ].map((row, index) => (
-                              <tr key={index} className="border-b border-white/10 hover:bg-white/5">
-                                <td className="py-4 text-white font-medium">{row.feature}</td>
+                              <tr key={index} className={`border-b ${darkMode ? 'border-slate-800 hover:bg-slate-800/50' : 'border-indigo-100 hover:bg-indigo-50/50'}`}>
+                                <td className={`py-4 ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-medium`}>{row.feature}</td>
                                 {row.values.map((value, valueIndex) => (
-                                  <td key={valueIndex} className="py-4 text-center text-white/80">
+                                  <td key={valueIndex} className={`py-4 text-center ${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>
                                     {value}
                                   </td>
                                 ))}
@@ -1478,17 +1646,21 @@ const LandlordPayment = () => {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <AnimatedCard>
+                  <AnimatedCard darkMode={darkMode}>
                     <div className="flex justify-between items-center mb-8">
                       <div>
-                        <h2 className="text-3xl font-bold text-white mb-2">Payment Methods</h2>
-                        <p className="text-white/70">Manage your saved payment methods</p>
+                        <h2 className={`text-3xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-2`}>Payment Methods</h2>
+                        <p className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Manage your saved payment methods</p>
                       </div>
                       
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 flex items-center space-x-2"
+                        className={`px-6 py-3 ${
+                          darkMode 
+                            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700' 
+                            : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700'
+                        } text-white rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2`}
                       >
                         <Plus className="w-5 h-5" />
                         <span>Add Payment Method</span>
@@ -1517,6 +1689,7 @@ const LandlordPayment = () => {
                               message: 'Payment method has been removed successfully'
                             });
                           }}
+                          darkMode={darkMode}
                         />
                       ))}
                     </div>
@@ -1532,27 +1705,31 @@ const LandlordPayment = () => {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <AnimatedCard>
+                  <AnimatedCard darkMode={darkMode}>
                     <div className="flex justify-between items-center mb-8">
                       <div>
-                        <h2 className="text-3xl font-bold text-white mb-2">Payment History</h2>
-                        <p className="text-white/70">View all your past transactions</p>
+                        <h2 className={`text-3xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-2`}>Payment History</h2>
+                        <p className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>View all your past transactions</p>
                       </div>
                       
                       <div className="flex space-x-4">
                         <div className="relative">
-                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/50" />
+                          <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${darkMode ? 'text-blue-300' : 'text-gray-500'}`} />
                           <input
                             type="text"
                             placeholder="Search payments..."
-                            className="pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
+                            className={`pl-10 pr-4 py-2 ${
+                              darkMode 
+                                ? 'bg-slate-700/50 border border-slate-600 text-cyan-100 placeholder-blue-300' 
+                                : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700 placeholder-gray-500'
+                            } rounded-lg focus:${darkMode ? 'border-cyan-400' : 'border-indigo-500'} focus:outline-none`}
                           />
                         </div>
                         
                         <motion.button
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          className="px-4 py-2 bg-green-500/20 text-green-300 rounded-lg hover:bg-green-500/30 transition-colors flex items-center space-x-2"
+                          className="px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 transition-colors flex items-center space-x-2"
                         >
                           <Download className="w-4 h-4" />
                           <span>Export</span>
@@ -1572,6 +1749,7 @@ const LandlordPayment = () => {
                             payment={payment}
                             onDownloadReceipt={handleDownloadReceipt}
                             onViewDetails={handleViewDetails}
+                            darkMode={darkMode}
                           />
                         </motion.div>
                       ))}
@@ -1592,6 +1770,7 @@ const LandlordPayment = () => {
             onClose={() => setShowPaymentModal(false)}
             amount={paymentAmount}
             onPayment={handlePayment}
+            darkMode={darkMode}
           />
         )}
       </AnimatePresence>
@@ -1600,6 +1779,7 @@ const LandlordPayment = () => {
       <NotificationToast
         notifications={notifications}
         onRemove={removeNotification}
+        darkMode={darkMode}
       />
     </div>
   );
