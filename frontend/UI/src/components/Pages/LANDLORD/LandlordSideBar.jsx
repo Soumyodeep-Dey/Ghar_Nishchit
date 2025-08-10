@@ -4,73 +4,20 @@ import {
   Home,
   Building2,
   Users,
-  DollarSign,
-  FileText,
-  Calendar,
+  Wallet,
   Settings,
-  BarChart3,
-  Bell,
   MessageSquare,
   ChevronLeft,
-  ChevronRight,
-  Plus,
-  Star,
   Crown,
-  Shield,
-  Zap,
-  TrendingUp,
-  Activity,
-  PieChart,
-  Wallet,
-  CreditCard,
-  Award,
-  Target,
   Sparkles,
-  Globe,
-  Headphones,
-  User,
+  TrendingUp,
   LogOut,
-  HelpCircle,
-  ArrowRight,
-  Clock,
-  Heart,
-  Bookmark,
-  Archive,
-  Flag,
-  Gift,
-  Eye,
-  Search,
-  Filter,
-  Download,
-  Upload,
-  Share2,
   Edit,
-  Trash2,
-  RefreshCw,
-  Lock,
-  Unlock,
-  Key,
-  Mail,
-  Phone,
-  MapPin,
-  Camera,
-  Video,
-  Mic,
-  Volume2,
-  Monitor,
-  Smartphone,
-  Tablet,
-  Laptop,
-  Wifi,
-  Database,
-  Server,
-  Cloud,
-  Coffee,
-  Sunrise,
   Moon,
+  Sunrise,
   Sun,
-  Briefcase,
-  TrendingDown
+  Wallet as WalletIcon,
+  Heart
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -94,12 +41,11 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
   const location = useLocation();
   const sidebarRef = useRef(null);
 
-  // Update time and greeting
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date();
       setCurrentTime(now);
-      
+
       const hour = now.getHours();
       if (hour < 12) setGreeting('Good Morning');
       else if (hour < 17) setGreeting('Good Afternoon');
@@ -109,7 +55,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
     return () => clearInterval(timer);
   }, []);
 
-  // Peaceful color palette for menu items
   const menuItems = [
     {
       id: 'dashboard',
@@ -179,10 +124,8 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
     }
   ];
 
-  // Enhanced navigation handler
   const handleNavigation = (route, sectionName = null) => {
     try {
-      // Add haptic feedback for mobile
       if (navigator.vibrate) {
         navigator.vibrate(50);
       }
@@ -193,7 +136,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
         onSectionChange(sectionName);
       }
 
-      // Auto-collapse on mobile after navigation
       if (window.innerWidth < 768) {
         setTimeout(() => setIsCollapsed(true), 300);
       }
@@ -203,7 +145,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
     }
   };
 
-  // Get current active section based on route
   const getCurrentActiveSection = () => {
     const pathname = location.pathname;
 
@@ -220,18 +161,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
     return activeItem ? activeItem.label : 'Dashboard';
   };
 
-  // Update current section when location changes
-  // Removed this useEffect to avoid conflict with LandlordDashboard syncing currentSection
-  /*
-  useEffect(() => {
-    const activeSection = getCurrentActiveSection();
-    if (onSectionChange && activeSection !== currentSection) {
-      onSectionChange(activeSection);
-    }
-  }, [location.pathname, onSectionChange]);
-  */
-
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
@@ -243,7 +172,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Auto-collapse on mobile
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
@@ -258,7 +186,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.altKey && event.key >= '1' && event.key <= '9') {
@@ -269,7 +196,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
         }
       }
 
-      // ESC to collapse/expand
       if (event.key === 'Escape') {
         setIsCollapsed(!isCollapsed);
       }
@@ -319,31 +245,24 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
 
   return (
     <>
-      {/* Enhanced Global Scrollbar Styles - Peaceful Colors */}
       <style>{`
-        /* Scrollbar styles for the sidebar */
         .sidebar-scrollable::-webkit-scrollbar {
           width: 6px;
         }
-        
         .sidebar-scrollable::-webkit-scrollbar-track {
           background: rgba(168, 185, 207, 0.1);
           border-radius: 3px;
         }
-        
         .sidebar-scrollable::-webkit-scrollbar-thumb {
           background: linear-gradient(180deg, rgba(168, 185, 207, 0.6) 0%, rgba(168, 185, 207, 0.3) 100%);
           border-radius: 3px;
           border: 1px solid rgba(168, 185, 207, 0.2);
           transition: all 0.3s ease;
         }
-        
         .sidebar-scrollable::-webkit-scrollbar-thumb:hover {
           background: linear-gradient(180deg, rgba(168, 185, 207, 0.8) 0%, rgba(168, 185, 207, 0.5) 100%);
           box-shadow: 0 0 8px rgba(168, 185, 207, 0.3);
         }
-        
-        /* Firefox scrollbar */
         .sidebar-scrollable {
           scrollbar-width: thin;
           scrollbar-color: rgba(168, 185, 207, 0.6) rgba(168, 185, 207, 0.1);
@@ -351,7 +270,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
         }
       `}</style>
 
-      {/* Mobile Backdrop */}
       <AnimatePresence>
         {!isCollapsed && window.innerWidth < 768 && (
           <motion.div
@@ -387,7 +305,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
           overflow: 'hidden'
         }}
       >
-        {/* Enhanced Background Effects - Peaceful Colors */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div
             animate={{ 
@@ -431,7 +348,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
           />
         </div>
 
-        {/* Floating Particles - Peaceful Colors */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {[...Array(4)].map((_, i) => (
             <motion.div
@@ -457,10 +373,8 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
           ))}
         </div>
 
-        {/* Header Section - Peaceful Colors */}
         <div className="relative z-20 p-6 border-b border-slate-200/60 flex-shrink-0">
           <div className="flex items-center justify-between">
-            {/* Enhanced Logo */}
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
@@ -517,7 +431,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
               </AnimatePresence>
             </motion.div>
 
-            {/* Enhanced Toggle Button */}
             <motion.button
               whileHover={{ scale: 1.1, rotate: 3 }}
               whileTap={{ scale: 0.95 }}
@@ -538,7 +451,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
             </motion.button>
           </div>
 
-          {/* Enhanced User Profile Section - Peaceful Colors */}
           <AnimatePresence>
             {!isCollapsed && (
               <motion.div
@@ -548,11 +460,9 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                 transition={{ delay: 0.3, duration: 0.6 }}
                 className="mt-8 p-5 bg-gradient-to-br from-white/60 to-slate-50/60 rounded-3xl border border-slate-200/50 shadow-lg backdrop-blur-xl relative overflow-hidden"
               >
-                {/* Background Glow */}
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-indigo-50/30 to-slate-50/30 rounded-3xl" />
-                
+
                 <div className="relative z-10">
-                  {/* Time and Greeting */}
                   <motion.div 
                     className="flex items-center justify-between mb-4"
                     initial={{ opacity: 0 }}
@@ -598,7 +508,7 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                         <div className="w-2 h-2 bg-white rounded-full" />
                       </motion.div>
                     </motion.div>
-                    
+
                     <div className="flex-1">
                       <motion.h3 
                         className="text-slate-700 font-bold text-lg bg-gradient-to-r from-slate-700 to-blue-600 bg-clip-text text-transparent"
@@ -623,7 +533,7 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                         </motion.div>
                       </div>
                     </div>
-                    
+
                     <motion.button
                       whileHover={{ scale: 1.15, rotate: 8 }}
                       whileTap={{ scale: 0.95 }}
@@ -635,7 +545,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                     </motion.button>
                   </div>
 
-                  {/* Enhanced Quick Stats - Peaceful Colors */}
                   <div className="grid grid-cols-2 gap-3">
                     <motion.div 
                       whileHover={{ scale: 1.05, y: -1 }}
@@ -688,7 +597,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                     </motion.div>
                   </div>
 
-                  {/* Revenue Display - Peaceful Colors */}
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -701,7 +609,7 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                           animate={{ rotate: [0, 5, -5, 0] }}
                           transition={{ duration: 4, repeat: Infinity }}
                         >
-                          <Wallet className="w-4 h-4 text-indigo-600" />
+                          <WalletIcon className="w-4 h-4 text-indigo-600" />
                         </motion.div>
                         <span className="text-slate-600 text-xs">Monthly Revenue</span>
                       </div>
@@ -720,7 +628,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
           </AnimatePresence>
         </div>
 
-        {/* FIXED Navigation Menu Section - Peaceful Colors */}
         <div className="flex-1 relative min-h-0">
           <div 
             className="absolute inset-0 sidebar-scrollable"
@@ -765,7 +672,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                         : 'hover:bg-slate-100/80 border border-transparent hover:border-slate-200/60 hover:shadow-md'
                     }`}
                   >
-                    {/* Enhanced Active Indicator */}
                     {isItemActive(item) && (
                       <>
                         <motion.div
@@ -782,7 +688,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                       </>
                     )}
 
-                    {/* Enhanced Background Glow Effect */}
                     <AnimatePresence>
                       {hoveredItem === item.id && !isItemActive(item) && (
                         <motion.div
@@ -795,7 +700,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                       )}
                     </AnimatePresence>
 
-                    {/* Enhanced Icon with Premium Effects */}
                     <motion.div
                       whileHover={{ 
                         scale: 1.1, 
@@ -812,8 +716,7 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                       <item.icon className={`w-6 h-6 ${
                         isItemActive(item) ? 'text-white' : 'text-slate-600 group-hover:text-slate-700'
                       } transition-colors duration-300`} />
-                      
-                      {/* Premium Badge */}
+
                       {item.premium && (
                         <motion.div
                           animate={{ rotate: [0, 360] }}
@@ -824,7 +727,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                         </motion.div>
                       )}
 
-                      {/* Icon Glow Effect */}
                       <motion.div
                         animate={{ 
                           scale: [1, 1.1, 1],
@@ -839,7 +741,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                       />
                     </motion.div>
 
-                    {/* Enhanced Label and Description */}
                     <AnimatePresence>
                       {!isCollapsed && (
                         <motion.div
@@ -865,8 +766,7 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                           >
                             {item.description}
                           </motion.div>
-                          
-                          {/* Keyboard Shortcut */}
+
                           <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: hoveredItem === item.id ? 0.6 : 0 }}
@@ -880,7 +780,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                       )}
                     </AnimatePresence>
 
-                    {/* Enhanced Badge - Peaceful Colors */}
                     <AnimatePresence>
                       {item.badge && (
                         <motion.div
@@ -946,7 +845,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                       )}
                     </AnimatePresence>
 
-                    {/* Ripple Effect */}
                     <motion.div
                       className="absolute inset-0 rounded-2xl"
                       whileTap={{
@@ -960,7 +858,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                     />
                   </motion.button>
 
-                  {/* Enhanced Tooltip for Collapsed State - Peaceful Colors */}
                   <AnimatePresence>
                     {isCollapsed && showTooltip === item.id && (
                       <motion.div
@@ -986,13 +883,11 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                             </div>
                           </div>
                         </div>
-                        
-                        {/* Enhanced Tooltip Arrow */}
+
                         <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-2">
                           <div className="w-4 h-4 bg-white border-l border-t border-slate-200/60 rotate-45 backdrop-blur-2xl"></div>
                         </div>
-                        
-                        {/* Tooltip Glow */}
+
                         <motion.div
                           animate={{ opacity: [0.3, 0.6, 0.3] }}
                           transition={{ duration: 3, repeat: Infinity }}
@@ -1007,44 +902,8 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
           </div>
         </div>
 
-        {/* Enhanced Bottom Section - Peaceful Colors */}
+        {/* Bottom Section (Support removed) */}
         <div className="relative z-20 p-4 border-t border-slate-200/60 flex-shrink-0">
-          {/* Support Section */}
-          <AnimatePresence>
-            {!isCollapsed && (
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 15 }}
-                className="mb-4 p-3 bg-gradient-to-r from-indigo-50/80 to-purple-50/80 rounded-2xl border border-indigo-100/60"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <motion.div
-                      animate={{ rotate: [0, 5, -5, 0] }}
-                      transition={{ duration: 5, repeat: Infinity }}
-                      className="w-8 h-8 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center shadow-sm"
-                    >
-                      <Headphones className="w-4 h-4 text-white" />
-                    </motion.div>
-                    <div>
-                      <div className="text-slate-700 text-sm font-semibold">24/7 Support</div>
-                      <div className="text-slate-500 text-xs">We're here to help</div>
-                    </div>
-                  </div>
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="p-2 rounded-lg hover:bg-slate-100/60 transition-colors"
-                  >
-                    <HelpCircle className="w-4 h-4 text-slate-500 hover:text-slate-700 transition-colors" />
-                  </motion.button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Enhanced Logout Button - Peaceful Colors */}
           <motion.button
             whileHover={{ 
               x: isCollapsed ? 2 : 5, 
@@ -1056,7 +915,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
             className="w-full flex items-center p-4 rounded-2xl hover:bg-rose-50/80 border border-transparent hover:border-rose-200/60 transition-all duration-400 group relative overflow-hidden"
             title="Logout"
           >
-            {/* Background Effect */}
             <motion.div
               className="absolute inset-0 bg-gradient-to-r from-rose-50/60 to-red-50/60 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               whileHover={{ scale: 1.02 }}
@@ -1104,7 +962,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
             </AnimatePresence>
           </motion.button>
 
-          {/* Enhanced Footer - Peaceful Colors */}
           <AnimatePresence>
             {!isCollapsed && (
               <motion.div
@@ -1138,7 +995,6 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
           </AnimatePresence>
         </div>
 
-        {/* Enhanced Resize Handle - Peaceful Colors */}
         <motion.div
           className="absolute right-0 top-0 bottom-0 w-2 bg-gradient-to-b from-transparent via-slate-200/40 to-transparent cursor-col-resize hover:bg-gradient-to-b hover:from-blue-200/30 hover:via-indigo-200/40 hover:to-blue-200/30 transition-all duration-500 group"
           whileHover={{ scale: 1.1 }}

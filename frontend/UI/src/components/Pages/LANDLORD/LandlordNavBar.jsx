@@ -27,7 +27,18 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-
+  
+  // Get user data from localStorage - use 'user' key from authentication
+  const user = JSON.parse(localStorage.getItem('user')) || { name: '', email: '' };
+  
+  // Logout handler function
+  const handleLogout = () => {
+    // Clear authentication (example: remove token from localStorage)
+    localStorage.removeItem('authToken');
+    // Redirect to login page
+    window.location.href = '/login';
+  };
+  
   const profileDropdownRef = useRef(null);
   const notificationsRef = useRef(null);
   const searchRef = useRef(null);
@@ -359,12 +370,14 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
                   <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-success-500 rounded-full border-2 border-white dark:border-gray-900" />
                 </div>
                 <div className="hidden md:block text-left">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">John Landlord</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Premium Member</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">{user.name || 'Unknown User'}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{user.email || 'No Email'}</p>
+                  <div className="flex items-center mt-1">
+                    <div className="h-2 w-2 bg-success-500 rounded-full mr-2" />
+                    <span className="text-xs text-success-600 dark:text-success-400">Online</span>
+                  </div>
                 </div>
-                <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${
-                  isProfileDropdownOpen ? 'rotate-180' : ''
-                }`} />
+                <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {/* Profile Dropdown Menu */}
@@ -377,8 +390,8 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
                         <User className="h-6 w-6 text-white" />
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-900 dark:text-white">John Landlord</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">john@example.com</p>
+                        <p className="font-semibold text-gray-900 dark:text-white">{user.name || 'Unknown User'}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{user.email || 'No Email'}</p>
                         <div className="flex items-center mt-1">
                           <div className="h-2 w-2 bg-success-500 rounded-full mr-2" />
                           <span className="text-xs text-success-600 dark:text-success-400">Online</span>
@@ -405,7 +418,7 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
 
                     <hr className="my-2 border-gray-200/50 dark:border-gray-700/50" />
 
-                    <button className="w-full flex items-center space-x-3 px-4 py-3 text-left text-error-600 dark:text-error-400 hover:bg-error-50/80 dark:hover:bg-error-900/20 rounded-xl transition-all duration-200 group">
+                    <button className="w-full flex items-center space-x-3 px-4 py-3 text-left text-error-600 dark:text-error-400 hover:bg-error-50/80 dark:hover:bg-error-900/20 rounded-xl transition-all duration-200 group" onClick={handleLogout}>
                       <div className="p-2 bg-error-100 dark:bg-error-900/30 rounded-lg group-hover:bg-error-200 dark:group-hover:bg-error-900/50 transition-colors">
                         <LogOut className="h-4 w-4" />
                       </div>
