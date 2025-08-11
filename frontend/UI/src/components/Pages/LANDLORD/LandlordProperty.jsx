@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
+import { useDarkMode } from '../../../DarkModeContext';
 import { 
   Building2, 
   Plus, 
@@ -137,6 +138,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
   const [showMenu, setShowMenu] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const menuRef = useRef(null);
+  const { darkMode } = useDarkMode();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -163,7 +165,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay, duration: 0.4 }}
         whileHover={{ scale: 1.01, boxShadow: "0 10px 30px rgba(0,0,0,0.2)" }}
-        className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 group"
+        className={`backdrop-blur-xl border rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 group ${darkMode ? 'bg-slate-800/80 border-slate-700/50 hover:border-cyan-400/30' : 'bg-white/80 border-indigo-200/50 hover:border-indigo-400/40'}`}
       >
         <div className="flex items-center space-x-6">
           <div className="w-24 h-24 rounded-lg overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
@@ -227,22 +229,24 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
                     initial={{ opacity: 0, scale: 0.95, y: -10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                    className="absolute right-0 top-full mt-2 w-48 bg-white/20 backdrop-blur-xl border border-white/30 rounded-xl shadow-xl z-50"
+                    className={`absolute right-0 top-full mt-2 w-48 backdrop-blur-xl rounded-xl shadow-xl z-50 ${darkMode 
+                      ? 'bg-white/20 border border-white/30' 
+                      : 'bg-white/90 border border-indigo-200/50'}`}
                   >
                     <div className="p-2">
-                      <button onClick={() => { onView(property); setShowMenu(false); }} className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-white/80">
+                      <button onClick={() => { onView(property); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-indigo-50 text-indigo-700'}`}>
                         <Eye className="w-4 h-4" />
                         <span>View Details</span>
                       </button>
-                      <button onClick={() => { onEdit(property); setShowMenu(false); }} className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-white/80">
+                      <button onClick={() => { onEdit(property); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-indigo-50 text-indigo-700'}`}>
                         <Edit className="w-4 h-4" />
                         <span>Edit Property</span>
                       </button>
-                      <button onClick={() => { onToggleStatus(property.id); setShowMenu(false); }} className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-white/80">
+                      <button onClick={() => { onToggleStatus(property.id); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-indigo-50 text-indigo-700'}`}>
                         <RefreshCw className="w-4 h-4" />
                         <span>Toggle Status</span>
                       </button>
-                      <button onClick={() => { onDelete(property.id); setShowMenu(false); }} className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-red-500/20 transition-colors text-red-300">
+                      <button onClick={() => { onDelete(property.id); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-red-500/20 text-red-300' : 'hover:bg-red-50 text-red-600'}`}>
                         <Trash2 className="w-4 h-4" />
                         <span>Delete</span>
                       </button>
@@ -265,7 +269,9 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
       whileHover={{ scale: 1.02, y: -5 }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="relative overflow-hidden bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 group"
+      className={`relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 group ${darkMode 
+        ? 'bg-white/10 backdrop-blur-xl border border-white/20' 
+        : 'bg-white/80 backdrop-blur-xl border border-indigo-200/50'}`}
     >
       {/* Image Carousel */}
       <div className="relative h-64 overflow-hidden rounded-t-2xl">
@@ -366,8 +372,8 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
       <div className="p-6">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h3 className="text-xl font-bold text-white mb-2">{property.title}</h3>
-            <div className="flex items-center space-x-1 text-white/70">
+            <h3 className={`text-xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{property.title}</h3>
+            <div className={`flex items-center space-x-1 ${darkMode ? 'text-white/70' : 'text-indigo-700/80'}`}>
               <MapPin className="w-4 h-4" />
               <span className="text-sm">{property.location}</span>
             </div>
@@ -378,9 +384,9 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setShowMenu(!showMenu)}
-              className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+              className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10' : 'hover:bg-indigo-100/80'}`}
             >
-              <MoreVertical className="w-5 h-5 text-white/70" />
+              <MoreVertical className={`w-5 h-5 ${darkMode ? 'text-white/70' : 'text-indigo-700/70'}`} />
             </motion.button>
             
             <AnimatePresence>
@@ -1152,6 +1158,7 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
 // Main Component
 const LandlordProperty = () => {
   const [currentSection] = useState('Properties');
+  const { darkMode } = useDarkMode();
   const [properties, setProperties] = useLocalStorage('landlord_properties', [
     {
       id: 1,
@@ -1321,25 +1328,25 @@ const LandlordProperty = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex relative overflow-hidden">
+    <div className={`min-h-screen flex relative overflow-hidden ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'}`}>
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
           animate={{ rotate: 360, scale: [1, 1.1, 1] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-3xl"
+          className={`absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-purple-500/10 to-pink-500/10' : 'bg-gradient-to-r from-indigo-500/20 to-cyan-500/20'}`}
         />
         <motion.div
           animate={{ rotate: -360, scale: [1.1, 1, 1.1] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-full blur-3xl"
+          className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10' : 'bg-gradient-to-r from-pink-500/20 to-purple-500/20'}`}
         />
       </div>
 
       <LandlordSideBar currentSection={currentSection} />
       
-      <div className="flex-1 flex flex-col relative z-10">
-        <LandlordNavBar />
+      <div className="flex-1 flex flex-col relative z-10 ml-[85px] md:ml-[320px] transition-all duration-700">
+        <LandlordNavBar currentSection={currentSection} />
         
         <main className="flex-1 overflow-y-auto">
           <div className="p-8 space-y-8">
@@ -1351,7 +1358,7 @@ const LandlordProperty = () => {
               className="text-center mb-12"
             >
               <motion.h1
-                className="text-5xl font-bold text-white mb-4 bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent"
+                className={`text-5xl font-bold mb-4 bg-clip-text text-transparent ${darkMode ? 'bg-gradient-to-r from-white via-purple-200 to-white' : 'bg-gradient-to-r from-indigo-800 via-purple-800 to-indigo-800'}`}
               >
                 Property Management Hub
               </motion.h1>
@@ -1359,7 +1366,7 @@ const LandlordProperty = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.6 }}
-                className="text-xl text-white/70 max-w-2xl mx-auto"
+                className={`text-xl max-w-2xl mx-auto ${darkMode ? 'text-white/70' : 'text-indigo-900/80'}`}
               >
                 Manage, track, and optimize your property portfolio with advanced tools and analytics
               </motion.p>
@@ -1367,34 +1374,34 @@ const LandlordProperty = () => {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-              <AnimatedCard className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 text-center">
-                <Building2 className="w-8 h-8 mx-auto mb-3 text-blue-400" />
-                <div className="text-2xl font-bold text-white">{stats.total}</div>
-                <div className="text-white/60 text-sm">Total Properties</div>
+              <AnimatedCard className={`backdrop-blur-xl rounded-xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
+                <Building2 className={`w-8 h-8 mx-auto mb-3 ${darkMode ? 'text-blue-400' : 'text-indigo-600'}`} />
+                <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.total}</div>
+                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Total Properties</div>
               </AnimatedCard>
               
-              <AnimatedCard delay={0.1} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 text-center">
-                <CheckCircle className="w-8 h-8 mx-auto mb-3 text-green-400" />
-                <div className="text-2xl font-bold text-white">{stats.available}</div>
-                <div className="text-white/60 text-sm">Available</div>
+              <AnimatedCard delay={0.1} className={`backdrop-blur-xl rounded-xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
+                <CheckCircle className={`w-8 h-8 mx-auto mb-3 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
+                <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.available}</div>
+                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Available</div>
               </AnimatedCard>
               
-              <AnimatedCard delay={0.2} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 text-center">
-                <Users className="w-8 h-8 mx-auto mb-3 text-purple-400" />
-                <div className="text-2xl font-bold text-white">{stats.occupied}</div>
-                <div className="text-white/60 text-sm">Occupied</div>
+              <AnimatedCard delay={0.2} className={`backdrop-blur-xl rounded-xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
+                <Users className={`w-8 h-8 mx-auto mb-3 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`} />
+                <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.occupied}</div>
+                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Occupied</div>
               </AnimatedCard>
               
-              <AnimatedCard delay={0.3} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 text-center">
-                <Settings className="w-8 h-8 mx-auto mb-3 text-orange-400" />
-                <div className="text-2xl font-bold text-white">{stats.maintenance}</div>
-                <div className="text-white/60 text-sm">Maintenance</div>
+              <AnimatedCard delay={0.3} className={`backdrop-blur-xl rounded-xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
+                <Settings className={`w-8 h-8 mx-auto mb-3 ${darkMode ? 'text-orange-400' : 'text-orange-600'}`} />
+                <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.maintenance}</div>
+                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Maintenance</div>
               </AnimatedCard>
               
-              <AnimatedCard delay={0.4} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl p-6 text-center">
-                <DollarSign className="w-8 h-8 mx-auto mb-3 text-green-400" />
-                <div className="text-2xl font-bold text-white">${stats.totalRevenue.toLocaleString()}</div>
-                <div className="text-white/60 text-sm">Monthly Revenue</div>
+              <AnimatedCard delay={0.4} className={`backdrop-blur-xl rounded-xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
+                <DollarSign className={`w-8 h-8 mx-auto mb-3 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
+                <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>${stats.totalRevenue.toLocaleString()}</div>
+                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Monthly Revenue</div>
               </AnimatedCard>
             </div>
 
