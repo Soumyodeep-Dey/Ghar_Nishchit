@@ -1590,12 +1590,12 @@ const LandlordTenant = () => {
         <motion.div
           animate={{ rotate: 360, scale: [1, 1.1, 1] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-3xl"
+          className={`absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-purple-500/10 to-pink-500/10' : 'bg-gradient-to-r from-purple-300/30 to-pink-300/30'}`}
         />
         <motion.div
           animate={{ rotate: -360, scale: [1.1, 1, 1.1] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-full blur-3xl"
+          className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10' : 'bg-gradient-to-r from-blue-300/30 to-cyan-300/30'}`}
         />
       </div>
 
@@ -1614,7 +1614,7 @@ const LandlordTenant = () => {
               className="text-center mb-12"
             >
               <motion.h1
-                className="text-5xl font-bold text-white mb-4 bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent"
+                className={`text-5xl font-bold mb-4 bg-clip-text text-transparent ${darkMode ? 'bg-gradient-to-r from-white via-purple-200 to-white' : 'bg-gradient-to-r from-indigo-800 via-purple-800 to-indigo-800'}`}
               >
                 Tenant Management
               </motion.h1>
@@ -1622,7 +1622,7 @@ const LandlordTenant = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.6 }}
-                className="text-xl text-white/70 max-w-2xl mx-auto"
+                className={`text-xl max-w-2xl mx-auto ${darkMode ? 'text-white/70' : 'text-indigo-900/80'}`}
               >
                 Manage your tenants, schedule visits, send contracts, and handle the complete tenant lifecycle
               </motion.p>
@@ -1630,37 +1630,37 @@ const LandlordTenant = () => {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-6 mb-8">
-              <AnimatedCard className="xl:col-span-1 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center">
+              <AnimatedCard className={`xl:col-span-1 backdrop-blur-xl rounded-2xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center"
                 >
                   <Users className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className="text-2xl font-bold text-white mb-1">{stats.total}</div>
-                <div className="text-white/60 text-sm">Total Tenants</div>
+                <div className={`text-2xl font-bold mb-1 ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.total}</div>
+                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Total Tenants</div>
               </AnimatedCard>
               
-              <AnimatedCard delay={0.1} className="xl:col-span-1 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center">
+              <AnimatedCard delay={0.1} className={`xl:col-span-1 backdrop-blur-xl rounded-2xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center"
                 >
                   <CheckCircle className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className="text-2xl font-bold text-white mb-1">{stats.active}</div>
-                <div className="text-white/60 text-sm">Active</div>
+                <div className={`text-2xl font-bold mb-1 ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.active}</div>
+                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Active</div>
               </AnimatedCard>
               
-              <AnimatedCard delay={0.2} className="xl:col-span-1 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center">
+              <AnimatedCard delay={0.2} className={`xl:col-span-1 backdrop-blur-xl rounded-2xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center"
                 >
                   <UserPlus className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className="text-2xl font-bold text-white mb-1">{stats.prospects}</div>
-                <div className="text-white/60 text-sm">Prospects</div>
+                <div className={`text-2xl font-bold mb-1 ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.prospects}</div>
+                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Prospects</div>
               </AnimatedCard>
               
               <AnimatedCard delay={0.3} className="xl:col-span-1 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center">
@@ -1726,10 +1726,11 @@ const LandlordTenant = () => {
                   
                   {/* Filters */}
                   <div className="flex space-x-3">
+                    <div className="relative">
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className="px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:border-blue-500 focus:outline-none transition-colors"
+                      className={`pl-4 pr-10 py-3 rounded-xl focus:outline-none transition-colors appearance-none ${darkMode ? 'bg-gray-800 border border-gray-700 text-white focus:border-blue-500' : 'bg-white/70 border border-indigo-200/50 text-gray-900 focus:border-indigo-500'}`}
                     >
                       <option value="All">All Status</option>
                       <option value="Active">Active</option>
@@ -1738,27 +1739,33 @@ const LandlordTenant = () => {
                       <option value="Overdue">Overdue</option>
                       <option value="Inactive">Inactive</option>
                     </select>
+                    <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none ${darkMode ? 'text-white/50' : 'text-indigo-700/70'}`} />
+                  </div>
                     
+                    <div className="relative">
                     <select
                       value={propertyFilter}
                       onChange={(e) => setPropertyFilter(e.target.value)}
-                      className="px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:border-blue-500 focus:outline-none transition-colors"
+                      className={`pl-4 pr-10 py-3 rounded-xl focus:outline-none transition-colors appearance-none ${darkMode ? 'bg-gray-800 border border-gray-700 text-white focus:border-blue-500' : 'bg-white/70 border border-indigo-200/50 text-gray-900 focus:border-indigo-500'}`}
                     >
                       <option value="All">All Properties</option>
                       {properties.map((property) => (
                         <option key={property} value={property}>{property}</option>
                       ))}
                     </select>
+                    <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none ${darkMode ? 'text-white/50' : 'text-indigo-700/70'}`} />
+                  </div>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-4">
                   {/* Sort controls */}
                   <div className="flex items-center space-x-2">
+                    <div className="relative">
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none transition-colors"
+                      className={`pl-3 pr-10 py-2 rounded-lg text-sm focus:outline-none transition-colors appearance-none ${darkMode ? 'bg-gray-800 border border-gray-700 text-white focus:border-blue-500' : 'bg-white/70 border border-indigo-200/50 text-gray-900 focus:border-indigo-500'}`}
                     >
                       <option value="name">Name</option>
                       <option value="status">Status</option>
@@ -1767,6 +1774,8 @@ const LandlordTenant = () => {
                       <option value="moveInDate">Move-in Date</option>
                       <option value="rating">Rating</option>
                     </select>
+                    <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none ${darkMode ? 'text-white/50' : 'text-indigo-700/70'}`} />
+                  </div>
                     
                     <motion.button
                       whileHover={{ scale: 1.05 }}
@@ -1778,15 +1787,7 @@ const LandlordTenant = () => {
                     </motion.button>
                   </div>
                   
-                  {/* Add tenant button */}
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 flex items-center space-x-2 shadow-lg"
-                  >
-                    <UserPlus className="w-5 h-5" />
-                    <span>Add Tenant</span>
-                  </motion.button>
+                  
                 </div>
               </div>
             </AnimatedCard>
@@ -1816,16 +1817,7 @@ const LandlordTenant = () => {
                         : 'Start by adding your first tenant or prospect'
                       }
                     </p>
-                    {!(searchTerm || statusFilter !== 'All' || propertyFilter !== 'All') && (
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 flex items-center space-x-2 mx-auto"
-                      >
-                        <UserPlus className="w-5 h-5" />
-                        <span>Add Your First Tenant</span>
-                      </motion.button>
-                    )}
+                    
                   </motion.div>
                 </div>
               ) : (

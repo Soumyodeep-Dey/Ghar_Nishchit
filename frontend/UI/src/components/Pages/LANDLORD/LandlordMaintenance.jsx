@@ -1312,22 +1312,47 @@ const LandlordMaintenance = () => {
       property: "Luxury Penthouse #505",
       tenant: "Jane Smith",
       createdAt: "2025-07-28T09:15:00Z",
-      updatedAt: "2025-07-28T09:15:00Z",
-      status: "Pending",
+      updatedAt: "2025-08-05T10:00:00Z",
+      status: "In Progress",
       priority: "Medium",
-      progress: 0,
+      progress: 50,
       category: "hvac",
-      assignedTo: null,
+      assignedTo: "HVAC Solutions Inc.",
       estimatedCost: 300,
       isEmergency: false,
       isUrgent: false,
-      attachments: [],
-      comments: [],
+      attachments: [
+        {
+          id: 1,
+          name: "thermostat_reading.jpg",
+          type: "image",
+          size: "1.5 MB",
+          url: "/api/placeholder/400/300"
+        }
+      ],
+      comments: [
+        {
+          author: "Landlord",
+          text: "HVAC Solutions Inc. has been contacted and will inspect the system tomorrow.",
+          timestamp: "2025-07-29T11:00:00Z",
+          attachments: []
+        }
+      ],
       history: [
         {
           type: "created",
           description: "Request created by Jane Smith",
           timestamp: "2025-07-28T09:15:00Z"
+        },
+        {
+          type: "assignment",
+          description: "Assigned to HVAC Solutions Inc.",
+          timestamp: "2025-07-29T10:30:00Z"
+        },
+        {
+          type: "status",
+          description: "Status changed to In Progress",
+          timestamp: "2025-08-05T10:00:00Z"
         }
       ]
     },
@@ -1822,15 +1847,7 @@ const LandlordMaintenance = () => {
                     </motion.button>
                   </div>
                   
-                  {/* Add request button */}
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className={`px-6 py-3 text-white rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 shadow-lg ${darkMode ? 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700' : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700'}`}
-                  >
-                    <Plus className="w-5 h-5" />
-                    <span>New Request</span>
-                  </motion.button>
+                  
                 </div>
               </div>
             </AnimatedCard>
