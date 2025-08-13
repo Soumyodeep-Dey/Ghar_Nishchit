@@ -20,6 +20,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import { useDarkMode } from '../../../DarkModeContext';
+import { Link } from 'react-router-dom';
 
 const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
   const { darkMode: isDarkMode, toggleDarkMode } = useDarkMode();
@@ -402,12 +403,16 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
 
                   {/* Menu Options */}
                   <div className="p-2">
-                    <button className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200 group">
+                    <Link 
+                      to="/landlord/profile" 
+                      className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200 group"
+                      onClick={() => setIsProfileDropdownOpen(false)} // Close dropdown on click
+                    >
                       <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg group-hover:bg-primary-200 dark:group-hover:bg-primary-900/50 transition-colors">
                         <Settings className="h-4 w-4 text-primary-600 dark:text-primary-400" />
                       </div>
                       <span className="font-medium">Update Profile</span>
-                    </button>
+                    </Link>
 
                     <button className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200 group">
                       <div className="p-2 bg-warning-100 dark:bg-warning-900/30 rounded-lg group-hover:bg-warning-200 dark:group-hover:bg-warning-900/50 transition-colors">

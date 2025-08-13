@@ -15,6 +15,7 @@ import LandlordMessage from './components/Pages/LANDLORD/LandlordMessage';
 import LandlordMaintenance from './components/Pages/LANDLORD/LandlordMaintenance';
 import LandlordPayment from './components/Pages/LANDLORD/LandlordPayment';
 import LandlordTenant from './components/Pages/LANDLORD/LandlordTenant';
+import UpdateLandlordProfile from './components/Pages/LANDLORD/UpdateLandlordProfile';
 import ProtectedRoute from './components/ProtectedRoute';
 
 
@@ -111,6 +112,14 @@ export default function App() {
             element={
               <ProtectedRoute requiredRole="landlord">
                 <LandlordTenant />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/landlord/profile"
+            element={
+              <ProtectedRoute requiredRole="landlord">
+                <UpdateLandlordProfile />
               </ProtectedRoute>
             }
           />
