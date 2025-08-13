@@ -227,6 +227,7 @@ const AnimatedCard = ({ children, delay = 0, className = '', ...props }) => {
 
 // Tenant Card Component
 const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVisit, onSendContract, delay = 0 }) => {
+  const { darkMode } = useDarkMode();
   const [showMenu, setShowMenu] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const menuRef = useRef(null);
@@ -244,34 +245,34 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
   const getStatusIcon = (status) => {
     switch (status) {
       case 'Active':
-        return <CheckCircle className="w-4 h-4 text-green-400" />;
+        return <CheckCircle className={`w-4 h-4 ${darkMode ? 'text-white' : 'text-emerald-800'}`} />;
       case 'Pending':
-        return <Clock className="w-4 h-4 text-yellow-400" />;
+        return <Clock className={`w-4 h-4 ${darkMode ? 'text-white' : 'text-yellow-800'}`} />;
       case 'Prospect':
-        return <User className="w-4 h-4 text-blue-400" />;
+        return <User className={`w-4 h-4 ${darkMode ? 'text-white' : 'text-indigo-800'}`} />;
       case 'Inactive':
-        return <XCircle className="w-4 h-4 text-gray-400" />;
+        return <XCircle className={`w-4 h-4 ${darkMode ? 'text-white' : 'text-slate-800'}`} />;
       case 'Overdue':
-        return <AlertCircle className="w-4 h-4 text-red-400" />;
+        return <AlertCircle className={`w-4 h-4 ${darkMode ? 'text-white' : 'text-red-800'}`} />;
       default:
-        return <User className="w-4 h-4 text-gray-400" />;
+        return <User className={`w-4 h-4 ${darkMode ? 'text-white' : 'text-gray-800'}`} />;
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
       case 'Active':
-        return 'bg-green-500/20 text-green-300 border-green-500/30';
+        return darkMode ? 'bg-emerald-600 text-white' : 'bg-emerald-100 text-emerald-800';
       case 'Pending':
-        return 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30';
+        return darkMode ? 'bg-yellow-600 text-white' : 'bg-yellow-100 text-yellow-800';
       case 'Prospect':
-        return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+        return darkMode ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-800';
       case 'Inactive':
-        return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
+        return darkMode ? 'bg-slate-600 text-white' : 'bg-slate-100 text-slate-800';
       case 'Overdue':
-        return 'bg-red-500/20 text-red-300 border-red-500/30';
+        return darkMode ? 'bg-red-600 text-white' : 'bg-red-100 text-red-800';
       default:
-        return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
+        return darkMode ? 'bg-gray-600 text-white' : 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -294,7 +295,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
       whileHover={{ scale: 1.02, y: -5 }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="relative overflow-hidden bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 group"
+      className={`relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 group ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}
     >
       {/* Background gradient effect */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -332,7 +333,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
             
             <div className="flex-1">
               <div className="flex items-center space-x-2 mb-1">
-                <h3 className="text-lg font-bold text-white group-hover:text-blue-300 transition-colors">
+                <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'} group-hover:text-blue-300 transition-colors`}>
                   {tenant.name}
                 </h3>
                 {tenant.isPremium && (
@@ -345,7 +346,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
                 )}
               </div>
               
-              <div className="space-y-1 text-sm text-white/70">
+              <div className={`space-y-1 text-sm ${darkMode ? 'text-white/70' : 'text-gray-600'}`}>
                 <div className="flex items-center space-x-1">
                   <Mail className="w-3 h-3" />
                   <span>{tenant.email}</span>
@@ -369,9 +370,9 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setShowMenu(!showMenu)}
-              className="p-2 rounded-lg hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100"
+              className={`p-2 rounded-lg transition-colors opacity-0 group-hover:opacity-100 ${darkMode ? 'hover:bg-white/10' : 'hover:bg-black/10'}`}
             >
-              <MoreVertical className="w-4 h-4 text-white/70" />
+              <MoreVertical className={`w-4 h-4 ${darkMode ? 'text-white/70' : 'text-gray-600'}`} />
             </motion.button>
             
             <AnimatePresence>
@@ -380,33 +381,33 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
                   initial={{ opacity: 0, scale: 0.95, y: -10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                  className="absolute right-0 top-full mt-2 w-56 bg-white/20 backdrop-blur-xl border border-white/30 rounded-xl shadow-xl z-50"
+                  className={`absolute right-0 top-full mt-2 w-56 backdrop-blur-xl border rounded-xl shadow-xl z-50 ${darkMode ? 'bg-white/20 border-white/30' : 'bg-white/80 border-black/10'}`}
                 >
                   <div className="p-2">
                     <button 
                       onClick={() => { onView(tenant); setShowMenu(false); }}
-                      className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-white/80"
+                      className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-black/10 text-black/80'}`}
                     >
                       <Eye className="w-4 h-4" />
                       <span>View Profile</span>
                     </button>
                     <button 
                       onClick={() => { onEdit(tenant); setShowMenu(false); }}
-                      className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-white/80"
+                      className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-black/10 text-black/80'}`}
                     >
                       <Edit className="w-4 h-4" />
                       <span>Edit Details</span>
                     </button>
                     <button 
                       onClick={() => { onMessage(tenant); setShowMenu(false); }}
-                      className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-white/80"
+                      className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-black/10 text-black/80'}`}
                     >
                       <MessageCircle className="w-4 h-4" />
                       <span>Send Message</span>
                     </button>
                     <button 
                       onClick={() => { onScheduleVisit(tenant); setShowMenu(false); }}
-                      className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-white/80"
+                      className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-black/10 text-black/80'}`}
                     >
                       <Calendar className="w-4 h-4" />
                       <span>Schedule Visit</span>
@@ -414,7 +415,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
                     {tenant.status === 'Prospect' && (
                       <button 
                         onClick={() => { onSendContract(tenant); setShowMenu(false); }}
-                        className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-white/80"
+                        className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-black/10 text-black/80'}`}
                       >
                         <FileText className="w-4 h-4" />
                         <span>Send Contract</span>
@@ -436,18 +437,18 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
         
         {/* Status and Info */}
         <div className="flex items-center justify-between mb-4">
-          <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs border ${getStatusColor(tenant.status)}`}>
+          <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs ${getStatusColor(tenant.status)}`}>
             {getStatusIcon(tenant.status)}
             <span>{tenant.status}</span>
           </div>
           
           {tenant.rentAmount && (
             <div className="text-right">
-              <div className="text-lg font-bold text-white">
+              <div className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                 ${tenant.rentAmount}/month
               </div>
               {tenant.nextPaymentDate && (
-                <div className="text-xs text-white/60">
+                <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>
                   Next: {new Date(tenant.nextPaymentDate).toLocaleDateString()}
                 </div>
               )}
@@ -456,11 +457,11 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
         </div>
         
         {/* Additional Info */}
-        <div className="grid grid-cols-2 gap-4 mb-4 text-xs text-white/70">
+        <div className={`grid grid-cols-2 gap-4 mb-4 text-xs ${darkMode ? 'text-white/70' : 'text-gray-600'}`}>
           {tenant.moveInDate && (
             <div>
-              <span className="text-white/50">Move-in Date</span>
-              <div className="text-white">
+              <span className={`${darkMode ? 'text-white/50' : 'text-gray-400'}`}>Move-in Date</span>
+              <div className={`${darkMode ? 'text-white' : 'text-gray-900'}`}>
                 {new Date(tenant.moveInDate).toLocaleDateString()}
               </div>
             </div>
@@ -468,8 +469,8 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
           
           {tenant.leaseEndDate && (
             <div>
-              <span className="text-white/50">Lease Ends</span>
-              <div className="text-white">
+              <span className={`${darkMode ? 'text-white/50' : 'text-gray-400'}`}>Lease Ends</span>
+              <div className={`${darkMode ? 'text-white' : 'text-gray-900'}`}>
                 {new Date(tenant.leaseEndDate).toLocaleDateString()}
               </div>
             </div>
@@ -478,14 +479,14 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
         
         {/* Visit Requests */}
         {tenant.visitRequests && tenant.visitRequests.length > 0 && (
-          <div className="mb-4 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+          <div className="mb-4 p-3 bg-blue-500 rounded-lg">
             <div className="flex items-center space-x-2 mb-2">
-              <Calendar className="w-4 h-4 text-blue-400" />
-              <span className="text-sm font-medium text-blue-300">
+              <Calendar className="w-4 h-4 text-white" />
+              <span className="text-sm font-medium text-white">
                 {tenant.visitRequests.length} Visit Request{tenant.visitRequests.length > 1 ? 's' : ''}
               </span>
             </div>
-            <div className="text-xs text-blue-200">
+            <div className="text-xs text-blue-100">
               Latest: {new Date(tenant.visitRequests[0].requestedDate).toLocaleDateString()}
             </div>
           </div>
@@ -497,7 +498,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onMessage(tenant)}
-            className="flex-1 px-3 py-2 bg-blue-500/20 text-blue-300 rounded-lg text-sm font-medium hover:bg-blue-500/30 transition-colors flex items-center justify-center space-x-1"
+            className="flex-1 px-3 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors flex items-center justify-center space-x-1"
           >
             <MessageCircle className="w-3 h-3" />
             <span>Message</span>
@@ -508,7 +509,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => onScheduleVisit(tenant)}
-              className="flex-1 px-3 py-2 bg-green-500/20 text-green-300 rounded-lg text-sm font-medium hover:bg-green-500/30 transition-colors flex items-center justify-center space-x-1"
+              className="flex-1 px-3 py-2 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600 transition-colors flex items-center justify-center space-x-1"
             >
               <Calendar className="w-3 h-3" />
               <span>Schedule</span>
@@ -518,7 +519,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => onView(tenant)}
-              className="flex-1 px-3 py-2 bg-purple-500/20 text-purple-300 rounded-lg text-sm font-medium hover:bg-purple-500/30 transition-colors flex items-center justify-center space-x-1"
+              className="flex-1 px-3 py-2 bg-purple-500 text-white rounded-lg text-sm font-medium hover:bg-purple-600 transition-colors flex items-center justify-center space-x-1"
             >
               <Eye className="w-3 h-3" />
               <span>View</span>
@@ -532,13 +533,13 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
             {tenant.tags.slice(0, 3).map((tag, index) => (
               <span
                 key={index}
-                className="px-2 py-1 bg-white/10 rounded-full text-xs text-white/70"
+                className={`px-2 py-1 rounded-full text-xs ${darkMode ? 'bg-white/10 text-white/70' : 'bg-black/10 text-black/70'}`}
               >
                 {tag}
               </span>
             ))}
             {tenant.tags.length > 3 && (
-              <span className="px-2 py-1 bg-white/10 rounded-full text-xs text-white/50">
+              <span className={`px-2 py-1 rounded-full text-xs ${darkMode ? 'bg-white/10 text-white/50' : 'bg-black/10 text-black/50'}`}>
                 +{tenant.tags.length - 3}
               </span>
             )}
@@ -1590,12 +1591,12 @@ const LandlordTenant = () => {
         <motion.div
           animate={{ rotate: 360, scale: [1, 1.1, 1] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className={`absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-purple-500/10 to-pink-500/10' : 'bg-gradient-to-r from-purple-300/30 to-pink-300/30'}`}
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-3xl"
         />
         <motion.div
           animate={{ rotate: -360, scale: [1.1, 1, 1.1] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10' : 'bg-gradient-to-r from-blue-300/30 to-cyan-300/30'}`}
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-full blur-3xl"
         />
       </div>
 
@@ -1614,7 +1615,7 @@ const LandlordTenant = () => {
               className="text-center mb-12"
             >
               <motion.h1
-                className={`text-5xl font-bold mb-4 bg-clip-text text-transparent ${darkMode ? 'bg-gradient-to-r from-white via-purple-200 to-white' : 'bg-gradient-to-r from-indigo-800 via-purple-800 to-indigo-800'}`}
+                className="text-5xl font-bold text-white mb-4 bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent"
               >
                 Tenant Management
               </motion.h1>
@@ -1622,7 +1623,7 @@ const LandlordTenant = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.6 }}
-                className={`text-xl max-w-2xl mx-auto ${darkMode ? 'text-white/70' : 'text-indigo-900/80'}`}
+                className="text-xl text-white/70 max-w-2xl mx-auto"
               >
                 Manage your tenants, schedule visits, send contracts, and handle the complete tenant lifecycle
               </motion.p>
@@ -1630,107 +1631,106 @@ const LandlordTenant = () => {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-6 mb-8">
-              <AnimatedCard className={`xl:col-span-1 backdrop-blur-xl rounded-2xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
+              <AnimatedCard className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center"
                 >
                   <Users className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className={`text-2xl font-bold mb-1 ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.total}</div>
-                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Total Tenants</div>
+                <div className="text-2xl font-bold mb-1">{stats.total}</div>
+                <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>Total Tenants</div>
               </AnimatedCard>
               
-              <AnimatedCard delay={0.1} className={`xl:col-span-1 backdrop-blur-xl rounded-2xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
+              <AnimatedCard delay={0.1} className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center"
                 >
                   <CheckCircle className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className={`text-2xl font-bold mb-1 ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.active}</div>
-                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Active</div>
+                <div className="text-2xl font-bold mb-1">{stats.active}</div>
+                <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>Active</div>
               </AnimatedCard>
               
-              <AnimatedCard delay={0.2} className={`xl:col-span-1 backdrop-blur-xl rounded-2xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
+              <AnimatedCard delay={0.2} className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center"
                 >
                   <UserPlus className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className={`text-2xl font-bold mb-1 ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.prospects}</div>
-                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Prospects</div>
+                <div className="text-2xl font-bold mb-1">{stats.prospects}</div>
+                <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>Prospects</div>
               </AnimatedCard>
               
-              <AnimatedCard delay={0.3} className="xl:col-span-1 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center">
+              <AnimatedCard delay={0.3} className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center"
                 >
                   <AlertCircle className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className="text-2xl font-bold text-white mb-1">{stats.overdue}</div>
-                <div className="text-white/60 text-sm">Overdue</div>
+                <div className="text-2xl font-bold mb-1">{stats.overdue}</div>
+                <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>Overdue</div>
               </AnimatedCard>
               
-              <AnimatedCard delay={0.4} className="xl:col-span-1 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center">
+              <AnimatedCard delay={0.4} className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center"
                 >
                   <Calendar className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className="text-2xl font-bold text-white mb-1">{stats.pendingVisits}</div>
-                <div className="text-white/60 text-sm">Pending Visits</div>
+                <div className="text-2xl font-bold mb-1">{stats.pendingVisits}</div>
+                <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>Pending Visits</div>
               </AnimatedCard>
               
-              <AnimatedCard delay={0.5} className="xl:col-span-1 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center">
+              <AnimatedCard delay={0.5} className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center"
                 >
                   <DollarSign className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className="text-2xl font-bold text-white mb-1">${stats.totalRevenue.toLocaleString()}</div>
-                <div className="text-white/60 text-sm">Monthly Revenue</div>
+                <div className="text-2xl font-bold mb-1">${stats.totalRevenue.toLocaleString()}</div>
+                <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>Monthly Revenue</div>
               </AnimatedCard>
               
-              <AnimatedCard delay={0.6} className="xl:col-span-1 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 text-center">
+              <AnimatedCard delay={0.6} className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center"
                 >
                   <Star className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className="text-2xl font-bold text-white mb-1">{stats.avgRating}</div>
-                <div className="text-white/60 text-sm">Avg Rating</div>
+                <div className="text-2xl font-bold mb-1">{stats.avgRating}</div>
+                <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>Avg Rating</div>
               </AnimatedCard>
             </div>
 
             {/* Filters and Controls */}
-            <AnimatedCard delay={0.7} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6">
+            <AnimatedCard delay={0.7} className={`rounded-2xl p-6 ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                   {/* Search */}
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/50" />
+                    <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
                     <input
                       type="text"
                       placeholder="Search tenants..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-4 py-3 w-64 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:border-blue-500 focus:outline-none transition-colors"
+                      className={`pl-10 pr-4 py-3 w-64 rounded-xl focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'}`}
                     />
                   </div>
                   
                   {/* Filters */}
                   <div className="flex space-x-3">
-                    <div className="relative">
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className={`pl-4 pr-10 py-3 rounded-xl focus:outline-none transition-colors appearance-none ${darkMode ? 'bg-gray-800 border border-gray-700 text-white focus:border-blue-500' : 'bg-white/70 border border-indigo-200/50 text-gray-900 focus:border-indigo-500'}`}
+                      className={`px-4 py-3 rounded-xl focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                     >
                       <option value="All">All Status</option>
                       <option value="Active">Active</option>
@@ -1739,33 +1739,27 @@ const LandlordTenant = () => {
                       <option value="Overdue">Overdue</option>
                       <option value="Inactive">Inactive</option>
                     </select>
-                    <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none ${darkMode ? 'text-white/50' : 'text-indigo-700/70'}`} />
-                  </div>
                     
-                    <div className="relative">
                     <select
                       value={propertyFilter}
                       onChange={(e) => setPropertyFilter(e.target.value)}
-                      className={`pl-4 pr-10 py-3 rounded-xl focus:outline-none transition-colors appearance-none ${darkMode ? 'bg-gray-800 border border-gray-700 text-white focus:border-blue-500' : 'bg-white/70 border border-indigo-200/50 text-gray-900 focus:border-indigo-500'}`}
+                      className={`px-4 py-3 rounded-xl focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                     >
                       <option value="All">All Properties</option>
                       {properties.map((property) => (
                         <option key={property} value={property}>{property}</option>
                       ))}
                     </select>
-                    <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none ${darkMode ? 'text-white/50' : 'text-indigo-700/70'}`} />
-                  </div>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-4">
                   {/* Sort controls */}
                   <div className="flex items-center space-x-2">
-                    <div className="relative">
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className={`pl-3 pr-10 py-2 rounded-lg text-sm focus:outline-none transition-colors appearance-none ${darkMode ? 'bg-gray-800 border border-gray-700 text-white focus:border-blue-500' : 'bg-white/70 border border-indigo-200/50 text-gray-900 focus:border-indigo-500'}`}
+                      className={`px-3 py-2 rounded-lg text-sm focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                     >
                       <option value="name">Name</option>
                       <option value="status">Status</option>
@@ -1774,14 +1768,12 @@ const LandlordTenant = () => {
                       <option value="moveInDate">Move-in Date</option>
                       <option value="rating">Rating</option>
                     </select>
-                    <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none ${darkMode ? 'text-white/50' : 'text-indigo-700/70'}`} />
-                  </div>
                     
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                      className="p-2 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition-colors"
+                      className={`p-2 rounded-lg hover:bg-opacity-20 transition-colors ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                     >
                       {sortOrder === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
                     </motion.button>

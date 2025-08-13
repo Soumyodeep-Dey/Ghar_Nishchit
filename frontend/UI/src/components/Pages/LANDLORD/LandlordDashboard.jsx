@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
+import AddNewPropertyModal from './AddNewPropertyModal';
+import GenerateReportModal from './GenerateReportModal';
 import { 
   Home, 
   DollarSign, 
@@ -671,6 +673,9 @@ const MaintenanceRow = React.memo(({ request, delay = 0, isDark = true }) => {
 const LandlordDashboard = () => {
   const location = useLocation();
   const [currentSection, setCurrentSection] = useState('Dashboard');
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [showAddPropertyModal, setShowAddPropertyModal] = useState(false);
+  const [showGenerateReportModal, setShowGenerateReportModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -1128,12 +1133,13 @@ const LandlordDashboard = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {[
-                        { label: 'Add New Property', icon: Plus, color: themeConfig.buttonPrimary },
-                        { label: 'Schedule Inspection', icon: Calendar, color: themeConfig.buttonPrimary },
-                        { label: 'Generate Report', icon: BarChart3, color: themeConfig.buttonSecondary }
+                        { label: 'Add New Property', icon: Plus, color: themeConfig.buttonPrimary, onClick: () => setShowAddPropertyModal(true) },
+                        { label: 'Schedule Inspection', icon: Calendar, color: themeConfig.buttonPrimary, onClick: () => setShowScheduleModal(true) },
+                        { label: 'Generate Report', icon: BarChart3, color: themeConfig.buttonSecondary, onClick: () => setShowGenerateReportModal(true) }
                       ].map((action, index) => (
                         <motion.button
                           key={action.label}
+                          onClick={action.onClick} // Added onClick
                           whileHover={{ 
                             scale: 1.05, 
                             y: -5,
@@ -1229,19 +1235,7 @@ const LandlordDashboard = () => {
                         </motion.div>
                         <span>Your Properties</span>
                       </motion.h2>
-                      <motion.button
-                        whileHover={{ 
-                          scale: 1.03,
-                          boxShadow: isDarkMode 
-                            ? "0 15px 30px rgba(6, 182, 212, 0.3)" 
-                            : "0 15px 30px rgba(99, 102, 241, 0.3)"
-                        }}
-                        whileTap={{ scale: 0.97 }}
-                        className={`px-6 py-3 bg-gradient-to-r ${themeConfig.buttonPrimary} ${isDarkMode ? 'text-blue-950' : 'text-white'} rounded-xl font-bold hover:brightness-110 transition-all duration-300 flex items-center space-x-2 shadow-lg text-sm`}
-                      >
-                        <Plus className="w-4 h-4" />
-                        <span>Add Property</span>
-                      </motion.button>
+                      
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -1370,7 +1364,170 @@ const LandlordDashboard = () => {
           </div>
         </main>
       </div>
+    {/* Schedule Inspection Modal */}
+      <AnimatePresence>
+        {showScheduleModal && (
+          <ScheduleInspectionModal
+            isOpen={showScheduleModal}
+            onClose={() => setShowScheduleModal(false)}
+            isDark={isDarkMode}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Add New Property Modal */}
+      <AnimatePresence>
+        {showAddPropertyModal && (
+          <AddNewPropertyModal
+            isOpen={showAddPropertyModal}
+            onClose={() => setShowAddPropertyModal(false)}
+            isDark={isDarkMode}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Generate Report Modal */}
+      <AnimatePresence>
+        {showGenerateReportModal && (
+          <GenerateReportModal
+            isOpen={showGenerateReportModal}
+            onClose={() => setShowGenerateReportModal(false)}
+            isDark={isDarkMode}
+          />
+        )}
+      </AnimatePresence>
     </div>
+  );
+};
+
+const ScheduleInspectionModal = ({ isOpen, onClose, isDark }) => {
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
+  const [type, setType] = useState('in-person'); // 'in-person' or 'virtual'
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Scheduling inspection:', { date, time, type });
+    // In a real app, you'd send this data to a backend
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  const modalTheme = isDark
+    ? {
+        bg: 'bg-slate-800/90',
+        border: 'border-slate-700/50',
+        text: 'text-white',
+        inputBg: 'bg-slate-700/50',
+        inputBorder: 'border-slate-600/50',
+        inputPlaceholder: 'placeholder-slate-400',
+        focusBorder: 'focus:border-cyan-500',
+        buttonPrimaryBg: 'bg-gradient-to-r from-cyan-500 to-indigo-600',
+        buttonPrimaryText: 'text-white',
+        buttonSecondaryBg: 'bg-slate-700/50',
+        buttonSecondaryText: 'text-slate-300',
+        buttonHover: 'hover:brightness-110',
+      }
+    : {
+        bg: 'bg-white/90',
+        border: 'border-indigo-200/50',
+        text: 'text-gray-900',
+        inputBg: 'bg-white/70',
+        inputBorder: 'border-indigo-300/50',
+        inputPlaceholder: 'placeholder-indigo-400',
+        focusBorder: 'focus:border-indigo-500',
+        buttonPrimaryBg: 'bg-gradient-to-r from-indigo-600 to-purple-600',
+        buttonPrimaryText: 'text-white',
+        buttonSecondaryBg: 'bg-indigo-100/60',
+        buttonSecondaryText: 'text-indigo-700',
+        buttonHover: 'hover:brightness-105',
+      };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className={`${modalTheme.bg} ${modalTheme.border} border rounded-2xl w-full max-w-md p-6 shadow-xl`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className={`text-2xl font-bold mb-6 ${modalTheme.text}`}>Schedule Inspection</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className={`block text-sm font-medium mb-2 ${modalTheme.text}`}>Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className={`w-full p-3 rounded-lg ${modalTheme.inputBg} ${modalTheme.inputBorder} border ${modalTheme.text} ${modalTheme.inputPlaceholder} ${modalTheme.focusBorder} focus:outline-none transition-colors`}
+              required
+            />
+          </div>
+          <div>
+            <label className={`block text-sm font-medium mb-2 ${modalTheme.text}`}>Time</label>
+            <input
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className={`w-full p-3 rounded-lg ${modalTheme.inputBg} ${modalTheme.inputBorder} border ${modalTheme.text} ${modalTheme.inputPlaceholder} ${modalTheme.focusBorder} focus:outline-none transition-colors`}
+              required
+            />
+          </div>
+          <div>
+            <label className={`block text-sm font-medium mb-2 ${modalTheme.text}`}>Type</label>
+            <div className="flex space-x-4">
+              <label className={`flex items-center ${modalTheme.text}`}>
+                <input
+                  type="radio"
+                  value="in-person"
+                  checked={type === 'in-person'}
+                  onChange={() => setType('in-person')}
+                  className="form-radio h-4 w-4 text-blue-600 transition-colors duration-200"
+                />
+                <span className="ml-2">In-person</span>
+              </label>
+              <label className={`flex items-center ${modalTheme.text}`}>
+                <input
+                  type="radio"
+                  value="virtual"
+                  checked={type === 'virtual'}
+                  onChange={() => setType('virtual')}
+                  className="form-radio h-4 w-4 text-blue-600 transition-colors duration-200"
+                />
+                <span className="ml-2">Virtual Tour</span>
+              </label>
+            </div>
+          </div>
+          <div className="flex justify-end space-x-4 pt-4">
+            <motion.button
+              type="button"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onClose}
+              className={`px-6 py-2 rounded-lg font-semibold transition-all duration-200 ${modalTheme.buttonSecondaryBg} ${modalTheme.buttonSecondaryText} ${modalTheme.buttonHover}`}
+            >
+              Cancel
+            </motion.button>
+            <motion.button
+              type="submit"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`px-6 py-2 rounded-lg font-semibold transition-all duration-200 ${modalTheme.buttonPrimaryBg} ${modalTheme.buttonPrimaryText} ${modalTheme.buttonHover}`}
+            >
+              Schedule Visit
+            </motion.button>
+          </div>
+        </form>
+      </motion.div>
+    </motion.div>
   );
 };
 

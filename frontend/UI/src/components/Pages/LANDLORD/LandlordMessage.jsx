@@ -1376,29 +1376,7 @@ const LandlordMessage = () => {
                         </div>
                       </div>
                       
-                      <div className="flex items-center space-x-2">
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          className="p-3 bg-indigo-100 dark:bg-slate-700 rounded-xl hover:bg-indigo-200 dark:hover:bg-slate-600 transition-colors"
-                        >
-                          <Phone className="w-5 h-5 text-indigo-600 dark:text-cyan-300" />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          className="p-3 bg-indigo-100 dark:bg-slate-700 rounded-xl hover:bg-indigo-200 dark:hover:bg-slate-600 transition-colors"
-                        >
-                          <Video className="w-5 h-5 text-indigo-600 dark:text-cyan-300" />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          className="p-3 bg-indigo-100 dark:bg-slate-700 rounded-xl hover:bg-indigo-200 dark:hover:bg-slate-600 transition-colors"
-                        >
-                          <Info className="w-5 h-5 text-indigo-600 dark:text-cyan-300" />
-                        </motion.button>
-                      </div>
+                      
                     </div>
                   </div>
 
