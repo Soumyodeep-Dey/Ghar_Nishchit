@@ -20,6 +20,7 @@ import {
   Heart
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSidebar } from './SidebarContext';
 
 // Detect theme from <html class="dark"> and keep in sync with navbar toggle
 const useTheme = () => {
@@ -50,8 +51,8 @@ const useTheme = () => {
 
 const LandlordSideBar = ({ currentSection, onSectionChange }) => {
   const isDark = useTheme();
+  const { isCollapsed, setIsCollapsed, sidebarWidth } = useSidebar();
 
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [hoveredItem, setHoveredItem] = useState(null);
   const [showTooltip, setShowTooltip] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -174,15 +175,7 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 768) setIsCollapsed(true);
-      else if (window.innerWidth >= 1024) setIsCollapsed(false);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -296,11 +289,11 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
         animate={{ 
           x: 0, 
           opacity: 1,
-          width: isCollapsed ? 85 : 320 
+          width: sidebarWidth
         }}
         transition={{ duration: 0.7, type: "spring", stiffness: 120, damping: 20 }}
-        className={`fixed left-0 top-0 h-screen bg-gradient-to-br ${themeClasses.shellBg} backdrop-blur-3xl border-r ${themeClasses.border} shadow-2xl z-40 flex flex-col ${isCollapsed ? 'w-[85px]' : 'w-80'} transition-all duration-700`}
-        style={{ height: '100vh', maxHeight: '100vh', overflow: 'hidden' }}
+        className={`fixed left-0 top-0 h-screen bg-gradient-to-br ${themeClasses.shellBg} backdrop-blur-3xl border-r ${themeClasses.border} shadow-2xl z-40 flex flex-col transition-all duration-700`}
+        style={{ width: sidebarWidth, height: '100vh', maxHeight: '100vh', overflow: 'hidden' }}
       >
         {/* Soft background particles */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">

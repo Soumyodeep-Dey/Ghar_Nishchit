@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import { useDarkMode } from '../../../DarkModeContext';
+import { useSidebar } from './SidebarContext';
 import { 
   Wrench, 
   Plus, 
@@ -1274,6 +1275,7 @@ const NotificationToast = ({ notifications, onRemove }) => {
 const LandlordMaintenance = () => {
   const [currentSection] = useState('Maintenance');
   const { darkMode } = useDarkMode();
+  const { sidebarWidthClass } = useSidebar();
   
   // Sample maintenance requests data
   const [maintenanceRequests, setMaintenanceRequests] = useLocalStorage('landlord_maintenance_requests', [
@@ -1685,7 +1687,7 @@ const LandlordMaintenance = () => {
 
       <LandlordSideBar currentSection={currentSection} />
       
-      <div className="flex-1 flex flex-col relative z-10 ml-[85px] md:ml-[320px] transition-all duration-700">
+      <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
         <LandlordNavBar currentSection={currentSection} />
         
         <main className="flex-1 overflow-y-auto">

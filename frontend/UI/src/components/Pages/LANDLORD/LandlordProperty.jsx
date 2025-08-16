@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import { useDarkMode } from '../../../DarkModeContext';
+import { useSidebar } from './SidebarContext';
 import { 
   Building2, 
   Plus, 
@@ -1252,6 +1253,7 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
 const LandlordProperty = () => {
   const [currentSection] = useState('Properties');
   const { darkMode } = useDarkMode();
+  const { sidebarWidthClass } = useSidebar();
   const [properties, setProperties] = useLocalStorage('landlord_properties', [
     {
       id: 1,
@@ -1438,7 +1440,7 @@ const LandlordProperty = () => {
 
       <LandlordSideBar currentSection={currentSection} />
       
-      <div className="flex-1 flex flex-col relative z-10 ml-[85px] md:ml-[320px] transition-all duration-700">
+      <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
         <LandlordNavBar currentSection={currentSection} />
         
         <main className="flex-1 overflow-y-auto">

@@ -28,6 +28,7 @@ import {
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import { useDarkMode } from '../../../DarkModeContext';
+import { useSidebar } from './SidebarContext';
 
 // Enhanced Custom Hooks with better performance
 const useIntersectionObserver = (options = {}) => {
@@ -672,6 +673,7 @@ const MaintenanceRow = React.memo(({ request, delay = 0, isDark = true }) => {
 
 const LandlordDashboard = () => {
   const location = useLocation();
+  const { sidebarWidthClass } = useSidebar();
   const [currentSection, setCurrentSection] = useState('Dashboard');
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showAddPropertyModal, setShowAddPropertyModal] = useState(false);
@@ -987,7 +989,7 @@ const LandlordDashboard = () => {
 
       <LandlordSideBar currentSection={currentSection} onSectionChange={setCurrentSection} />
 
-      <div className="flex-1 flex flex-col relative z-10 ml-[85px] md:ml-[320px] transition-all duration-700">
+      <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
         <LandlordNavBar currentSection={currentSection} />
 
         <main className="flex-1 overflow-y-auto">

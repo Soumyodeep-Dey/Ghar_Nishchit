@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Lock, Phone, Eye, EyeOff, Image as ImageIcon, AlertTriangle, Trash2 } from 'lucide-react';
+import { User, Mail, Lock, Phone, Eye, EyeOff, Image as ImageIcon, AlertTriangle, Trash2, CheckCircle, XCircle } from 'lucide-react';
 import { useDarkMode } from '../../../DarkModeContext';
 import { useNavigate } from 'react-router-dom';
+import { useSidebar } from './SidebarContext';
+import LandlordSideBar from './LandlordSideBar';
+import LandlordNavBar from './LandlordNavBar';
 
 export default function UpdateLandlordProfile() {
   const navigate = useNavigate();
   const { darkMode, toggleDarkMode } = useDarkMode();
+  const { sidebarWidthClass } = useSidebar();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -14,25 +19,115 @@ export default function UpdateLandlordProfile() {
     password: '', // Password update is optional
     profilePicture: '',
   });
+  const [errors, setErrors] = useState({});
   const [message, setMessage] = useState('');
 
-  // Simulate loading existing user data
+  // Load existing user data
   useEffect(() => {
-    // In a real application, you would fetch this from your API
-    const storedUser = JSON.parse(localStorage.getItem('user'));
-    if (storedUser) {
-      setFormData({
-        name: storedUser.name || '',
-        email: storedUser.email || '',
-        phone: storedUser.phone || '',
-        password: '', // Never pre-fill password for security
-        profilePicture: storedUser.profilePicture || '',
-      });
-    } else {
-      // Redirect to login if no user data is found
-      navigate('/login');
-    }
+    const loadUserData = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          navigate('/login');
+          return;
+        }
+
+        // Fetch user data from API
+        const response = await fetch('http://localhost:5000/api/auth/profile', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          setFormData({
+            name: userData.name || '',
+            email: userData.email || '',
+            phone: userData.phone || '',
+            password: '', // Never pre-fill password for security
+            profilePicture: userData.profilePicture || '',
+          });
+        } else {
+          // Fallback to localStorage if API fails
+          const storedUser = JSON.parse(localStorage.getItem('user'));
+          if (storedUser) {
+            setFormData({
+              name: storedUser.name || '',
+              email: storedUser.email || '',
+              phone: storedUser.phone || '',
+              password: '',
+              profilePicture: storedUser.profilePicture || '',
+            });
+          } else {
+            navigate('/login');
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        // Fallback to localStorage
+        const storedUser = JSON.parse(localStorage.getItem('user'));
+        if (storedUser) {
+          setFormData({
+            name: storedUser.name || '',
+            email: storedUser.email || '',
+            phone: storedUser.phone || '',
+            password: '',
+            profilePicture: storedUser.profilePicture || '',
+          });
+        } else {
+          navigate('/login');
+        }
+      }
+    };
+
+    loadUserData();
   }, [navigate]);
+
+  // Validation functions
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhone = (phone) => {
+    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+    return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
+  };
+
+  const validatePassword = (password) => {
+    if (!password) return true; // Password is optional
+    return password.length >= 6;
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!validatePhone(formData.phone)) {
+      newErrors.phone = 'Please enter a valid phone number';
+    }
+
+    if (formData.password && !validatePassword(formData.password)) {
+      newErrors.password = 'Password must be at least 6 characters long';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,6 +135,14 @@ export default function UpdateLandlordProfile() {
       ...prev,
       [name]: value,
     }));
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
   };
 
   const handleFileChange = (e) => {
@@ -59,18 +162,78 @@ export default function UpdateLandlordProfile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
+    setErrors({});
 
-    // In a real application, you would send this data to your API
-    console.log('Updating profile with:', formData);
+    if (!validateForm()) {
+      setMessage('Please fix the errors above.');
+      return;
+    }
+
+    setIsLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      localStorage.setItem('user', JSON.stringify(formData)); // Update local storage
-      setMessage('Profile updated successfully!');
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      // Prepare data for API (exclude empty password)
+      const updateData = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+      };
+
+      if (formData.password) {
+        updateData.password = formData.password;
+      }
+
+      if (formData.profilePicture) {
+        updateData.profilePicture = formData.profilePicture;
+      }
+
+      // Send update request to API
+      const response = await fetch('http://localhost:5000/api/auth/profile', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData),
+      });
+
+      if (response.ok) {
+        const responseData = await response.json();
+        const updatedUser = responseData.user || responseData;
+        
+        // Update localStorage with new data
+        localStorage.setItem('user', JSON.stringify({
+          ...JSON.parse(localStorage.getItem('user') || '{}'),
+          ...updatedUser
+        }));
+
+        setMessage(responseData.message || 'Profile updated successfully!');
+        
+        // Clear password field
+        setFormData(prev => ({
+          ...prev,
+          password: ''
+        }));
+
+        // Show success message for 3 seconds
+        setTimeout(() => {
+          setMessage('');
+        }, 3000);
+      } else {
+        const errorData = await response.json();
+        setMessage(errorData.error || errorData.message || 'Failed to update profile.');
+      }
     } catch (error) {
       console.error('Profile update failed:', error);
-      setMessage('Failed to update profile.');
+      setMessage('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -114,8 +277,20 @@ export default function UpdateLandlordProfile() {
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center px-2 sm:px-4 transition-colors duration-500 ${themeClasses.bg}`}>
-      <div className={`relative flex flex-col rounded-2xl shadow-2xl overflow-hidden max-w-lg sm:max-w-xl w-full transition-colors duration-300 ${themeClasses.cardBg}`}>
+    <div className={`min-h-screen flex relative overflow-hidden ${themeClasses.bg}`}>
+      {/* Background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className={`absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-purple-500/10 to-pink-500/10' : 'bg-gradient-to-r from-indigo-500/20 to-cyan-500/20'}`} />
+        <div className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10' : 'bg-gradient-to-r from-pink-500/20 to-purple-500/20'}`} />
+      </div>
+
+      <LandlordSideBar currentSection="Profile" />
+      
+      <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
+        <LandlordNavBar currentSection="Profile" />
+        
+        <main className="flex-1 overflow-y-auto flex items-center justify-center px-2 sm:px-4">
+          <div className={`relative flex flex-col rounded-2xl shadow-2xl overflow-hidden max-w-lg sm:max-w-xl w-full transition-colors duration-300 ${themeClasses.cardBg}`}>
         <div className="w-full p-6 sm:p-8 relative">
           <button
             onClick={toggleDarkMode}
@@ -132,7 +307,16 @@ export default function UpdateLandlordProfile() {
           </p>
 
           {message && (
-            <div className={`mb-4 text-sm text-center font-medium ${message.includes('successfully') ? 'text-green-500' : 'text-red-500'}`}>
+            <div className={`mb-4 p-3 rounded-lg text-sm text-center font-medium flex items-center justify-center gap-2 ${
+              message.includes('successfully') 
+                ? 'text-green-700 bg-green-100 border border-green-300' 
+                : 'text-red-700 bg-red-100 border border-red-300'
+            }`}>
+              {message.includes('successfully') ? (
+                <CheckCircle className="w-4 h-4" />
+              ) : (
+                <XCircle className="w-4 h-4" />
+              )}
               {message}
             </div>
           )}
@@ -149,10 +333,20 @@ export default function UpdateLandlordProfile() {
                 autoComplete="name"
                 value={formData.name}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputText} ${themeClasses.inputPlaceholder} ${themeClasses.inputFocusRing}`}
+                className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${
+                  errors.name 
+                    ? 'border-red-500 focus:ring-red-400' 
+                    : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
+                } ${themeClasses.inputText} ${themeClasses.inputPlaceholder}`}
                 placeholder="Your full name"
                 required
               />
+              {errors.name && (
+                <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                  <XCircle className="w-3 h-3" />
+                  {errors.name}
+                </p>
+              )}
             </div>
 
             <div>
@@ -166,10 +360,20 @@ export default function UpdateLandlordProfile() {
                 autoComplete="email"
                 value={formData.email}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputText} ${themeClasses.inputPlaceholder} ${themeClasses.inputFocusRing}`}
+                className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${
+                  errors.email 
+                    ? 'border-red-500 focus:ring-red-400' 
+                    : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
+                } ${themeClasses.inputText} ${themeClasses.inputPlaceholder}`}
                 placeholder="you@example.com"
                 required
               />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                  <XCircle className="w-3 h-3" />
+                  {errors.email}
+                </p>
+              )}
             </div>
 
             <div>
@@ -183,10 +387,20 @@ export default function UpdateLandlordProfile() {
                 autoComplete="tel"
                 value={formData.phone}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputText} ${themeClasses.inputPlaceholder} ${themeClasses.inputFocusRing}`}
+                className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${
+                  errors.phone 
+                    ? 'border-red-500 focus:ring-red-400' 
+                    : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
+                } ${themeClasses.inputText} ${themeClasses.inputPlaceholder}`}
                 placeholder="Your phone number"
                 required
               />
+              {errors.phone && (
+                <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                  <XCircle className="w-3 h-3" />
+                  {errors.phone}
+                </p>
+              )}
             </div>
 
             <div>
@@ -201,7 +415,11 @@ export default function UpdateLandlordProfile() {
                   autoComplete="new-password"
                   value={formData.password}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputText} ${themeClasses.inputPlaceholder} ${themeClasses.inputFocusRing}`}
+                  className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${
+                    errors.password 
+                      ? 'border-red-500 focus:ring-red-400' 
+                      : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
+                  } ${themeClasses.inputText} ${themeClasses.inputPlaceholder}`}
                   placeholder="Leave blank to keep current password"
                 />
                 <button
@@ -214,6 +432,12 @@ export default function UpdateLandlordProfile() {
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                  <XCircle className="w-3 h-3" />
+                  {errors.password}
+                </p>
+              )}
             </div>
 
             <div>
@@ -237,9 +461,21 @@ export default function UpdateLandlordProfile() {
 
             <button
               type="submit"
-              className={`w-full py-2 sm:py-3 rounded-lg font-semibold transition-colors duration-300 hover:shadow-xl hover:scale-105 text-sm sm:text-base ${themeClasses.buttonPrimaryBg} ${themeClasses.buttonPrimaryText} ${themeClasses.buttonPrimaryHover}`}
+              disabled={isLoading}
+              className={`w-full py-2 sm:py-3 rounded-lg font-semibold transition-colors duration-300 hover:shadow-xl hover:scale-105 text-sm sm:text-base ${
+                isLoading 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : `${themeClasses.buttonPrimaryBg} ${themeClasses.buttonPrimaryText} ${themeClasses.buttonPrimaryHover}`
+              }`}
             >
-              Save Changes
+              {isLoading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Updating...
+                </div>
+              ) : (
+                'Save Changes'
+              )}
             </button>
           </form>
 
@@ -259,6 +495,8 @@ export default function UpdateLandlordProfile() {
             </button>
           </div>
         </div>
+        </div>
+        </main>
       </div>
     </div>
   );
