@@ -491,17 +491,7 @@ const TenantMessage = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <button className="p-3 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200 hover:scale-110">
-                    <PhoneIcon className="h-6 w-6" />
-                  </button>
-                  <button className="p-3 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200 hover:scale-110">
-                    <VideoCameraIcon className="h-6 w-6" />
-                  </button>
-                  <button className="p-3 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200 hover:scale-110">
-                    <InformationCircleIcon className="h-6 w-6" />
-                  </button>
-                </div>
+                
               </div>
             </div>
 

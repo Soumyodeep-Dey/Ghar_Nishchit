@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
+import { useSidebar } from './SidebarContext';
 import { 
   CreditCard, 
   DollarSign, 
@@ -232,6 +233,8 @@ const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete, dar
         return <div className="text-blue-500 font-bold text-lg">PP</div>;
       case 'bank':
         return <Building2 className="w-6 h-6 text-emerald-600" />;
+      case 'upi':
+        return <div className="text-purple-600 font-bold text-lg">UPI</div>;
       default:
         return <CreditCard className={`w-6 h-6 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`} />;
     }
@@ -288,7 +291,7 @@ const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete, dar
         
         <div className="space-y-2">
           <div className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-medium`}>
-            {method.type === 'bank' ? method.bankName : `•••• •••• •••• ${method.last4}`}
+            {method.type === 'bank' ? method.bankName : method.type === 'upi' ? method.id : `•••• •••• •••• ${method.last4}`}
           </div>
           
           <div className={`flex items-center justify-between ${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>
@@ -1078,14 +1081,158 @@ const NotificationToast = ({ notifications, onRemove, darkMode }) => {
   );
 };
 
+// Add Payment Method Modal Component
+const AddPaymentMethodModal = ({ isOpen, onClose, onAdd, darkMode }) => {
+  const [paymentType, setPaymentType] = useState('card'); // 'card' or 'upi'
+  const [cardDetails, setCardDetails] = useState({ number: '', expiry: '', cvv: '', name: '' });
+  const [upiId, setUpiId] = useState('');
+
+  if (!isOpen) return null;
+
+  const handleAdd = () => {
+    if (paymentType === 'card') {
+      onAdd({
+        type: 'visa', // Default to visa for now
+        ...cardDetails
+      });
+    } else {
+      onAdd({
+        type: 'upi',
+        id: upiId
+      });
+    }
+    onClose();
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className={`${
+          darkMode
+            ? 'bg-slate-800/90 backdrop-blur-xl border border-slate-700'
+            : 'bg-white/90 backdrop-blur-xl border border-indigo-200'
+        } rounded-2xl w-full max-w-md overflow-hidden`}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className={`p-6 border-b ${darkMode ? 'border-slate-700' : 'border-indigo-200'}`}>
+          <div className="flex items-center justify-between">
+            <h2 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'}`}>Add Payment Method</h2>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={onClose}
+              className={`p-2 rounded-lg ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-indigo-100'} transition-colors`}
+            >
+              <X className={`w-6 h-6 ${darkMode ? 'text-cyan-300' : 'text-indigo-600'}`} />
+            </motion.button>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="flex mb-6">
+            <button
+              onClick={() => setPaymentType('card')}
+              className={`flex-1 py-2 text-center font-semibold rounded-l-lg transition-all ${
+                paymentType === 'card'
+                  ? darkMode ? 'bg-cyan-500 text-white' : 'bg-indigo-500 text-white'
+                  : darkMode ? 'bg-slate-700 text-blue-200' : 'bg-gray-200 text-gray-600'
+              }`}
+            >
+              Card
+            </button>
+            <button
+              onClick={() => setPaymentType('upi')}
+              className={`flex-1 py-2 text-center font-semibold rounded-r-lg transition-all ${
+                paymentType === 'upi'
+                  ? darkMode ? 'bg-cyan-500 text-white' : 'bg-indigo-500 text-white'
+                  : darkMode ? 'bg-slate-700 text-blue-200' : 'bg-gray-200 text-gray-600'
+              }`}
+            >
+              UPI
+            </button>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {paymentType === 'card' ? (
+              <motion.div
+                key="card-form"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="space-y-4"
+              >
+                <div>
+                  <label className={`block ${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm mb-2`}>Card Number</label>
+                  <input type="text" placeholder="1234 5678 9012 3456" onChange={e => setCardDetails({...cardDetails, number: e.target.value})} className={`w-full p-3 ${darkMode ? 'bg-slate-700/50 border border-slate-600 text-cyan-100' : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700'} rounded-lg focus:outline-none`} />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className={`block ${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm mb-2`}>Expiry Date</label>
+                    <input type="text" placeholder="MM/YY" onChange={e => setCardDetails({...cardDetails, expiry: e.target.value})} className={`w-full p-3 ${darkMode ? 'bg-slate-700/50 border border-slate-600 text-cyan-100' : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700'} rounded-lg focus:outline-none`} />
+                  </div>
+                  <div>
+                    <label className={`block ${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm mb-2`}>CVV</label>
+                    <input type="text" placeholder="123" onChange={e => setCardDetails({...cardDetails, cvv: e.target.value})} className={`w-full p-3 ${darkMode ? 'bg-slate-700/50 border border-slate-600 text-cyan-100' : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700'} rounded-lg focus:outline-none`} />
+                  </div>
+                </div>
+                <div>
+                  <label className={`block ${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm mb-2`}>Cardholder Name</label>
+                  <input type="text" placeholder="John Doe" onChange={e => setCardDetails({...cardDetails, name: e.target.value})} className={`w-full p-3 ${darkMode ? 'bg-slate-700/50 border border-slate-600 text-cyan-100' : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700'} rounded-lg focus:outline-none`} />
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="upi-form"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+              >
+                <label className={`block ${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm mb-2`}>UPI ID</label>
+                <input type="text" placeholder="yourname@bank" onChange={e => setUpiId(e.target.value)} className={`w-full p-3 ${darkMode ? 'bg-slate-700/50 border border-slate-600 text-cyan-100' : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700'} rounded-lg focus:outline-none`} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className={`p-6 border-t ${darkMode ? 'border-slate-700' : 'border-indigo-200'}`}>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleAdd}
+            className={`w-full py-3 ${
+              darkMode
+                ? 'bg-gradient-to-r from-cyan-500 to-blue-600'
+                : 'bg-gradient-to-r from-indigo-500 to-purple-600'
+            } text-white rounded-xl font-bold`}
+          >
+            Save Payment Method
+          </motion.button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+
 // Main Component
 const LandlordPayment = () => {
   const [currentSection] = useState('Payments');
   const [activeTab, setActiveTab] = useState('billing');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showAddPaymentModal, setShowAddPaymentModal] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState(0);
   
   const { darkMode, toggleDarkMode } = useDarkMode();
+  const { sidebarWidthClass } = useSidebar();
   const { notifications, addNotification, removeNotification } = useNotification();
   
   // Sample data
@@ -1297,6 +1444,28 @@ const LandlordPayment = () => {
     });
   };
 
+  const handleAddPaymentMethod = (method) => {
+    const newMethod = {
+      id: paymentMethods.length + 1,
+      ...method,
+      isDefault: false
+    };
+    if(method.type === 'visa') { // or other card types
+      newMethod.last4 = method.number.slice(-4);
+      newMethod.holderName = method.name;
+      newMethod.expiryDate = method.expiry;
+    } else if (method.type === 'upi') {
+      newMethod.holderName = method.id.split('@')[0];
+    }
+
+    setPaymentMethods(prev => [...prev, newMethod]);
+    addNotification({
+      type: 'success',
+      title: 'Payment Method Added',
+      message: 'New payment method has been saved successfully'
+    });
+  };
+
   return (
     <div className={`min-h-screen ${
       darkMode 
@@ -1327,7 +1496,7 @@ const LandlordPayment = () => {
 
       <LandlordSideBar currentSection={currentSection} darkMode={darkMode} />
       
-      <div className="flex-1 flex flex-col relative z-10 ml-[85px] md:ml-[320px] transition-all duration-700">
+      <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
         <LandlordNavBar currentSection={currentSection} darkMode={darkMode} toggleTheme={toggleDarkMode} />
         
         <main className="flex-1 overflow-y-auto">
@@ -1656,6 +1825,7 @@ const LandlordPayment = () => {
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
+                        onClick={() => setShowAddPaymentModal(true)}
                         className={`px-6 py-3 ${
                           darkMode 
                             ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700' 
@@ -1678,7 +1848,7 @@ const LandlordPayment = () => {
                             addNotification({
                               type: 'info',
                               title: 'Edit Payment Method',
-                              message: `Editing ${method.type} ending in ${method.last4}`
+                              message: `Editing ${method.type} ending in ${method.last4 || ''}`
                             });
                           }}
                           onDelete={(methodId) => {
@@ -1770,6 +1940,18 @@ const LandlordPayment = () => {
             onClose={() => setShowPaymentModal(false)}
             amount={paymentAmount}
             onPayment={handlePayment}
+            darkMode={darkMode}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Add Payment Method Modal */}
+      <AnimatePresence>
+        {showAddPaymentModal && (
+          <AddPaymentMethodModal
+            isOpen={showAddPaymentModal}
+            onClose={() => setShowAddPaymentModal(false)}
+            onAdd={handleAddPaymentMethod}
             darkMode={darkMode}
           />
         )}

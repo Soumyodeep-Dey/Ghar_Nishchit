@@ -93,4 +93,75 @@ export const getUserDetails = async (req, res) => {
     console.error("Error fetching user details:", error);
     res.status(500).json({ error: "Failed to fetch user details" });
   }
+};
+
+// Get User Profile
+export const getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).select("-password");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({ error: "Failed to fetch user profile" });
+  }
+};
+
+// Update User Profile
+export const updateProfile = async (req, res) => {
+  try {
+    const { name, email, phone, password, profilePicture } = req.body;
+    const userId = req.user.userId;
+
+    // Find user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Check if email is being changed and if it's already taken
+    if (email && email !== user.email) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({ error: "Email already registered" });
+      }
+    }
+
+    // Check if phone is being changed and if it's already taken
+    if (phone && phone !== user.phone) {
+      const existingUser = await User.findOne({ phone });
+      if (existingUser) {
+        return res.status(400).json({ error: "Phone number already registered" });
+      }
+    }
+
+    // Prepare update data
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+    if (phone) updateData.phone = phone;
+    if (profilePicture) updateData.profilePicture = profilePicture;
+
+    // Hash password if provided
+    if (password) {
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+
+    // Update user
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      updateData,
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    res.status(500).json({ error: "Failed to update profile" });
+  }
 }; 

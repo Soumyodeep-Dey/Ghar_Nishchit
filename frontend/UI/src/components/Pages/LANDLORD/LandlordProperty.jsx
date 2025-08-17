@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import { useDarkMode } from '../../../DarkModeContext';
+import { useSidebar } from './SidebarContext';
 import { 
   Building2, 
   Plus, 
@@ -140,6 +141,57 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
   const menuRef = useRef(null);
   const { darkMode } = useDarkMode();
 
+  const theme = useMemo(() => {
+    if (darkMode) {
+      return {
+        cardBg: 'bg-white/10 backdrop-blur-xl border border-white/20',
+        listCardBg: 'bg-slate-800/80 border-slate-700/50 hover:border-cyan-400/30',
+        title: 'text-white',
+        text: 'text-white/70',
+        subtleText: 'text-white/60',
+        icon: 'text-white/70',
+        menuBg: 'bg-white/20 border border-white/30',
+        menuItem: 'hover:bg-white/10 text-white/80',
+        deleteMenuItem: 'hover:bg-red-500/20 text-red-300',
+        status: {
+          Available: 'bg-green-500/20 text-green-300 border border-green-500/30',
+          Occupied: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
+          Maintenance: 'bg-orange-500/20 text-orange-300 border border-orange-500/30',
+        },
+        amenityBg: 'bg-white/10',
+        amenityIcon: 'text-white/60',
+        price: 'text-white',
+        priceUnit: 'text-white/60',
+        rating: 'text-yellow-400',
+        trendUp: 'text-green-400',
+        trendDown: 'text-red-400',
+      };
+    }
+    return {
+      cardBg: 'bg-white/80 backdrop-blur-xl border border-indigo-200/50',
+      listCardBg: 'bg-white/80 border-indigo-200/50 hover:border-indigo-400/40',
+      title: 'text-indigo-900',
+      text: 'text-indigo-700/80',
+      subtleText: 'text-indigo-600/80',
+      icon: 'text-indigo-700/70',
+      menuBg: 'bg-white/90 border border-indigo-200/50',
+      menuItem: 'hover:bg-indigo-50 text-indigo-700',
+      deleteMenuItem: 'hover:bg-red-50 text-red-600',
+      status: {
+        Available: 'bg-green-100 text-green-800 border border-green-200',
+        Occupied: 'bg-blue-100 text-blue-800 border border-blue-200',
+        Maintenance: 'bg-orange-100 text-orange-800 border border-orange-200',
+      },
+      amenityBg: 'bg-indigo-100/60',
+      amenityIcon: 'text-indigo-600',
+      price: 'text-indigo-900',
+      priceUnit: 'text-indigo-700/80',
+      rating: 'text-yellow-500',
+      trendUp: 'text-green-600',
+      trendDown: 'text-red-600',
+    };
+  }, [darkMode]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -165,7 +217,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay, duration: 0.4 }}
         whileHover={{ scale: 1.01, boxShadow: "0 10px 30px rgba(0,0,0,0.2)" }}
-        className={`backdrop-blur-xl border rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 group ${darkMode ? 'bg-slate-800/80 border-slate-700/50 hover:border-cyan-400/30' : 'bg-white/80 border-indigo-200/50 hover:border-indigo-400/40'}`}
+        className={`backdrop-blur-xl border rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 group ${theme.listCardBg}`}
       >
         <div className="flex items-center space-x-6">
           <div className="w-24 h-24 rounded-lg overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
@@ -177,8 +229,8 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
           </div>
           
           <div className="flex-1 min-w-0">
-            <h3 className="text-xl font-bold text-white mb-2 truncate">{property.title}</h3>
-            <div className="flex items-center space-x-4 text-white/70 mb-2">
+            <h3 className={`text-xl font-bold mb-2 truncate ${theme.title}`}>{property.title}</h3>
+            <div className={`flex items-center space-x-4 mb-2 ${theme.text}`}>
               <span className="flex items-center space-x-1">
                 <MapPin className="w-4 h-4" />
                 <span className="truncate">{property.location}</span>
@@ -188,7 +240,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
                 <span>${property.rent}/month</span>
               </span>
             </div>
-            <div className="flex items-center space-x-4 text-white/60">
+            <div className={`flex items-center space-x-4 ${theme.subtleText}`}>
               <span className="flex items-center space-x-1">
                 <Bed className="w-4 h-4" />
                 <span>{property.bedrooms}</span>
@@ -205,11 +257,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
           </div>
           
           <div className="flex items-center space-x-4">
-            <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-              property.status === 'Available' ? 'bg-green-500/20 text-green-300 border border-green-500/30' :
-              property.status === 'Occupied' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
-              'bg-orange-500/20 text-orange-300 border border-orange-500/30'
-            }`}>
+            <span className={`px-3 py-1 rounded-full text-sm font-semibold ${theme.status[property.status]}`}>
               {property.status}
             </span>
             
@@ -218,9 +266,9 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setShowMenu(!showMenu)}
-                className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10' : 'hover:bg-indigo-100'}`}
               >
-                <MoreVertical className="w-5 h-5 text-white/70" />
+                <MoreVertical className={`w-5 h-5 ${theme.icon}`} />
               </motion.button>
               
               <AnimatePresence>
@@ -229,24 +277,22 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
                     initial={{ opacity: 0, scale: 0.95, y: -10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                    className={`absolute right-0 top-full mt-2 w-48 backdrop-blur-xl rounded-xl shadow-xl z-50 ${darkMode 
-                      ? 'bg-white/20 border border-white/30' 
-                      : 'bg-white/90 border border-indigo-200/50'}`}
+                    className={`absolute right-0 top-full mt-2 w-48 backdrop-blur-xl rounded-xl shadow-xl z-50 ${theme.menuBg}`}
                   >
                     <div className="p-2">
-                      <button onClick={() => { onView(property); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-indigo-50 text-indigo-700'}`}>
+                      <button onClick={() => { onView(property); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
                         <Eye className="w-4 h-4" />
                         <span>View Details</span>
                       </button>
-                      <button onClick={() => { onEdit(property); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-indigo-50 text-indigo-700'}`}>
+                      <button onClick={() => { onEdit(property); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
                         <Edit className="w-4 h-4" />
                         <span>Edit Property</span>
                       </button>
-                      <button onClick={() => { onToggleStatus(property.id); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-indigo-50 text-indigo-700'}`}>
+                      <button onClick={() => { onToggleStatus(property.id); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
                         <RefreshCw className="w-4 h-4" />
                         <span>Toggle Status</span>
                       </button>
-                      <button onClick={() => { onDelete(property.id); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-red-500/20 text-red-300' : 'hover:bg-red-50 text-red-600'}`}>
+                      <button onClick={() => { onDelete(property.id); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.deleteMenuItem}`}>
                         <Trash2 className="w-4 h-4" />
                         <span>Delete</span>
                       </button>
@@ -269,9 +315,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
       whileHover={{ scale: 1.02, y: -5 }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 group ${darkMode 
-        ? 'bg-white/10 backdrop-blur-xl border border-white/20' 
-        : 'bg-white/80 backdrop-blur-xl border border-indigo-200/50'}`}
+      className={`relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 group ${theme.cardBg}`}
     >
       {/* Image Carousel */}
       <div className="relative h-64 overflow-hidden rounded-t-2xl">
@@ -330,11 +374,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
         )}
         
         {/* Status Badge */}
-        <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-sm font-semibold backdrop-blur-sm ${
-          property.status === 'Available' ? 'bg-green-500/20 text-green-300 border border-green-500/30' :
-          property.status === 'Occupied' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
-          'bg-orange-500/20 text-orange-300 border border-orange-500/30'
-        }`}>
+        <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-sm font-semibold backdrop-blur-sm ${theme.status[property.status]}`}>
           {property.status}
         </div>
         
@@ -372,8 +412,8 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
       <div className="p-6">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h3 className={`text-xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{property.title}</h3>
-            <div className={`flex items-center space-x-1 ${darkMode ? 'text-white/70' : 'text-indigo-700/80'}`}>
+            <h3 className={`text-xl font-bold mb-2 ${theme.title}`}>{property.title}</h3>
+            <div className={`flex items-center space-x-1 ${theme.text}`}>
               <MapPin className="w-4 h-4" />
               <span className="text-sm">{property.location}</span>
             </div>
@@ -386,7 +426,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
               onClick={() => setShowMenu(!showMenu)}
               className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10' : 'hover:bg-indigo-100/80'}`}
             >
-              <MoreVertical className={`w-5 h-5 ${darkMode ? 'text-white/70' : 'text-indigo-700/70'}`} />
+              <MoreVertical className={`w-5 h-5 ${theme.icon}`} />
             </motion.button>
             
             <AnimatePresence>
@@ -395,30 +435,30 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
                   initial={{ opacity: 0, scale: 0.95, y: -10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                  className="absolute right-0 top-full mt-2 w-48 bg-white/20 backdrop-blur-xl border border-white/30 rounded-xl shadow-xl z-50"
+                  className={`absolute right-0 top-full mt-2 w-48 backdrop-blur-xl rounded-xl shadow-xl z-50 ${theme.menuBg}`}
                 >
                   <div className="p-2">
-                    <button onClick={() => { onView(property); setShowMenu(false); }} className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-white/80">
+                    <button onClick={() => { onView(property); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
                       <Eye className="w-4 h-4" />
                       <span>View Details</span>
                     </button>
-                    <button onClick={() => { onEdit(property); setShowMenu(false); }} className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-white/80">
+                    <button onClick={() => { onEdit(property); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
                       <Edit className="w-4 h-4" />
                       <span>Edit Property</span>
                     </button>
-                    <button className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-white/80">
+                    <button className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
                       <Share2 className="w-4 h-4" />
                       <span>Share Property</span>
                     </button>
-                    <button className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-white/80">
+                    <button className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
                       <Download className="w-4 h-4" />
                       <span>Download Report</span>
                     </button>
-                    <button onClick={() => { onToggleStatus(property.id); setShowMenu(false); }} className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-white/80">
+                    <button onClick={() => { onToggleStatus(property.id); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
                       <RefreshCw className="w-4 h-4" />
                       <span>Toggle Status</span>
                     </button>
-                    <button onClick={() => { onDelete(property.id); setShowMenu(false); }} className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-red-500/20 transition-colors text-red-300">
+                    <button onClick={() => { onDelete(property.id); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.deleteMenuItem}`}>
                       <Trash2 className="w-4 h-4" />
                       <span>Delete</span>
                     </button>
@@ -430,7 +470,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
         </div>
         
         {/* Property Details */}
-        <div className="grid grid-cols-3 gap-4 mb-4 text-white/70">
+        <div className={`grid grid-cols-3 gap-4 mb-4 ${theme.text}`}>
           <div className="flex items-center space-x-1">
             <Bed className="w-4 h-4" />
             <span className="text-sm">{property.bedrooms} bed</span>
@@ -448,40 +488,40 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
         {/* Amenities */}
         <div className="flex items-center space-x-2 mb-4">
           {property.amenities?.slice(0, 4).map((amenity, index) => (
-            <div key={index} className="p-1 rounded bg-white/10">
-              {amenity === 'wifi' && <Wifi className="w-3 h-3 text-white/60" />}
-              {amenity === 'parking' && <Car className="w-3 h-3 text-white/60" />}
-              {amenity === 'ac' && <AirVent className="w-3 h-3 text-white/60" />}
-              {amenity === 'tv' && <Tv className="w-3 h-3 text-white/60" />}
+            <div key={index} className={`p-1 rounded ${theme.amenityBg}`}>
+              {amenity === 'wifi' && <Wifi className={`w-3 h-3 ${theme.amenityIcon}`} />}
+              {amenity === 'parking' && <Car className={`w-3 h-3 ${theme.amenityIcon}`} />}
+              {amenity === 'ac' && <AirVent className={`w-3 h-3 ${theme.amenityIcon}`} />}
+              {amenity === 'tv' && <Tv className={`w-3 h-3 ${theme.amenityIcon}`} />}
             </div>
           ))}
           {property.amenities?.length > 4 && (
-            <span className="text-xs text-white/50">+{property.amenities.length - 4} more</span>
+            <span className={`text-xs ${darkMode ? 'text-white/50' : 'text-indigo-500'}`}>+{property.amenities.length - 4} more</span>
           )}
         </div>
         
         {/* Price and Actions */}
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-2xl font-bold text-white">
+            <div className={`text-2xl font-bold ${theme.price}`}>
               ${property.rent}
-              <span className="text-sm text-white/60">/month</span>
+              <span className={`text-sm ${theme.priceUnit}`}>/month</span>
             </div>
             {property.previousRent && (
-              <div className="text-sm text-white/50 line-through">
+              <div className={`text-sm line-through ${darkMode ? 'text-white/50' : 'text-gray-500'}`}>
                 ${property.previousRent}
               </div>
             )}
           </div>
           
           <div className="flex items-center space-x-2">
-            <div className="flex items-center space-x-1 text-yellow-400">
+            <div className={`flex items-center space-x-1 ${theme.rating}`}>
               <Star className="w-4 h-4 fill-current" />
               <span className="text-sm">{property.rating || '4.5'}</span>
             </div>
             {property.trend && (
               <div className={`flex items-center space-x-1 ${
-                property.trend === 'up' ? 'text-green-400' : 'text-red-400'
+                property.trend === 'up' ? theme.trendUp : theme.trendDown
               }`}>
                 {property.trend === 'up' ? 
                   <TrendingUp className="w-4 h-4" /> : 
@@ -498,6 +538,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
 
 // Property Form Modal
 const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
+  const { darkMode } = useDarkMode();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -532,6 +573,59 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
+
+  const theme = useMemo(() => {
+    if (darkMode) {
+        return {
+            bg: 'bg-slate-800/90 backdrop-blur-xl border border-slate-700/50',
+            headerBg: 'p-6 border-b border-slate-700/50',
+            title: 'text-white',
+            label: 'text-slate-300',
+            input: 'w-full p-3 rounded-xl bg-slate-700/50 border border-slate-600/50 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500 focus:outline-none transition-colors',
+            select: 'w-full p-3 rounded-xl bg-slate-700/50 border border-slate-600/50 text-white focus:border-cyan-500 focus:ring-cyan-500 focus:outline-none transition-colors',
+            button: 'px-6 py-3 bg-gradient-to-r from-cyan-500 to-indigo-600 text-white rounded-xl font-semibold hover:brightness-110 transition-all duration-300 flex items-center space-x-2',
+            cancelButton: 'px-6 py-3 bg-slate-700/50 text-slate-300 rounded-xl font-semibold hover:bg-slate-600/50 transition-colors',
+            previousButton: 'px-6 py-3 bg-slate-700/50 text-slate-300 rounded-xl font-semibold hover:bg-slate-600/50 transition-colors',
+            stepActive: 'bg-cyan-500 text-white',
+            stepCompleted: 'bg-green-500 text-white',
+            stepInactive: 'bg-slate-700 text-slate-400',
+            stepLineCompleted: 'bg-green-500',
+            stepLineInactive: 'bg-slate-600',
+            uploadBox: 'border-2 border-dashed border-slate-600/50 rounded-xl p-8 text-center cursor-pointer hover:border-cyan-500/50 hover:bg-slate-700/30 transition-all duration-200',
+            uploadIcon: 'text-slate-400',
+            uploadText: 'text-slate-200 font-medium',
+            uploadSubText: 'text-slate-400 text-sm',
+            amenityButton: 'p-4 rounded-xl border transition-all duration-200',
+            amenityActive: 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300',
+            amenityInactive: 'bg-slate-700/30 border-slate-600/50 text-slate-300 hover:bg-slate-700/50',
+            checkbox: 'w-5 h-5 rounded border-2 border-slate-500 bg-slate-600/50 text-cyan-500 focus:ring-cyan-500 focus:ring-2',
+        }
+    }
+    return {
+        bg: 'bg-white/95 backdrop-blur-xl border border-gray-200',
+        headerBg: 'p-6 border-b border-gray-200',
+        title: 'text-gray-900',
+        label: 'text-gray-600 font-semibold',
+        input: 'w-full p-3 rounded-xl bg-gray-50 border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors',
+        select: 'w-full p-3 rounded-xl bg-gray-50 border border-gray-300 text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors',
+        button: 'px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:brightness-105 transition-all duration-300 flex items-center space-x-2',
+        cancelButton: 'px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors',
+        previousButton: 'px-6 py-3 bg-gray-200 text-gray-800 rounded-xl font-semibold hover:bg-gray-300 transition-colors',
+        stepActive: 'bg-indigo-600 text-white',
+        stepCompleted: 'bg-green-600 text-white',
+        stepInactive: 'bg-gray-200 text-gray-500',
+        stepLineCompleted: 'bg-green-500',
+        stepLineInactive: 'bg-gray-300',
+        uploadBox: 'border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 hover:bg-gray-50 transition-all duration-200',
+        uploadIcon: 'text-gray-400',
+        uploadText: 'text-gray-800 font-medium',
+        uploadSubText: 'text-gray-500 text-sm',
+        amenityButton: 'p-4 rounded-xl border transition-all duration-200',
+        amenityActive: 'bg-indigo-100 border-indigo-300 text-indigo-800',
+        amenityInactive: 'bg-gray-100 border-gray-200 text-gray-600 hover:bg-gray-200',
+        checkbox: 'w-5 h-5 rounded border-2 border-gray-300 bg-gray-100 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-0 focus:ring-2',
+    }
+  }, [darkMode]);
 
   useEffect(() => {
     if (property && mode === 'edit') {
@@ -648,22 +742,22 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
+        className={`${theme.bg} rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col`}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-6 border-b border-white/20">
+        <div className={theme.headerBg}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className={`text-2xl font-bold ${theme.title}`}>
               {mode === 'edit' ? 'Edit Property' : 'Add New Property'}
             </h2>
             <motion.button
-              whileHover={{ scale: 1.1 }}
+              whileHover={{ scale: 1.1, rotate: 90 }}
               whileTap={{ scale: 0.9 }}
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+              className={`p-2 rounded-full transition-colors ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-gray-200'}`}
             >
-              <X className="w-6 h-6 text-white/70" />
+              <X className={`w-6 h-6 ${darkMode ? 'text-slate-400' : 'text-gray-600'}`} />
             </motion.button>
           </div>
           
@@ -673,10 +767,10 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
               <div key={index} className="flex items-center space-x-2">
                 <div className={`p-2 rounded-lg ${
                   currentStep === index + 1 
-                    ? 'bg-blue-500 text-white' 
+                    ? theme.stepActive 
                     : currentStep > index + 1 
-                      ? 'bg-green-500 text-white' 
-                      : 'bg-white/10 text-white/50'
+                      ? theme.stepCompleted 
+                      : theme.stepInactive
                 }`}>
                   {currentStep > index + 1 ? (
                     <Check className="w-4 h-4" />
@@ -685,13 +779,13 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                   )}
                 </div>
                 <span className={`text-sm ${
-                  currentStep === index + 1 ? 'text-white' : 'text-white/50'
+                  currentStep === index + 1 ? theme.title : (darkMode ? 'text-slate-400' : 'text-gray-500')
                 }`}>
                   {step.title}
                 </span>
                 {index < steps.length - 1 && (
                   <div className={`w-8 h-0.5 ${
-                    currentStep > index + 1 ? 'bg-green-500' : 'bg-white/20'
+                    currentStep > index + 1 ? theme.stepLineCompleted : theme.stepLineInactive
                   }`} />
                 )}
               </div>
@@ -699,7 +793,7 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="h-full flex flex-col">
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto p-6">
             {/* Step 1: Basic Info */}
             {currentStep === 1 && (
@@ -710,28 +804,28 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-white/80 text-sm font-semibold mb-2">
+                    <label className={`block text-sm mb-2 ${theme.label}`}>
                       Property Title *
                     </label>
                     <input
                       type="text"
                       value={formData.title}
                       onChange={(e) => handleInputChange('title', e.target.value)}
-                      className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:border-blue-500 focus:outline-none transition-colors"
+                      className={theme.input}
                       placeholder="Enter property title"
                       required
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-white/80 text-sm font-semibold mb-2">
+                    <label className={`block text-sm mb-2 ${theme.label}`}>
                       Location *
                     </label>
                     <input
                       type="text"
                       value={formData.location}
                       onChange={(e) => handleInputChange('location', e.target.value)}
-                      className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:border-blue-500 focus:outline-none transition-colors"
+                      className={theme.input}
                       placeholder="Enter property location"
                       required
                     />
@@ -739,27 +833,27 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                 </div>
                 
                 <div>
-                  <label className="block text-white/80 text-sm font-semibold mb-2">
+                  <label className={`block text-sm mb-2 ${theme.label}`}>
                     Description
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => handleInputChange('description', e.target.value)}
                     rows={4}
-                    className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:border-blue-500 focus:outline-none transition-colors resize-none"
+                    className={`${theme.input} resize-none`}
                     placeholder="Describe your property..."
                   />
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
-                    <label className="block text-white/80 text-sm font-semibold mb-2">
+                    <label className={`block text-sm mb-2 ${theme.label}`}>
                       Property Type *
                     </label>
                     <select
                       value={formData.propertyType}
                       onChange={(e) => handleInputChange('propertyType', e.target.value)}
-                      className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white focus:border-blue-500 focus:outline-none transition-colors"
+                      className={theme.select}
                       required
                     >
                       <option value="apartment">Apartment</option>
@@ -772,13 +866,13 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                   </div>
                   
                   <div>
-                    <label className="block text-white/80 text-sm font-semibold mb-2">
+                    <label className={`block text-sm mb-2 ${theme.label}`}>
                       Status *
                     </label>
                     <select
                       value={formData.status}
                       onChange={(e) => handleInputChange('status', e.target.value)}
-                      className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white focus:border-blue-500 focus:outline-none transition-colors"
+                      className={theme.select}
                       required
                     >
                       <option value="Available">Available</option>
@@ -789,14 +883,14 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                   </div>
                   
                   <div>
-                    <label className="block text-white/80 text-sm font-semibold mb-2">
+                    <label className={`block text-sm mb-2 ${theme.label}`}>
                       Area (sq ft) *
                     </label>
                     <input
                       type="number"
                       value={formData.area}
                       onChange={(e) => handleInputChange('area', e.target.value)}
-                      className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:border-blue-500 focus:outline-none transition-colors"
+                      className={theme.input}
                       placeholder="1200"
                       required
                     />
@@ -814,7 +908,7 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
               >
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <div>
-                    <label className="block text-white/80 text-sm font-semibold mb-2">
+                    <label className={`block text-sm mb-2 ${theme.label}`}>
                       Bedrooms *
                     </label>
                     <input
@@ -822,13 +916,13 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                       min="0"
                       value={formData.bedrooms}
                       onChange={(e) => handleInputChange('bedrooms', parseInt(e.target.value))}
-                      className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:border-blue-500 focus:outline-none transition-colors"
+                      className={theme.input}
                       required
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-white/80 text-sm font-semibold mb-2">
+                    <label className={`block text-sm mb-2 ${theme.label}`}>
                       Bathrooms *
                     </label>
                     <input
@@ -837,13 +931,13 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                       step="0.5"
                       value={formData.bathrooms}
                       onChange={(e) => handleInputChange('bathrooms', parseFloat(e.target.value))}
-                      className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:border-blue-500 focus:outline-none transition-colors"
+                      className={theme.input}
                       required
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-white/80 text-sm font-semibold mb-2">
+                    <label className={`block text-sm mb-2 ${theme.label}`}>
                       Rent ($) *
                     </label>
                     <input
@@ -851,14 +945,14 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                       min="0"
                       value={formData.rent}
                       onChange={(e) => handleInputChange('rent', e.target.value)}
-                      className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:border-blue-500 focus:outline-none transition-colors"
+                      className={theme.input}
                       placeholder="2500"
                       required
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-white/80 text-sm font-semibold mb-2">
+                    <label className={`block text-sm mb-2 ${theme.label}`}>
                       Previous Rent ($)
                     </label>
                     <input
@@ -866,7 +960,7 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                       min="0"
                       value={formData.previousRent}
                       onChange={(e) => handleInputChange('previousRent', e.target.value)}
-                      className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:border-blue-500 focus:outline-none transition-colors"
+                      className={theme.input}
                       placeholder="2300"
                     />
                   </div>
@@ -874,7 +968,7 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                 
                 {/* Amenities */}
                 <div>
-                  <label className="block text-white/80 text-sm font-semibold mb-4">
+                  <label className={`block text-sm mb-4 ${theme.label}`}>
                     Amenities
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -894,10 +988,10 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => handleAmenityToggle(key)}
-                        className={`p-4 rounded-xl border transition-all duration-200 ${
+                        className={`${theme.amenityButton} ${
                           formData.amenities.includes(key)
-                            ? 'bg-blue-500/20 border-blue-500/50 text-blue-300'
-                            : 'bg-white/5 border-white/20 text-white/70 hover:bg-white/10'
+                            ? theme.amenityActive
+                            : theme.amenityInactive
                         }`}
                       >
                         <Icon className="w-6 h-6 mx-auto mb-2" />
@@ -909,7 +1003,7 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                 
                 {/* Policies */}
                 <div>
-                  <label className="block text-white/80 text-sm font-semibold mb-4">
+                  <label className={`block text-sm mb-4 ${theme.label}`}>
                     Property Policies
                   </label>
                   <div className="space-y-3">
@@ -918,12 +1012,12 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                       { key: 'smokingAllowed', label: 'Smoking Allowed' },
                       { key: 'furnished', label: 'Furnished' }
                     ].map(({ key, label }) => (
-                      <label key={key} className="flex items-center space-x-3 text-white/80">
+                      <label key={key} className={`flex items-center space-x-3 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                         <input
                           type="checkbox"
                           checked={formData.policies[key]}
                           onChange={(e) => handleInputChange(`policies.${key}`, e.target.checked)}
-                          className="w-5 h-5 rounded border-2 border-white/20 bg-white/10 text-blue-500 focus:ring-blue-500 focus:ring-2"
+                          className={theme.checkbox}
                         />
                         <span>{label}</span>
                       </label>
@@ -941,14 +1035,14 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                 className="space-y-6"
               >
                 <div>
-                  <label className="block text-white/80 text-sm font-semibold mb-4">
+                  <label className={`block text-sm mb-4 ${theme.label}`}>
                     Property Images
                   </label>
                   
                   {/* Upload Area */}
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-white/30 rounded-xl p-8 text-center cursor-pointer hover:border-blue-500/50 hover:bg-white/5 transition-all duration-200"
+                    className={theme.uploadBox}
                   >
                     <input
                       ref={fileInputRef}
@@ -961,15 +1055,15 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                     
                     {isUploading ? (
                       <div className="space-y-4">
-                        <Loader className="w-12 h-12 mx-auto text-blue-400 animate-spin" />
-                        <p className="text-white/60">Uploading images...</p>
+                        <Loader className={`w-12 h-12 mx-auto animate-spin ${darkMode ? 'text-cyan-400' : 'text-indigo-600'}`} />
+                        <p className={darkMode ? 'text-slate-400' : 'text-gray-600'}>Uploading images...</p>
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        <Upload className="w-12 h-12 mx-auto text-white/40" />
+                        <Upload className={`w-12 h-12 mx-auto ${theme.uploadIcon}`} />
                         <div>
-                          <p className="text-white/80 font-medium">Click to upload images</p>
-                          <p className="text-white/50 text-sm">Support: JPG, PNG, GIF up to 10MB each</p>
+                          <p className={theme.uploadText}>Click to upload images</p>
+                          <p className={theme.uploadSubText}>Support: JPG, PNG, GIF up to 10MB each</p>
                         </div>
                       </div>
                     )}
@@ -1008,43 +1102,43 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                 className="space-y-6"
               >
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-4">Contact Information</h3>
+                  <h3 className={`text-xl font-bold mb-4 ${theme.title}`}>Contact Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                      <label className="block text-white/80 text-sm font-semibold mb-2">
+                      <label className={`block text-sm mb-2 ${theme.label}`}>
                         Phone Number
                       </label>
                       <input
                         type="tel"
                         value={formData.contact.phone}
                         onChange={(e) => handleInputChange('contact.phone', e.target.value)}
-                        className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:border-blue-500 focus:outline-none transition-colors"
+                        className={theme.input}
                         placeholder="+1 (555) 123-4567"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-white/80 text-sm font-semibold mb-2">
+                      <label className={`block text-sm mb-2 ${theme.label}`}>
                         Email Address
                       </label>
                       <input
                         type="email"
                         value={formData.contact.email}
                         onChange={(e) => handleInputChange('contact.email', e.target.value)}
-                        className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:border-blue-500 focus:outline-none transition-colors"
+                        className={theme.input}
                         placeholder="contact@property.com"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-white/80 text-sm font-semibold mb-2">
+                      <label className={`block text-sm mb-2 ${theme.label}`}>
                         Website
                       </label>
                       <input
                         type="url"
                         value={formData.contact.website}
                         onChange={(e) => handleInputChange('contact.website', e.target.value)}
-                        className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:border-blue-500 focus:outline-none transition-colors"
+                        className={theme.input}
                         placeholder="https://property.com"
                       />
                     </div>
@@ -1052,43 +1146,43 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                 </div>
                 
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-4">Social Media (Optional)</h3>
+                  <h3 className={`text-xl font-bold mb-4 ${theme.title}`}>Social Media (Optional)</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                      <label className="block text-white/80 text-sm font-semibold mb-2">
+                      <label className={`block text-sm mb-2 ${theme.label}`}>
                         Facebook
                       </label>
                       <input
                         type="url"
                         value={formData.socialMedia.facebook}
                         onChange={(e) => handleInputChange('socialMedia.facebook', e.target.value)}
-                        className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:border-blue-500 focus:outline-none transition-colors"
+                        className={theme.input}
                         placeholder="https://facebook.com/property"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-white/80 text-sm font-semibold mb-2">
+                      <label className={`block text-sm mb-2 ${theme.label}`}>
                         Twitter
                       </label>
                       <input
                         type="url"
                         value={formData.socialMedia.twitter}
                         onChange={(e) => handleInputChange('socialMedia.twitter', e.target.value)}
-                        className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:border-blue-500 focus:outline-none transition-colors"
+                        className={theme.input}
                         placeholder="https://twitter.com/property"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-white/80 text-sm font-semibold mb-2">
+                      <label className={`block text-sm mb-2 ${theme.label}`}>
                         Instagram
                       </label>
                       <input
                         type="url"
                         value={formData.socialMedia.instagram}
                         onChange={(e) => handleInputChange('socialMedia.instagram', e.target.value)}
-                        className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:border-blue-500 focus:outline-none transition-colors"
+                        className={theme.input}
                         placeholder="https://instagram.com/property"
                       />
                     </div>
@@ -1099,7 +1193,7 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
           </div>
 
           {/* Footer */}
-          <div className="p-6 border-t border-white/20 flex items-center justify-between">
+          <div className={`${theme.headerBg} flex items-center justify-between`}>
             <div className="flex space-x-4">
               {currentStep > 1 && (
                 <motion.button
@@ -1107,7 +1201,7 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setCurrentStep(prev => prev - 1)}
-                  className="px-6 py-3 bg-white/10 text-white rounded-xl font-semibold hover:bg-white/20 transition-colors"
+                  className={theme.previousButton}
                 >
                   Previous
                 </motion.button>
@@ -1120,7 +1214,7 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onClose}
-                className="px-6 py-3 bg-red-500/20 text-red-300 rounded-xl font-semibold hover:bg-red-500/30 transition-colors"
+                className={theme.cancelButton}
               >
                 Cancel
               </motion.button>
@@ -1131,7 +1225,7 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setCurrentStep(prev => prev + 1)}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 flex items-center space-x-2"
+                  className={theme.button}
                 >
                   <span>Next</span>
                   <ArrowRight className="w-4 h-4" />
@@ -1141,7 +1235,7 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                   type="submit"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all duration-300 flex items-center space-x-2"
+                  className={`${theme.button} bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700`}
                 >
                   <Save className="w-4 h-4" />
                   <span>{mode === 'edit' ? 'Update Property' : 'Save Property'}</span>
@@ -1159,6 +1253,7 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
 const LandlordProperty = () => {
   const [currentSection] = useState('Properties');
   const { darkMode } = useDarkMode();
+  const { sidebarWidthClass } = useSidebar();
   const [properties, setProperties] = useLocalStorage('landlord_properties', [
     {
       id: 1,
@@ -1328,7 +1423,7 @@ const LandlordProperty = () => {
   };
 
   return (
-    <div className={`min-h-screen flex relative overflow-hidden ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'}`}>
+    <div className={`min-h-screen flex relative overflow-hidden ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-r from-pink-100 via-purple-100 to-indigo-200'}`}>
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
@@ -1345,7 +1440,7 @@ const LandlordProperty = () => {
 
       <LandlordSideBar currentSection={currentSection} />
       
-      <div className="flex-1 flex flex-col relative z-10 ml-[85px] md:ml-[320px] transition-all duration-700">
+      <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
         <LandlordNavBar currentSection={currentSection} />
         
         <main className="flex-1 overflow-y-auto">
@@ -1406,51 +1501,57 @@ const LandlordProperty = () => {
             </div>
 
             {/* Controls */}
-            <AnimatedCard delay={0.5} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6">
+            <AnimatedCard delay={0.5} className={`backdrop-blur-xl rounded-2xl p-6 ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border-indigo-200/50'}`}>
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                   {/* Search */}
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/50" />
+                    <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${darkMode ? 'text-white/50' : 'text-indigo-700/70'}`} />
                     <input
                       type="text"
                       placeholder="Search properties..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-4 py-3 w-64 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:border-blue-500 focus:outline-none transition-colors"
+                      className={`pl-10 pr-4 py-3 w-64 rounded-xl focus:outline-none transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white placeholder-white/50 focus:border-blue-500' : 'bg-white/50 border border-indigo-300 text-indigo-900 placeholder-indigo-700/50 focus:border-indigo-500'}`}
                     />
                   </div>
                   
                   {/* Status Filter */}
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:border-blue-500 focus:outline-none transition-colors"
-                  >
-                    <option value="All">All Status</option>
-                    <option value="Available">Available</option>
-                    <option value="Occupied">Occupied</option>
-                    <option value="Maintenance">Maintenance</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      className={`pl-4 pr-10 py-3 rounded-xl focus:outline-none transition-colors appearance-none ${darkMode ? 'bg-slate-800 border border-slate-700 text-white focus:border-cyan-500' : 'bg-white/50 border border-indigo-300 text-indigo-900 focus:border-indigo-500'}`}
+                    >
+                      <option value="All">All Status</option>
+                      <option value="Available">Available</option>
+                      <option value="Occupied">Occupied</option>
+                      <option value="Maintenance">Maintenance</option>
+                    </select>
+                    <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none ${darkMode ? 'text-white/50' : 'text-indigo-700/70'}`} />
+                  </div>
                   
                   {/* Sort */}
                   <div className="flex space-x-2">
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                      className="px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:border-blue-500 focus:outline-none transition-colors"
+                    <div className="relative">
+                      <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className={`pl-4 pr-10 py-3 rounded-xl focus:outline-none transition-colors appearance-none ${darkMode ? 'bg-slate-800 border border-slate-700 text-white focus:border-cyan-500' : 'bg-white/50 border border-indigo-300 text-indigo-900 focus:border-indigo-500'}`}
                     >
-                      <option value="title">Sort by Title</option>
-                      <option value="rent">Sort by Rent</option>
-                      <option value="location">Sort by Location</option>
-                      <option value="createdAt">Sort by Date</option>
-                    </select>
+                        <option value="title">Sort by Title</option>
+                        <option value="rent">Sort by Rent</option>
+                        <option value="location">Sort by Location</option>
+                        <option value="createdAt">Sort by Date</option>
+                      </select>
+                      <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none ${darkMode ? 'text-white/50' : 'text-indigo-700/70'}`} />
+                    </div>
                     
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                      className="p-3 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-colors"
+                      className={`p-3 rounded-xl transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white hover:bg-white/20' : 'bg-white/50 border border-indigo-300 text-indigo-900 hover:bg-white'}`}
                     >
                       {sortOrder === 'asc' ? <SortAsc className="w-5 h-5" /> : <SortDesc className="w-5 h-5" />}
                     </motion.button>
@@ -1459,13 +1560,13 @@ const LandlordProperty = () => {
                 
                 <div className="flex items-center space-x-4">
                   {/* View Mode Toggle */}
-                  <div className="flex bg-white/10 rounded-xl p-1">
+                  <div className={`rounded-xl p-1 ${darkMode ? 'bg-slate-800' : 'bg-indigo-200/50'}`}>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setViewMode('grid')}
                       className={`p-2 rounded-lg transition-colors ${
-                        viewMode === 'grid' ? 'bg-blue-500 text-white' : 'text-white/60 hover:text-white'
+                        viewMode === 'grid' ? (darkMode ? 'bg-cyan-500 text-white' : 'bg-indigo-600 text-white') : (darkMode ? 'text-slate-400 hover:text-white' : 'text-indigo-700 hover:text-indigo-900')
                       }`}
                     >
                       <Grid3X3 className="w-5 h-5" />
@@ -1475,7 +1576,7 @@ const LandlordProperty = () => {
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setViewMode('list')}
                       className={`p-2 rounded-lg transition-colors ${
-                        viewMode === 'list' ? 'bg-blue-500 text-white' : 'text-white/60 hover:text-white'
+                        viewMode === 'list' ? (darkMode ? 'bg-cyan-500 text-white' : 'bg-indigo-600 text-white') : (darkMode ? 'text-slate-400 hover:text-white' : 'text-indigo-700 hover:text-indigo-900')
                       }`}
                     >
                       <List className="w-5 h-5" />
@@ -1487,7 +1588,7 @@ const LandlordProperty = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleExportData}
-                    className="px-4 py-3 bg-green-500/20 text-green-300 rounded-xl font-semibold hover:bg-green-500/30 transition-colors flex items-center space-x-2"
+                    className={`px-4 py-3 rounded-xl font-semibold transition-colors flex items-center space-x-2 ${darkMode ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-green-500 text-white hover:bg-green-600'}`}
                   >
                     <Download className="w-5 h-5" />
                     <span>Export</span>
@@ -1498,7 +1599,7 @@ const LandlordProperty = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleAddProperty}
-                    className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 flex items-center space-x-2 shadow-lg"
+                    className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 flex items-center space-x-2 shadow-lg"
                   >
                     <Plus className="w-5 h-5" />
                     <span>Add Property</span>
@@ -1510,10 +1611,10 @@ const LandlordProperty = () => {
             {/* Properties Grid/List */}
             <AnimatedCard delay={0.6}>
               {filteredProperties.length === 0 ? (
-                <div className="text-center py-20">
-                  <Building2 className="w-20 h-20 mx-auto text-white/30 mb-6" />
-                  <h3 className="text-2xl font-bold text-white mb-4">No Properties Found</h3>
-                  <p className="text-white/60 mb-8">
+                <div className={`text-center py-20 rounded-2xl ${darkMode ? 'bg-white/5' : 'bg-white/50'}`}>
+                  <Building2 className={`w-20 h-20 mx-auto mb-6 ${darkMode ? 'text-white/30' : 'text-indigo-300'}`} />
+                  <h3 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-indigo-900'}`}>No Properties Found</h3>
+                  <p className={`mb-8 ${darkMode ? 'text-white/60' : 'text-indigo-700/80'}`}>
                     {searchTerm || statusFilter !== 'All' 
                       ? 'Try adjusting your search criteria or filters'
                       : 'Start by adding your first property to get started'
@@ -1523,7 +1624,7 @@ const LandlordProperty = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleAddProperty}
-                    className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 flex items-center space-x-2 mx-auto"
+                    className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 flex items-center space-x-2 mx-auto"
                   >
                     <Plus className="w-5 h-5" />
                     <span>Add Your First Property</span>

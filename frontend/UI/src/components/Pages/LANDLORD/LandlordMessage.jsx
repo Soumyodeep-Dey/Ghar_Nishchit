@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import { useDarkMode } from '../../../DarkModeContext';
+import { useSidebar } from './SidebarContext';
 import { 
   MessageSquare, 
   Send, 
@@ -958,6 +959,7 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
 const LandlordMessage = () => {
   const { darkMode, toggleDarkMode } = useDarkMode();
   const [currentSection] = useState('Messages');
+  const { sidebarWidthClass } = useSidebar();
   const [conversations, setConversations] = useLocalStorage('landlord_conversations', [
     {
       id: 1,
@@ -1222,7 +1224,7 @@ const LandlordMessage = () => {
 
       <LandlordSideBar currentSection={currentSection} />
       
-      <div className="flex-1 flex flex-col relative z-10 ml-[85px] md:ml-[320px] transition-all duration-700">
+      <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
         <LandlordNavBar currentSection={currentSection} />
         
         <main className="flex-1 overflow-hidden">
@@ -1376,29 +1378,7 @@ const LandlordMessage = () => {
                         </div>
                       </div>
                       
-                      <div className="flex items-center space-x-2">
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          className="p-3 bg-indigo-100 dark:bg-slate-700 rounded-xl hover:bg-indigo-200 dark:hover:bg-slate-600 transition-colors"
-                        >
-                          <Phone className="w-5 h-5 text-indigo-600 dark:text-cyan-300" />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          className="p-3 bg-indigo-100 dark:bg-slate-700 rounded-xl hover:bg-indigo-200 dark:hover:bg-slate-600 transition-colors"
-                        >
-                          <Video className="w-5 h-5 text-indigo-600 dark:text-cyan-300" />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          className="p-3 bg-indigo-100 dark:bg-slate-700 rounded-xl hover:bg-indigo-200 dark:hover:bg-slate-600 transition-colors"
-                        >
-                          <Info className="w-5 h-5 text-indigo-600 dark:text-cyan-300" />
-                        </motion.button>
-                      </div>
+                      
                     </div>
                   </div>
 

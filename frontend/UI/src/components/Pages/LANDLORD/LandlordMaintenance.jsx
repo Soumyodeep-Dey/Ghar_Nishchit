@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import { useDarkMode } from '../../../DarkModeContext';
+import { useSidebar } from './SidebarContext';
 import { 
   Wrench, 
   Plus, 
@@ -239,49 +240,49 @@ const ProgressBar = ({ progress, status, animated = true }) => {
 };
 
 // Status Badge Component
-const StatusBadge = ({ status, priority }) => {
+const StatusBadge = ({ status, priority, darkMode }) => { // Added darkMode prop
   const getStatusConfig = () => {
     switch (status) {
       case 'Pending':
         return { 
-          bg: 'bg-yellow-500/20', 
-          text: 'text-yellow-300', 
-          border: 'border-yellow-500/30',
+          bg: darkMode ? 'bg-yellow-600' : 'bg-yellow-100', 
+          text: darkMode ? 'text-white' : 'text-yellow-800', 
+          border: darkMode ? 'border-yellow-600' : 'border-yellow-100', // Border matches background for solid look
           icon: Clock 
         };
       case 'In Progress':
         return { 
-          bg: 'bg-blue-500/20', 
-          text: 'text-blue-300', 
-          border: 'border-blue-500/30',
+          bg: darkMode ? 'bg-blue-600' : 'bg-blue-100', 
+          text: darkMode ? 'text-white' : 'text-blue-800', 
+          border: darkMode ? 'border-blue-600' : 'border-blue-100',
           icon: Play 
         };
       case 'On Hold':
         return { 
-          bg: 'bg-orange-500/20', 
-          text: 'text-orange-300', 
-          border: 'border-orange-500/30',
+          bg: darkMode ? 'bg-orange-600' : 'bg-orange-100', 
+          text: darkMode ? 'text-white' : 'text-orange-800', 
+          border: darkMode ? 'border-orange-600' : 'border-orange-100',
           icon: Pause 
         };
       case 'Completed':
         return { 
-          bg: 'bg-green-500/20', 
-          text: 'text-green-300', 
-          border: 'border-green-500/30',
+          bg: darkMode ? 'bg-emerald-600' : 'bg-emerald-100', 
+          text: darkMode ? 'text-white' : 'text-emerald-800', 
+          border: darkMode ? 'border-emerald-600' : 'border-emerald-100',
           icon: CheckCircle 
         };
       case 'Cancelled':
         return { 
-          bg: 'bg-red-500/20', 
-          text: 'text-red-300', 
-          border: 'border-red-500/30',
+          bg: darkMode ? 'bg-red-600' : 'bg-red-100', 
+          text: darkMode ? 'text-white' : 'text-red-800', 
+          border: darkMode ? 'border-red-600' : 'border-red-100',
           icon: XCircle 
         };
       default:
         return { 
-          bg: 'bg-gray-500/20', 
-          text: 'text-gray-300', 
-          border: 'border-gray-500/30',
+          bg: darkMode ? 'bg-gray-600' : 'bg-gray-100', 
+          text: darkMode ? 'text-white' : 'text-gray-800', 
+          border: darkMode ? 'border-gray-600' : 'border-gray-100',
           icon: AlertCircle 
         };
     }
@@ -398,6 +399,8 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
     return darkMode ? 'border-white/20' : 'border-indigo-200/50';
   };
 
+  const isHighlighted = request.title === "Heating System Malfunction";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -406,7 +409,20 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
       whileHover={{ scale: 1.02, y: -5 }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`${darkMode ? 'bg-white/10' : 'bg-white/80'} backdrop-blur-xl border ${getUrgencyColor()} rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-500 group relative overflow-hidden`}
+      className={`${darkMode ? 'bg-white/10' : 'bg-white/80'} 
+                  backdrop-blur-xl 
+                  border 
+                  ${isHighlighted ? (darkMode ? 'border-yellow-400' : 'border-amber-500') : getUrgencyColor()} 
+                  rounded-2xl 
+                  p-6 
+                  shadow-xl 
+                  ${isHighlighted ? (darkMode ? 'shadow-yellow-400/20' : 'shadow-amber-500/20') : ''}
+                  hover:shadow-2xl 
+                  transition-all 
+                  duration-500 
+                  group 
+                  relative 
+                  overflow-hidden`}
     >
       {/* Background Gradient Effect */}
       <div className={`absolute inset-0 bg-gradient-to-br ${darkMode ? 'from-white/5' : 'from-indigo-200/20'} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
@@ -515,7 +531,7 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
       
       {/* Status and Priority */}
       <div className="relative z-10 flex items-center justify-between mb-4">
-        <StatusBadge status={request.status} priority={request.priority} />
+        <StatusBadge status={request.status} priority={request.priority} darkMode={darkMode} />
         <PriorityIndicator priority={request.priority} />
       </div>
       
@@ -597,7 +613,11 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onView(request)}
-            className="px-4 py-2 bg-blue-500/20 text-blue-300 rounded-lg text-sm font-medium hover:bg-blue-500/30 transition-colors"
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              darkMode
+                ? 'bg-sky-500/20 text-sky-300 hover:bg-sky-500/30'
+                : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
+            }`}
           >
             View Details
           </motion.button>
@@ -607,7 +627,11 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => onStatusChange(request.id, 'In Progress')}
-              className="px-4 py-2 bg-green-500/20 text-green-300 rounded-lg text-sm font-medium hover:bg-green-500/30 transition-colors"
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                darkMode
+                  ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'
+                  : 'bg-green-100 text-green-600 hover:bg-green-200'
+              }`}
             >
               Start Work
             </motion.button>
@@ -1251,6 +1275,7 @@ const NotificationToast = ({ notifications, onRemove }) => {
 const LandlordMaintenance = () => {
   const [currentSection] = useState('Maintenance');
   const { darkMode } = useDarkMode();
+  const { sidebarWidthClass } = useSidebar();
   
   // Sample maintenance requests data
   const [maintenanceRequests, setMaintenanceRequests] = useLocalStorage('landlord_maintenance_requests', [
@@ -1312,22 +1337,47 @@ const LandlordMaintenance = () => {
       property: "Luxury Penthouse #505",
       tenant: "Jane Smith",
       createdAt: "2025-07-28T09:15:00Z",
-      updatedAt: "2025-07-28T09:15:00Z",
-      status: "Pending",
+      updatedAt: "2025-08-05T10:00:00Z",
+      status: "In Progress",
       priority: "Medium",
-      progress: 0,
+      progress: 50,
       category: "hvac",
-      assignedTo: null,
+      assignedTo: "HVAC Solutions Inc.",
       estimatedCost: 300,
       isEmergency: false,
       isUrgent: false,
-      attachments: [],
-      comments: [],
+      attachments: [
+        {
+          id: 1,
+          name: "thermostat_reading.jpg",
+          type: "image",
+          size: "1.5 MB",
+          url: "/api/placeholder/400/300"
+        }
+      ],
+      comments: [
+        {
+          author: "Landlord",
+          text: "HVAC Solutions Inc. has been contacted and will inspect the system tomorrow.",
+          timestamp: "2025-07-29T11:00:00Z",
+          attachments: []
+        }
+      ],
       history: [
         {
           type: "created",
           description: "Request created by Jane Smith",
           timestamp: "2025-07-28T09:15:00Z"
+        },
+        {
+          type: "assignment",
+          description: "Assigned to HVAC Solutions Inc.",
+          timestamp: "2025-07-29T10:30:00Z"
+        },
+        {
+          type: "status",
+          description: "Status changed to In Progress",
+          timestamp: "2025-08-05T10:00:00Z"
         }
       ]
     },
@@ -1637,7 +1687,7 @@ const LandlordMaintenance = () => {
 
       <LandlordSideBar currentSection={currentSection} />
       
-      <div className="flex-1 flex flex-col relative z-10 ml-[85px] md:ml-[320px] transition-all duration-700">
+      <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
         <LandlordNavBar currentSection={currentSection} />
         
         <main className="flex-1 overflow-y-auto">
@@ -1822,15 +1872,7 @@ const LandlordMaintenance = () => {
                     </motion.button>
                   </div>
                   
-                  {/* Add request button */}
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className={`px-6 py-3 text-white rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 shadow-lg ${darkMode ? 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700' : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700'}`}
-                  >
-                    <Plus className="w-5 h-5" />
-                    <span>New Request</span>
-                  </motion.button>
+                  
                 </div>
               </div>
             </AnimatedCard>
