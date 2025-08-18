@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import { useDarkMode } from '../../../DarkModeContext';
-import { useSidebar } from './SidebarContext';
+// Removed SidebarContext usage
 import { 
   Wrench, 
   Plus, 
@@ -1275,7 +1275,7 @@ const NotificationToast = ({ notifications, onRemove }) => {
 const LandlordMaintenance = () => {
   const [currentSection] = useState('Maintenance');
   const { darkMode } = useDarkMode();
-  const { sidebarWidthClass } = useSidebar();
+  const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
   
   // Sample maintenance requests data
   const [maintenanceRequests, setMaintenanceRequests] = useLocalStorage('landlord_maintenance_requests', [

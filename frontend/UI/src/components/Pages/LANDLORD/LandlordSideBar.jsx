@@ -20,43 +20,22 @@ import {
   Heart
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSidebar } from './SidebarContext';
+import { useDarkMode } from '../../../DarkModeContext';
 
-// Detect theme from <html class="dark"> and keep in sync with navbar toggle
-const useTheme = () => {
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return document.documentElement.classList.contains('dark') ||
-             localStorage.getItem('theme') === 'dark' ||
-             (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    }
-    return false;
-  });
-
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsDark(document.documentElement.classList.contains('dark'));
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  return isDark;
-};
+// We'll use the centralized DarkModeContext instead of a custom hook
 
 const LandlordSideBar = ({ currentSection, onSectionChange }) => {
-  const isDark = useTheme();
-  const { isCollapsed, setIsCollapsed, sidebarWidth } = useSidebar();
+  const { darkMode: isDark } = useDarkMode();
+  const [isCollapsed, setIsCollapsed] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 768 : false));
+  const [sidebarWidth, setSidebarWidth] = useState(() => (isCollapsed ? '4.5rem' : '18rem'));
 
   const [hoveredItem, setHoveredItem] = useState(null);
   const [showTooltip, setShowTooltip] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [greeting, setGreeting] = useState('');
+  const [user, setUser] = useState(() => {
+    return JSON.parse(localStorage.getItem('user') || '{}');
+  });
   const [userStats] = useState({
     properties: 12,
     tenants: 34,
@@ -84,6 +63,31 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
 
     return () => clearInterval(timer);
   }, []);
+
+  // Listen for user data updates
+  useEffect(() => {
+    const handleUserUpdate = () => {
+      setUser(JSON.parse(localStorage.getItem('user') || '{}'));
+    };
+
+    // Listen for the custom event dispatched when user data is updated
+    window.addEventListener('user:updated', handleUserUpdate);
+    
+    // Also check localStorage directly in case it was updated without the event
+    const checkUserData = () => {
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      if (storedUser.name !== user.name || storedUser.email !== user.email) {
+        setUser(storedUser);
+      }
+    };
+    
+    const interval = setInterval(checkUserData, 5000); // Check every 5 seconds
+    
+    return () => {
+      window.removeEventListener('user:updated', handleUserUpdate);
+      clearInterval(interval);
+    };
+  }, [user]);
 
   const menuItems = [
     {
@@ -164,6 +168,27 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
       window.location.href = route;
     }
   };
+
+  useEffect(() => {
+    // Keep width in sync with collapsed state
+    setSidebarWidth(isCollapsed ? '4.5rem' : '18rem');
+    if (typeof document !== 'undefined') {
+      document.documentElement.style.setProperty('--sidebar-width', isCollapsed ? '4.5rem' : '18rem');
+    }
+  }, [isCollapsed]);
+
+  useEffect(() => {
+    // Auto-collapse on small screens, expand on larger
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsCollapsed(true);
+      } else {
+        setIsCollapsed(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -293,7 +318,7 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
         }}
         transition={{ duration: 0.7, type: "spring", stiffness: 120, damping: 20 }}
         className={`fixed left-0 top-0 h-screen bg-gradient-to-br ${themeClasses.shellBg} backdrop-blur-3xl border-r ${themeClasses.border} shadow-2xl z-40 flex flex-col transition-all duration-700`}
-        style={{ width: sidebarWidth, height: '100vh', maxHeight: '100vh', overflow: 'hidden' }}
+        style={{ width: sidebarWidth, height: '100vh', maxHeight: '100vh', overflow: 'hidden', '--sidebar-width': sidebarWidth }}
       >
         {/* Soft background particles */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -358,7 +383,7 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
               whileHover={{ scale: 1.1, rotate: 3 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className={`relative p-3 rounded-2xl ${themeClasses.buttonIdle} border ${themeClasses.border} transition-all duration-500 shadow-sm group overflow-hidden`}
+              className={`p-3 rounded-2xl ${themeClasses.buttonIdle} border ${themeClasses.border} transition-all duration-500 shadow-sm group overflow-hidden ${isCollapsed ? 'absolute -right-3 top-6 z-50' : 'relative'}`}
               title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
               <motion.div animate={{ rotate: isCollapsed ? 180 : 0 }} transition={{ duration: 0.5, type: "spring", stiffness: 200 }}>
@@ -398,7 +423,19 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                   <div className="flex items-center space-x-4 mb-4">
                     <motion.div className="relative" whileHover={{ scale: 1.05 }}>
                       <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-500 flex items-center justify-center shadow-lg">
-                        <span className="text-white font-bold text-lg">JD</span>
+                        <span className="text-white font-bold text-lg">
+                          {(() => {
+                            const name = user.name || 'Unknown User';
+                            const nameParts = name.split(' ');
+                            if (nameParts.length >= 2) {
+                              return `${nameParts[0][0]}${nameParts[1][0]}`;
+                            } else if (nameParts.length === 1 && nameParts[0].length > 0) {
+                              return `${nameParts[0][0]}${nameParts[0][1] || ''}`;
+                            } else {
+                              return 'UN';
+                            }
+                          })()} 
+                        </span>
                       </div>
                       <motion.div
                         animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.6, 0.3] }}
@@ -416,7 +453,7 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
 
                     <div className="flex-1">
                       <motion.h3 className={`${themeClasses.textPrimary} font-bold text-lg`} whileHover={{ scale: 1.02 }}>
-                        John Doe
+                        {user.name || 'Unknown User'}
                       </motion.h3>
                       <div className="flex items-center space-x-2">
                         <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 12, repeat: Infinity, ease: "linear" }}>

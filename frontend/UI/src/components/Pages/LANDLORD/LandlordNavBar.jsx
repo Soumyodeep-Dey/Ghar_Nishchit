@@ -30,7 +30,7 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   
   // Get user data from localStorage - use 'user' key from authentication
-  const user = JSON.parse(localStorage.getItem('user')) || { name: '', email: '' };
+  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')) || { name: '', email: '' });
   
   // Logout handler function
   const handleLogout = () => {
@@ -43,6 +43,19 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
   const profileDropdownRef = useRef(null);
   const notificationsRef = useRef(null);
   const searchRef = useRef(null);
+
+  // Listen to global user updates so navbar reflects latest details immediately
+  useEffect(() => {
+    const onUserUpdated = (e) => {
+      try {
+        setUser(e.detail || JSON.parse(localStorage.getItem('user')) || {});
+      } catch {
+        // noop
+      }
+    };
+    window.addEventListener('user:updated', onUserUpdated);
+    return () => window.removeEventListener('user:updated', onUserUpdated);
+  }, []);
 
   // Section icons mapping
   const sectionIcons = {
@@ -113,14 +126,7 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
   // Theme toggle functionality
   const toggleTheme = () => {
     toggleDarkMode();
-    document.documentElement.classList.toggle('dark');
-
-    // Add smooth transition animation
-    const body = document.body;
-    body.style.transition = 'all 0.3s ease-in-out';
-    setTimeout(() => {
-      body.style.transition = '';
-    }, 300);
+    // The DarkModeContext now handles all the DOM updates
   };
 
   // Close dropdowns when clicking outside

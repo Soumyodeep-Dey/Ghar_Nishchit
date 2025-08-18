@@ -281,6 +281,13 @@ const TenantNavBar = ({ currentSection }) => {
         console.error('Error parsing user data:', error);
       }
     }
+    const onUserUpdated = (e) => {
+      try {
+        setUser(e.detail || JSON.parse(localStorage.getItem('user')) || {});
+      } catch {}
+    };
+    window.addEventListener('user:updated', onUserUpdated);
+    return () => window.removeEventListener('user:updated', onUserUpdated);
   }, []);
 
   // Apply theme to document
