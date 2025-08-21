@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   MessageSquare, 
   Bell, 
-  Settings, 
   LogOut, 
   ChevronDown, 
   Search,
@@ -265,8 +264,7 @@ const TenantNavBar = ({ currentSection }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [notifications, setNotifications] = useState({
     messages: 3,
-    alerts: 2,
-    settings: 0
+    alerts: 2
   });
 
   const navigate = useNavigate();
@@ -370,13 +368,6 @@ const TenantNavBar = ({ currentSection }) => {
             onClick={() => navigate('/tenant/notifications')}
             badge={notifications.alerts}
             ariaLabel="Notifications"
-          />
-          
-          <IconButton
-            icon={Settings}
-            onClick={() => navigate('/tenant/settings')}
-            badge={notifications.settings}
-            ariaLabel="Settings"
           />
         </div>
 
