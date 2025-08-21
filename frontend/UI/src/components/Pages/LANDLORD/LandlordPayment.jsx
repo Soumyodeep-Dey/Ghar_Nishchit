@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
-import { useSidebar } from './SidebarContext';
+// Removed SidebarContext usage
 import { 
   CreditCard, 
   DollarSign, 
@@ -1232,7 +1232,7 @@ const LandlordPayment = () => {
   const [paymentAmount, setPaymentAmount] = useState(0);
   
   const { darkMode, toggleDarkMode } = useDarkMode();
-  const { sidebarWidthClass } = useSidebar();
+  const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
   const { notifications, addNotification, removeNotification } = useNotification();
   
   // Sample data
@@ -1494,10 +1494,10 @@ const LandlordPayment = () => {
         />
       </div>
 
-      <LandlordSideBar currentSection={currentSection} darkMode={darkMode} />
+      <LandlordSideBar currentSection={currentSection} />
       
       <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
-        <LandlordNavBar currentSection={currentSection} darkMode={darkMode} toggleTheme={toggleDarkMode} />
+        <LandlordNavBar currentSection={currentSection} />
         
         <main className="flex-1 overflow-y-auto">
           <div className="p-8 space-y-8">

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import { useDarkMode } from '../../../DarkModeContext';
-import { useSidebar } from './SidebarContext';
+// Removed SidebarContext usage
 import { 
   MessageSquare, 
   Send, 
@@ -959,7 +959,7 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
 const LandlordMessage = () => {
   const { darkMode, toggleDarkMode } = useDarkMode();
   const [currentSection] = useState('Messages');
-  const { sidebarWidthClass } = useSidebar();
+  const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
   const [conversations, setConversations] = useLocalStorage('landlord_conversations', [
     {
       id: 1,

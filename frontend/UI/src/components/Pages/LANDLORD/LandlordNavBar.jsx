@@ -22,7 +22,7 @@ import {
 import { useDarkMode } from '../../../DarkModeContext';
 import { Link } from 'react-router-dom';
 
-const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
+const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
   const { darkMode: isDarkMode, toggleDarkMode } = useDarkMode();
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -30,7 +30,7 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   
   // Get user data from localStorage - use 'user' key from authentication
-  const user = JSON.parse(localStorage.getItem('user')) || { name: '', email: '' };
+  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')) || { name: '', email: '' });
   
   // Logout handler function
   const handleLogout = () => {
@@ -43,6 +43,19 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
   const profileDropdownRef = useRef(null);
   const notificationsRef = useRef(null);
   const searchRef = useRef(null);
+
+  // Listen to global user updates so navbar reflects latest details immediately
+  useEffect(() => {
+    const onUserUpdated = (e) => {
+      try {
+        setUser(e.detail || JSON.parse(localStorage.getItem('user')) || {});
+      } catch {
+        // noop
+      }
+    };
+    window.addEventListener('user:updated', onUserUpdated);
+    return () => window.removeEventListener('user:updated', onUserUpdated);
+  }, []);
 
   // Section icons mapping
   const sectionIcons = {
@@ -113,14 +126,7 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
   // Theme toggle functionality
   const toggleTheme = () => {
     toggleDarkMode();
-    document.documentElement.classList.toggle('dark');
-
-    // Add smooth transition animation
-    const body = document.body;
-    body.style.transition = 'all 0.3s ease-in-out';
-    setTimeout(() => {
-      body.style.transition = '';
-    }, 300);
+    // The DarkModeContext now handles all the DOM updates
   };
 
   // Close dropdowns when clicking outside
@@ -172,22 +178,25 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
   const CurrentSectionIcon = getCurrentSectionIcon();
 
   return (
-    <nav className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-glass dark:shadow-glass-dark border-b border-gray-200/20 dark:border-gray-700/20 sticky top-0 z-50 transition-all duration-300">
+    <nav className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-glass dark:shadow-glass-dark border-b border-gray-200/20 dark:border-gray-700/20 sticky top-0 z-50 transition-all duration-300 animate-fadeIn hover:shadow-lg"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
           {/* Current Section Display */}
           <div className="flex items-center space-x-4 min-w-0">
             <div className="flex items-center space-x-3 group">
-              <div className="relative">
-                <div className={`p-2.5 bg-gradient-to-br ${getCurrentSectionColor()} rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105`}>
+              <div className="relative hover:scale-110 transition-all duration-300 hover:rotate-3 hover:shadow-lg">
+                <div className={`p-2.5 bg-gradient-to-br ${getCurrentSectionColor()} rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 hover:rotate-3`}>
                   <CurrentSectionIcon className="h-5 w-5 text-white" />
                 </div>
                 {/* Animated glow effect */}
-                <div className={`absolute inset-0 p-2.5 bg-gradient-to-br ${getCurrentSectionColor()} rounded-xl opacity-0 group-hover:opacity-20 blur-sm transition-opacity duration-300`} />
+                <div className={`absolute inset-0 p-2.5 bg-gradient-to-br ${getCurrentSectionColor()} rounded-xl opacity-0 group-hover:opacity-40 blur-md transition-all duration-500 group-hover:scale-110`} />
+                {/* Pulse effect */}
+                <div className={`absolute inset-0 p-2.5 bg-gradient-to-br ${getCurrentSectionColor()} rounded-xl animate-pulse opacity-0 group-hover:opacity-30`} />
               </div>
-              <div className="min-w-0">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent truncate">
+              <div className="min-w-0 animate-fadeIn">
+                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 via-indigo-700 to-gray-700 dark:from-white dark:via-blue-300 dark:to-gray-300 bg-clip-text text-transparent truncate hover:scale-105 transition-transform duration-300 animate-fadeIn">
                   {currentSection}
                 </h1>
                 <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
@@ -206,11 +215,7 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
           <div className="hidden md:flex flex-1 max-w-xl mx-8 relative">
             <div className="relative w-full group">
               <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                <Search className={`h-4 w-4 transition-colors duration-200 ${
-                  isSearchFocused 
-                    ? 'text-primary-500 dark:text-primary-400' 
-                    : 'text-gray-400 dark:text-gray-500'
-                }`} />
+                <Search className={`h-4 w-4 transition-colors duration-200 ${isSearchFocused ? 'text-primary-500 dark:text-primary-400' : 'text-gray-400 dark:text-gray-500'}`} />
               </div>
               <input
                 ref={searchRef}
@@ -220,7 +225,7 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
                 placeholder="Search properties, tenants, or requests..."
-                className="w-full pl-11 pr-4 py-2.5 bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200/50 dark:border-gray-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 dark:focus:border-primary-400 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 backdrop-blur-sm"
+                className="w-full pl-11 pr-4 py-2.5 bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200/50 dark:border-gray-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 dark:focus:border-primary-400 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 backdrop-blur-sm hover:bg-gray-200/80 dark:hover:bg-gray-700/80 hover:shadow-inner"
               />
               {searchQuery && (
                 <button
@@ -258,7 +263,7 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
             <div className="relative" ref={notificationsRef}>
               <button
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                className="relative p-2.5 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200 group"
+                className="relative p-2.5 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200 group hover:scale-110 transform hover:rotate-6"
               >
                 <Bell className="h-5 w-5" />
                 {unreadCount > 0 && (
@@ -267,12 +272,12 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
                   </span>
                 )}
                 {/* Hover glow effect */}
-                <div className="absolute inset-0 rounded-xl bg-primary-500/20 opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-200" />
+                <div className="absolute inset-0 rounded-xl bg-primary-500/20 opacity-0 group-hover:opacity-100 blur-sm transition-all duration-300 group-hover:scale-110" />
               </button>
 
               {/* Notifications Dropdown */}
               {isNotificationsOpen && (
-                <div className="absolute right-0 mt-3 w-96 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-glass dark:shadow-glass-dark border border-gray-200/20 dark:border-gray-700/20 overflow-hidden z-50 animate-in slide-in-from-top-2 duration-200">
+                <div className="absolute right-0 mt-3 w-96 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-glass dark:shadow-glass-dark border border-gray-200/20 dark:border-gray-700/20 overflow-hidden z-50 animate-slideDown hover:shadow-xl transition-shadow duration-300">
                   {/* Header */}
                   <div className="p-4 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-primary-50/50 to-transparent dark:from-primary-900/20">
                     <div className="flex items-center justify-between">
@@ -309,14 +314,14 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
                           onClick={() => markAsRead(notification.id)}
                         >
                           <div className="flex items-start space-x-3">
-                            <div className={`p-2 rounded-lg ${colorClasses[notification.color]}`}>
+                            <div className={`p-2 rounded-lg ${colorClasses[notification.color]} transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`}>
                               <IconComponent className="h-4 w-4" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className={`font-medium ${notification.isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'}`}>
+                              <p className={`font-medium group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200 ${notification.isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'}`}>
                                 {notification.title}
                               </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-200">
                                 {notification.message}
                               </p>
                               <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
@@ -345,7 +350,7 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2.5 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200 group relative overflow-hidden"
+              className="p-2.5 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200 group relative overflow-hidden hover:scale-110 hover:rotate-12"
             >
               <div className="relative z-10">
                 {isDarkMode ? (
@@ -361,10 +366,12 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
             <div className="relative" ref={profileDropdownRef}>
               <button
                 onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                className="flex items-center space-x-3 p-2 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200 group"
+                className="flex items-center space-x-3 p-2 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200 group hover:scale-105"
               >
                 <div className="relative">
-                  <div className="h-9 w-9 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-200">
+                  <div className="h-9 w-9 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 relative overflow-hidden group-hover:scale-110 hover:rotate-6">
+                   <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+                   <div className="absolute -inset-1 bg-gradient-to-br from-primary-300 to-primary-600 opacity-0 group-hover:opacity-30 blur-md transition-opacity duration-300" />
                     <User className="h-4 w-4 text-white" />
                   </div>
                   {/* Online indicator */}
@@ -383,7 +390,8 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
 
               {/* Profile Dropdown Menu */}
               {isProfileDropdownOpen && (
-                <div className="absolute right-0 mt-3 w-64 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-glass dark:shadow-glass-dark border border-gray-200/20 dark:border-gray-700/20 overflow-hidden z-50 animate-in slide-in-from-top-2 duration-200">
+                <div className="absolute right-0 mt-3 w-64 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-glass dark:shadow-glass-dark border border-gray-200/20 dark:border-gray-700/20 overflow-hidden z-50 animate-slideDown hover:shadow-xl transition-shadow duration-300"
+                >
                   {/* Profile Info */}
                   <div className="p-4 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-primary-50/50 to-transparent dark:from-primary-900/20">
                     <div className="flex items-center space-x-3">
@@ -405,16 +413,16 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
                   <div className="p-2">
                     <Link 
                       to="/landlord/profile" 
-                      className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200 group"
+                      className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200 group hover:translate-x-1"
                       onClick={() => setIsProfileDropdownOpen(false)} // Close dropdown on click
                     >
-                      <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg group-hover:bg-primary-200 dark:group-hover:bg-primary-900/50 transition-colors">
+                      <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg group-hover:bg-primary-200 dark:group-hover:bg-primary-900/50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 hover:shadow-md">
                         <Settings className="h-4 w-4 text-primary-600 dark:text-primary-400" />
                       </div>
                       <span className="font-medium">Update Profile</span>
                     </Link>
 
-                    <button className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200 group">
+                    <button className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200 group hover:translate-x-1">
                       <div className="p-2 bg-warning-100 dark:bg-warning-900/30 rounded-lg group-hover:bg-warning-200 dark:group-hover:bg-warning-900/50 transition-colors">
                         <HelpCircle className="h-4 w-4 text-warning-600 dark:text-warning-400" />
                       </div>
@@ -423,7 +431,7 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
 
                     <hr className="my-2 border-gray-200/50 dark:border-gray-700/50" />
 
-                    <button className="w-full flex items-center space-x-3 px-4 py-3 text-left text-error-600 dark:text-error-400 hover:bg-error-50/80 dark:hover:bg-error-900/20 rounded-xl transition-all duration-200 group" onClick={handleLogout}>
+                    <button className="w-full flex items-center space-x-3 px-4 py-3 text-left text-error-600 dark:text-error-400 hover:bg-error-50/80 dark:hover:bg-error-900/20 rounded-xl transition-all duration-200 group hover:translate-x-1" onClick={handleLogout}>
                       <div className="p-2 bg-error-100 dark:bg-error-900/30 rounded-lg group-hover:bg-error-200 dark:group-hover:bg-error-900/50 transition-colors">
                         <LogOut className="h-4 w-4" />
                       </div>
@@ -462,4 +470,4 @@ const LandlordNavbar = ({ currentSection = 'Dashboard' }) => {
   );
 };
 
-export default LandlordNavbar;
+export default LandlordNavBar;

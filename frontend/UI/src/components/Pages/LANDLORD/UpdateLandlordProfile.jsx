@@ -2,16 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { User, Mail, Lock, Phone, Eye, EyeOff, Image as ImageIcon, AlertTriangle, Trash2, CheckCircle, XCircle } from 'lucide-react';
 import { useDarkMode } from '../../../DarkModeContext';
 import { useNavigate } from 'react-router-dom';
-import { useSidebar } from './SidebarContext';
-import LandlordSideBar from './LandlordSideBar';
-import LandlordNavBar from './LandlordNavBar';
+// Removed SidebarContext usage
+ 
 
 export default function UpdateLandlordProfile() {
   const navigate = useNavigate();
   const { darkMode, toggleDarkMode } = useDarkMode();
-  const { sidebarWidthClass } = useSidebar();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [serverStatus, setServerStatus] = useState('checking'); // 'online', 'offline', 'checking'
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -22,51 +21,190 @@ export default function UpdateLandlordProfile() {
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState('');
 
-  // Load existing user data
-  useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-          navigate('/login');
-          return;
+  // Check server status and provide retry functionality
+  const checkServerStatus = async () => {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
+      // Get authentication token
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      
+      // Use a simple endpoint that's likely to exist and respond quickly
+      const response = await fetch('http://localhost:3000/api/auth/profile', {
+        method: 'HEAD', // Just check if server responds, don't need data
+        signal: controller.signal,
+        // Add cache control to prevent caching of status check
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         }
-
-        // Fetch user data from API
-        const response = await fetch('http://localhost:5000/api/auth/profile', {
-          method: 'GET',
+      });
+      
+      clearTimeout(timeoutId);
+      
+      // Check if response is successful (including 401 which means server is running but requires auth)
+      if (response.ok || response.status === 401) {
+        setServerStatus('online');
+        return true;
+      } else {
+        console.error('Server returned error status:', response.status);
+        setServerStatus('offline');
+        return false;
+      }
+    } catch (error) {
+      console.error('Server status check failed:', error.message);
+      // Explicitly log connection refused errors
+      if (error.message && error.message.includes('Failed to fetch')) {
+        console.log('Backend server appears to be offline (connection refused)');
+      }
+      setServerStatus('offline');
+      return false;
+    }
+  };
+  
+  // Function to retry connecting to the server
+  const retryConnection = async () => {
+    setMessage('Attempting to reconnect to server...');
+    const result = await checkServerStatus();
+    if (result) {
+      setMessage('Successfully reconnected to server! Your changes will be synced.');
+      // Try to sync any pending changes
+      syncOfflineChanges();
+      // Clear message after 3 seconds
+      setTimeout(() => setMessage(''), 3000);
+    } else {
+      setMessage('Could not connect to server. Still in offline mode.');
+      // Clear message after 3 seconds
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
+  
+  // Function to sync offline changes when server becomes available
+  const syncOfflineChanges = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      // Check if there are pending changes to sync
+      if (user.pendingSync) {
+        const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+        if (!token) return;
+        
+        // Prepare data for API
+        const updateData = {
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          profilePicture: user.profilePicture || '',
+        };
+        
+        // Send update request to API
+        const response = await fetch('http://localhost:3000/api/auth/profile', {
+          method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
+          body: JSON.stringify(updateData),
         });
-
+        
         if (response.ok) {
-          const userData = await response.json();
+          // Remove the pendingSync flag
+          const updatedUser = { ...user };
+          delete updatedUser.pendingSync;
+          delete updatedUser.lastUpdatedOffline;
+          
+          // Update localStorage
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          
+          console.log('Successfully synced offline changes with server');
+          setMessage('Your offline changes have been successfully synced with the server!');
+          setTimeout(() => setMessage(''), 3000);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to sync offline changes:', error);
+    }
+  };
+  
+  // Initial server status check and periodic checking
+  useEffect(() => {
+    checkServerStatus();
+    
+    // Set up interval to check server status every 30 seconds
+    const intervalId = setInterval(checkServerStatus, 30000);
+    
+    return () => clearInterval(intervalId);
+  }, []);
+  
+  // Track server status changes to sync offline changes when server comes back online
+  useEffect(() => {
+    // If server status changes from offline to online, try to sync offline changes
+    if (serverStatus === 'online') {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (user.pendingSync) {
+        syncOfflineChanges();
+      }
+    }
+  }, [serverStatus]);
+
+  // Load existing user data
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+        if (!token) {
+          // ProtectedRoute will handle redirect; avoid double navigation here
+          return;
+        }
+
+        // Only try to fetch from API if server is online
+        if (serverStatus === 'online') {
+          // Fetch user data from API
+          const response = await fetch('http://localhost:3000/api/auth/profile', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (response.ok) {
+            const userData = await response.json();
+            setFormData({
+              name: userData.name || '',
+              email: userData.email || '',
+              phone: userData.phone || '',
+              password: '', // Never pre-fill password for security
+              profilePicture: userData.profilePicture || '',
+            });
+            return;
+          }
+        }
+        
+        // Fallback to localStorage if API fails or server is offline
+        const storedUser = JSON.parse(localStorage.getItem('user'));
+        if (storedUser) {
           setFormData({
-            name: userData.name || '',
-            email: userData.email || '',
-            phone: userData.phone || '',
-            password: '', // Never pre-fill password for security
-            profilePicture: userData.profilePicture || '',
+            name: storedUser.name || '',
+            email: storedUser.email || '',
+            phone: storedUser.phone || '',
+            password: '',
+            profilePicture: storedUser.profilePicture || '',
           });
         } else {
-          // Fallback to localStorage if API fails
-          const storedUser = JSON.parse(localStorage.getItem('user'));
-          if (storedUser) {
-            setFormData({
-              name: storedUser.name || '',
-              email: storedUser.email || '',
-              phone: storedUser.phone || '',
-              password: '',
-              profilePicture: storedUser.profilePicture || '',
-            });
-          } else {
-            navigate('/login');
-          }
+          // No local user data; keep form empty and show message instead of redirecting
+          setFormData(prev => ({ ...prev }));
         }
       } catch (error) {
         console.error('Error loading user data:', error);
+        // Check if it's a connection refused error
+        if (error.message && error.message.includes('fetch')) {
+          setMessage('Cannot connect to the server. The backend server may not be running. Using local data instead.');
+        }
+        
         // Fallback to localStorage
         const storedUser = JSON.parse(localStorage.getItem('user'));
         if (storedUser) {
@@ -78,7 +216,7 @@ export default function UpdateLandlordProfile() {
             profilePicture: storedUser.profilePicture || '',
           });
         } else {
-          navigate('/login');
+          // Avoid redirect here; let route guard manage auth
         }
       }
     };
@@ -172,66 +310,147 @@ export default function UpdateLandlordProfile() {
     setIsLoading(true);
 
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
       if (!token) {
-        navigate('/login');
+        // ProtectedRoute handles redirect; avoid navigating here
         return;
       }
 
-      // Prepare data for API (exclude empty password)
+      // Prepare data for API (include all fields except empty password)
       const updateData = {
         name: formData.name.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim(),
+        profilePicture: formData.profilePicture || '', // Always include profile picture
       };
 
+      // Only include password if provided (for security reasons)
       if (formData.password) {
         updateData.password = formData.password;
       }
 
-      if (formData.profilePicture) {
-        updateData.profilePicture = formData.profilePicture;
-      }
+      // Only attempt to send to server if it's online
+      if (serverStatus === 'online') {
+        // Send update request to API
+        const response = await fetch('http://localhost:3000/api/auth/profile', {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updateData),
+        });
 
-      // Send update request to API
-      const response = await fetch('http://localhost:5000/api/auth/profile', {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updateData),
-      });
-
-      if (response.ok) {
+        if (response.ok) {
         const responseData = await response.json();
         const updatedUser = responseData.user || responseData;
         
-        // Update localStorage with new data
-        localStorage.setItem('user', JSON.stringify({
+        // Replace all old information with new data
+        const mergedUser = {
           ...JSON.parse(localStorage.getItem('user') || '{}'),
           ...updatedUser
-        }));
-
-        setMessage(responseData.message || 'Profile updated successfully!');
+        };
         
-        // Clear password field
-        setFormData(prev => ({
-          ...prev,
-          password: ''
-        }));
+        // Update localStorage with the new user data
+        localStorage.setItem('user', JSON.stringify(mergedUser));
+        
+        // Dispatch event to update UI components that use user data
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('user:updated', { detail: mergedUser }));
+        }
 
+        // Update the form data with the new values (except password)
+        setFormData({
+          name: mergedUser.name || '',
+          email: mergedUser.email || '',
+          phone: mergedUser.phone || '',
+          password: '', // Clear password field for security
+          profilePicture: mergedUser.profilePicture || formData.profilePicture,
+        });
+
+        setMessage(responseData.message || 'Profile updated successfully! All changes have been applied.');
+        
         // Show success message for 3 seconds
         setTimeout(() => {
           setMessage('');
         }, 3000);
       } else {
         const errorData = await response.json();
-        setMessage(errorData.error || errorData.message || 'Failed to update profile.');
+        setMessage(errorData.error || errorData.message || 'Failed to update profile. Please try again.');
+        
+        // Log detailed error for debugging
+        console.error('Profile update failed with status:', response.status, errorData);
+        }
+      } else {
+        // Server is offline, update local storage directly
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const updatedUser = {
+          ...currentUser,
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          profilePicture: formData.profilePicture || currentUser.profilePicture || '',
+          lastUpdatedOffline: new Date().toISOString(), // Add timestamp for offline updates
+          pendingSync: true, // Flag to indicate this needs to be synced when server is available
+        };
+        
+        // Update localStorage with the new user data
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        // Dispatch event to update UI components that use user data
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('user:updated', { detail: updatedUser }));
+        }
+        
+        // Update the form data with the new values (except password)
+        setFormData({
+          name: updatedUser.name || '',
+          email: updatedUser.email || '',
+          phone: updatedUser.phone || '',
+          password: '', // Clear password field for security
+          profilePicture: updatedUser.profilePicture || formData.profilePicture,
+        });
+        
+        setMessage('Server is offline. Your changes have been saved locally and will sync when the server is available.');
       }
     } catch (error) {
       console.error('Profile update failed:', error);
-      setMessage('Network error. Please try again.');
+      
+      // Provide more specific error message based on error type
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        // Update server status to offline since we can't connect
+        setServerStatus('offline');
+        
+        setMessage('Connection Error: Cannot connect to the server (ERR_CONNECTION_REFUSED). The backend server may not be running at http://localhost:3000. Your changes have been saved locally.');
+        
+        // Since we can't reach the server, update local storage directly
+        try {
+          const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+          const updatedUser = {
+            ...currentUser,
+            name: formData.name.trim(),
+            email: formData.email.trim(),
+            phone: formData.phone.trim(),
+            profilePicture: formData.profilePicture || currentUser.profilePicture || '',
+            lastUpdatedOffline: new Date().toISOString(), // Add timestamp for offline updates
+          };
+          
+          // Update localStorage with the new user data
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          
+          // Dispatch event to update UI components that use user data
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('user:updated', { detail: updatedUser }));
+          }
+          
+          setMessage('Server is offline. Your changes have been saved locally and will sync when the server is available.');
+        } catch (localStorageError) {
+          console.error('Failed to update local storage:', localStorageError);
+          setMessage('Failed to save changes locally. Please try again.');
+        }
+      } else {
+        setMessage('An unexpected error occurred. Please try again later.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -283,15 +502,41 @@ export default function UpdateLandlordProfile() {
         <div className={`absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-purple-500/10 to-pink-500/10' : 'bg-gradient-to-r from-indigo-500/20 to-cyan-500/20'}`} />
         <div className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10' : 'bg-gradient-to-r from-pink-500/20 to-purple-500/20'}`} />
       </div>
-
-      <LandlordSideBar currentSection="Profile" />
       
-      <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
-        <LandlordNavBar currentSection="Profile" />
-        
-        <main className="flex-1 overflow-y-auto flex items-center justify-center px-2 sm:px-4">
-          <div className={`relative flex flex-col rounded-2xl shadow-2xl overflow-hidden max-w-lg sm:max-w-xl w-full transition-colors duration-300 ${themeClasses.cardBg}`}>
-        <div className="w-full p-6 sm:p-8 relative">
+      {/* Server status indicator */}
+      <div className={`absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-full shadow-lg z-10 ${serverStatus === 'online' ? 'bg-green-100 dark:bg-green-900' : serverStatus === 'offline' ? 'bg-red-100 dark:bg-red-900' : 'bg-yellow-100 dark:bg-yellow-900'}`}>
+        <div className={`w-2.5 h-2.5 rounded-full animate-pulse ${serverStatus === 'online' ? 'bg-green-500' : serverStatus === 'offline' ? 'bg-red-500' : 'bg-yellow-500'}`}></div>
+        <span className={`text-xs font-semibold ${serverStatus === 'online' ? 'text-green-800 dark:text-green-200' : serverStatus === 'offline' ? 'text-red-800 dark:text-red-200' : 'text-yellow-800 dark:text-yellow-200'}`}>
+          {serverStatus === 'online' ? 'Server Online' : serverStatus === 'offline' ? 'Server Offline - Using Local Data' : 'Checking Server Status...'}
+        </span>
+        {serverStatus === 'offline' && (
+          <button 
+            onClick={retryConnection}
+            className="ml-2 text-xs bg-blue-500 hover:bg-blue-600 text-white px-2.5 py-0.5 rounded-full transition-colors shadow-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
+            title="Try to reconnect to the server"
+            aria-label="Retry connection to server"
+          >
+            Retry
+          </button>
+        )}
+      </div>
+
+      <main className="flex-1 overflow-y-auto flex items-center justify-center px-2 sm:px-4 relative z-10 w-full">
+          {/* Server status notification */}
+          {serverStatus === 'offline' && (
+            <div className="absolute top-4 left-0 right-0 mx-auto w-full max-w-md bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-3 rounded shadow-md">
+              <div className="flex items-start">
+                <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0" />
+                <div>
+                  <p className="font-medium">Connection Error: Backend server is not running</p>
+                  <p className="text-sm">Unable to connect to http://localhost:3000 (ERR_CONNECTION_REFUSED). Your changes will be saved locally and will sync when the server is available again.</p>
+                  <p className="text-xs mt-1 text-amber-800">Please ensure the backend server is running at the correct port.</p>
+                </div>
+              </div>
+            </div>
+          )}
+        <div className={`relative flex flex-col rounded-2xl shadow-2xl overflow-hidden max-w-lg sm:max-w-xl w-full transition-colors duration-300 ${themeClasses.cardBg}`}>
+          <div className="w-full p-6 sm:p-8 relative">
           <button
             onClick={toggleDarkMode}
             className={`absolute top-4 right-4 z-10 px-4 py-2 rounded-full font-semibold shadow transition-colors duration-300 ${themeClasses.toggleButtonBg} ${themeClasses.toggleButtonText} ${themeClasses.toggleButtonHover}`}
@@ -302,9 +547,18 @@ export default function UpdateLandlordProfile() {
           <h2 className={`text-xl sm:text-2xl font-bold mb-2 ${themeClasses.textAccent}`}>
             Update Your Profile
           </h2>
-          <p className={`mb-4 sm:mb-6 ${themeClasses.textSecondary}`}>
+          <p className={`mb-6 ${themeClasses.textSecondary}`}>
             Manage your personal information.
           </p>
+          <div className="mb-6 flex justify-start">
+            <button
+              onClick={() => navigate(-1)}
+              className={`px-4 py-2 rounded-full font-semibold transition-colors duration-300 ${themeClasses.toggleButtonBg} ${themeClasses.toggleButtonText} ${themeClasses.toggleButtonHover}`}
+              aria-label="Go back"
+            >
+              ← Back
+            </button>
+          </div>
 
           {message && (
             <div className={`mb-4 p-3 rounded-lg text-sm text-center font-medium flex items-center justify-center gap-2 ${
@@ -462,7 +716,7 @@ export default function UpdateLandlordProfile() {
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full py-2 sm:py-3 rounded-lg font-semibold transition-colors duration-300 hover:shadow-xl hover:scale-105 text-sm sm:text-base ${
+              className={`w-full py-3 sm:py-4 rounded-lg font-bold text-center transition-all duration-300 hover:shadow-xl hover:scale-105 text-sm sm:text-base transform active:scale-95 ${
                 isLoading 
                   ? 'bg-gray-400 cursor-not-allowed' 
                   : `${themeClasses.buttonPrimaryBg} ${themeClasses.buttonPrimaryText} ${themeClasses.buttonPrimaryHover}`
@@ -470,11 +724,14 @@ export default function UpdateLandlordProfile() {
             >
               {isLoading ? (
                 <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Updating...
+                  <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Updating Profile...</span>
                 </div>
               ) : (
-                'Save Changes'
+                <span className="flex items-center justify-center gap-2">
+                  <CheckCircle className="w-5 h-5" />
+                  Save Changes
+                </span>
               )}
             </button>
           </form>
@@ -494,10 +751,9 @@ export default function UpdateLandlordProfile() {
               <Trash2 size={18} className="inline mr-2" /> Delete Account
             </button>
           </div>
+          </div>
         </div>
-        </div>
-        </main>
-      </div>
+      </main>
     </div>
   );
 }

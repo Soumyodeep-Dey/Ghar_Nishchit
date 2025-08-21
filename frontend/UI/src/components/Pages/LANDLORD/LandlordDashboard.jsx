@@ -28,7 +28,7 @@ import {
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import { useDarkMode } from '../../../DarkModeContext';
-import { useSidebar } from './SidebarContext';
+// Removed SidebarContext usage
 
 // Enhanced Custom Hooks with better performance
 const useIntersectionObserver = (options = {}) => {
@@ -673,7 +673,7 @@ const MaintenanceRow = React.memo(({ request, delay = 0, isDark = true }) => {
 
 const LandlordDashboard = () => {
   const location = useLocation();
-  const { sidebarWidthClass } = useSidebar();
+  const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
   const [currentSection, setCurrentSection] = useState('Dashboard');
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showAddPropertyModal, setShowAddPropertyModal] = useState(false);

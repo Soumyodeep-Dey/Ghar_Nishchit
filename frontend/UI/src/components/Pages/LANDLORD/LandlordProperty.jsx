@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import { useDarkMode } from '../../../DarkModeContext';
-import { useSidebar } from './SidebarContext';
+// Removed SidebarContext usage
 import { 
   Building2, 
   Plus, 
@@ -1253,7 +1253,7 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
 const LandlordProperty = () => {
   const [currentSection] = useState('Properties');
   const { darkMode } = useDarkMode();
-  const { sidebarWidthClass } = useSidebar();
+  const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
   const [properties, setProperties] = useLocalStorage('landlord_properties', [
     {
       id: 1,

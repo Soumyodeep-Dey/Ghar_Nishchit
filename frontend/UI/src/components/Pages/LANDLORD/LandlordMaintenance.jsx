@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import { useDarkMode } from '../../../DarkModeContext';
-import { useSidebar } from './SidebarContext';
+// Removed SidebarContext usage
 import { 
   Wrench, 
   Plus, 
@@ -726,8 +726,8 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                 <Wrench className="w-8 h-8 text-blue-400" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">{request.title}</h2>
-                <div className="flex items-center space-x-4 mt-1 text-white/60">
+                <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{request.title}</h2>
+                <div className={`flex items-center space-x-4 mt-1 ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>
                   <span>Request #{request.id}</span>
                   <span>•</span>
                   <span>Created {new Date(request.createdAt).toLocaleDateString()}</span>
@@ -741,15 +741,15 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}
-                className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                className={`p-2 rounded-lg ${darkMode ? 'hover:bg-white/10' : 'hover:bg-indigo-100'} transition-colors`}
               >
-                <X className="w-6 h-6 text-white/70" />
+                <X className={`w-6 h-6 ${darkMode ? 'text-white/70' : 'text-indigo-700'}`} />
               </motion.button>
             </div>
           </div>
           
           {/* Tab Navigation */}
-          <div className="flex space-x-1 mt-6 bg-white/5 p-1 rounded-xl">
+          <div className={`flex space-x-1 mt-6 ${darkMode ? 'bg-white/5' : 'bg-indigo-100/70'} p-1 rounded-xl`}>
             {[
               { key: 'overview', label: 'Overview', icon: Eye },
               { key: 'comments', label: 'Comments', icon: MessageCircle },
@@ -764,7 +764,9 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                   activeTab === key
                     ? 'bg-blue-500 text-white shadow-lg'
-                    : 'text-white/70 hover:text-white hover:bg-white/10'
+                    : darkMode 
+                      ? 'text-white/70 hover:text-white hover:bg-white/10'
+                      : 'text-indigo-700 hover:text-indigo-900 hover:bg-indigo-200/70'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -780,75 +782,75 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Request Details */}
               <div className="space-y-6">
-                <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                  <h3 className="text-lg font-bold text-white mb-4">Request Details</h3>
+                <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-xl p-6 border`}>
+                  <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-indigo-900'} mb-4`}>Request Details</h3>
                   
                   <div className="space-y-4">
                     <div>
-                      <label className="text-sm font-medium text-white/70">Description</label>
-                      <p className="text-white mt-1">{request.description}</p>
+                      <label className={`text-sm font-medium ${darkMode ? 'text-white/70' : 'text-indigo-700/70'}`}>Description</label>
+                      <p className={`${darkMode ? 'text-white' : 'text-indigo-900'} mt-1`}>{request.description}</p>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="text-sm font-medium text-white/70">Property</label>
+                        <label className={`text-sm font-medium ${darkMode ? 'text-white/70' : 'text-indigo-700/70'}`}>Property</label>
                         <div className="flex items-center space-x-2 mt-1">
-                          <Building2 className="w-4 h-4 text-white/60" />
-                          <span className="text-white">{request.property}</span>
+                          <Building2 className={`w-4 h-4 ${darkMode ? 'text-white/60' : 'text-indigo-600/70'}`} />
+                          <span className={`${darkMode ? 'text-white' : 'text-indigo-900'}`}>{request.property}</span>
                         </div>
                       </div>
                       
                       <div>
-                        <label className="text-sm font-medium text-white/70">Tenant</label>
+                        <label className={`text-sm font-medium ${darkMode ? 'text-white/70' : 'text-indigo-700/70'}`}>Tenant</label>
                         <div className="flex items-center space-x-2 mt-1">
-                          <User className="w-4 h-4 text-white/60" />
-                          <span className="text-white">{request.tenant}</span>
+                          <User className={`w-4 h-4 ${darkMode ? 'text-white/60' : 'text-indigo-600/70'}`} />
+                          <span className={`${darkMode ? 'text-white' : 'text-indigo-900'}`}>{request.tenant}</span>
                         </div>
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="text-sm font-medium text-white/70">Priority</label>
+                        <label className={`text-sm font-medium ${darkMode ? 'text-white/70' : 'text-indigo-700/70'}`}>Priority</label>
                         <div className="mt-1">
                           <PriorityIndicator priority={request.priority} />
                         </div>
                       </div>
                       
                       <div>
-                        <label className="text-sm font-medium text-white/70">Category</label>
-                        <p className="text-white mt-1 capitalize">{request.category || 'General'}</p>
+                        <label className={`text-sm font-medium ${darkMode ? 'text-white/70' : 'text-indigo-700/70'}`}>Category</label>
+                        <p className={`${darkMode ? 'text-white' : 'text-indigo-900'} mt-1 capitalize`}>{request.category || 'General'}</p>
                       </div>
                     </div>
                   </div>
                 </div>
                 
                 {/* Progress Section */}
-                <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                  <h3 className="text-lg font-bold text-white mb-4">Progress Tracking</h3>
+                <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-xl p-6 border`}>
+                  <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-indigo-900'} mb-4`}>Progress Tracking</h3>
                   
                   <div className="space-y-4">
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-white/70">Completion</span>
-                        <span className="text-sm text-white font-medium">{request.progress}%</span>
+                        <span className={`text-sm ${darkMode ? 'text-white/70' : 'text-indigo-700/70'}`}>Completion</span>
+                        <span className={`text-sm ${darkMode ? 'text-white' : 'text-indigo-900'} font-medium`}>{request.progress}%</span>
                       </div>
                       <ProgressBar progress={request.progress} status={request.status} />
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4 pt-4">
-                      <div className="text-center p-4 bg-white/5 rounded-lg">
-                        <div className="text-2xl font-bold text-blue-400">
+                      <div className={`text-center p-4 ${darkMode ? 'bg-white/5' : 'bg-indigo-100'} rounded-lg`}>
+                        <div className={`text-2xl font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
                           {Math.floor((Date.now() - new Date(request.createdAt)) / (1000 * 60 * 60 * 24))}
                         </div>
-                        <div className="text-xs text-white/60">Days Open</div>
+                        <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Days Open</div>
                       </div>
                       
-                      <div className="text-center p-4 bg-white/5 rounded-lg">
-                        <div className="text-2xl font-bold text-green-400">
+                      <div className={`text-center p-4 ${darkMode ? 'bg-white/5' : 'bg-indigo-100'} rounded-lg`}>
+                        <div className={`text-2xl font-bold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
                           ${request.estimatedCost || '0'}
                         </div>
-                        <div className="text-xs text-white/60">Est. Cost</div>
+                        <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Est. Cost</div>
                       </div>
                     </div>
                   </div>
@@ -858,18 +860,18 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
               {/* Assignment and Actions */}
               <div className="space-y-6">
                 {/* Status Update */}
-                <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                  <h3 className="text-lg font-bold text-white mb-4">Update Status</h3>
+                <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-xl p-6 border`}>
+                  <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-indigo-900'} mb-4`}>Update Status</h3>
                   
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-white/70 mb-2">
+                      <label className={`block text-sm font-medium ${darkMode ? 'text-white/70' : 'text-indigo-700/70'} mb-2`}>
                         Current Status
                       </label>
                       <select
                         value={newStatus}
                         onChange={(e) => setNewStatus(e.target.value)}
-                        className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+                        className={`w-full p-3 ${darkMode ? 'bg-white/10 border-white/20 text-white' : 'bg-white border-indigo-200 text-indigo-900'} border rounded-lg focus:border-blue-500 focus:outline-none`}
                       >
                         <option value="Pending">Pending</option>
                         <option value="In Progress">In Progress</option>
@@ -892,43 +894,43 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                 </div>
                 
                 {/* Assignment */}
-                <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                  <h3 className="text-lg font-bold text-white mb-4">Assignment</h3>
+                <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-xl p-6 border`}>
+                  <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-indigo-900'} mb-4`}>Assignment</h3>
                   
                   {request.assignedTo ? (
-                    <div className="flex items-center space-x-3 p-4 bg-white/5 rounded-lg">
+                    <div className={`flex items-center space-x-3 p-4 ${darkMode ? 'bg-white/5' : 'bg-indigo-100'} rounded-lg`}>
                       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
                         {request.assignedTo.charAt(0)}
                       </div>
                       <div className="flex-1">
-                        <div className="text-white font-medium">{request.assignedTo}</div>
-                        <div className="text-white/60 text-sm">Service Provider</div>
+                        <div className={`${darkMode ? 'text-white' : 'text-indigo-900'} font-medium`}>{request.assignedTo}</div>
+                        <div className={`${darkMode ? 'text-white/60' : 'text-indigo-700/70'} text-sm`}>Service Provider</div>
                       </div>
                       <div className="flex space-x-2">
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          className="p-2 bg-green-500/20 rounded-lg hover:bg-green-500/30 transition-colors"
+                          className={`p-2 ${darkMode ? 'bg-green-500/20 hover:bg-green-500/30' : 'bg-green-100 hover:bg-green-200'} rounded-lg transition-colors`}
                         >
-                          <Phone className="w-4 h-4 text-green-300" />
+                          <Phone className={`w-4 h-4 ${darkMode ? 'text-green-300' : 'text-green-600'}`} />
                         </motion.button>
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          className="p-2 bg-blue-500/20 rounded-lg hover:bg-blue-500/30 transition-colors"
+                          className={`p-2 ${darkMode ? 'bg-blue-500/20 hover:bg-blue-500/30' : 'bg-blue-100 hover:bg-blue-200'} rounded-lg transition-colors`}
                         >
-                          <MessageCircle className="w-4 h-4 text-blue-300" />
+                          <MessageCircle className={`w-4 h-4 ${darkMode ? 'text-blue-300' : 'text-blue-600'}`} />
                         </motion.button>
                       </div>
                     </div>
                   ) : (
                     <div className="text-center py-8">
-                      <Users className="w-12 h-12 mx-auto text-white/30 mb-4" />
-                      <p className="text-white/60 mb-4">No one assigned yet</p>
+                      <Users className={`w-12 h-12 mx-auto ${darkMode ? 'text-white/30' : 'text-indigo-400/30'} mb-4`} />
+                      <p className={`${darkMode ? 'text-white/60' : 'text-indigo-700/70'} mb-4`}>No one assigned yet</p>
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-pink-700 transition-all duration-300"
+                        className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-pink-700 transition-all duration-300 shadow-md"
                       >
                         Assign Technician
                       </motion.button>
@@ -937,44 +939,44 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                 </div>
                 
                 {/* Quick Actions */}
-                <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-                  <h3 className="text-lg font-bold text-white mb-4">Quick Actions</h3>
+                <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-xl p-6 border`}>
+                  <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-indigo-900'} mb-4`}>Quick Actions</h3>
                   
                   <div className="grid grid-cols-2 gap-3">
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="flex items-center justify-center space-x-2 p-3 bg-blue-500/20 rounded-lg hover:bg-blue-500/30 transition-colors"
+                      className={`flex items-center justify-center space-x-2 p-3 ${darkMode ? 'bg-blue-500/20 hover:bg-blue-500/30' : 'bg-blue-100 hover:bg-blue-200'} rounded-lg transition-colors`}
                     >
-                      <MessageCircle className="w-4 h-4 text-blue-300" />
-                      <span className="text-blue-300 text-sm">Message Tenant</span>
+                      <MessageCircle className={`w-4 h-4 ${darkMode ? 'text-blue-300' : 'text-blue-600'}`} />
+                      <span className={`${darkMode ? 'text-blue-300' : 'text-blue-600'} text-sm`}>Message Tenant</span>
                     </motion.button>
                     
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="flex items-center justify-center space-x-2 p-3 bg-green-500/20 rounded-lg hover:bg-green-500/30 transition-colors"
+                      className={`flex items-center justify-center space-x-2 p-3 ${darkMode ? 'bg-green-500/20 hover:bg-green-500/30' : 'bg-green-100 hover:bg-green-200'} rounded-lg transition-colors`}
                     >
-                      <Calendar className="w-4 h-4 text-green-300" />
-                      <span className="text-green-300 text-sm">Schedule Visit</span>
+                      <Calendar className={`w-4 h-4 ${darkMode ? 'text-green-300' : 'text-green-600'}`} />
+                      <span className={`${darkMode ? 'text-green-300' : 'text-green-600'} text-sm`}>Schedule Visit</span>
                     </motion.button>
                     
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="flex items-center justify-center space-x-2 p-3 bg-purple-500/20 rounded-lg hover:bg-purple-500/30 transition-colors"
+                      className={`flex items-center justify-center space-x-2 p-3 ${darkMode ? 'bg-purple-500/20 hover:bg-purple-500/30' : 'bg-purple-100 hover:bg-purple-200'} rounded-lg transition-colors`}
                     >
-                      <Share2 className="w-4 h-4 text-purple-300" />
-                      <span className="text-purple-300 text-sm">Share Report</span>
+                      <Share2 className={`w-4 h-4 ${darkMode ? 'text-purple-300' : 'text-purple-600'}`} />
+                      <span className={`${darkMode ? 'text-purple-300' : 'text-purple-600'} text-sm`}>Share Report</span>
                     </motion.button>
                     
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="flex items-center justify-center space-x-2 p-3 bg-orange-500/20 rounded-lg hover:bg-orange-500/30 transition-colors"
+                      className={`flex items-center justify-center space-x-2 p-3 ${darkMode ? 'bg-orange-500/20 hover:bg-orange-500/30' : 'bg-orange-100 hover:bg-orange-200'} rounded-lg transition-colors`}
                     >
-                      <Download className="w-4 h-4 text-orange-300" />
-                      <span className="text-orange-300 text-sm">Export PDF</span>
+                      <Download className={`w-4 h-4 ${darkMode ? 'text-orange-300' : 'text-orange-600'}`} />
+                      <span className={`${darkMode ? 'text-orange-300' : 'text-orange-600'} text-sm`}>Export PDF</span>
                     </motion.button>
                   </div>
                 </div>
@@ -992,7 +994,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="flex space-x-4 p-4 bg-white/5 rounded-lg border border-white/10"
+                    className={`flex space-x-4 p-4 ${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-lg border`}
                   >
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
                       {comment.author?.charAt(0) || 'L'}
@@ -1000,18 +1002,18 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                     
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-2">
-                        <span className="font-semibold text-white">{comment.author}</span>
-                        <span className="text-xs text-white/50">
+                        <span className={`font-semibold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{comment.author}</span>
+                        <span className={`text-xs ${darkMode ? 'text-white/50' : 'text-indigo-700/50'}`}>
                           {new Date(comment.timestamp).toLocaleString()}
                         </span>
                       </div>
                       
-                      <p className="text-white/80">{comment.text}</p>
+                      <p className={`${darkMode ? 'text-white/80' : 'text-indigo-800/80'}`}>{comment.text}</p>
                       
                       {comment.attachments && comment.attachments.length > 0 && (
                         <div className="flex space-x-2 mt-3">
                           {comment.attachments.map((attachment, idx) => (
-                            <div key={idx} className="w-16 h-16 rounded-lg bg-white/10 flex items-center justify-center">
+                            <div key={idx} className={`w-16 h-16 rounded-lg ${darkMode ? 'bg-white/10' : 'bg-indigo-100'} flex items-center justify-center`}>
                               {attachment.type === 'image' ? (
                                 <img 
                                   src={attachment.url} 
@@ -1019,7 +1021,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                                   className="w-full h-full object-cover rounded-lg" 
                                 />
                               ) : (
-                                <FileText className="w-6 h-6 text-white/60" />
+                                <FileText className={`w-6 h-6 ${darkMode ? 'text-white/60' : 'text-indigo-600/60'}`} />
                               )}
                             </div>
                           ))}
@@ -1031,21 +1033,21 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                 
                 {!request.comments?.length && (
                   <div className="text-center py-12">
-                    <MessageCircle className="w-16 h-16 mx-auto text-white/30 mb-4" />
-                    <p className="text-white/60">No comments yet</p>
-                    <p className="text-white/40 text-sm mt-1">Start a conversation with your tenant</p>
+                    <MessageCircle className={`w-16 h-16 mx-auto ${darkMode ? 'text-white/30' : 'text-indigo-400/30'} mb-4`} />
+                    <p className={`${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>No comments yet</p>
+                    <p className={`${darkMode ? 'text-white/40' : 'text-indigo-700/40'} text-sm mt-1`}>Start a conversation with your tenant</p>
                   </div>
                 )}
               </div>
               
               {/* Add Comment */}
-              <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+              <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-lg p-4 border`}>
                 <div className="space-y-4">
                   <textarea
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                     placeholder="Add a comment or update..."
-                    className="w-full p-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-blue-500 focus:outline-none resize-none"
+                    className={`w-full p-4 ${darkMode ? 'bg-white/10 border-white/20 text-white placeholder-white/50' : 'bg-white border-indigo-200 text-indigo-900 placeholder-indigo-400/50'} border rounded-lg focus:border-blue-500 focus:outline-none resize-none`}
                     rows={3}
                   />
                   
@@ -1054,7 +1056,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                     <div className="flex space-x-2">
                       {attachments.map((attachment, index) => (
                         <div key={index} className="relative group">
-                          <div className="w-16 h-16 rounded-lg bg-white/10 flex items-center justify-center">
+                          <div className={`w-16 h-16 rounded-lg ${darkMode ? 'bg-white/10' : 'bg-indigo-100'} flex items-center justify-center`}>
                             {attachment.type === 'image' ? (
                               <img 
                                 src={attachment.url} 
@@ -1062,7 +1064,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                                 className="w-full h-full object-cover rounded-lg" 
                               />
                             ) : (
-                              <FileText className="w-6 h-6 text-white/60" />
+                              <FileText className={`w-6 h-6 ${darkMode ? 'text-white/60' : 'text-indigo-600/60'}`} />
                             )}
                           </div>
                           <motion.button
@@ -1092,10 +1094,10 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => fileInputRef.current?.click()}
-                        className="flex items-center space-x-1 px-3 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+                        className={`flex items-center space-x-1 px-3 py-2 ${darkMode ? 'bg-white/10 hover:bg-white/20' : 'bg-indigo-100/50 hover:bg-indigo-200/50'} rounded-lg transition-colors`}
                       >
-                        <Paperclip className="w-4 h-4 text-white/70" />
-                        <span className="text-sm text-white/70">Attach</span>
+                        <Paperclip className={`w-4 h-4 ${darkMode ? 'text-white/70' : 'text-indigo-600/70'}`} />
+                        <span className={`text-sm ${darkMode ? 'text-white/70' : 'text-indigo-600/70'}`}>Attach</span>
                       </motion.button>
                     </div>
                     
@@ -1122,7 +1124,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="flex items-start space-x-4 p-4 bg-white/5 rounded-lg border border-white/10"
+                  className={`flex items-start space-x-4 p-4 ${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-lg border`}
                 >
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                     event.type === 'status' ? 'bg-blue-500/20' :
@@ -1138,13 +1140,13 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                   
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
-                      <span className="font-medium text-white">{event.description}</span>
-                      <span className="text-xs text-white/50">
+                      <span className={`font-medium ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{event.description}</span>
+                      <span className={`text-xs ${darkMode ? 'text-white/50' : 'text-indigo-700/50'}`}>
                         {new Date(event.timestamp).toLocaleString()}
                       </span>
                     </div>
                     {event.details && (
-                      <p className="text-sm text-white/70 mt-1">{event.details}</p>
+                      <p className={`text-sm ${darkMode ? 'text-white/70' : 'text-indigo-700/70'} mt-1`}>{event.details}</p>
                     )}
                   </div>
                 </motion.div>
@@ -1152,8 +1154,8 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
               
               {!request.history?.length && (
                 <div className="text-center py-12">
-                  <Clock className="w-16 h-16 mx-auto text-white/30 mb-4" />
-                  <p className="text-white/60">No history available</p>
+                  <Clock className={`w-16 h-16 mx-auto ${darkMode ? 'text-white/30' : 'text-indigo-400/30'} mb-4`} />
+                  <p className={`${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>No history available</p>
                 </div>
               )}
             </div>
@@ -1167,9 +1169,9 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-white/5 rounded-lg p-4 border border-white/10 group hover:border-white/30 transition-colors"
+                  className={`${darkMode ? 'bg-white/5 border-white/10 group hover:border-white/30' : 'bg-indigo-100 border-indigo-200 group hover:border-indigo-300'} rounded-lg p-4 border transition-colors`}
                 >
-                  <div className="aspect-square mb-4 rounded-lg overflow-hidden bg-white/10 flex items-center justify-center">
+                  <div className={`aspect-square mb-4 rounded-lg overflow-hidden ${darkMode ? 'bg-white/10' : 'bg-indigo-100'} flex items-center justify-center`}>
                     {attachment.type === 'image' ? (
                       <img 
                         src={attachment.url} 
@@ -1177,31 +1179,31 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                         className="w-full h-full object-cover" 
                       />
                     ) : (
-                      <FileText className="w-12 h-12 text-white/40" />
+                      <FileText className={`w-12 h-12 ${darkMode ? 'text-white/40' : 'text-indigo-600/40'}`} />
                     )}
                   </div>
                   
                   <div className="space-y-2">
-                    <h4 className="font-medium text-white truncate">{attachment.name}</h4>
-                    <p className="text-xs text-white/50">{attachment.size}</p>
+                    <h4 className={`font-medium ${darkMode ? 'text-white' : 'text-indigo-900'} truncate`}>{attachment.name}</h4>
+                    <p className={`text-xs ${darkMode ? 'text-white/50' : 'text-indigo-700/50'}`}>{attachment.size}</p>
                     
                     <div className="flex space-x-2">
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="flex-1 flex items-center justify-center space-x-1 py-2 bg-blue-500/20 rounded-lg hover:bg-blue-500/30 transition-colors"
+                        className={`flex-1 flex items-center justify-center space-x-1 py-2 ${darkMode ? 'bg-blue-500/20 hover:bg-blue-500/30' : 'bg-blue-100 hover:bg-blue-200'} rounded-lg transition-colors`}
                       >
-                        <Eye className="w-4 h-4 text-blue-300" />
-                        <span className="text-xs text-blue-300">View</span>
+                        <Eye className={`w-4 h-4 ${darkMode ? 'text-blue-300' : 'text-blue-600'}`} />
+                        <span className={`text-xs ${darkMode ? 'text-blue-300' : 'text-blue-600'}`}>View</span>
                       </motion.button>
                       
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="flex-1 flex items-center justify-center space-x-1 py-2 bg-green-500/20 rounded-lg hover:bg-green-500/30 transition-colors"
+                        className={`flex-1 flex items-center justify-center space-x-1 py-2 ${darkMode ? 'bg-green-500/20 hover:bg-green-500/30' : 'bg-green-100 hover:bg-green-200'} rounded-lg transition-colors`}
                       >
-                        <Download className="w-4 h-4 text-green-300" />
-                        <span className="text-xs text-green-300">Download</span>
+                        <Download className={`w-4 h-4 ${darkMode ? 'text-green-300' : 'text-green-600'}`} />
+                        <span className={`text-xs ${darkMode ? 'text-green-300' : 'text-green-600'}`}>Download</span>
                       </motion.button>
                     </div>
                   </div>
@@ -1210,8 +1212,8 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
               
               {!request.attachments?.length && (
                 <div className="col-span-full text-center py-12">
-                  <ImageIcon className="w-16 h-16 mx-auto text-white/30 mb-4" />
-                  <p className="text-white/60">No attachments</p>
+                  <ImageIcon className={`w-16 h-16 mx-auto ${darkMode ? 'text-white/30' : 'text-indigo-400/30'} mb-4`} />
+                  <p className={`${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>No attachments</p>
                 </div>
               )}
             </div>
@@ -1275,7 +1277,7 @@ const NotificationToast = ({ notifications, onRemove }) => {
 const LandlordMaintenance = () => {
   const [currentSection] = useState('Maintenance');
   const { darkMode } = useDarkMode();
-  const { sidebarWidthClass } = useSidebar();
+  const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
   
   // Sample maintenance requests data
   const [maintenanceRequests, setMaintenanceRequests] = useLocalStorage('landlord_maintenance_requests', [

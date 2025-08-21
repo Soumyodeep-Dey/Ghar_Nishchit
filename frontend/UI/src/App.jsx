@@ -4,7 +4,6 @@ import Landing from './components/Landing';
 import Login from './components/Login';
 import SignUp from './components/SignUp';
 import { DarkModeProvider } from './DarkModeContext';
-import { SidebarProvider } from './components/Pages/LANDLORD/SidebarContext';
 import TenantDashboard from './components/Pages/TENANT/TenantDashboard';
 import TenantProperty from './components/Pages/TENANT/TenantProperty';
 import TenantMessage from './components/Pages/TENANT/TenantMessage';
@@ -72,9 +71,7 @@ export default function App() {
             path="/landlord"
             element={
               <ProtectedRoute requiredRole="landlord">
-                <SidebarProvider>
-                  <LandlordDashboard />
-                </SidebarProvider>
+                <LandlordDashboard />
               </ProtectedRoute>
             }
           />
@@ -82,9 +79,7 @@ export default function App() {
             path="/landlord/properties"
             element={
               <ProtectedRoute requiredRole="landlord">
-                <SidebarProvider>
-                  <LandlordProperty />
-                </SidebarProvider>
+                <LandlordProperty />
               </ProtectedRoute>
             }
           />
@@ -92,9 +87,7 @@ export default function App() {
             path="/landlord/messages"
             element={
               <ProtectedRoute requiredRole="landlord">
-                <SidebarProvider>
-                  <LandlordMessage />
-                </SidebarProvider>
+                <LandlordMessage />
               </ProtectedRoute>
             }
           />
@@ -102,9 +95,7 @@ export default function App() {
             path="/landlord/maintenance"
             element={
               <ProtectedRoute requiredRole="landlord">
-                <SidebarProvider>
-                  <LandlordMaintenance />
-                </SidebarProvider>
+                <LandlordMaintenance />
               </ProtectedRoute>
             }
           />
@@ -112,9 +103,7 @@ export default function App() {
             path="/landlord/payment"
             element={
               <ProtectedRoute requiredRole="landlord">
-                <SidebarProvider>
-                  <LandlordPayment />
-                </SidebarProvider>
+                <LandlordPayment />
               </ProtectedRoute>
             }
           />
@@ -122,9 +111,7 @@ export default function App() {
             path="/landlord/tenants"
             element={
               <ProtectedRoute requiredRole="landlord">
-                <SidebarProvider>
-                  <LandlordTenant />
-                </SidebarProvider>
+                <LandlordTenant />
               </ProtectedRoute>
             }
           />
@@ -132,9 +119,7 @@ export default function App() {
             path="/landlord/profile"
             element={
               <ProtectedRoute requiredRole="landlord">
-                <SidebarProvider>
-                  <UpdateLandlordProfile />
-                </SidebarProvider>
+                <UpdateLandlordProfile />
               </ProtectedRoute>
             }
           />

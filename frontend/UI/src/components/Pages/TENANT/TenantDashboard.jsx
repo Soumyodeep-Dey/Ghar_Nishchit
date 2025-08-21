@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useDarkMode } from '../../../DarkModeContext';
 import TenantSideBar from '../../Pages/TENANT/TenantSideBar';
 import TenantNavBar from '../../Pages/TENANT/TenantNavBar';
 import { HeartIcon, BellIcon, ChatBubbleLeftRightIcon, WrenchScrewdriverIcon, CreditCardIcon, PlusIcon, TrashIcon, EyeIcon, XMarkIcon, ChartBarIcon, ChevronUpIcon, ChevronDownIcon, ExclamationTriangleIcon, SparklesIcon, FireIcon, TrophyIcon, ClockIcon, DocumentArrowDownIcon, CheckCircleIcon, ArrowTrendingUpIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
@@ -103,6 +104,7 @@ const AnimatedCounter = ({ value, duration = 2000, prefix = '', suffix = '' }) =
 };
 
 const FloatingCard = ({ children, delay = 0, className = '' }) => {
+  const { darkMode } = useDarkMode();
   return (
     <div 
       className={`animate-float ${className}`}
@@ -140,6 +142,7 @@ const GlowingButton = ({ children, onClick, className = '', glowColor = 'blue' }
 const PropertyCard = React.memo(({ property, onView, onRemove, removeConfirmId, onConfirmRemove, onCancelRemove, index }) => {
   const [setRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });
   const [imageLoaded, setImageLoaded] = useState(false);
+  const { darkMode } = useDarkMode();
 
   return (
     <div
@@ -150,10 +153,14 @@ const PropertyCard = React.memo(({ property, onView, onRemove, removeConfirmId, 
       style={{ transitionDelay: `${index * 100}ms` }}
     >
       <FloatingCard delay={index * 200}>
-        <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden group hover:scale-105 border border-gray-100">
+        <div className={`rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden group hover:scale-105 border ${darkMode 
+          ? 'bg-slate-800 border-slate-700 hover:shadow-blue-500/10' 
+          : 'bg-white border-gray-100 hover:shadow-blue-500/20'}`}>
           <div className="relative overflow-hidden">
             {!imageLoaded && (
-              <div className="absolute inset-0 bg-gradient-to-r from-gray-200 to-gray-300 animate-pulse"></div>
+              <div className={`absolute inset-0 animate-pulse ${darkMode 
+                ? 'bg-gradient-to-r from-slate-700 to-slate-600' 
+                : 'bg-gradient-to-r from-gray-200 to-gray-300'}`}></div>
             )}
             <img
               src={property.image}
@@ -169,43 +176,51 @@ const PropertyCard = React.memo(({ property, onView, onRemove, removeConfirmId, 
             {/* Floating Action Buttons */}
             <div className="absolute top-4 right-4 space-y-2">
               <button
-                className="p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white hover:scale-110 transition-all duration-300"
+                className={`p-2 backdrop-blur-sm rounded-full shadow-lg hover:scale-110 transition-all duration-300 ${darkMode 
+                  ? 'bg-slate-800/90 hover:bg-slate-700' 
+                  : 'bg-white/90 hover:bg-white'}`}
                 onClick={() => onView(property)}
                 aria-label={`View details of ${property.title}`}
               >
-                <EyeIcon className="h-5 w-5 text-blue-600" />
+                <EyeIcon className={`h-5 w-5 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
               </button>
             </div>
 
             {/* Price Badge */}
-            <div className="absolute bottom-4 left-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full font-semibold shadow-lg">
+            <div className={`absolute bottom-4 left-4 px-4 py-2 rounded-full font-semibold shadow-lg text-white ${darkMode 
+              ? 'bg-gradient-to-r from-blue-700 to-purple-800' 
+              : 'bg-gradient-to-r from-blue-600 to-purple-600'}`}>
               {property.price}
             </div>
           </div>
           
           <div className="p-6">
-            <h3 className="font-bold text-xl text-gray-800 mb-2 group-hover:text-blue-600 transition-colors duration-300">
+            <h3 className={`font-bold text-xl mb-2 transition-colors duration-300 ${darkMode 
+              ? 'text-slate-100 group-hover:text-blue-400' 
+              : 'text-gray-800 group-hover:text-blue-600'}`}>
               {property.title}
             </h3>
-            <p className="text-gray-600 mb-3 flex items-center">
-              <SparklesIcon className="h-4 w-4 mr-2 text-yellow-500" />
+            <p className={`mb-3 flex items-center ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>
+              <SparklesIcon className={`h-4 w-4 mr-2 ${darkMode ? 'text-yellow-400' : 'text-yellow-500'}`} />
               {property.location}
             </p>
-            <p className="text-gray-500 text-sm mb-4">{property.bedrooms} bed • {property.bathrooms} bath</p>
+            <p className={`text-sm mb-4 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>{property.bedrooms} bed • {property.bathrooms} bath</p>
             
             <div className="flex justify-between items-center">
               {removeConfirmId === property.id ? (
                 <div className="flex space-x-2">
                   <GlowingButton
                     onClick={() => onRemove(property.id)}
-                    className="bg-red-600 text-white text-sm px-4 py-2 rounded-lg group"
-                    glowColor="red"
+                    className={`text-white text-sm px-4 py-2 rounded-lg group ${darkMode ? 'bg-red-700' : 'bg-red-600'}`}
+                    glowColor={darkMode ? 'darkred' : 'red'}
                   >
                     Confirm
                   </GlowingButton>
                   <button
                     onClick={onCancelRemove}
-                    className="bg-gray-200 text-gray-700 text-sm px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-200"
+                    className={`text-sm px-4 py-2 rounded-lg transition-colors duration-200 ${darkMode 
+                      ? 'bg-slate-700 text-slate-200 hover:bg-slate-600' 
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
                   >
                     Cancel
                   </button>
@@ -213,7 +228,7 @@ const PropertyCard = React.memo(({ property, onView, onRemove, removeConfirmId, 
               ) : (
                 <button
                   onClick={() => onConfirmRemove(property.id)}
-                  className="text-red-500 hover:text-red-700 transition-colors duration-200 p-2 hover:scale-110"
+                  className={`transition-colors duration-200 p-2 hover:scale-110 ${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
                   aria-label={`Remove ${property.title} from favorites`}
                 >
                   <TrashIcon className="h-5 w-5" />
@@ -229,14 +244,19 @@ const PropertyCard = React.memo(({ property, onView, onRemove, removeConfirmId, 
 
 const NotificationItem = React.memo(({ notification, onMarkAsRead, onDelete, index }) => {
   const [setRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });
+  const { darkMode } = useDarkMode();
 
   const notificationTypeIcon = {
-    maintenance: <WrenchScrewdriverIcon className="h-6 w-6 text-orange-500" />,
-    payment: <CreditCardIcon className="h-6 w-6 text-purple-500" />,
-    general: <BellIcon className="h-6 w-6 text-yellow-500" />,
+    maintenance: <WrenchScrewdriverIcon className={`h-6 w-6 ${darkMode ? 'text-orange-400' : 'text-orange-500'}`} />,
+    payment: <CreditCardIcon className={`h-6 w-6 ${darkMode ? 'text-purple-400' : 'text-purple-500'}`} />,
+    general: <BellIcon className={`h-6 w-6 ${darkMode ? 'text-yellow-400' : 'text-yellow-500'}`} />,
   };
 
-  const bgGradient = {
+  const bgGradient = darkMode ? {
+    maintenance: 'from-slate-800 to-orange-900/50',
+    payment: 'from-slate-800 to-purple-900/50',
+    general: 'from-slate-800 to-yellow-900/50',
+  } : {
     maintenance: 'from-orange-50 to-red-50',
     payment: 'from-purple-50 to-pink-50',
     general: 'from-yellow-50 to-orange-50',
@@ -254,19 +274,21 @@ const NotificationItem = React.memo(({ notification, onMarkAsRead, onDelete, ind
         className={`relative p-4 rounded-xl border-l-4 cursor-pointer transition-all duration-300 shadow-md hover:shadow-xl bg-gradient-to-r ${
           bgGradient[notification.type]
         } ${
-          notification.read ? 'border-gray-300' : 'border-blue-500 animate-pulse'
+          notification.read 
+            ? (darkMode ? 'border-slate-600' : 'border-gray-300') 
+            : (darkMode ? 'border-blue-400 animate-pulse' : 'border-blue-500 animate-pulse')
         } hover:scale-105 group`}
         onClick={() => onMarkAsRead(notification.id)}
       >
         <div className="flex items-start">
-          <div className="p-2 rounded-full bg-white shadow-md group-hover:scale-110 transition-transform duration-300">
+          <div className={`p-2 rounded-full shadow-md group-hover:scale-110 transition-transform duration-300 ${darkMode ? 'bg-slate-700' : 'bg-white'}`}>
             {notificationTypeIcon[notification.type]}
           </div>
           <div className="flex-1 ml-4">
-            <h4 className="font-semibold text-gray-800 mb-1">{notification.title}</h4>
-            <p className="text-gray-600 text-sm">{notification.message}</p>
+            <h4 className={`font-semibold mb-1 ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>{notification.title}</h4>
+            <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>{notification.message}</p>
             <div className="flex justify-between items-center mt-2">
-              <span className="text-xs text-gray-500">{notification.time}</span>
+              <span className={`text-xs ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>{notification.time}</span>
               {!notification.read && (
                 <div className="w-3 h-3 bg-blue-500 rounded-full animate-ping"></div>
               )}
@@ -277,7 +299,7 @@ const NotificationItem = React.memo(({ notification, onMarkAsRead, onDelete, ind
               e.stopPropagation();
               onDelete(notification.id);
             }}
-            className="ml-2 text-gray-400 hover:text-red-600 p-2 hover:scale-110 transition-all duration-200"
+            className={`ml-2 p-2 hover:scale-110 transition-all duration-200 ${darkMode ? 'text-slate-400 hover:text-red-400' : 'text-gray-400 hover:text-red-600'}`}
             aria-label="Delete notification"
           >
             <XMarkIcon className="h-5 w-5" />
@@ -337,6 +359,7 @@ const MessageBubble = React.memo(({ message, index }) => {
 
 const AnalyticsWidget = React.memo(({ title, children, className = "", icon, gradient = "from-blue-50 to-purple-50" }) => {
   const [setRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });
+  const { darkMode } = useDarkMode();
 
   return (
     <div
@@ -345,10 +368,10 @@ const AnalyticsWidget = React.memo(({ title, children, className = "", icon, gra
         isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
       }`}
     >
-      <div className={`bg-gradient-to-br ${gradient} rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 border border-white/50 ${className}`}>
+      <div className={`bg-gradient-to-br ${gradient} rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 ${darkMode ? 'border border-slate-700/50' : 'border border-white/50'} ${className}`}>
         <div className="flex items-center mb-4">
-          {icon && <div className="p-2 rounded-lg bg-white/50 mr-3">{icon}</div>}
-          <h3 className="font-bold text-gray-800 text-lg">{title}</h3>
+          {icon && <div className={`p-2 rounded-lg mr-3 ${darkMode ? 'bg-slate-700/50' : 'bg-white/50'}`}>{icon}</div>}
+          <h3 className={`font-bold text-lg ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>{title}</h3>
         </div>
         {children}
       </div>
@@ -358,6 +381,7 @@ const AnalyticsWidget = React.memo(({ title, children, className = "", icon, gra
 
 const Modal = React.memo(({ isOpen, onClose, title, children, size = "md" }) => {
   const [isClosing, setIsClosing] = useState(false);
+  const { darkMode } = useDarkMode();
 
   useEffect(() => {
     if (isOpen) {
@@ -407,24 +431,24 @@ const Modal = React.memo(({ isOpen, onClose, title, children, size = "md" }) => 
       onClick={handleClose}
     >
       <div 
-        className={`bg-white rounded-2xl shadow-2xl ${sizeClasses[size]} w-full max-h-[90vh] overflow-y-auto m-4 transform transition-all duration-300 ${
+        className={`${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-2xl ${sizeClasses[size]} w-full max-h-[90vh] overflow-y-auto m-4 transform transition-all duration-300 ${
           isOpen && !isClosing ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 bg-white/95 backdrop-blur-sm border-b border-gray-200 p-6 rounded-t-2xl">
+        <div className={`sticky top-0 ${darkMode ? 'bg-slate-800/95' : 'bg-white/95'} backdrop-blur-sm border-b ${darkMode ? 'border-slate-700' : 'border-gray-200'} p-6 rounded-t-2xl`}>
           <div className="flex justify-between items-center">
-            <h3 className="text-2xl font-bold text-gray-800">{title}</h3>
+            <h3 className={`text-2xl font-bold ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>{title}</h3>
             <button
               onClick={handleClose}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200 hover:scale-110"
+              className={`p-2 ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-gray-100'} rounded-full transition-colors duration-200 hover:scale-110`}
               aria-label={`Close ${title}`}
             >
-              <XMarkIcon className="h-6 w-6 text-gray-500" />
+              <XMarkIcon className={`h-6 w-6 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`} />
             </button>
           </div>
         </div>
-        <div className="p-6">
+        <div className={`p-6 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
           {children}
         </div>
       </div>
@@ -434,6 +458,7 @@ const Modal = React.memo(({ isOpen, onClose, title, children, size = "md" }) => 
 
 // Main Component
 const TenantDashboard = () => {
+  const { darkMode } = useDarkMode();
   // Initial data with enhanced properties
   const INITIAL_PROPERTIES = [
     {
@@ -800,7 +825,10 @@ const TenantDashboard = () => {
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
+    <div className={`flex h-screen transition-colors duration-500 ${darkMode
+        ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100'
+        : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 text-gray-900'
+        }`}>
       <TenantSideBar setCurrentSection={setCurrentSection} />
       <div className="flex flex-col flex-1">
         <TenantNavBar currentSection={currentSection} />
@@ -812,8 +840,12 @@ const TenantDashboard = () => {
         >
           {/* Enhanced Hero Section */}
           <div className="relative mb-12 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-3xl p-8 text-white shadow-2xl">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm"></div>
+            <div className={`rounded-3xl p-8 text-white shadow-2xl ${darkMode 
+              ? 'bg-gradient-to-r from-blue-950 via-slate-900 to-gray-900' 
+              : 'bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600'}`}>
+              <div className={`absolute inset-0 backdrop-blur-sm ${darkMode 
+                ? 'bg-gradient-to-r from-blue-900/20 to-slate-800/20' 
+                : 'bg-gradient-to-r from-blue-600/20 to-purple-600/20'}`}></div>
               <div className="relative z-10">
                 <div className="flex items-center mb-6">
                   <div className="p-3 bg-white/20 rounded-2xl mr-4 animate-pulse">
@@ -831,43 +863,49 @@ const TenantDashboard = () => {
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
                   <FloatingCard delay={0}>
-                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
+                    <div className={`backdrop-blur-md rounded-2xl p-6 border transition-all duration-300 ${darkMode 
+                      ? 'bg-slate-800/50 border-slate-700/50 hover:bg-slate-700/50' 
+                      : 'bg-white/10 border-white/20 hover:bg-white/20'}`}>
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="text-3xl font-bold mb-1">
                             <AnimatedCounter value={favouriteProperties.length} />
                           </div>
-                          <div className="text-blue-100">Favorite Properties</div>
+                          <div className={`${darkMode ? 'text-cyan-200' : 'text-blue-100'}`}>Favorite Properties</div>
                         </div>
-                        <HeartSolidIcon className="h-12 w-12 text-red-400 animate-pulse" />
+                        <HeartSolidIcon className={`h-12 w-12 ${darkMode ? 'text-red-500' : 'text-red-400'} animate-pulse`} />
                       </div>
                     </div>
                   </FloatingCard>
 
                   <FloatingCard delay={200}>
-                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
+                    <div className={`backdrop-blur-md rounded-2xl p-6 border transition-all duration-300 ${darkMode 
+                      ? 'bg-slate-800/50 border-slate-700/50 hover:bg-slate-700/50' 
+                      : 'bg-white/10 border-white/20 hover:bg-white/20'}`}>
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="text-3xl font-bold mb-1">
                             <AnimatedCounter value={analyticsData.unreadNotifications} />
                           </div>
-                          <div className="text-blue-100">New Notifications</div>
+                          <div className={`${darkMode ? 'text-cyan-200' : 'text-blue-100'}`}>New Notifications</div>
                         </div>
-                        <BellIcon className="h-12 w-12 text-yellow-400 animate-bounce" />
+                        <BellIcon className={`h-12 w-12 ${darkMode ? 'text-cyan-400' : 'text-yellow-400'} animate-bounce`} />
                       </div>
                     </div>
                   </FloatingCard>
 
                   <FloatingCard delay={400}>
-                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
+                    <div className={`backdrop-blur-md rounded-2xl p-6 border transition-all duration-300 ${darkMode 
+                      ? 'bg-slate-800/50 border-slate-700/50 hover:bg-slate-700/50' 
+                      : 'bg-white/10 border-white/20 hover:bg-white/20'}`}>
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="text-3xl font-bold mb-1">
                             <AnimatedCounter value={analyticsData.pendingRequests} />
                           </div>
-                          <div className="text-blue-100">Pending Requests</div>
+                          <div className={`${darkMode ? 'text-cyan-200' : 'text-blue-100'}`}>Pending Requests</div>
                         </div>
-                        <ClockIcon className="h-12 w-12 text-orange-400 animate-pulse" />
+                        <ClockIcon className={`h-12 w-12 ${darkMode ? 'text-cyan-400' : 'text-orange-400'} animate-pulse`} />
                       </div>
                     </div>
                   </FloatingCard>
@@ -876,30 +914,173 @@ const TenantDashboard = () => {
             </div>
           </div>
 
+          {/* Navigation Row for Dashboard Sections */}
+          <div className="mb-8">
+            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4`}>
+              {/* Analytics Overview Button */}
+              <button 
+                onClick={() => setCurrentSection('Analytics')} 
+                className={`flex items-center p-4 rounded-xl transition-all duration-300 ${darkMode 
+                  ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700' 
+                  : 'bg-white hover:bg-blue-50 border border-gray-200 hover:border-blue-200'} 
+                  ${currentSection === 'Analytics' ? (darkMode ? 'ring-2 ring-blue-500' : 'ring-2 ring-blue-500') : ''}`}
+              >
+                <div className={`p-3 rounded-lg mr-3 ${darkMode 
+                  ? 'bg-blue-900/50 text-blue-400' 
+                  : 'bg-blue-100 text-blue-600'}`}>
+                  <ChartBarIcon className="h-6 w-6" />
+                </div>
+                <div className="text-left">
+                  <h3 className={`font-semibold ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Analytics Overview</h3>
+                  <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Track your insights</p>
+                </div>
+              </button>
+
+              {/* Favorite Properties Button */}
+              <button 
+                onClick={() => setCurrentSection('Favorites')} 
+                className={`flex items-center p-4 rounded-xl transition-all duration-300 ${darkMode 
+                  ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700' 
+                  : 'bg-white hover:bg-red-50 border border-gray-200 hover:border-red-200'} 
+                  ${currentSection === 'Favorites' ? (darkMode ? 'ring-2 ring-red-500' : 'ring-2 ring-red-500') : ''}`}
+              >
+                <div className={`p-3 rounded-lg mr-3 ${darkMode 
+                  ? 'bg-red-900/50 text-red-400' 
+                  : 'bg-red-100 text-red-600'}`}>
+                  <HeartSolidIcon className="h-6 w-6" />
+                </div>
+                <div className="text-left">
+                  <h3 className={`font-semibold ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Favorite Properties</h3>
+                  <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Your saved listings</p>
+                </div>
+              </button>
+
+              {/* Notifications Button */}
+              <button 
+                onClick={() => setCurrentSection('Notifications')} 
+                className={`flex items-center p-4 rounded-xl transition-all duration-300 ${darkMode 
+                  ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700' 
+                  : 'bg-white hover:bg-yellow-50 border border-gray-200 hover:border-yellow-200'} 
+                  ${currentSection === 'Notifications' ? (darkMode ? 'ring-2 ring-yellow-500' : 'ring-2 ring-yellow-500') : ''}`}
+              >
+                <div className={`p-3 rounded-lg mr-3 ${darkMode 
+                  ? 'bg-yellow-900/50 text-yellow-400' 
+                  : 'bg-yellow-100 text-yellow-600'}`}>
+                  <BellIcon className="h-6 w-6" />
+                  {analyticsData.unreadNotifications > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {analyticsData.unreadNotifications}
+                    </span>
+                  )}
+                </div>
+                <div className="text-left">
+                  <h3 className={`font-semibold ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Notifications</h3>
+                  <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Updates & alerts</p>
+                </div>
+              </button>
+
+              {/* Messages Button */}
+              <button 
+                onClick={() => setCurrentSection('Messages')} 
+                className={`flex items-center p-4 rounded-xl transition-all duration-300 ${darkMode 
+                  ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700' 
+                  : 'bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-200'} 
+                  ${currentSection === 'Messages' ? (darkMode ? 'ring-2 ring-purple-500' : 'ring-2 ring-purple-500') : ''}`}
+              >
+                <div className={`p-3 rounded-lg mr-3 ${darkMode 
+                  ? 'bg-purple-900/50 text-purple-400' 
+                  : 'bg-purple-100 text-purple-600'}`}>
+                  <ChatBubbleLeftRightIcon className="h-6 w-6" />
+                </div>
+                <div className="text-left">
+                  <h3 className={`font-semibold ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Messages</h3>
+                  <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Communicate easily</p>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Dashboard Welcome Section - Only visible when no section is selected */}
+          <div className={`mb-12 ${currentSection !== 'Dashboard' ? 'hidden' : ''}`}>
+            <div className={`rounded-3xl p-8 text-center ${darkMode 
+              ? 'bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700' 
+              : 'bg-white border border-gray-200 shadow-lg'}`}>
+              <div className="max-w-2xl mx-auto">
+                <div className="mb-6">
+                  <SparklesIcon className={`h-16 w-16 mx-auto ${darkMode ? 'text-blue-400' : 'text-blue-500'}`} />
+                </div>
+                <h2 className={`text-3xl font-bold mb-4 ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Welcome to Your Dashboard</h2>
+                <p className={`text-lg mb-8 ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>
+                  Select one of the dashboard sections above to view detailed information about your rental experience.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+                  <div className={`p-4 rounded-xl ${darkMode ? 'bg-slate-700/50' : 'bg-blue-50'}`}>
+                    <div className="flex items-start">
+                      <ChartBarIcon className={`h-6 w-6 mt-1 mr-3 ${darkMode ? 'text-blue-400' : 'text-blue-500'}`} />
+                      <div>
+                        <h3 className={`font-semibold mb-1 ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Analytics</h3>
+                        <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>View your rental insights and payment history</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={`p-4 rounded-xl ${darkMode ? 'bg-slate-700/50' : 'bg-red-50'}`}>
+                    <div className="flex items-start">
+                      <HeartSolidIcon className={`h-6 w-6 mt-1 mr-3 ${darkMode ? 'text-red-400' : 'text-red-500'}`} />
+                      <div>
+                        <h3 className={`font-semibold mb-1 ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Favorites</h3>
+                        <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>Browse your saved properties</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={`p-4 rounded-xl ${darkMode ? 'bg-slate-700/50' : 'bg-yellow-50'}`}>
+                    <div className="flex items-start">
+                      <BellIcon className={`h-6 w-6 mt-1 mr-3 ${darkMode ? 'text-yellow-400' : 'text-yellow-500'}`} />
+                      <div>
+                        <h3 className={`font-semibold mb-1 ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Notifications</h3>
+                        <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>Check your alerts and updates</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={`p-4 rounded-xl ${darkMode ? 'bg-slate-700/50' : 'bg-purple-50'}`}>
+                    <div className="flex items-start">
+                      <ChatBubbleLeftRightIcon className={`h-6 w-6 mt-1 mr-3 ${darkMode ? 'text-purple-400' : 'text-purple-500'}`} />
+                      <div>
+                        <h3 className={`font-semibold mb-1 ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Messages</h3>
+                        <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>Communicate with property managers</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Enhanced Analytics Section */}
-          <div className="mb-12">
+          <div className={`mb-12 ${currentSection !== 'Analytics' ? 'hidden' : ''}`}>
             <div className="flex items-center mb-8">
-              <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mr-4">
+              <div className={`p-3 rounded-2xl mr-4 ${darkMode 
+                ? 'bg-gradient-to-r from-blue-700 to-indigo-800' 
+                : 'bg-gradient-to-r from-blue-500 to-purple-600'}`}>
                 <ChartBarIcon className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-gray-800">Analytics Overview</h2>
-                <p className="text-gray-600">Track your rental insights and trends</p>
+                <h2 className={`text-3xl font-bold ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Analytics Overview</h2>
+                <p className={`${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>Track your rental insights and trends</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               <AnalyticsWidget 
                 title="Monthly Rent Trend" 
-                icon={<ArrowTrendingUpIcon className="h-6 w-6 text-blue-600" />}
-                gradient="from-blue-50 to-indigo-100"
+                icon={<ArrowTrendingUpIcon className={`h-6 w-6 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />}
+                gradient={darkMode ? 'from-slate-800 to-blue-900' : 'from-blue-50 to-indigo-100'}
               >
                 <ResponsiveContainer width="100%" height={120}>
                   <AreaChart data={analyticsData.monthlyRentData}>
                     <defs>
                       <linearGradient id="rentGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1}/>
+                        <stop offset="5%" stopColor={darkMode ? "#60a5fa" : "#3b82f6"} stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor={darkMode ? "#60a5fa" : "#3b82f6"} stopOpacity={0.1}/>
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="month" tick={{ fontSize: 12 }} />
@@ -907,10 +1088,11 @@ const TenantDashboard = () => {
                     <Tooltip 
                       formatter={(value) => [formatCurrency(value), 'Rent']}
                       contentStyle={{ 
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                        backgroundColor: darkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)', 
                         borderRadius: '12px',
                         border: 'none',
-                        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
+                        boxShadow: darkMode ? '0 10px 25px rgba(0, 0, 0, 0.3)' : '0 10px 25px rgba(0, 0, 0, 0.1)',
+                        color: darkMode ? '#e2e8f0' : 'inherit'
                       }}
                     />
                     <Area 
@@ -926,8 +1108,8 @@ const TenantDashboard = () => {
 
               <AnalyticsWidget 
                 title="Payment Breakdown" 
-                icon={<CurrencyDollarIcon className="h-6 w-6 text-green-600" />}
-                gradient="from-green-50 to-emerald-100"
+                icon={<CurrencyDollarIcon className={`h-6 w-6 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />}
+                gradient={darkMode ? 'from-slate-800 to-green-900' : 'from-green-50 to-emerald-100'}
               >
                 <ResponsiveContainer width="100%" height={120}>
                   <PieChart>
@@ -947,10 +1129,11 @@ const TenantDashboard = () => {
                     <Tooltip 
                       formatter={(value) => [formatCurrency(value)]}
                       contentStyle={{ 
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                        backgroundColor: darkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)', 
                         borderRadius: '12px',
                         border: 'none',
-                        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
+                        boxShadow: darkMode ? '0 10px 25px rgba(0, 0, 0, 0.3)' : '0 10px 25px rgba(0, 0, 0, 0.1)',
+                        color: darkMode ? '#e2e8f0' : 'inherit'
                       }}
                     />
                   </PieChart>
@@ -959,8 +1142,8 @@ const TenantDashboard = () => {
 
               <AnalyticsWidget 
                 title="Maintenance Status" 
-                icon={<WrenchScrewdriverIcon className="h-6 w-6 text-orange-600" />}
-                gradient="from-orange-50 to-red-100"
+                icon={<WrenchScrewdriverIcon className={`h-6 w-6 ${darkMode ? 'text-orange-400' : 'text-orange-600'}`} />}
+                gradient={darkMode ? 'from-slate-800 to-orange-900' : 'from-orange-50 to-red-100'}
               >
                 <ResponsiveContainer width="100%" height={120}>
                   <BarChart data={analyticsData.maintenanceTimelineData}>
@@ -968,45 +1151,46 @@ const TenantDashboard = () => {
                     <YAxis tick={{ fontSize: 12 }} />
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                        backgroundColor: darkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)', 
                         borderRadius: '12px',
                         border: 'none',
-                        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
+                        boxShadow: darkMode ? '0 10px 25px rgba(0, 0, 0, 0.3)' : '0 10px 25px rgba(0, 0, 0, 0.1)',
+                        color: darkMode ? '#e2e8f0' : 'inherit'
                       }}
                     />
-                    <Bar dataKey="value" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="value" fill={darkMode ? "#fb923c" : "#f59e0b"} radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </AnalyticsWidget>
 
               <AnalyticsWidget 
                 title="Total Paid This Year" 
-                icon={<TrophyIcon className="h-6 w-6 text-yellow-600" />}
-                gradient="from-yellow-50 to-orange-100"
+                icon={<TrophyIcon className={`h-6 w-6 ${darkMode ? 'text-yellow-400' : 'text-yellow-600'}`} />}
+                gradient={darkMode ? 'from-slate-800 to-yellow-900' : 'from-yellow-50 to-orange-100'}
               >
-                <div className="text-3xl font-bold text-green-600 mb-2">
+                <div className={`text-3xl font-bold mb-2 ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
                   <AnimatedCounter value={analyticsData.totalPaid} prefix="$" />
                 </div>
-                <div className="text-sm text-gray-600">
+                <div className={`text-sm ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>
                   +12% from last year
                 </div>
               </AnalyticsWidget>
 
               <AnalyticsWidget 
                 title="Notifications Summary" 
-                icon={<BellIcon className="h-6 w-6 text-purple-600" />}
-                gradient="from-purple-50 to-pink-100"
+                icon={<BellIcon className={`h-6 w-6 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`} />}
+                gradient={darkMode ? 'from-slate-800 to-purple-900' : 'from-purple-50 to-pink-100'}
               >
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Read</span>
-                    <span className="font-bold text-green-600">
+                    <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>Read</span>
+                    <span className={`font-bold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
                       <AnimatedCounter value={analyticsData.readNotifications} />
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Unread</span>
-                    <span className="font-bold text-yellow-600">
+                    <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>Unread</span>
+                    <span className={`font-bold ${darkMode ? 'text-yellow-400' : 'text-yellow-600'}`}>
                       <AnimatedCounter value={analyticsData.unreadNotifications} />
                     </span>
                   </div>
@@ -1015,8 +1199,8 @@ const TenantDashboard = () => {
 
               <AnalyticsWidget 
                 title="Quick Actions" 
-                icon={<FireIcon className="h-6 w-6 text-red-600" />}
-                gradient="from-red-50 to-pink-100"
+                icon={<FireIcon className={`h-6 w-6 ${darkMode ? 'text-red-400' : 'text-red-600'}`} />}
+                gradient={darkMode ? 'from-slate-800 to-red-900' : 'from-red-50 to-pink-100'}
               >
                 <div className="space-y-2">
                   <GlowingButton 
@@ -1031,18 +1215,237 @@ const TenantDashboard = () => {
             </div>
           </div>
 
-          {/* Enhanced Properties and Other Sections */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-12">
+          {/* Favorite Properties Section */}
+          <div className={`mb-12 ${currentSection !== 'Favorites' ? 'hidden' : ''}`}>
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center">
+                <div className={`p-3 rounded-2xl mr-4 ${darkMode 
+                  ? 'bg-gradient-to-r from-red-700 to-pink-800' 
+                  : 'bg-gradient-to-r from-red-500 to-pink-600'}`}>
+                  <HeartSolidIcon className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h2 className={`text-3xl font-bold ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Favorite Properties</h2>
+                  <p className={`${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>Your saved rental listings</p>
+                </div>
+              </div>
+              <GlowingButton
+                onClick={() => setIsAddModalOpen(true)}
+                className={`px-4 py-2 rounded-xl ${darkMode ? 'bg-blue-700' : 'bg-blue-600'} text-white`}
+                glowColor="blue"
+              >
+                <div className="flex items-center">
+                  <PlusIcon className="h-5 w-5 mr-2" />
+                  <span>Add Property</span>
+                </div>
+              </GlowingButton>
+            </div>
+
+            <div className="mb-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                <div className={`relative w-full sm:w-64 ${darkMode ? 'text-slate-200' : 'text-gray-700'}`}>
+                  <input
+                    type="text"
+                    placeholder="Search properties..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className={`w-full pl-10 pr-4 py-2 rounded-xl border ${darkMode 
+                      ? 'bg-slate-800 border-slate-700 focus:border-blue-500 text-slate-200' 
+                      : 'bg-white border-gray-300 focus:border-blue-500 text-gray-700'} focus:outline-none focus:ring-2 focus:ring-blue-500/40`}
+                  />
+                  <div className="absolute left-3 top-2.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${darkMode ? 'text-slate-400' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => toggleSort('price')}
+                    className={`flex items-center px-3 py-2 rounded-lg border transition-colors duration-200 ${darkMode 
+                      ? 'bg-slate-800 border-slate-700 hover:bg-slate-700 text-slate-200' 
+                      : 'bg-white border-gray-300 hover:bg-gray-100 text-gray-700'}`}
+                  >
+                    <span>Price</span>
+                    {sortKey === 'price' && (
+                      sortAsc ? <ChevronUpIcon className="h-4 w-4 ml-1" /> : <ChevronDownIcon className="h-4 w-4 ml-1" />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => toggleSort('title')}
+                    className={`flex items-center px-3 py-2 rounded-lg border transition-colors duration-200 ${darkMode 
+                      ? 'bg-slate-800 border-slate-700 hover:bg-slate-700 text-slate-200' 
+                      : 'bg-white border-gray-300 hover:bg-gray-100 text-gray-700'}`}
+                  >
+                    <span>Name</span>
+                    {sortKey === 'title' && (
+                      sortAsc ? <ChevronUpIcon className="h-4 w-4 ml-1" /> : <ChevronDownIcon className="h-4 w-4 ml-1" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+              {paginatedProperties.map((property, index) => (
+                <PropertyCard
+                  key={property.id}
+                  property={property}
+                  onView={() => setSelectedProperty(property)}
+                  onRemove={removeFavourite}
+                  removeConfirmId={removeConfirmId}
+                  onConfirmRemove={confirmRemoveFavourite}
+                  onCancelRemove={cancelRemoveFavourite}
+                  index={index}
+                />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center mt-8">
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded-lg transition-colors duration-200 ${darkMode 
+                      ? 'bg-slate-800 border border-slate-700 text-slate-200 disabled:opacity-50' 
+                      : 'bg-white border border-gray-300 text-gray-700 disabled:opacity-50'}`}
+                  >
+                    Previous
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-4 py-2 rounded-lg transition-colors duration-200 ${darkMode 
+                        ? currentPage === page 
+                          ? 'bg-blue-700 text-white' 
+                          : 'bg-slate-800 border border-slate-700 text-slate-200' 
+                        : currentPage === page 
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-white border border-gray-300 text-gray-700'}`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className={`px-4 py-2 rounded-lg transition-colors duration-200 ${darkMode 
+                      ? 'bg-slate-800 border border-slate-700 text-slate-200 disabled:opacity-50' 
+                      : 'bg-white border border-gray-300 text-gray-700 disabled:opacity-50'}`}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Notifications Section */}
+          <div className={`mb-12 ${currentSection !== 'Notifications' ? 'hidden' : ''}`}>
+            <div className="flex items-center mb-8">
+              <div className={`p-3 rounded-2xl mr-4 ${darkMode 
+                ? 'bg-gradient-to-r from-yellow-700 to-orange-800' 
+                : 'bg-gradient-to-r from-yellow-500 to-orange-600'}`}>
+                <BellIcon className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h2 className={`text-3xl font-bold ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Notifications</h2>
+                <p className={`${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>Stay updated with important alerts</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {notifications.length > 0 ? (
+                notifications.map((notification, index) => (
+                  <NotificationItem
+                    key={notification.id}
+                    notification={notification}
+                    onMarkAsRead={markNotificationAsRead}
+                    onDelete={deleteNotification}
+                    index={index}
+                  />
+                ))
+              ) : (
+                <div className={`text-center py-12 rounded-xl border ${darkMode ? 'border-slate-700 bg-slate-800' : 'border-gray-200 bg-gray-50'}`}>
+                  <BellIcon className={`h-16 w-16 mx-auto mb-4 ${darkMode ? 'text-slate-500' : 'text-gray-400'}`} />
+                  <h3 className={`text-xl font-semibold mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>No Notifications</h3>
+                  <p className={`${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>You're all caught up!</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Messages Section */}
+          <div className={`mb-12 ${currentSection !== 'Messages' ? 'hidden' : ''}`}>
+            <div className="flex items-center mb-8">
+              <div className={`p-3 rounded-2xl mr-4 ${darkMode 
+                ? 'bg-gradient-to-r from-purple-700 to-indigo-800' 
+                : 'bg-gradient-to-r from-purple-500 to-indigo-600'}`}>
+                <ChatBubbleLeftRightIcon className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h2 className={`text-3xl font-bold ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Messages</h2>
+                <p className={`${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>Communicate with your landlord and property managers</p>
+              </div>
+            </div>
+
+            <div className={`rounded-2xl shadow-lg overflow-hidden border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
+              <div className="p-6 max-h-[600px] overflow-y-auto custom-scrollbar">
+                <div className="space-y-6">
+                  {messages.map((message, index) => (
+                    <MessageBubble key={message.id} message={message} index={index} />
+                  ))}
+                </div>
+              </div>
+              <div className={`p-4 border-t ${darkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                <div className="flex items-end space-x-2">
+                  <div className="flex-1">
+                    <textarea
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          sendMessage();
+                        }
+                      }}
+                      placeholder="Type your message..."
+                      className={`w-full p-3 rounded-xl border resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${darkMode 
+                        ? 'bg-slate-700 border-slate-600 text-slate-200 placeholder-slate-400' 
+                        : 'bg-white border-gray-300 text-gray-700 placeholder-gray-400'}`}
+                      rows="2"
+                    />
+                  </div>
+                  <button
+                    onClick={sendMessage}
+                    className={`p-3 rounded-xl ${darkMode ? 'bg-blue-700 hover:bg-blue-600' : 'bg-blue-600 hover:bg-blue-700'} text-white transition-colors duration-200`}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Enhanced Properties and Other Sections - Never visible */}
+          <div className="hidden grid grid-cols-1 xl:grid-cols-2 gap-12">
             {/* Favourite Properties Section */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-white/50">
+            <div className={`backdrop-blur-sm rounded-3xl shadow-2xl p-8 ${darkMode 
+              ? 'bg-slate-800/80 border border-slate-700/50 text-slate-100' 
+              : 'bg-white/80 border border-white/50 text-gray-800'}`}>
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center">
                   <div className="p-3 bg-gradient-to-r from-red-500 to-pink-600 rounded-2xl mr-4">
                     <HeartSolidIcon className="h-8 w-8 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-800">Favourite Properties</h2>
-                    <p className="text-gray-600">Your saved property listings</p>
+                    <h2 className={`text-2xl font-bold ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Favourite Properties</h2>
+                    <p className={`${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>Your saved property listings</p>
                   </div>
                 </div>
                 <GlowingButton
@@ -1060,14 +1463,16 @@ const TenantDashboard = () => {
                   placeholder="Search favorites..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
+                  className={`w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 ${darkMode 
+                    ? 'bg-slate-700/50 border-2 border-slate-600 text-slate-100 placeholder-slate-400 focus:ring-blue-500/30 focus:border-blue-500' 
+                    : 'bg-white border-2 border-gray-200 text-gray-800 focus:ring-blue-500/20 focus:border-blue-500'}`}
                 />
               </div>
 
               {paginatedProperties.length === 0 ? (
                 <div className="text-center py-12">
-                  <ExclamationTriangleIcon className="h-16 w-16 text-gray-400 mx-auto mb-4 animate-bounce" />
-                  <p className="text-gray-600 text-lg">No favorite properties found</p>
+                  <ExclamationTriangleIcon className={`h-16 w-16 mx-auto mb-4 animate-bounce ${darkMode ? 'text-slate-500' : 'text-gray-400'}`} />
+                  <p className={`text-lg ${darkMode ? 'text-slate-400' : 'text-gray-600'}`}>No favorite properties found</p>
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -1092,17 +1497,23 @@ const TenantDashboard = () => {
                   <button
                     onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
                     disabled={currentPage === 1}
-                    className="px-6 py-3 rounded-xl border border-gray-300 bg-white disabled:opacity-50 hover:bg-gray-50 hover:scale-105 transition-all duration-300 disabled:hover:scale-100"
+                    className={`px-6 py-3 rounded-xl disabled:opacity-50 hover:scale-105 transition-all duration-300 disabled:hover:scale-100 ${darkMode 
+                      ? 'border border-slate-600 bg-slate-700 text-slate-200 hover:bg-slate-600' 
+                      : 'border border-gray-300 bg-white text-gray-800 hover:bg-gray-50'}`}
                   >
                     Previous
                   </button>
-                  <span className="px-6 py-3 rounded-xl border border-gray-300 bg-gradient-to-r from-blue-100 to-purple-100 font-semibold">
+                  <span className={`px-6 py-3 rounded-xl font-semibold ${darkMode 
+                    ? 'border border-slate-600 bg-gradient-to-r from-blue-900/50 to-purple-900/50 text-slate-200' 
+                    : 'border border-gray-300 bg-gradient-to-r from-blue-100 to-purple-100 text-gray-800'}`}>
                     {currentPage} of {totalPages}
                   </span>
                   <button
                     onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="px-6 py-3 rounded-xl border border-gray-300 bg-white disabled:opacity-50 hover:bg-gray-50 hover:scale-105 transition-all duration-300 disabled:hover:scale-100"
+                    className={`px-6 py-3 rounded-xl disabled:opacity-50 hover:scale-105 transition-all duration-300 disabled:hover:scale-100 ${darkMode 
+                      ? 'border border-slate-600 bg-slate-700 text-slate-200 hover:bg-slate-600' 
+                      : 'border border-gray-300 bg-white text-gray-800 hover:bg-gray-50'}`}
                   >
                     Next
                   </button>
@@ -1111,14 +1522,16 @@ const TenantDashboard = () => {
             </div>
 
             {/* Notifications Section */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-white/50">
+            <div className={`backdrop-blur-sm rounded-3xl shadow-2xl p-8 ${darkMode 
+              ? 'bg-slate-800/80 border border-slate-700/50 text-slate-100' 
+              : 'bg-white/80 border border-white/50 text-gray-800'}`}>
               <div className="flex items-center mb-8">
                 <div className="p-3 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-2xl mr-4">
                   <BellIcon className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-800">Notifications</h2>
-                  <p className="text-gray-600">Stay updated with important alerts</p>
+                  <h2 className={`text-2xl font-bold ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Notifications</h2>
+                  <p className={`${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>Stay updated with important alerts</p>
                 </div>
               </div>
               
@@ -1230,11 +1643,11 @@ const TenantDashboard = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-                    <SparklesIcon className="h-5 w-5 mr-2 text-blue-600" />
+                  <h4 className={`font-semibold mb-3 flex items-center ${darkMode ? 'text-slate-100' : 'text-gray-900'}`}>
+                    <SparklesIcon className={`h-5 w-5 mr-2 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                     Details
                   </h4>
-                  <div className="space-y-2 text-gray-600">
+                  <div className={`space-y-2 ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>
                     <p>{selectedProperty.location}</p>
                     <p>{selectedProperty.bedrooms} bed • {selectedProperty.bathrooms} bath</p>
                   </div>
@@ -1397,17 +1810,17 @@ const TenantDashboard = () => {
         }
         
         .custom-scrollbar::-webkit-scrollbar-track {
-          background: #f1f5f9;
+          background: ${darkMode ? '#1e293b' : '#f1f5f9'};
           border-radius: 10px;
         }
         
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+          background: ${darkMode ? 'linear-gradient(45deg, #1d4ed8, #7e22ce)' : 'linear-gradient(45deg, #3b82f6, #8b5cf6)'};
           border-radius: 10px;
         }
         
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(45deg, #2563eb, #7c3aed);
+          background: ${darkMode ? 'linear-gradient(45deg, #2563eb, #9333ea)' : 'linear-gradient(45deg, #2563eb, #7c3aed)'};
         }
       `}</style>
     </div>
