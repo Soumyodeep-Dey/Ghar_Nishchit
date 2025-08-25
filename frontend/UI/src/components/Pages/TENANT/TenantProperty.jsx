@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useDarkMode } from '../../../DarkModeContext';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
 import { 
@@ -79,26 +80,30 @@ const FloatingCard = ({ children, delay = 0 }) => {
 };
 
 // Loading Skeleton Component
-const PropertyCardSkeleton = () => (
-  <div className="bg-white rounded-xl shadow-lg overflow-hidden animate-pulse">
-    <div className="h-48 bg-gray-300"></div>
-    <div className="p-5 space-y-3">
-      <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-      <div className="h-3 bg-gray-300 rounded w-1/2"></div>
-      <div className="h-3 bg-gray-300 rounded w-full"></div>
-      <div className="flex justify-between">
-        <div className="h-3 bg-gray-300 rounded w-1/4"></div>
-        <div className="h-3 bg-gray-300 rounded w-1/4"></div>
+const PropertyCardSkeleton = () => {
+  const { darkMode } = useDarkMode();
+  return (
+    <div className={`${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-xl shadow-lg overflow-hidden animate-pulse`}>
+      <div className={`h-48 ${darkMode ? 'bg-slate-700' : 'bg-gray-300'}`}></div>
+      <div className="p-5 space-y-3">
+        <div className={`h-4 ${darkMode ? 'bg-slate-700' : 'bg-gray-300'} rounded w-3/4`}></div>
+        <div className={`h-3 ${darkMode ? 'bg-slate-700' : 'bg-gray-300'} rounded w-1/2`}></div>
+        <div className={`h-3 ${darkMode ? 'bg-slate-700' : 'bg-gray-300'} rounded w-full`}></div>
+        <div className="flex justify-between">
+          <div className={`h-3 ${darkMode ? 'bg-slate-700' : 'bg-gray-300'} rounded w-1/4`}></div>
+          <div className={`h-3 ${darkMode ? 'bg-slate-700' : 'bg-gray-300'} rounded w-1/4`}></div>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Enhanced Property Card Component
 const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, index }) => {
   const [setRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const { darkMode } = useDarkMode();
 
   return (
     <div
@@ -112,8 +117,8 @@ const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, in
     >
       <FloatingCard delay={index * 200}>
         <div 
-          className={`bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-500 hover:shadow-2xl hover:scale-105 cursor-pointer group ${
-            isHovered ? 'ring-2 ring-blue-400 ring-opacity-50' : ''
+          className={`${darkMode ? 'bg-slate-800 text-white' : 'bg-white'} rounded-xl shadow-lg overflow-hidden transition-all duration-500 hover:shadow-2xl hover:scale-105 cursor-pointer group ${
+            isHovered ? `ring-2 ${darkMode ? 'ring-cyan-400' : 'ring-blue-400'} ring-opacity-50` : ''
           }`}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
@@ -166,26 +171,26 @@ const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, in
           
           <div className="p-5">
             <div className="flex items-start justify-between mb-2">
-              <h3 className="font-bold text-lg text-gray-900 mb-1 group-hover:text-blue-600 transition-colors duration-300">
+              <h3 className={`font-bold text-lg mb-1 group-hover:${darkMode ? 'text-cyan-400' : 'text-blue-600'} transition-colors duration-300 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                 {property.title}
               </h3>
             </div>
             
-            <p className="text-gray-600 text-sm mb-3 flex items-center">
-              <MapPinIcon className="h-4 w-4 mr-1 text-gray-400" />
+            <p className={`${darkMode ? 'text-slate-300' : 'text-gray-600'} text-sm mb-3 flex items-center`}>
+              <MapPinIcon className={`h-4 w-4 mr-1 ${darkMode ? 'text-slate-400' : 'text-gray-400'}`} />
               {property.location}
             </p>
             
-            <p className="text-gray-700 mb-4 text-sm line-clamp-2">{property.description}</p>
+            <p className={`${darkMode ? 'text-slate-400' : 'text-gray-700'} mb-4 text-sm line-clamp-2`}>{property.description}</p>
             
             <div className="flex justify-between items-center mb-4">
               <div className="flex space-x-4 text-sm">
-                <span className="flex items-center text-gray-600">
-                  <HomeIcon className="h-4 w-4 mr-1" />
+                <span className={`flex items-center ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>
+                  <HomeIcon className={`h-4 w-4 mr-1 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`} />
                   {property.bedrooms} bed
                 </span>
-                <span className="flex items-center text-gray-600">
-                  <SparklesIcon className="h-4 w-4 mr-1" />
+                <span className={`flex items-center ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>
+                  <SparklesIcon className={`h-4 w-4 mr-1 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`} />
                   {property.bathrooms} bath
                 </span>
               </div>
@@ -194,7 +199,7 @@ const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, in
             <div className="flex justify-between items-center">
               <button
                 onClick={() => onViewDetails(property)}
-                className="flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-200 font-medium"
+                className={`flex items-center ${darkMode ? 'text-cyan-400 hover:text-cyan-300' : 'text-blue-600 hover:text-blue-800'} transition-colors duration-200 font-medium`}
               >
                 <EyeIcon className="h-5 w-5 mr-1" />
                 View Details
@@ -374,6 +379,7 @@ const PropertyModal = ({ property, isOpen, onClose, onToggleFavorite }) => {
 
 // Main Component
 const TenantProperty = () => {
+  const { darkMode } = useDarkMode();
   const [properties, setProperties] = useLocalStorage('properties', [
     {
       id: 1,
@@ -506,7 +512,10 @@ const TenantProperty = () => {
         <TenantSideBar />
         <div className="flex flex-col flex-1">
           <TenantNavBar />
-          <main className="flex-1 p-6 bg-gray-50 overflow-y-auto">
+          <main className={`flex-1 p-6 overflow-y-auto ${darkMode
+            ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100'
+            : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 text-gray-900'
+          }`}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, index) => (
                 <PropertyCardSkeleton key={index} />
@@ -523,7 +532,10 @@ const TenantProperty = () => {
       <TenantSideBar />
       <div className="flex flex-col flex-1">
         <TenantNavBar />
-        <main className="flex-1 p-6 bg-gradient-to-br from-gray-50 to-blue-50 overflow-y-auto">
+        <main className={`flex-1 p-6 overflow-y-auto ${darkMode
+          ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100'
+          : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 text-gray-900'
+        }`}>
           {/* Hero Section */}
           <div className="mb-8 animate-fadeIn">
             <div className="text-center mb-6">
@@ -537,7 +549,7 @@ const TenantProperty = () => {
           </div>
 
           {/* Enhanced Search and Filter Section */}
-          <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl mb-8 border border-white/20 animate-slideUp">
+          <div className={`${darkMode ? 'bg-slate-800/80 border-slate-700/50' : 'bg-white/80 border-white/20'} backdrop-blur-sm p-6 rounded-2xl shadow-xl mb-8 border animate-slideUp`}>
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               {/* Search */}
               <div className="flex-1 relative">
@@ -547,9 +559,9 @@ const TenantProperty = () => {
                     placeholder="Search properties by name or location..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full border-2 border-gray-200 rounded-xl px-6 py-4 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 pl-12 text-lg"
+                    className={`w-full border-2 rounded-xl px-6 py-4 focus:outline-none focus:ring-4 transition-all duration-300 pl-12 text-lg ${darkMode ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:ring-cyan-500/20 focus:border-cyan-500' : 'bg-white border-gray-200 text-gray-800 placeholder-gray-500 focus:ring-blue-500/20 focus:border-blue-500'}`}
                   />
-                  <MagnifyingGlassIcon className="h-6 w-6 text-gray-400 absolute left-4 top-5" />
+                  <MagnifyingGlassIcon className={`h-6 w-6 absolute left-4 top-5 ${darkMode ? 'text-slate-400' : 'text-gray-400'}`} />
                 </div>
               </div>
               
@@ -559,7 +571,7 @@ const TenantProperty = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
+                  className={`border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-cyan-500/20 focus:border-cyan-500' : 'bg-white border-gray-200 text-gray-800 focus:ring-blue-500/20 focus:border-blue-500'}`}
                 >
                   <option value="title">Sort by Name</option>
                   <option value="price">Sort by Price</option>
@@ -571,8 +583,8 @@ const TenantProperty = () => {
                   onClick={() => setFilter('all')}
                   className={`px-6 py-3 rounded-xl transition-all duration-300 ${
                     filter === 'all' 
-                      ? 'bg-blue-600 text-white shadow-lg scale-105' 
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105'
+                      ? `${darkMode ? 'bg-cyan-600' : 'bg-blue-600'} text-white shadow-lg scale-105` 
+                      : darkMode ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:scale-105' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105'
                   }`}
                 >
                   All Properties
@@ -582,7 +594,7 @@ const TenantProperty = () => {
                   className={`px-6 py-3 rounded-xl flex items-center transition-all duration-300 ${
                     filter === 'favorite' 
                       ? 'bg-red-600 text-white shadow-lg scale-105' 
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105'
+                      : darkMode ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:scale-105' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105'
                   }`}
                 >
                   <HeartSolidIcon className="h-5 w-5 mr-2" />
@@ -593,7 +605,7 @@ const TenantProperty = () => {
 
             {/* Price Range Slider */}
             <div className="mt-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                 Price Range: ${priceRange[0]} - ${priceRange[1]}
               </label>
               <input
@@ -603,7 +615,7 @@ const TenantProperty = () => {
                 step="100"
                 value={priceRange[1]}
                 onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                className={`w-full h-2 rounded-lg appearance-none cursor-pointer slider ${darkMode ? 'bg-slate-700' : 'bg-gray-200'}`}
               />
             </div>
           </div>
@@ -613,9 +625,9 @@ const TenantProperty = () => {
             {filteredAndSortedProperties.length === 0 ? (
               <div className="col-span-full text-center py-16 animate-fadeIn">
                 <div className="max-w-md mx-auto">
-                  <BuildingOfficeIcon className="h-24 w-24 text-gray-400 mx-auto mb-6 animate-bounce" />
-                  <h3 className="text-2xl font-bold text-gray-800 mb-3">No properties found</h3>
-                  <p className="text-gray-600 text-lg mb-6">
+                  <BuildingOfficeIcon className={`h-24 w-24 mx-auto mb-6 animate-bounce ${darkMode ? 'text-slate-500' : 'text-gray-400'}`} />
+                  <h3 className={`text-2xl font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>No properties found</h3>
+                  <p className={`text-lg mb-6 ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>
                     Try adjusting your search criteria or browse all available properties
                   </p>
                   <button
@@ -624,7 +636,7 @@ const TenantProperty = () => {
                       setFilter('all');
                       setPriceRange([0, 5000]);
                     }}
-                    className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-all duration-300 hover:scale-105"
+                    className={`${darkMode ? 'bg-cyan-600 hover:bg-cyan-700' : 'bg-blue-600 hover:bg-blue-700'} text-white px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105`}
                   >
                     Reset Filters
                   </button>
