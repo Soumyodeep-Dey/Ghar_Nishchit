@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useDarkMode } from '../../../DarkModeContext';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
 import { 
@@ -96,7 +97,7 @@ const TypingIndicator = ({ isVisible }) => {
   );
 };
 
-const ConversationItem = ({ conversation, isActive, onClick, index }) => {
+const ConversationItem = ({ conversation, isActive, onClick, index, darkMode }) => {
   const [setRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });
 
   return (
@@ -108,29 +109,29 @@ const ConversationItem = ({ conversation, isActive, onClick, index }) => {
       style={{ transitionDelay: `${index * 100}ms` }}
     >
       <div
-        className={`flex items-center p-4 border-b border-gray-100 cursor-pointer transition-all duration-300 hover:bg-gray-50 hover:scale-105 ${
-          isActive ? 'bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-blue-500' : ''
+        className={`flex items-center p-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-100'} cursor-pointer transition-all duration-300 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'} hover:scale-105 ${
+          isActive ? darkMode ? 'bg-gradient-to-r from-blue-900 to-purple-900 border-l-4 border-blue-500' : 'bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-blue-500' : ''
         }`}
         onClick={onClick}
       >
         <div className="relative">
           <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-lg transition-transform duration-300 hover:scale-110 ${
-            isActive ? 'ring-4 ring-blue-200' : ''
+            isActive ? darkMode ? 'ring-4 ring-blue-900' : 'ring-4 ring-blue-200' : ''
           }`}>
             {conversation.avatar}
           </div>
           {conversation.online && (
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
+            <div className={`absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 ${darkMode ? 'border-gray-800' : 'border-white'} animate-pulse`}></div>
           )}
         </div>
         <div className="ml-3 flex-1 min-w-0">
           <div className="flex justify-between">
-            <h3 className="font-medium text-gray-900 truncate group-hover:text-blue-600 transition-colors duration-200">
+            <h3 className={`font-medium ${darkMode ? 'text-gray-100' : 'text-gray-900'} truncate group-hover:text-blue-600 transition-colors duration-200`}>
               {conversation.name}
             </h3>
-            <span className="text-xs text-gray-500">{conversation.time}</span>
+            <span className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{conversation.time}</span>
           </div>
-          <p className="text-sm text-gray-500 truncate">{conversation.lastMessage}</p>
+          <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'} truncate`}>{conversation.lastMessage}</p>
         </div>
         {conversation.unread && (
           <div className="w-3 h-3 rounded-full bg-blue-500 ml-2 animate-ping"></div>
@@ -141,6 +142,7 @@ const ConversationItem = ({ conversation, isActive, onClick, index }) => {
 };
 
 const MessageBubble = ({ message, index }) => {
+  const { darkMode } = useDarkMode();
   const [imageError, setImageError] = useState(false);
 
   const getFileIcon = (fileName) => {
@@ -163,7 +165,9 @@ const MessageBubble = ({ message, index }) => {
           className={`max-w-xs md:max-w-md px-4 py-3 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 ${
             message.isOwn
               ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-br-md'
-              : 'bg-white text-gray-800 rounded-bl-md border border-gray-200'
+              : darkMode 
+                ? 'bg-gray-800 text-gray-100 rounded-bl-md border border-gray-700'
+                : 'bg-white text-gray-800 rounded-bl-md border border-gray-200'
           }`}
         >
           <p className="leading-relaxed">{message.message}</p>
@@ -176,7 +180,9 @@ const MessageBubble = ({ message, index }) => {
                   className={`text-xs rounded-lg px-3 py-2 flex items-center transition-all duration-200 hover:scale-105 ${
                     message.isOwn 
                       ? 'bg-white/20 text-blue-100' 
-                      : 'bg-gray-100 text-gray-700'
+                      : darkMode
+                        ? 'bg-gray-700 text-gray-300'
+                        : 'bg-gray-100 text-gray-700'
                   }`}
                 >
                   {getFileIcon(file.name)}
@@ -187,7 +193,7 @@ const MessageBubble = ({ message, index }) => {
           )}
           
           <div className="flex items-center justify-between mt-2">
-            <p className={`text-xs ${message.isOwn ? 'text-blue-200' : 'text-gray-500'}`}>
+            <p className={`text-xs ${message.isOwn ? 'text-blue-200' : darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
               {message.time}
             </p>
             {message.isOwn && (
@@ -204,6 +210,7 @@ const MessageBubble = ({ message, index }) => {
 };
 
 const TenantMessage = () => {
+  const { darkMode } = useDarkMode();
   const [conversations, setConversations] = useLocalStorage('conversations', [
     {
       id: 1,
@@ -368,8 +375,13 @@ const TenantMessage = () => {
 
   const sendMessage = useCallback(() => {
     if (newMessage.trim() || attachments.length) {
+      // Ensure we have a valid array for the current conversation
+      const currentMessages = Array.isArray(messages[activeConversation.id]) 
+        ? messages[activeConversation.id] 
+        : [];
+      
       const message = {
-        id: (messages[activeConversation.id]?.length || 0) + 1,
+        id: currentMessages.length + 1,
         sender: "You",
         message: newMessage,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -379,7 +391,7 @@ const TenantMessage = () => {
       
       setMessages(prev => ({
         ...prev,
-        [activeConversation.id]: [...(prev[activeConversation.id] || []), message]
+        [activeConversation.id]: [...currentMessages, message]
       }));
       
       // Update conversation last message
@@ -408,14 +420,14 @@ const TenantMessage = () => {
         <TenantSideBar />
         <div className="flex flex-col flex-1">
           <TenantNavBar />
-          <main className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+          <main className={`flex-1 flex items-center justify-center ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-br from-blue-50 to-purple-50'}`}>
             <div className="text-center">
               <div className="relative">
-                <div className="w-20 h-20 border-4 border-blue-200 rounded-full animate-spin"></div>
-                <div className="absolute inset-0 w-20 h-20 border-4 border-t-blue-600 rounded-full animate-spin"></div>
+                <div className={`w-20 h-20 border-4 ${darkMode ? 'border-blue-900' : 'border-blue-200'} rounded-full animate-spin`}></div>
+                <div className={`absolute inset-0 w-20 h-20 border-4 ${darkMode ? 'border-t-cyan-500' : 'border-t-blue-600'} rounded-full animate-spin`}></div>
               </div>
-              <h2 className="text-xl font-bold text-gray-800 mt-6 animate-pulse">Loading Messages...</h2>
-              <p className="text-gray-600 mt-2">Connecting to your conversations</p>
+              <h2 className={`text-xl font-bold ${darkMode ? 'text-slate-100' : 'text-gray-800'} mt-6 animate-pulse`}>Loading Messages...</h2>
+              <p className={`${darkMode ? 'text-slate-300' : 'text-gray-600'} mt-2`}>Connecting to your conversations</p>
             </div>
           </main>
         </div>
@@ -424,15 +436,15 @@ const TenantMessage = () => {
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+    <div className={`flex h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-br from-gray-50 to-blue-50'}`}>
       <TenantSideBar />
       <div className="flex flex-col flex-1">
         <TenantNavBar />
         <main className="flex-1 flex h-full overflow-hidden">
           {/* Conversations List */}
-          <div className="w-1/3 border-r border-gray-200 flex flex-col bg-white/80 backdrop-blur-sm">
+          <div className={`w-1/3 border-r ${darkMode ? 'border-gray-700' : 'border-gray-200'} flex flex-col ${darkMode ? 'bg-slate-800/80' : 'bg-white/80'} backdrop-blur-sm`}>
             {/* Header with Search */}
-            <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <div className={`p-6 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'} bg-gradient-to-r from-blue-600 to-purple-600 text-white`}>
               <h2 className="text-2xl font-bold mb-4 flex items-center">
                 <ChatBubbleLeftRightIcon className="h-8 w-8 mr-3" />
                 Messages
@@ -453,8 +465,8 @@ const TenantMessage = () => {
             <div className="flex-1 overflow-y-auto custom-scrollbar">
               {filteredConversations.length === 0 ? (
                 <div className="text-center py-12">
-                  <ChatBubbleLeftRightIcon className="h-16 w-16 text-gray-400 mx-auto mb-4 animate-bounce" />
-                  <p className="text-gray-600">No conversations found</p>
+                  <ChatBubbleLeftRightIcon className={`h-16 w-16 ${darkMode ? 'text-gray-600' : 'text-gray-400'} mx-auto mb-4 animate-bounce`} />
+                  <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>No conversations found</p>
                 </div>
               ) : (
                 filteredConversations.map((conversation, index) => (
@@ -464,6 +476,7 @@ const TenantMessage = () => {
                     isActive={activeConversation.id === conversation.id}
                     onClick={() => setActiveConversation(conversation)}
                     index={index}
+                    darkMode={darkMode}
                   />
                 ))
               )}
@@ -471,9 +484,11 @@ const TenantMessage = () => {
           </div>
 
           {/* Chat Area */}
-          <div className="flex-1 flex flex-col bg-white">
+          <div className={`flex-1 flex flex-col ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
+            {activeConversation ? (
+            <>
             {/* Chat Header */}
-            <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-white to-blue-50">
+            <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'} ${darkMode ? 'bg-gradient-to-r from-gray-800 to-blue-900' : 'bg-gradient-to-r from-white to-blue-50'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <div className="relative">
@@ -481,12 +496,12 @@ const TenantMessage = () => {
                       {activeConversation.avatar}
                     </div>
                     {activeConversation.online && (
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
+                      <div className={`absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 ${darkMode ? 'border-gray-800' : 'border-white'} animate-pulse`}></div>
                     )}
                   </div>
                   <div className="ml-4">
-                    <h3 className="font-semibold text-gray-900 text-lg">{activeConversation.name}</h3>
-                    <p className={`text-sm ${activeConversation.online ? 'text-green-600' : 'text-gray-500'}`}>
+                    <h3 className={`font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-900'} text-lg`}>{activeConversation.name}</h3>
+                    <p className={`text-sm ${activeConversation.online ? darkMode ? 'text-green-400' : 'text-green-600' : darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                       {activeConversation.online ? 'Online' : 'Offline'}
                     </p>
                   </div>
@@ -496,21 +511,28 @@ const TenantMessage = () => {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-gray-50 to-white custom-scrollbar">
-              {messages[activeConversation.id]?.map((message, index) => (
-                <MessageBubble key={message.id} message={message} index={index} />
-              ))}
+            <div className={`flex-1 overflow-y-auto p-6 ${darkMode ? 'bg-gradient-to-b from-gray-900 to-gray-800' : 'bg-gradient-to-b from-gray-50 to-white'} custom-scrollbar`}>
+              {Array.isArray(messages[activeConversation.id]) ? 
+                messages[activeConversation.id].map((message, index) => (
+                  <MessageBubble key={message.id} message={message} index={index} />
+                ))
+              : (
+                <div className="text-center py-12">
+                  <ChatBubbleLeftRightIcon className={`h-16 w-16 ${darkMode ? 'text-gray-600' : 'text-gray-400'} mx-auto mb-4`} />
+                  <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>No messages in this conversation</p>
+                </div>
+              )}
               <TypingIndicator isVisible={isTyping && newMessage} />
               <div ref={messagesEndRef} />
             </div>
 
             {/* Message Input */}
-            <div className="p-4 border-t border-gray-200 bg-white">
+            <div className={`p-4 border-t ${darkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
               {/* Attachments Preview */}
               {attachments.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-4 p-4 bg-gray-50 rounded-xl">
+                <div className={`flex flex-wrap gap-2 mb-4 p-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-xl`}>
                   {attachments.map((file, idx) => (
-                    <div key={idx} className="bg-white px-3 py-2 rounded-lg shadow-md text-sm text-gray-700 flex items-center transition-all duration-200 hover:shadow-lg">
+                    <div key={idx} className={`${darkMode ? 'bg-gray-800 text-gray-300' : 'bg-white text-gray-700'} px-3 py-2 rounded-lg shadow-md text-sm flex items-center transition-all duration-200 hover:shadow-lg`}>
                       {file.type?.startsWith('image/') ? (
                         <PhotoIcon className="h-4 w-4 mr-2 text-blue-600" />
                       ) : (
@@ -530,12 +552,12 @@ const TenantMessage = () => {
 
               {/* Emoji Picker */}
               {showEmojiPicker && (
-                <div className="mb-4 p-4 bg-white rounded-xl shadow-lg border border-gray-200 animate-slideUp">
+                <div className={`mb-4 p-4 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-xl shadow-lg border animate-slideUp`}>
                   <div className="grid grid-cols-8 gap-2">
                     {emojis.map((emoji, idx) => (
                       <button
                         key={idx}
-                        className="p-2 text-2xl hover:bg-gray-100 rounded-lg transition-all duration-200 hover:scale-125"
+                        className={`p-2 text-2xl ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} rounded-lg transition-all duration-200 hover:scale-125`}
                         onClick={() => {
                           setNewMessage(prev => prev + emoji);
                           setShowEmojiPicker(false);
@@ -555,7 +577,7 @@ const TenantMessage = () => {
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type a message..."
-                    className="w-full border-2 border-gray-200 rounded-2xl px-6 py-4 pr-16 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 resize-none"
+                    className={`w-full border-2 ${darkMode ? 'border-gray-700 bg-gray-800 text-gray-200 placeholder-gray-500' : 'border-gray-200 bg-white text-gray-800 placeholder-gray-400'} rounded-2xl px-6 py-4 pr-16 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 resize-none`}
                     rows="1"
                     style={{ minHeight: '56px', maxHeight: '120px' }}
                     onKeyPress={(e) => {
@@ -566,7 +588,7 @@ const TenantMessage = () => {
                     }}
                   />
                   <button
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-yellow-500 transition-all duration-200 hover:scale-110"
+                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${darkMode ? 'text-gray-500 hover:text-yellow-400' : 'text-gray-400 hover:text-yellow-500'} transition-all duration-200 hover:scale-110`}
                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                   >
                     <FaceSmileIcon className="h-6 w-6" />
@@ -584,7 +606,7 @@ const TenantMessage = () => {
                 />
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="p-4 bg-gray-100 text-gray-600 rounded-2xl hover:bg-gray-200 hover:text-gray-800 transition-all duration-300 hover:scale-110"
+                  className={`p-4 ${darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-gray-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800'} rounded-2xl transition-all duration-300 hover:scale-110`}
                 >
                   <PaperClipIcon className="h-6 w-6" />
                 </button>
@@ -593,7 +615,7 @@ const TenantMessage = () => {
                   className={`p-4 rounded-2xl transition-all duration-300 hover:scale-110 ${
                     newMessage.trim() || attachments.length
                       ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl'
-                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : darkMode ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   }`}
                   onClick={sendMessage}
                   disabled={!newMessage.trim() && attachments.length === 0}
@@ -602,6 +624,23 @@ const TenantMessage = () => {
                 </button>
               </div>
             </div>
+            </>
+            ) : (
+              <div className={`flex-1 flex flex-col items-center justify-center ${darkMode ? 'bg-gradient-to-b from-gray-900 to-gray-800' : 'bg-gradient-to-b from-gray-50 to-white'}`}>
+                <ChatBubbleLeftRightIcon className={`h-24 w-24 ${darkMode ? 'text-gray-700' : 'text-gray-300'} mb-6`} />
+                <h2 className={`text-2xl font-bold ${darkMode ? 'text-gray-200' : 'text-gray-700'} mb-2`}>No conversation selected</h2>
+                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-center max-w-md mb-8`}>
+                  Select a conversation from the list or start a new one to begin messaging.
+                </p>
+                <button
+                  onClick={startNewConversation}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center"
+                >
+                  <PlusCircleIcon className="h-5 w-5 mr-2" />
+                  New Conversation
+                </button>
+              </div>
+            )}
           </div>
         </main>
       </div>
@@ -667,7 +706,7 @@ const TenantMessage = () => {
         }
         
         .custom-scrollbar::-webkit-scrollbar-track {
-          background: #f1f5f9;
+          background: ${darkMode ? '#1e293b' : '#f1f5f9'};
           border-radius: 10px;
         }
         

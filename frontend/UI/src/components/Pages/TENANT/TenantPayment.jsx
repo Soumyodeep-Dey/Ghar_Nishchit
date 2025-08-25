@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useDarkMode } from '../../../DarkModeContext';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
 import { 
@@ -493,19 +494,22 @@ const TenantPayment = () => {
 
   // Loading screen
   if (isLoading) {
+    const { darkMode } = useDarkMode();
     return (
       <div className="flex h-screen">
         <TenantSideBar />
         <div className="flex flex-col flex-1">
           <TenantNavBar />
-          <main className="flex-1 flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50">
+          <main className={`flex-1 flex items-center justify-center ${darkMode 
+            ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' 
+            : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'}`}>
             <div className="text-center">
               <div className="relative">
                 <div className="w-20 h-20 border-4 border-green-200 rounded-full animate-spin"></div>
                 <div className="absolute inset-0 w-20 h-20 border-4 border-t-green-600 rounded-full animate-spin"></div>
               </div>
-              <h2 className="text-xl font-bold text-gray-800 mt-6 animate-pulse">Loading Payments...</h2>
-              <p className="text-gray-600 mt-2">Preparing your financial data</p>
+              <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} mt-6 animate-pulse`}>Loading Payments...</h2>
+              <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'} mt-2`}>Preparing your financial data</p>
             </div>
           </main>
         </div>
@@ -513,8 +517,12 @@ const TenantPayment = () => {
     );
   }
 
+  const { darkMode } = useDarkMode();
+  
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 via-green-50 to-blue-50">
+    <div className={`flex h-screen ${darkMode 
+      ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' 
+      : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'}`}>
       <TenantSideBar />
       <div className="flex flex-col flex-1">
         <TenantNavBar />
@@ -598,29 +606,29 @@ const TenantPayment = () => {
           </div>
 
           {/* Make Payment Section */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-8 mb-8 border border-white/50">
+          <div className={`${darkMode ? 'bg-slate-800/80' : 'bg-white/80'} backdrop-blur-sm rounded-3xl shadow-2xl p-8 mb-8 border ${darkMode ? 'border-gray-700/50' : 'border-white/50'}`}>
             <div className="flex items-center mb-8">
               <div className="p-3 bg-gradient-to-r from-green-500 to-blue-600 rounded-2xl mr-4">
                 <CreditCardIcon className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-gray-800">Make Payment</h2>
-                <p className="text-gray-600">Quick and secure payment processing</p>
+                <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Make Payment</h2>
+                <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Quick and secure payment processing</p>
               </div>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Upcoming Payments */}
               <div>
-                <h3 className="font-semibold text-gray-800 mb-6 flex items-center text-lg">
+                <h3 className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'} mb-6 flex items-center text-lg`}>
                   <ClockIcon className="h-6 w-6 mr-2 text-blue-600" />
                   Upcoming Payments
                 </h3>
                 {upcomingPayments.length === 0 ? (
                   <div className="text-center py-12">
                     <CheckCircleIcon className="h-16 w-16 text-green-400 mx-auto mb-4" />
-                    <p className="text-gray-600 text-lg">All caught up!</p>
-                    <p className="text-gray-500">No upcoming payments at this time</p>
+                    <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'} text-lg`}>All caught up!</p>
+                    <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>No upcoming payments at this time</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -638,7 +646,7 @@ const TenantPayment = () => {
               
               {/* Payment Methods */}
               <div>
-                <h3 className="font-semibold text-gray-800 mb-6 flex items-center text-lg">
+                <h3 className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'} mb-6 flex items-center text-lg`}>
                   <ShieldCheckIcon className="h-6 w-6 mr-2 text-green-600" />
                   Payment Methods
                 </h3>
@@ -671,19 +679,19 @@ const TenantPayment = () => {
           </div>
 
           {/* Payment History */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/50 overflow-hidden">
-            <div className="p-8 border-b border-gray-200">
+          <div className={`${darkMode ? 'bg-slate-800/80' : 'bg-white/80'} backdrop-blur-sm rounded-3xl shadow-2xl border ${darkMode ? 'border-gray-700/50' : 'border-white/50'} overflow-hidden`}>
+            <div className={`p-8 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl mr-4">
                     <ChartBarIcon className="h-8 w-8 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-800">Payment History</h2>
-                    <p className="text-gray-600">Track all your payment transactions</p>
+                    <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Payment History</h2>
+                    <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Track all your payment transactions</p>
                   </div>
                 </div>
-                <div className="text-sm text-gray-500">
+                <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                   {paymentHistory.length} total transactions
                 </div>
               </div>

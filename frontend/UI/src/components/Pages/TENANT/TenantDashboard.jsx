@@ -600,6 +600,12 @@ const TenantDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Form state
+  const [maintenanceForm, setMaintenanceForm] = useState({
+    issueType: '',
+    priority: '',
+    description: '',
+    photos: []
+  });
   const [newMessage, setNewMessage] = useState('');
   const [attachments, setAttachments] = useState([]);
   const [newMaintenanceRequest, setNewMaintenanceRequest] = useState({
@@ -652,6 +658,7 @@ const TenantDashboard = () => {
 
   const getPriorityColor = (priority) => {
     const colors = {
+      'Emergency': 'from-purple-600 to-indigo-700 text-white',
       'High': 'from-red-500 to-pink-600 text-white',
       'Medium': 'from-yellow-500 to-orange-600 text-white',
       'Low': 'from-green-500 to-emerald-600 text-white',
@@ -761,22 +768,92 @@ const TenantDashboard = () => {
     setNotifications(prev => prev.filter(n => n.id !== id));
   }, [setNotifications]);
 
-  const sendMessage = useCallback(() => {
-    if (newMessage.trim() || attachments.length) {
-      const message = {
-        id: Date.now(),
-        sender: "You",
-        message: newMessage,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isOwn: true,
-        status: "Sent",
-        attachments: attachments,
-      };
-      setMessages(prev => [...prev, message]);
-      setNewMessage('');
-      setAttachments([]);
+  // State for form submission feedback
+  const [formSubmitStatus, setFormSubmitStatus] = useState({
+    isSubmitting: false,
+    isSuccess: false,
+    isError: false,
+    message: ''
+  });
+
+  const handleMaintenanceSubmit = useCallback(() => {
+    // Validate form
+    if (!maintenanceForm.issueType || !maintenanceForm.priority || !maintenanceForm.description) {
+      setFormSubmitStatus({
+        isSubmitting: false,
+        isSuccess: false,
+        isError: true,
+        message: 'Please fill in all required fields'
+      });
+      
+      // Clear error message after 3 seconds
+      setTimeout(() => {
+        setFormSubmitStatus(prev => ({ ...prev, isError: false, message: '' }));
+      }, 3000);
+      
+      return;
     }
-  }, [newMessage, attachments, setMessages]);
+    
+    // Set submitting state
+    setFormSubmitStatus({
+      isSubmitting: true,
+      isSuccess: false,
+      isError: false,
+      message: 'Submitting request...'
+    });
+    
+    // Simulate API call with timeout
+    setTimeout(() => {
+      try {
+        const request = {
+          id: Date.now(),
+          title: maintenanceForm.issueType,
+          description: maintenanceForm.description,
+          priority: maintenanceForm.priority,
+          status: "Pending",
+          date: new Date().toISOString().split('T')[0],
+          photos: maintenanceForm.photos
+        };
+        
+        setMaintenanceRequests(prev => [...prev, request]);
+        
+        // Reset form
+        setMaintenanceForm({
+          issueType: '',
+          priority: '',
+          description: '',
+          photos: []
+        });
+        
+        // Show success message
+        setFormSubmitStatus({
+          isSubmitting: false,
+          isSuccess: true,
+          isError: false,
+          message: 'Maintenance request submitted successfully!'
+        });
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => {
+          setFormSubmitStatus(prev => ({ ...prev, isSuccess: false, message: '' }));
+        }, 3000);
+        
+      } catch (error) {
+        // Show error message
+        setFormSubmitStatus({
+          isSubmitting: false,
+          isSuccess: false,
+          isError: true,
+          message: 'Failed to submit request. Please try again.'
+        });
+        
+        // Clear error message after 3 seconds
+        setTimeout(() => {
+          setFormSubmitStatus(prev => ({ ...prev, isError: false, message: '' }));
+        }, 3000);
+      }
+    }, 1000); // Simulate network delay
+  }, [maintenanceForm, setMaintenanceRequests]);
 
   const submitMaintenanceRequest = useCallback(() => {
     if (newMaintenanceRequest.title && newMaintenanceRequest.description) {
@@ -790,6 +867,22 @@ const TenantDashboard = () => {
       setNewMaintenanceRequest({ title: '', description: '', priority: 'Medium' });
     }
   }, [newMaintenanceRequest, setMaintenanceRequests]);
+  
+  const sendMessage = useCallback(() => {
+    if (newMessage.trim() || attachments.length) {
+      const newMsg = {
+        id: Date.now(),
+        sender: "You",
+        message: newMessage,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isOwn: true,
+        attachments: attachments.length ? attachments.map(file => file.name) : []
+      };
+      setMessages(prev => [...prev, newMsg]);
+      setNewMessage('');
+      setAttachments([]);
+    }
+  }, [newMessage, attachments, setMessages]);
 
   const handleAddProperty = useCallback(() => {
     if (newProperty.title && newProperty.location && newProperty.price) {
@@ -979,22 +1072,22 @@ const TenantDashboard = () => {
                 </div>
               </button>
 
-              {/* Messages Button */}
+              {/* Maintenance Button */}
               <button 
-                onClick={() => setCurrentSection('Messages')} 
+                onClick={() => setCurrentSection('Maintenance')} 
                 className={`flex items-center p-4 rounded-xl transition-all duration-300 ${darkMode 
                   ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700' 
-                  : 'bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-200'} 
-                  ${currentSection === 'Messages' ? (darkMode ? 'ring-2 ring-purple-500' : 'ring-2 ring-purple-500') : ''}`}
+                  : 'bg-white hover:bg-green-50 border border-gray-200 hover:border-green-200'} 
+                  ${currentSection === 'Maintenance' ? (darkMode ? 'ring-2 ring-green-500' : 'ring-2 ring-green-500') : ''}`}
               >
                 <div className={`p-3 rounded-lg mr-3 ${darkMode 
-                  ? 'bg-purple-900/50 text-purple-400' 
-                  : 'bg-purple-100 text-purple-600'}`}>
-                  <ChatBubbleLeftRightIcon className="h-6 w-6" />
+                  ? 'bg-green-900/50 text-green-400' 
+                  : 'bg-green-100 text-green-600'}`}>
+                  <WrenchScrewdriverIcon className="h-6 w-6" />
                 </div>
                 <div className="text-left">
-                  <h3 className={`font-semibold ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Messages</h3>
-                  <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Communicate easily</p>
+                  <h3 className={`font-semibold ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Maintenance</h3>
+                  <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Request repairs</p>
                 </div>
               </button>
             </div>
@@ -1043,14 +1136,66 @@ const TenantDashboard = () => {
                   </div>
                   <div className={`p-4 rounded-xl ${darkMode ? 'bg-slate-700/50' : 'bg-purple-50'}`}>
                     <div className="flex items-start">
-                      <ChatBubbleLeftRightIcon className={`h-6 w-6 mt-1 mr-3 ${darkMode ? 'text-purple-400' : 'text-purple-500'}`} />
+                      <WrenchScrewdriverIcon className={`h-6 w-6 mt-1 mr-3 ${darkMode ? 'text-purple-400' : 'text-purple-500'}`} />
                       <div>
-                        <h3 className={`font-semibold mb-1 ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Messages</h3>
-                        <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>Communicate with property managers</p>
+                        <h3 className={`font-semibold mb-1 ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Maintenance</h3>
+                        <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>Request repairs and track maintenance issues</p>
                       </div>
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <div className={`mt-8 rounded-2xl shadow-lg overflow-hidden border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} hidden`}>
+              <div className="p-6">
+                <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-slate-200' : 'text-gray-700'}`}>Recent Maintenance Requests</h3>
+                
+                {maintenanceRequests.length > 0 ? (
+                  <div className="space-y-4">
+                    {maintenanceRequests.slice(0, 5).map((request) => (
+                      <div 
+                        key={request.id} 
+                        className={`p-4 rounded-xl border ${darkMode ? 'border-slate-700 bg-slate-800/50' : 'border-gray-200 bg-gray-50'}`}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className={`font-medium ${darkMode ? 'text-slate-200' : 'text-gray-800'}`}>{request.title}</h4>
+                            <p className={`text-sm mt-1 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                              Submitted on {request.date}
+                            </p>
+                          </div>
+                          <span 
+                            className={`px-3 py-1 text-xs font-medium rounded-full ${getPriorityColor(request.priority)}`}
+                          >
+                            {request.priority}
+                          </span>
+                        </div>
+                        <p className={`mt-2 text-sm ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>
+                          {request.description}
+                        </p>
+                        <div className="mt-3 flex justify-between items-center">
+                          <span 
+                            className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(request.status)}`}
+                          >
+                            {request.status}
+                          </span>
+                          {request.photos && request.photos.length > 0 && (
+                            <span className={`text-xs ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                              {request.photos.length} photo(s) attached
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className={`text-center py-8 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                    <WrenchScrewdriverIcon className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                    <p>No maintenance requests yet</p>
+                    <p className="text-sm mt-1">Submit a request using the form above</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -1217,7 +1362,7 @@ const TenantDashboard = () => {
 
           {/* Favorite Properties Section */}
           <div className={`mb-12 ${currentSection !== 'Favorites' ? 'hidden' : ''}`}>
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center mb-8">
               <div className="flex items-center">
                 <div className={`p-3 rounded-2xl mr-4 ${darkMode 
                   ? 'bg-gradient-to-r from-red-700 to-pink-800' 
@@ -1229,16 +1374,6 @@ const TenantDashboard = () => {
                   <p className={`${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>Your saved rental listings</p>
                 </div>
               </div>
-              <GlowingButton
-                onClick={() => setIsAddModalOpen(true)}
-                className={`px-4 py-2 rounded-xl ${darkMode ? 'bg-blue-700' : 'bg-blue-600'} text-white`}
-                glowColor="blue"
-              >
-                <div className="flex items-center">
-                  <PlusIcon className="h-5 w-5 mr-2" />
-                  <span>Add Property</span>
-                </div>
-              </GlowingButton>
             </div>
 
             <div className="mb-6">
@@ -1378,55 +1513,306 @@ const TenantDashboard = () => {
             </div>
           </div>
 
-          {/* Messages Section */}
-          <div className={`mb-12 ${currentSection !== 'Messages' ? 'hidden' : ''}`}>
+          {/* Maintenance Section */}
+          <div className={`mb-12 ${currentSection !== 'Maintenance' ? 'hidden' : ''}`}>
             <div className="flex items-center mb-8">
               <div className={`p-3 rounded-2xl mr-4 ${darkMode 
-                ? 'bg-gradient-to-r from-purple-700 to-indigo-800' 
-                : 'bg-gradient-to-r from-purple-500 to-indigo-600'}`}>
-                <ChatBubbleLeftRightIcon className="h-8 w-8 text-white" />
+                ? 'bg-gradient-to-r from-green-700 to-teal-800' 
+                : 'bg-gradient-to-r from-green-500 to-teal-600'}`}>
+                <WrenchScrewdriverIcon className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h2 className={`text-3xl font-bold ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Messages</h2>
-                <p className={`${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>Communicate with your landlord and property managers</p>
+                <h2 className={`text-3xl font-bold ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Maintenance</h2>
+                <p className={`${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>Request repairs and track maintenance issues</p>
               </div>
             </div>
 
             <div className={`rounded-2xl shadow-lg overflow-hidden border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
-              <div className="p-6 max-h-[600px] overflow-y-auto custom-scrollbar">
-                <div className="space-y-6">
-                  {messages.map((message, index) => (
-                    <MessageBubble key={message.id} message={message} index={index} />
-                  ))}
-                </div>
-              </div>
-              <div className={`p-4 border-t ${darkMode ? 'border-slate-700' : 'border-gray-200'}`}>
-                <div className="flex items-end space-x-2">
-                  <div className="flex-1">
-                    <textarea
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          sendMessage();
-                        }
-                      }}
-                      placeholder="Type your message..."
-                      className={`w-full p-3 rounded-xl border resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${darkMode 
-                        ? 'bg-slate-700 border-slate-600 text-slate-200 placeholder-slate-400' 
-                        : 'bg-white border-gray-300 text-gray-700 placeholder-gray-400'}`}
-                      rows="2"
-                    />
+              <div className="p-8">
+                <div className="mb-8">
+                  <h3 className={`text-2xl font-bold mb-6 ${darkMode ? 'text-slate-200' : 'text-gray-700'} flex items-center`}>
+                    <WrenchScrewdriverIcon className={`h-6 w-6 mr-3 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
+                    Submit a Maintenance Request
+                  </h3>
+                  <div className="space-y-6">
+                    {/* Issue Type Field with Icon */}
+                    <div className="relative">
+                      <label className={`block mb-2 font-medium ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+                        Issue Type <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <select 
+                          value={maintenanceForm.issueType}
+                          onChange={(e) => setMaintenanceForm({...maintenanceForm, issueType: e.target.value})}
+                          className={`w-full p-4 pl-12 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500/40 ${darkMode 
+                            ? 'bg-slate-700 border-slate-600 text-slate-200 hover:border-green-500/50' 
+                            : 'bg-white border-gray-300 text-gray-700 hover:border-green-500/50'}`}
+                        >
+                          <option value="">Select issue type</option>
+                          <option value="Plumbing">Plumbing</option>
+                          <option value="Electrical">Electrical</option>
+                          <option value="HVAC">Heating/Cooling</option>
+                          <option value="Appliance">Appliance Repair</option>
+                          <option value="Structural">Structural Issues</option>
+                          <option value="Pest Control">Pest Control</option>
+                          <option value="Other">Other</option>
+                        </select>
+                        <div className={`absolute left-4 top-1/2 transform -translate-y-1/2 ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+                          <WrenchScrewdriverIcon className="h-5 w-5" />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Priority Field with Visual Indicators */}
+                    <div>
+                      <label className={`block mb-2 font-medium ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+                        Priority <span className="text-red-500">*</span>
+                      </label>
+                      <div className="grid grid-cols-4 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setMaintenanceForm({...maintenanceForm, priority: 'Low'})}
+                          className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-300 ${maintenanceForm.priority === 'Low' 
+                            ? (darkMode ? 'bg-blue-900/50 border-blue-700 ring-2 ring-blue-500' : 'bg-blue-100 border-blue-300 ring-2 ring-blue-500') 
+                            : (darkMode ? 'bg-slate-700 border-slate-600 hover:bg-slate-600' : 'bg-white border-gray-300 hover:bg-gray-100')}`}
+                        >
+                          <div className={`w-4 h-4 rounded-full mb-2 ${darkMode ? 'bg-blue-500' : 'bg-blue-600'}`}></div>
+                          <span className={`text-sm font-medium ${darkMode ? 'text-slate-200' : 'text-gray-700'}`}>Low</span>
+                          <span className={`text-xs mt-1 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Not urgent</span>
+                        </button>
+                        
+                        <button
+                          type="button"
+                          onClick={() => setMaintenanceForm({...maintenanceForm, priority: 'Medium'})}
+                          className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-300 ${maintenanceForm.priority === 'Medium' 
+                            ? (darkMode ? 'bg-yellow-900/50 border-yellow-700 ring-2 ring-yellow-500' : 'bg-yellow-100 border-yellow-300 ring-2 ring-yellow-500') 
+                            : (darkMode ? 'bg-slate-700 border-slate-600 hover:bg-slate-600' : 'bg-white border-gray-300 hover:bg-gray-100')}`}
+                        >
+                          <div className={`w-4 h-4 rounded-full mb-2 ${darkMode ? 'bg-yellow-500' : 'bg-yellow-600'}`}></div>
+                          <span className={`text-sm font-medium ${darkMode ? 'text-slate-200' : 'text-gray-700'}`}>Medium</span>
+                          <span className={`text-xs mt-1 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Soon</span>
+                        </button>
+                        
+                        <button
+                          type="button"
+                          onClick={() => setMaintenanceForm({...maintenanceForm, priority: 'High'})}
+                          className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-300 ${maintenanceForm.priority === 'High' 
+                            ? (darkMode ? 'bg-orange-900/50 border-orange-700 ring-2 ring-orange-500' : 'bg-orange-100 border-orange-300 ring-2 ring-orange-500') 
+                            : (darkMode ? 'bg-slate-700 border-slate-600 hover:bg-slate-600' : 'bg-white border-gray-300 hover:bg-gray-100')}`}
+                        >
+                          <div className={`w-4 h-4 rounded-full mb-2 ${darkMode ? 'bg-orange-500' : 'bg-orange-600'}`}></div>
+                          <span className={`text-sm font-medium ${darkMode ? 'text-slate-200' : 'text-gray-700'}`}>High</span>
+                          <span className={`text-xs mt-1 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Urgent</span>
+                        </button>
+                        
+                        <button
+                          type="button"
+                          onClick={() => setMaintenanceForm({...maintenanceForm, priority: 'Emergency'})}
+                          className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-300 ${maintenanceForm.priority === 'Emergency' 
+                            ? (darkMode ? 'bg-red-900/50 border-red-700 ring-2 ring-red-500' : 'bg-red-100 border-red-300 ring-2 ring-red-500') 
+                            : (darkMode ? 'bg-slate-700 border-slate-600 hover:bg-slate-600' : 'bg-white border-gray-300 hover:bg-gray-100')}`}
+                        >
+                          <div className={`w-4 h-4 rounded-full mb-2 ${darkMode ? 'bg-red-500' : 'bg-red-600'}`}></div>
+                          <span className={`text-sm font-medium ${darkMode ? 'text-slate-200' : 'text-gray-700'}`}>Emergency</span>
+                          <span className={`text-xs mt-1 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Immediate</span>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Description Field with Enhanced Textarea */}
+                    <div>
+                      <label className={`block mb-2 font-medium ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+                        Description <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <textarea
+                          value={maintenanceForm.description}
+                          onChange={(e) => setMaintenanceForm({...maintenanceForm, description: e.target.value})}
+                          placeholder="Describe the issue in detail..."
+                          className={`w-full p-4 rounded-xl border resize-none transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500/40 ${darkMode 
+                            ? 'bg-slate-700 border-slate-600 text-slate-200 placeholder-slate-400 hover:border-green-500/50' 
+                            : 'bg-white border-gray-300 text-gray-700 placeholder-gray-400 hover:border-green-500/50'}`}
+                          rows="5"
+                        />
+                        <div className={`absolute bottom-3 right-3 text-xs ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                          {maintenanceForm.description.length} / 500
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Upload Photos with Enhanced UI */}
+                    <div>
+                      <label className={`block mb-2 font-medium ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+                        Upload Photos (Optional)
+                      </label>
+                      <div 
+                        className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${darkMode 
+                          ? 'border-slate-600 bg-slate-700/30 hover:border-green-500/50 hover:bg-slate-700/50' 
+                          : 'border-gray-300 bg-gray-50 hover:border-green-500/50 hover:bg-gray-100/80'}`}
+                      >
+                        <DocumentArrowDownIcon className={`h-16 w-16 mx-auto mb-4 ${darkMode ? 'text-slate-400' : 'text-gray-400'}`} />
+                        <p className={`text-lg mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>Drag and drop files here</p>
+                        <p className={`mb-4 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>or</p>
+                        <input 
+                          type="file" 
+                          id="maintenance-photos" 
+                          className="hidden" 
+                          multiple 
+                          accept="image/*" 
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files);
+                            if (files.length > 0) {
+                              setMaintenanceForm({...maintenanceForm, photos: files});
+                            }
+                          }}
+                        />
+                        <label 
+                          htmlFor="maintenance-photos"
+                          className={`px-6 py-3 rounded-xl text-sm inline-block cursor-pointer transition-all duration-300 ${darkMode 
+                            ? 'bg-green-700 hover:bg-green-600 text-white' 
+                            : 'bg-green-600 hover:bg-green-700 text-white'}`}>
+                          <div className="flex items-center">
+                            <PlusIcon className="h-5 w-5 mr-2" />
+                            Browse Files
+                          </div>
+                        </label>
+                        <p className={`mt-4 text-sm ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Maximum 5 photos, 5MB each</p>
+                        
+                        {/* Photo Preview Section */}
+                        {maintenanceForm.photos.length > 0 && (
+                          <div className="mt-6 border-t pt-4 border-dashed border-gray-300">
+                            <p className={`text-sm font-medium mb-3 ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+                              {maintenanceForm.photos.length} file(s) selected
+                            </p>
+                            <div className="flex flex-wrap gap-3 justify-center">
+                              {Array.from(maintenanceForm.photos).map((file, index) => (
+                                <div key={index} className="relative group">
+                                  <div className={`w-20 h-20 rounded-lg overflow-hidden border-2 ${darkMode ? 'border-slate-600' : 'border-gray-300'}`}>
+                                    <img 
+                                      src={URL.createObjectURL(file)} 
+                                      alt={`Preview ${index}`} 
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </div>
+                                  <button 
+                                    type="button"
+                                    onClick={() => {
+                                      const newPhotos = Array.from(maintenanceForm.photos);
+                                      newPhotos.splice(index, 1);
+                                      setMaintenanceForm({...maintenanceForm, photos: newPhotos});
+                                    }}
+                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                  >
+                                    <XMarkIcon className="h-4 w-4" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Form Status Feedback */}
+                    {formSubmitStatus.message && (
+                      <div className={`p-4 rounded-xl text-center transition-all duration-300 ${formSubmitStatus.isError 
+                        ? (darkMode ? 'bg-red-900/30 text-red-300 border border-red-700' : 'bg-red-100 text-red-700 border border-red-300') 
+                        : formSubmitStatus.isSuccess 
+                          ? (darkMode ? 'bg-green-900/30 text-green-300 border border-green-700' : 'bg-green-100 text-green-700 border border-green-300')
+                          : (darkMode ? 'bg-blue-900/30 text-blue-300 border border-blue-700' : 'bg-blue-100 text-blue-700 border border-blue-300')
+                      }`}>
+                        <div className="flex items-center justify-center">
+                          {formSubmitStatus.isError && (
+                            <ExclamationTriangleIcon className="h-5 w-5 mr-2 text-red-500" />
+                          )}
+                          {formSubmitStatus.isSuccess && (
+                            <CheckCircleIcon className="h-5 w-5 mr-2 text-green-500" />
+                          )}
+                          {formSubmitStatus.isSubmitting && (
+                            <div className="animate-spin h-5 w-5 mr-2 border-2 border-t-transparent rounded-full"></div>
+                          )}
+                          <span>{formSubmitStatus.message}</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Submit Button with Glowing Effect */}
+                    <div className="pt-6">
+                      <GlowingButton 
+                        onClick={handleMaintenanceSubmit}
+                        disabled={formSubmitStatus.isSubmitting}
+                        className={`w-full py-4 rounded-xl font-medium text-white flex items-center justify-center transition-all duration-300 ${darkMode 
+                        ? 'bg-gradient-to-r from-green-700 to-teal-700' 
+                        : 'bg-gradient-to-r from-green-600 to-teal-600'} ${formSubmitStatus.isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        glowColor="green"
+                      >
+                        {formSubmitStatus.isSubmitting ? (
+                          <>
+                            <div className="animate-spin h-5 w-5 mr-3 border-2 border-t-transparent rounded-full"></div>
+                            Submitting...
+                          </>
+                        ) : (
+                          <div className="flex items-center">
+                            <CheckCircleIcon className="h-5 w-5 mr-2" />
+                            <span>Submit Maintenance Request</span>
+                          </div>
+                        )}
+                      </GlowingButton>
+                      <p className={`text-center mt-3 text-sm ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                        Our team typically responds within 24-48 hours
+                      </p>
+                    </div>
                   </div>
-                  <button
-                    onClick={sendMessage}
-                    className={`p-3 rounded-xl ${darkMode ? 'bg-blue-700 hover:bg-blue-600' : 'bg-blue-600 hover:bg-blue-700'} text-white transition-colors duration-200`}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
-                  </button>
+                </div>
+                
+                <div className="hidden">
+                  <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-slate-200' : 'text-gray-700'}`}>Recent Maintenance Requests</h3>
+                  <div className="space-y-4">
+                    <div className={`p-4 rounded-xl border ${darkMode ? 'bg-slate-700/50 border-slate-600' : 'bg-white border-gray-200'}`}>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className={`font-medium ${darkMode ? 'text-slate-200' : 'text-gray-800'}`}>Leaking Bathroom Faucet</h4>
+                          <p className={`text-sm mt-1 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Submitted on May 15, 2023</p>
+                        </div>
+                        <span className={`px-3 py-1 text-xs font-medium rounded-full ${darkMode 
+                          ? 'bg-yellow-900/30 text-yellow-400' 
+                          : 'bg-yellow-100 text-yellow-800'}`}>
+                          In Progress
+                        </span>
+                      </div>
+                      <p className={`mt-3 text-sm ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>The bathroom sink faucet has been leaking consistently for the past two days.</p>
+                    </div>
+                    
+                    <div className={`p-4 rounded-xl border ${darkMode ? 'bg-slate-700/50 border-slate-600' : 'bg-white border-gray-200'}`}>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className={`font-medium ${darkMode ? 'text-slate-200' : 'text-gray-800'}`}>Heating Not Working</h4>
+                          <p className={`text-sm mt-1 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Submitted on April 28, 2023</p>
+                        </div>
+                        <span className={`px-3 py-1 text-xs font-medium rounded-full ${darkMode 
+                          ? 'bg-green-900/30 text-green-400' 
+                          : 'bg-green-100 text-green-800'}`}>
+                          Completed
+                        </span>
+                      </div>
+                      <p className={`mt-3 text-sm ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>The heating system in the living room is not turning on.</p>
+                    </div>
+                    
+                    <div className={`p-4 rounded-xl border ${darkMode ? 'bg-slate-700/50 border-slate-600' : 'bg-white border-gray-200'}`}>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className={`font-medium ${darkMode ? 'text-slate-200' : 'text-gray-800'}`}>Kitchen Light Fixture</h4>
+                          <p className={`text-sm mt-1 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Submitted on April 10, 2023</p>
+                        </div>
+                        <span className={`px-3 py-1 text-xs font-medium rounded-full ${darkMode 
+                          ? 'bg-red-900/30 text-red-400' 
+                          : 'bg-red-100 text-red-800'}`}>
+                          Scheduled
+                        </span>
+                      </div>
+                      <p className={`mt-3 text-sm ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>The main light fixture in the kitchen is flickering and sometimes doesn't turn on.</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

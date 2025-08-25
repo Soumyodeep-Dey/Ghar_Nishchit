@@ -14,6 +14,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ChartBarIcon, HeartIcon, BellIcon, WrenchScrewdriverIcon, HomeIcon, BuildingOfficeIcon, UserIcon, CreditCardIcon, DocumentIcon } from '@heroicons/react/24/outline';
 
 // Custom hooks
 const useClickOutside = (ref, callback) => {
@@ -34,10 +35,27 @@ const useTheme = () => {
     return localStorage.getItem('theme') === 'dark';
   });
 
+  // Initialize dark mode class on mount
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
   const toggleTheme = useCallback(() => {
     setIsDark(prev => {
       const newTheme = !prev;
       localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+      
+      // Update document class for Tailwind dark mode
+      if (newTheme) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      
       return newTheme;
     });
   }, []);
@@ -118,23 +136,35 @@ const SearchBar = ({ isExpanded, onToggle, searchTerm, onSearchChange }) => {
   );
 };
 
-const IconButton = ({ icon: Icon, onClick, badge = 0, className = '', ariaLabel }) => {
+const IconButton = ({ icon: Icon, onClick, badge = 0, className = '', ariaLabel, isActive }) => {
+  // Determine if this is a theme toggle button
+  const isThemeToggle = className.includes('theme-toggle');
+  
   return (
     <button
       onClick={onClick}
-      className={`relative p-3 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 hover:scale-110 group ${className}`}
+      className={`relative p-3 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 hover:scale-110 group ${isActive ? 'bg-blue-50 dark:bg-blue-900/30' : ''} ${className}`}
       aria-label={ariaLabel}
     >
-      <Icon className="w-6 h-6 text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300" />
+      <Icon 
+        className={`w-6 h-6 transition-colors duration-300 ${isThemeToggle 
+          ? (Icon.name === 'Sun' 
+              ? 'text-yellow-500 group-hover:text-yellow-600' 
+              : 'text-blue-500 group-hover:text-blue-600')
+          : `text-gray-600 dark:text-gray-300 ${isActive ? 'text-blue-600 dark:text-blue-400' : ''} group-hover:text-blue-600 dark:group-hover:text-blue-400`
+        }`} 
+      />
       <NotificationBadge count={badge} />
       
-      {/* Hover effect */}
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/0 to-purple-500/0 group-hover:from-blue-500/10 group-hover:to-purple-500/10 transition-all duration-300"></div>
+      {/* Enhanced hover effect with animation */}
+      <div className={`absolute inset-0 rounded-2xl bg-gradient-to-r transition-all duration-300 ${isActive 
+        ? 'from-blue-500/10 to-purple-500/10 animate-pulse' 
+        : 'from-blue-500/0 to-purple-500/0 group-hover:from-blue-500/10 group-hover:to-purple-500/10 group-hover:animate-pulse'}`}></div>
     </button>
   );
 };
 
-const ProfileDropdown = ({ user, showDropdown, onToggle, onLogout, isDark, onThemeToggle }) => {
+const ProfileDropdown = ({ user, showDropdown, onToggle, onLogout, isDark }) => {
   const dropdownRef = useRef(null);
   
   useClickOutside(dropdownRef, () => showDropdown && onToggle());
@@ -219,21 +249,7 @@ const ProfileDropdown = ({ user, showDropdown, onToggle, onLogout, isDark, onThe
               </div>
             </button>
 
-            <button 
-              onClick={onThemeToggle}
-              className="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 flex items-center space-x-3 group"
-            >
-              <div className="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900 group-hover:bg-yellow-200 dark:group-hover:bg-yellow-800 transition-colors duration-200">
-                {isDark ? 
-                  <Sun className="w-4 h-4 text-yellow-600 dark:text-yellow-400" /> : 
-                  <Moon className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
-                }
-              </div>
-              <div>
-                <div className="font-medium">{isDark ? 'Light Mode' : 'Dark Mode'}</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Switch theme</div>
-              </div>
-            </button>
+
 
             <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
 
@@ -266,6 +282,7 @@ const TenantNavBar = ({ currentSection }) => {
     messages: 3,
     alerts: 2
   });
+  const [activePage, setActivePage] = useState(currentSection);
 
   const navigate = useNavigate();
   const { isDark, toggleTheme } = useTheme();
@@ -296,6 +313,11 @@ const TenantNavBar = ({ currentSection }) => {
       document.documentElement.classList.remove('dark');
     }
   }, [isDark]);
+  
+  // Update active page when current section changes
+  useEffect(() => {
+    setActivePage(currentSection);
+  }, [currentSection]);
 
   const handleLogout = useCallback(() => {
     localStorage.removeItem('token');
@@ -309,17 +331,35 @@ const TenantNavBar = ({ currentSection }) => {
     // Implement search functionality here
     console.log('Searching for:', query);
   }, []);
+  
+  const handleNavigation = useCallback((page, path) => {
+    setActivePage(page);
+    navigate(path);
+  }, [navigate]);
 
   const getSectionIcon = (section) => {
-    const icons = {
-      'Dashboard': '🏠',
-      'Properties': '🏢',
-      'Messages': '💬',
-      'Maintenance': '🔧',
-      'Payments': '💳',
-      'Profile': '👤'
-    };
-    return icons[section] || '📄';
+    switch(section) {
+      case 'Dashboard':
+        return <HomeIcon className="w-6 h-6 text-white" />;
+      case 'Properties':
+        return <BuildingOfficeIcon className="w-6 h-6 text-white" />;
+      case 'Analytics':
+        return <ChartBarIcon className="w-6 h-6 text-white" />;
+      case 'Favorites':
+        return <HeartIcon className="w-6 h-6 text-white" />;
+      case 'Notifications':
+        return <BellIcon className="w-6 h-6 text-white" />;
+      case 'Messages':
+        return <MessageSquare className="w-6 h-6 text-white" />;
+      case 'Maintenance':
+        return <WrenchScrewdriverIcon className="w-6 h-6 text-white" />;
+      case 'Payments':
+        return <CreditCardIcon className="w-6 h-6 text-white" />;
+      case 'Profile':
+        return <UserIcon className="w-6 h-6 text-white" />;
+      default:
+        return <DocumentIcon className="w-6 h-6 text-white" />;
+    }
   };
 
   return (
@@ -328,7 +368,7 @@ const TenantNavBar = ({ currentSection }) => {
       <div className="flex items-center space-x-4 min-w-0">
         <div className="flex items-center space-x-3">
           <div className="p-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg">
-            <span className="text-2xl">{getSectionIcon(currentSection)}</span>
+            {getSectionIcon(currentSection)}
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 truncate">
@@ -358,19 +398,40 @@ const TenantNavBar = ({ currentSection }) => {
         <div className="hidden sm:flex items-center space-x-1">
           <IconButton
             icon={MessageSquare}
-            onClick={() => navigate('/tenant/messages')}
+            onClick={() => handleNavigation('Messages', '/tenant/messages')}
             badge={notifications.messages}
             ariaLabel="Messages"
+            isActive={activePage === 'Messages'}
           />
           
           <IconButton
             icon={Bell}
-            onClick={() => navigate('/tenant/notifications')}
+            onClick={() => handleNavigation('Notifications', '/tenant/notifications')}
             badge={notifications.alerts}
             ariaLabel="Notifications"
+            isActive={activePage === 'Notifications'}
           />
+          
+          {/* Theme Toggle Button */}
+          <IconButton
+            icon={isDark ? Sun : Moon}
+            onClick={toggleTheme}
+            className="theme-toggle"
+            ariaLabel="Toggle Theme"
+          />
+          
         </div>
 
+        {/* Mobile theme toggle */}
+        <div className="sm:hidden">
+          <IconButton
+            icon={isDark ? Sun : Moon}
+            onClick={toggleTheme}
+            className="theme-toggle mr-1"
+            ariaLabel="Toggle Theme"
+          />
+        </div>
+        
         {/* Mobile menu button */}
         <button className="sm:hidden p-2 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300">
           <Menu className="w-6 h-6 text-gray-600 dark:text-gray-300" />
@@ -383,7 +444,6 @@ const TenantNavBar = ({ currentSection }) => {
           onToggle={() => setShowDropdown(!showDropdown)}
           onLogout={handleLogout}
           isDark={isDark}
-          onThemeToggle={toggleTheme}
         />
       </div>
 
