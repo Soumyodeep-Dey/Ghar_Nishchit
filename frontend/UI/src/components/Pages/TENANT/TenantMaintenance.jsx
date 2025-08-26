@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useDarkMode } from '../../../DarkModeContext';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
 import { 
@@ -437,12 +438,15 @@ const TenantMaintenance = () => {
 
   // Loading screen
   if (isLoading) {
+    const { darkMode } = useDarkMode();
     return (
       <div className="flex h-screen">
         <TenantSideBar />
         <div className="flex flex-col flex-1">
           <TenantNavBar />
-          <main className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+          <main className={`flex-1 flex items-center justify-center ${darkMode 
+            ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' 
+            : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'}`}>
             <div className="text-center">
               <div className="relative">
                 <div className="w-20 h-20 border-4 border-orange-200 rounded-full animate-spin"></div>
@@ -457,8 +461,12 @@ const TenantMaintenance = () => {
     );
   }
 
+  const { darkMode } = useDarkMode();
+  
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
+    <div className={`flex h-screen ${darkMode 
+      ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' 
+      : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'}`}>
       <TenantSideBar />
       <div className="flex flex-col flex-1">
         <TenantNavBar />
@@ -515,7 +523,7 @@ const TenantMaintenance = () => {
           </div>
 
           {/* Search and Filter Section */}
-          <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl mb-8 border border-white/20">
+          <div className={`${darkMode ? 'bg-slate-800/80' : 'bg-white/80'} backdrop-blur-sm p-6 rounded-2xl shadow-xl mb-8 border ${darkMode ? 'border-gray-700/20' : 'border-white/20'}`}>
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               {/* Search */}
               <div className="flex-1 relative">
@@ -568,15 +576,15 @@ const TenantMaintenance = () => {
           {/* New Request Form */}
           {showNewRequestForm && (
             <div className="mb-8 animate-slideUp">
-              <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-white/50">
-                <h2 className="text-2xl font-bold mb-6 text-gray-800 flex items-center">
+              <div className={`${darkMode ? 'bg-slate-800/90' : 'bg-white/90'} backdrop-blur-sm rounded-3xl shadow-2xl p-8 border ${darkMode ? 'border-gray-700/50' : 'border-white/50'}`}>
+                <h2 className={`text-2xl font-bold mb-6 ${darkMode ? 'text-white' : 'text-gray-800'} flex items-center`}>
                   <DocumentTextIcon className="h-8 w-8 mr-3 text-orange-600" />
                   Submit New Request
                 </h2>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div className="space-y-6">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-3">Request Title</label>
+                      <label className={`block text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-3`}>Request Title</label>
                       <input
                         type="text"
                         value={newRequest.title}
@@ -586,7 +594,7 @@ const TenantMaintenance = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-3">Priority Level</label>
+                      <label className={`block text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-3`}>Priority Level</label>
                       <select
                         value={newRequest.priority}
                         onChange={(e) => setNewRequest(prev => ({ ...prev, priority: e.target.value }))}
@@ -599,7 +607,7 @@ const TenantMaintenance = () => {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">Detailed Description</label>
+                    <label className={`block text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-3`}>Detailed Description</label>
                     <textarea
                       value={newRequest.description}
                       onChange={(e) => setNewRequest(prev => ({ ...prev, description: e.target.value }))}
@@ -630,18 +638,18 @@ const TenantMaintenance = () => {
           )}
 
           {/* Requests Grid */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-white/50">
+          <div className={`${darkMode ? 'bg-slate-800/80' : 'bg-white/80'} backdrop-blur-sm rounded-3xl shadow-2xl p-8 border ${darkMode ? 'border-gray-700/50' : 'border-white/50'}`}>
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center">
                 <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mr-4">
                   <ChartBarIcon className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-800">Your Requests</h2>
-                  <p className="text-gray-600">Track and manage your maintenance requests</p>
+                  <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Your Requests</h2>
+                  <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Track and manage your maintenance requests</p>
                 </div>
               </div>
-              <div className="text-sm text-gray-500">
+              <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                 {filteredRequests.length} of {requests.length} requests
               </div>
             </div>
@@ -649,11 +657,11 @@ const TenantMaintenance = () => {
             {filteredRequests.length === 0 ? (
               <div className="text-center py-16">
                 <div className="max-w-md mx-auto">
-                  <WrenchScrewdriverIcon className="h-24 w-24 text-gray-400 mx-auto mb-6 animate-bounce" />
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                  <WrenchScrewdriverIcon className={`h-24 w-24 ${darkMode ? 'text-gray-600' : 'text-gray-400'} mx-auto mb-6 animate-bounce`} />
+                  <h3 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} mb-4`}>
                     {requests.length === 0 ? 'No maintenance requests found' : 'No requests match your filters'}
                   </h3>
-                  <p className="text-gray-600 text-lg mb-8">
+                  <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'} text-lg mb-8`}>
                     {requests.length === 0 
                       ? 'Submit your first maintenance request to get started' 
                       : 'Try adjusting your search criteria or filters'
