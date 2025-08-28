@@ -511,7 +511,7 @@ const TenantProperty = () => {
       <div className="flex h-screen">
         <TenantSideBar />
         <div className="flex flex-col flex-1">
-          <TenantNavBar />
+          <TenantNavBar currentSection="Properties" />
           <main className={`flex-1 p-6 overflow-y-auto ${darkMode
             ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100'
             : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 text-gray-900'
@@ -531,7 +531,7 @@ const TenantProperty = () => {
     <div className="flex h-screen">
       <TenantSideBar />
       <div className="flex flex-col flex-1">
-        <TenantNavBar />
+        <TenantNavBar currentSection="Properties" />
         <main className={`flex-1 p-6 overflow-y-auto ${darkMode
           ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100'
           : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 text-gray-900'

@@ -11,10 +11,16 @@ import {
   Sun,
   Menu,
   X,
-  Sparkles
+  Sparkles,
+  LayoutDashboard, 
+  Building2, 
+  BarChart3, 
+  Heart, 
+  Wrench, 
+  CreditCard, 
+  FileText 
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { ChartBarIcon, HeartIcon, BellIcon, WrenchScrewdriverIcon, HomeIcon, BuildingOfficeIcon, UserIcon, CreditCardIcon, DocumentIcon } from '@heroicons/react/24/outline';
 
 // Custom hooks
 const useClickOutside = (ref, callback) => {
@@ -340,25 +346,25 @@ const TenantNavBar = ({ currentSection }) => {
   const getSectionIcon = (section) => {
     switch(section) {
       case 'Dashboard':
-        return <HomeIcon className="w-6 h-6 text-white" />;
+        return <LayoutDashboard className="w-6 h-6 text-white" />;
       case 'Properties':
-        return <BuildingOfficeIcon className="w-6 h-6 text-white" />;
+        return <Building2 className="w-6 h-6 text-white" />;
       case 'Analytics':
-        return <ChartBarIcon className="w-6 h-6 text-white" />;
+        return <BarChart3 className="w-6 h-6 text-white" />;
       case 'Favorites':
-        return <HeartIcon className="w-6 h-6 text-white" />;
+        return <Heart className="w-6 h-6 text-white" />;
       case 'Notifications':
-        return <BellIcon className="w-6 h-6 text-white" />;
+        return <Bell className="w-6 h-6 text-white" />;
       case 'Messages':
         return <MessageSquare className="w-6 h-6 text-white" />;
       case 'Maintenance':
-        return <WrenchScrewdriverIcon className="w-6 h-6 text-white" />;
+        return <Wrench className="w-6 h-6 text-white" />;
       case 'Payments':
-        return <CreditCardIcon className="w-6 h-6 text-white" />;
+        return <CreditCard className="w-6 h-6 text-white" />;
       case 'Profile':
-        return <UserIcon className="w-6 h-6 text-white" />;
+        return <User className="w-6 h-6 text-white" />;
       default:
-        return <DocumentIcon className="w-6 h-6 text-white" />;
+        return <FileText className="w-6 h-6 text-white" />;
     }
   };
 
