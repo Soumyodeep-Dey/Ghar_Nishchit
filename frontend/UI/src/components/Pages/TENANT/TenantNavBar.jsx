@@ -143,7 +143,6 @@ const SearchBar = ({ isExpanded, onToggle, searchTerm, onSearchChange }) => {
 };
 
 const IconButton = ({ icon: Icon, onClick, badge = 0, className = '', ariaLabel, isActive }) => {
-  // Determine if this is a theme toggle button
   const isThemeToggle = className.includes('theme-toggle');
   
   return (
@@ -160,9 +159,8 @@ const IconButton = ({ icon: Icon, onClick, badge = 0, className = '', ariaLabel,
           : `text-gray-600 dark:text-gray-300 ${isActive ? 'text-blue-600 dark:text-blue-400' : ''} group-hover:text-blue-600 dark:group-hover:text-blue-400`
         }`} 
       />
-      <NotificationBadge count={badge} />
+      {badge > 0 && <NotificationBadge count={badge} />}
       
-      {/* Enhanced hover effect with animation */}
       <div className={`absolute inset-0 rounded-2xl bg-gradient-to-r transition-all duration-300 ${isActive 
         ? 'from-blue-500/10 to-purple-500/10 animate-pulse' 
         : 'from-blue-500/0 to-purple-500/0 group-hover:from-blue-500/10 group-hover:to-purple-500/10 group-hover:animate-pulse'}`}></div>
@@ -201,7 +199,6 @@ const ProfileDropdown = ({ user, showDropdown, onToggle, onLogout, isDark }) => 
             {getInitials(user?.name)}
           </div>
           
-          {/* Online indicator */}
           <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-900 animate-pulse"></div>
         </div>
         
@@ -217,10 +214,8 @@ const ProfileDropdown = ({ user, showDropdown, onToggle, onLogout, isDark }) => 
         <ChevronDown className={`w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 ${showDropdown ? 'rotate-180' : ''}`} />
       </button>
 
-      {/* Dropdown menu */}
       {showDropdown && (
         <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 animate-slideDown backdrop-blur-sm">
-          {/* Header */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-700 dark:to-gray-800 rounded-t-2xl">
             <div className="flex items-center space-x-3">
               <img
@@ -243,7 +238,6 @@ const ProfileDropdown = ({ user, showDropdown, onToggle, onLogout, isDark }) => 
             </div>
           </div>
 
-          {/* Menu Items */}
           <div className="py-2">
             <button className="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 flex items-center space-x-3 group">
               <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900 group-hover:bg-blue-200 dark:group-hover:bg-blue-800 transition-colors duration-200">
@@ -254,8 +248,6 @@ const ProfileDropdown = ({ user, showDropdown, onToggle, onLogout, isDark }) => 
                 <div className="text-xs text-gray-500 dark:text-gray-400">Manage your account</div>
               </div>
             </button>
-
-
 
             <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
 
@@ -282,16 +274,51 @@ const ProfileDropdown = ({ user, showDropdown, onToggle, onLogout, isDark }) => 
 const TenantNavBar = ({ currentSection }) => {
   const [user, setUser] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [notifications, setNotifications] = useState({
-    messages: 3,
-    alerts: 2
-  });
   const [activePage, setActivePage] = useState(currentSection);
 
   const navigate = useNavigate();
   const { isDark, toggleTheme } = useTheme();
+  const notificationsRef = useRef(null);
+
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      type: 'payment',
+      icon: CreditCard,
+      title: 'Rent Due Soon',
+      message: 'Your next rent payment of ₹15,000 is due in 3 days.',
+      time: '2 days ago',
+      isRead: false,
+      color: 'warning'
+    },
+    {
+      id: 2,
+      type: 'maintenance',
+      icon: Wrench,
+      title: 'Maintenance Scheduled',
+      message: 'Your AC repair is scheduled for tomorrow at 2 PM.',
+      time: '1 day ago',
+      isRead: false,
+      color: 'primary'
+    },
+    {
+      id: 3,
+      type: 'message',
+      icon: MessageSquare,
+      title: 'Message from Landlord',
+      message: 'John Smith: "Hi, just a reminder about the inspection."',
+      time: '5 hours ago',
+      isRead: true,
+      color: 'primary'
+    }
+  ]);
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  useClickOutside(notificationsRef, () => setIsNotificationsOpen(false));
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -311,7 +338,6 @@ const TenantNavBar = ({ currentSection }) => {
     return () => window.removeEventListener('user:updated', onUserUpdated);
   }, []);
 
-  // Apply theme to document
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add('dark');
@@ -320,7 +346,6 @@ const TenantNavBar = ({ currentSection }) => {
     }
   }, [isDark]);
   
-  // Update active page when current section changes
   useEffect(() => {
     setActivePage(currentSection);
   }, [currentSection]);
@@ -334,7 +359,6 @@ const TenantNavBar = ({ currentSection }) => {
 
   const handleSearch = useCallback((query) => {
     setSearchTerm(query);
-    // Implement search functionality here
     console.log('Searching for:', query);
   }, []);
   
@@ -342,6 +366,22 @@ const TenantNavBar = ({ currentSection }) => {
     setActivePage(page);
     navigate(path);
   }, [navigate]);
+
+  const markAsRead = (notificationId) => {
+    setNotifications(prev =>
+      prev.map(notification =>
+        notification.id === notificationId
+          ? { ...notification, isRead: true }
+          : notification
+      )
+    );
+  };
+
+  const markAllAsRead = () => {
+    setNotifications(prev =>
+      prev.map(notification => ({ ...notification, isRead: true }))
+    );
+  };
 
   const getSectionIcon = (section) => {
     switch(section) {
@@ -370,7 +410,6 @@ const TenantNavBar = ({ currentSection }) => {
 
   return (
     <nav className="w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-lg border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between relative z-40 transition-colors duration-300">
-      {/* Left side - Current Section */}
       <div className="flex items-center space-x-4 min-w-0">
         <div className="flex items-center space-x-3">
           <div className="p-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg">
@@ -388,7 +427,6 @@ const TenantNavBar = ({ currentSection }) => {
         </div>
       </div>
 
-      {/* Center - Search */}
       <div className="flex-1 flex justify-center max-w-2xl mx-8">
         <SearchBar
           isExpanded={showMobileSearch}
@@ -398,27 +436,93 @@ const TenantNavBar = ({ currentSection }) => {
         />
       </div>
 
-      {/* Right side - Icons and Profile */}
       <div className="flex items-center space-x-2">
-        {/* Action Icons */}
         <div className="hidden sm:flex items-center space-x-1">
           <IconButton
             icon={MessageSquare}
             onClick={() => handleNavigation('Messages', '/tenant/messages')}
-            badge={notifications.messages}
+            badge={notifications.filter(n => n.type === 'message' && !n.isRead).length}
             ariaLabel="Messages"
             isActive={activePage === 'Messages'}
           />
           
-          <IconButton
-            icon={Bell}
-            onClick={() => handleNavigation('Notifications', '/tenant/notifications')}
-            badge={notifications.alerts}
-            ariaLabel="Notifications"
-            isActive={activePage === 'Notifications'}
-          />
+          <div className="relative" ref={notificationsRef}>
+            <IconButton
+              icon={Bell}
+              onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+              badge={unreadCount}
+              ariaLabel="Notifications"
+              isActive={isNotificationsOpen}
+            />
+            {isNotificationsOpen && (
+              <div className="absolute right-0 mt-3 w-96 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-glass dark:shadow-glass-dark border border-gray-200/20 dark:border-gray-700/20 overflow-hidden z-50 animate-slideDown hover:shadow-xl transition-shadow duration-300">
+                <div className="p-4 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-primary-50/50 to-transparent dark:from-primary-900/20">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={markAllAsRead}
+                        className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 font-medium transition-colors"
+                      >
+                        Mark all read
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="max-h-96 overflow-y-auto">
+                  {notifications.map((notification) => {
+                    const IconComponent = notification.icon;
+                    const colorClasses = {
+                      success: 'text-success-600 bg-success-100 dark:bg-success-900/30',
+                      warning: 'text-warning-600 bg-warning-100 dark:bg-warning-900/30',
+                      primary: 'text-primary-600 bg-primary-100 dark:bg-primary-900/30',
+                      error: 'text-error-600 bg-error-100 dark:bg-error-900/30'
+                    };
+
+                    return (
+                      <div
+                        key={notification.id}
+                        className={`p-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer border-l-4 ${
+                          notification.isRead 
+                            ? 'border-transparent' 
+                            : 'border-primary-500 bg-primary-50/30 dark:bg-primary-900/10'
+                        }`}
+                        onClick={() => markAsRead(notification.id)}
+                      >
+                        <div className="flex items-start space-x-3">
+                          <div className={`p-2 rounded-lg ${colorClasses[notification.color]} transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`}>
+                            <IconComponent className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={`font-medium group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200 ${notification.isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'}`}>
+                              {notification.title}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-200">
+                              {notification.message}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                              {notification.time}
+                            </p>
+                          </div>
+                          {!notification.isRead && (
+                            <div className="h-2 w-2 bg-primary-600 rounded-full animate-pulse" />
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="p-4 border-t border-gray-200/50 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/50">
+                  <button className="w-full text-center text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 font-medium py-2 text-sm transition-colors">
+                    View all notifications
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
           
-          {/* Theme Toggle Button */}
           <IconButton
             icon={isDark ? Sun : Moon}
             onClick={toggleTheme}
@@ -428,7 +532,6 @@ const TenantNavBar = ({ currentSection }) => {
           
         </div>
 
-        {/* Mobile theme toggle */}
         <div className="sm:hidden">
           <IconButton
             icon={isDark ? Sun : Moon}
@@ -438,12 +541,10 @@ const TenantNavBar = ({ currentSection }) => {
           />
         </div>
         
-        {/* Mobile menu button */}
         <button className="sm:hidden p-2 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300">
           <Menu className="w-6 h-6 text-gray-600 dark:text-gray-300" />
         </button>
 
-        {/* Profile Dropdown */}
         <ProfileDropdown
           user={user}
           showDropdown={showDropdown}
@@ -453,10 +554,8 @@ const TenantNavBar = ({ currentSection }) => {
         />
       </div>
 
-      {/* Gradient border effect */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-60"></div>
 
-      {/* Custom Styles */}
       <style>{`
         @keyframes slideDown {
           from {
@@ -508,12 +607,10 @@ const TenantNavBar = ({ currentSection }) => {
           animation: bounce 1s infinite;
         }
 
-        /* Dark mode styles */
         .dark {
           color-scheme: dark;
         }
 
-        /* Custom scrollbar for dark mode */
         .dark ::-webkit-scrollbar {
           width: 8px;
         }
