@@ -104,7 +104,6 @@ const AnimatedCounter = ({ value, duration = 2000, prefix = '', suffix = '' }) =
 };
 
 const FloatingCard = ({ children, delay = 0, className = '' }) => {
-  const { darkMode } = useDarkMode();
   return (
     <div 
       className={`animate-float ${className}`}
@@ -119,13 +118,14 @@ const FloatingCard = ({ children, delay = 0, className = '' }) => {
   );
 };
 
-const GlowingButton = ({ children, onClick, className = '', glowColor = 'blue' }) => {
+const GlowingButton = ({ children, onClick, className = '', glowColor = 'blue', disabled = false }) => {
   return (
     <button
       onClick={onClick}
-      className={`relative overflow-hidden transform transition-all duration-300 hover:scale-105 ${className}`}
+      disabled={disabled}
+      className={`relative overflow-hidden transform transition-all duration-300 hover:scale-105 group ${disabled ? 'opacity-60 cursor-not-allowed' : ''} ${className}`}
     >
-      <div className={`absolute inset-0 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity bg-gradient-to-r ${
+      <div className={`absolute inset-0 rounded-lg blur opacity-0 group-hover:opacity-75 transition-opacity bg-gradient-to-r ${
         glowColor === 'blue' ? 'from-blue-500 to-purple-600' :
         glowColor === 'red' ? 'from-red-500 to-pink-600' :
         glowColor === 'green' ? 'from-green-500 to-emerald-600' :
@@ -212,7 +212,7 @@ const PropertyCard = React.memo(({ property, onView, onRemove, removeConfirmId, 
                   <GlowingButton
                     onClick={() => onRemove(property.id)}
                     className={`text-white text-sm px-4 py-2 rounded-lg group ${darkMode ? 'bg-red-700' : 'bg-red-600'}`}
-                    glowColor={darkMode ? 'darkred' : 'red'}
+                    glowColor="red"
                   >
                     Confirm
                   </GlowingButton>
@@ -459,6 +459,7 @@ const Modal = React.memo(({ isOpen, onClose, title, children, size = "md" }) => 
 // Main Component
 const TenantDashboard = () => {
   const { darkMode } = useDarkMode();
+  
   // Initial data with enhanced properties
   const INITIAL_PROPERTIES = [
     {
@@ -899,18 +900,18 @@ const TenantDashboard = () => {
     }
   }, [newProperty, setFavouriteProperties]);
 
-  // Loading screen
+  // Loading screen with enhanced animation
   if (isLoading) {
     return (
-      <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+      <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-slate-800 dark:to-blue-950">
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="relative">
-              <div className="w-32 h-32 border-8 border-blue-200 rounded-full animate-spin"></div>
-              <div className="absolute inset-0 w-32 h-32 border-8 border-t-blue-600 rounded-full animate-spin"></div>
+              <div className="w-32 h-32 border-8 border-blue-200 dark:border-blue-900 rounded-full animate-spin"></div>
+              <div className="absolute inset-0 w-32 h-32 border-8 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin"></div>
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mt-8 animate-pulse">Loading Dashboard...</h2>
-            <p className="text-gray-600 mt-2">Preparing your personalized experience</p>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mt-8 animate-pulse">Loading Dashboard...</h2>
+            <p className="text-gray-600 dark:text-gray-300 mt-2">Preparing your personalized experience</p>
           </div>
         </div>
       </div>
@@ -1013,7 +1014,7 @@ const TenantDashboard = () => {
               {/* Analytics Overview Button */}
               <button 
                 onClick={() => setCurrentSection('Analytics')} 
-                className={`flex items-center p-4 rounded-xl transition-all duration-300 ${darkMode 
+                className={`flex items-center p-4 rounded-xl transition-all duration-300 hover:scale-105 ${darkMode 
                   ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700' 
                   : 'bg-white hover:bg-blue-50 border border-gray-200 hover:border-blue-200'} 
                   ${currentSection === 'Analytics' ? (darkMode ? 'ring-2 ring-blue-500' : 'ring-2 ring-blue-500') : ''}`}
@@ -1032,7 +1033,7 @@ const TenantDashboard = () => {
               {/* Favorite Properties Button */}
               <button 
                 onClick={() => setCurrentSection('Favorites')} 
-                className={`flex items-center p-4 rounded-xl transition-all duration-300 ${darkMode 
+                className={`flex items-center p-4 rounded-xl transition-all duration-300 hover:scale-105 ${darkMode 
                   ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700' 
                   : 'bg-white hover:bg-red-50 border border-gray-200 hover:border-red-200'} 
                   ${currentSection === 'Favorites' ? (darkMode ? 'ring-2 ring-red-500' : 'ring-2 ring-red-500') : ''}`}
@@ -1051,12 +1052,12 @@ const TenantDashboard = () => {
               {/* Notifications Button */}
               <button 
                 onClick={() => setCurrentSection('Notifications')} 
-                className={`flex items-center p-4 rounded-xl transition-all duration-300 ${darkMode 
+                className={`flex items-center p-4 rounded-xl transition-all duration-300 hover:scale-105 ${darkMode 
                   ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700' 
                   : 'bg-white hover:bg-yellow-50 border border-gray-200 hover:border-yellow-200'} 
                   ${currentSection === 'Notifications' ? (darkMode ? 'ring-2 ring-yellow-500' : 'ring-2 ring-yellow-500') : ''}`}
               >
-                <div className={`p-3 rounded-lg mr-3 ${darkMode 
+                <div className={`p-3 rounded-lg mr-3 relative ${darkMode 
                   ? 'bg-yellow-900/50 text-yellow-400' 
                   : 'bg-yellow-100 text-yellow-600'}`}>
                   <BellIcon className="h-6 w-6" />
@@ -1075,7 +1076,7 @@ const TenantDashboard = () => {
               {/* Maintenance Button */}
               <button 
                 onClick={() => setCurrentSection('Maintenance')} 
-                className={`flex items-center p-4 rounded-xl transition-all duration-300 ${darkMode 
+                className={`flex items-center p-4 rounded-xl transition-all duration-300 hover:scale-105 ${darkMode 
                   ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700' 
                   : 'bg-white hover:bg-green-50 border border-gray-200 hover:border-green-200'} 
                   ${currentSection === 'Maintenance' ? (darkMode ? 'ring-2 ring-green-500' : 'ring-2 ring-green-500') : ''}`}
@@ -1144,58 +1145,6 @@ const TenantDashboard = () => {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <div className={`mt-8 rounded-2xl shadow-lg overflow-hidden border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'} hidden`}>
-              <div className="p-6">
-                <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-slate-200' : 'text-gray-700'}`}>Recent Maintenance Requests</h3>
-                
-                {maintenanceRequests.length > 0 ? (
-                  <div className="space-y-4">
-                    {maintenanceRequests.slice(0, 5).map((request) => (
-                      <div 
-                        key={request.id} 
-                        className={`p-4 rounded-xl border ${darkMode ? 'border-slate-700 bg-slate-800/50' : 'border-gray-200 bg-gray-50'}`}
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className={`font-medium ${darkMode ? 'text-slate-200' : 'text-gray-800'}`}>{request.title}</h4>
-                            <p className={`text-sm mt-1 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
-                              Submitted on {request.date}
-                            </p>
-                          </div>
-                          <span 
-                            className={`px-3 py-1 text-xs font-medium rounded-full ${getPriorityColor(request.priority)}`}
-                          >
-                            {request.priority}
-                          </span>
-                        </div>
-                        <p className={`mt-2 text-sm ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>
-                          {request.description}
-                        </p>
-                        <div className="mt-3 flex justify-between items-center">
-                          <span 
-                            className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(request.status)}`}
-                          >
-                            {request.status}
-                          </span>
-                          {request.photos && request.photos.length > 0 && (
-                            <span className={`text-xs ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
-                              {request.photos.length} photo(s) attached
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className={`text-center py-8 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
-                    <WrenchScrewdriverIcon className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                    <p>No maintenance requests yet</p>
-                    <p className="text-sm mt-1">Submit a request using the form above</p>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -1647,7 +1596,7 @@ const TenantDashboard = () => {
                       </label>
                       <div 
                         className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${darkMode 
-                          ? 'border-slate-600 bg-slate-700/30 hover:border-green-500/50 hover:bg-slate-700/50' 
+                          ? 'border-slate-600 bg-slate-700/30 hover:border-green-500/50 hover:bg-slate-700/50'
                           : 'border-gray-300 bg-gray-50 hover:border-green-500/50 hover:bg-gray-100/80'}`}
                       >
                         <DocumentArrowDownIcon className={`h-16 w-16 mx-auto mb-4 ${darkMode ? 'text-slate-400' : 'text-gray-400'}`} />
@@ -1764,243 +1713,7 @@ const TenantDashboard = () => {
                     </div>
                   </div>
                 </div>
-                
-                <div className="hidden">
-                  <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-slate-200' : 'text-gray-700'}`}>Recent Maintenance Requests</h3>
-                  <div className="space-y-4">
-                    <div className={`p-4 rounded-xl border ${darkMode ? 'bg-slate-700/50 border-slate-600' : 'bg-white border-gray-200'}`}>
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className={`font-medium ${darkMode ? 'text-slate-200' : 'text-gray-800'}`}>Leaking Bathroom Faucet</h4>
-                          <p className={`text-sm mt-1 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Submitted on May 15, 2023</p>
-                        </div>
-                        <span className={`px-3 py-1 text-xs font-medium rounded-full ${darkMode 
-                          ? 'bg-yellow-900/30 text-yellow-400' 
-                          : 'bg-yellow-100 text-yellow-800'}`}>
-                          In Progress
-                        </span>
-                      </div>
-                      <p className={`mt-3 text-sm ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>The bathroom sink faucet has been leaking consistently for the past two days.</p>
-                    </div>
-                    
-                    <div className={`p-4 rounded-xl border ${darkMode ? 'bg-slate-700/50 border-slate-600' : 'bg-white border-gray-200'}`}>
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className={`font-medium ${darkMode ? 'text-slate-200' : 'text-gray-800'}`}>Heating Not Working</h4>
-                          <p className={`text-sm mt-1 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Submitted on April 28, 2023</p>
-                        </div>
-                        <span className={`px-3 py-1 text-xs font-medium rounded-full ${darkMode 
-                          ? 'bg-green-900/30 text-green-400' 
-                          : 'bg-green-100 text-green-800'}`}>
-                          Completed
-                        </span>
-                      </div>
-                      <p className={`mt-3 text-sm ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>The heating system in the living room is not turning on.</p>
-                    </div>
-                    
-                    <div className={`p-4 rounded-xl border ${darkMode ? 'bg-slate-700/50 border-slate-600' : 'bg-white border-gray-200'}`}>
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className={`font-medium ${darkMode ? 'text-slate-200' : 'text-gray-800'}`}>Kitchen Light Fixture</h4>
-                          <p className={`text-sm mt-1 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Submitted on April 10, 2023</p>
-                        </div>
-                        <span className={`px-3 py-1 text-xs font-medium rounded-full ${darkMode 
-                          ? 'bg-red-900/30 text-red-400' 
-                          : 'bg-red-100 text-red-800'}`}>
-                          Scheduled
-                        </span>
-                      </div>
-                      <p className={`mt-3 text-sm ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>The main light fixture in the kitchen is flickering and sometimes doesn't turn on.</p>
-                    </div>
-                  </div>
-                </div>
               </div>
-            </div>
-          </div>
-
-          {/* Enhanced Properties and Other Sections - Never visible */}
-          <div className="hidden grid grid-cols-1 xl:grid-cols-2 gap-12">
-            {/* Favourite Properties Section */}
-            <div className={`backdrop-blur-sm rounded-3xl shadow-2xl p-8 ${darkMode 
-              ? 'bg-slate-800/80 border border-slate-700/50 text-slate-100' 
-              : 'bg-white/80 border border-white/50 text-gray-800'}`}>
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center">
-                  <div className="p-3 bg-gradient-to-r from-red-500 to-pink-600 rounded-2xl mr-4">
-                    <HeartSolidIcon className="h-8 w-8 text-white" />
-                  </div>
-                  <div>
-                    <h2 className={`text-2xl font-bold ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Favourite Properties</h2>
-                    <p className={`${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>Your saved property listings</p>
-                  </div>
-                </div>
-                <GlowingButton
-                  onClick={() => setIsAddModalOpen(true)}
-                  className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-3 rounded-xl group"
-                >
-                  <PlusIcon className="h-6 w-6" />
-                </GlowingButton>
-              </div>
-
-              {/* Search and Sort */}
-              <div className="mb-6">
-                <input
-                  type="text"
-                  placeholder="Search favorites..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className={`w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 ${darkMode 
-                    ? 'bg-slate-700/50 border-2 border-slate-600 text-slate-100 placeholder-slate-400 focus:ring-blue-500/30 focus:border-blue-500' 
-                    : 'bg-white border-2 border-gray-200 text-gray-800 focus:ring-blue-500/20 focus:border-blue-500'}`}
-                />
-              </div>
-
-              {paginatedProperties.length === 0 ? (
-                <div className="text-center py-12">
-                  <ExclamationTriangleIcon className={`h-16 w-16 mx-auto mb-4 animate-bounce ${darkMode ? 'text-slate-500' : 'text-gray-400'}`} />
-                  <p className={`text-lg ${darkMode ? 'text-slate-400' : 'text-gray-600'}`}>No favorite properties found</p>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {paginatedProperties.map((property, index) => (
-                    <PropertyCard
-                      key={property.id}
-                      property={property}
-                      onView={setSelectedProperty}
-                      onRemove={removeFavourite}
-                      removeConfirmId={removeConfirmId}
-                      onConfirmRemove={confirmRemoveFavourite}
-                      onCancelRemove={cancelRemoveFavourite}
-                      index={index}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex justify-center mt-8 space-x-4">
-                  <button
-                    onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
-                    disabled={currentPage === 1}
-                    className={`px-6 py-3 rounded-xl disabled:opacity-50 hover:scale-105 transition-all duration-300 disabled:hover:scale-100 ${darkMode 
-                      ? 'border border-slate-600 bg-slate-700 text-slate-200 hover:bg-slate-600' 
-                      : 'border border-gray-300 bg-white text-gray-800 hover:bg-gray-50'}`}
-                  >
-                    Previous
-                  </button>
-                  <span className={`px-6 py-3 rounded-xl font-semibold ${darkMode 
-                    ? 'border border-slate-600 bg-gradient-to-r from-blue-900/50 to-purple-900/50 text-slate-200' 
-                    : 'border border-gray-300 bg-gradient-to-r from-blue-100 to-purple-100 text-gray-800'}`}>
-                    {currentPage} of {totalPages}
-                  </span>
-                  <button
-                    onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className={`px-6 py-3 rounded-xl disabled:opacity-50 hover:scale-105 transition-all duration-300 disabled:hover:scale-100 ${darkMode 
-                      ? 'border border-slate-600 bg-slate-700 text-slate-200 hover:bg-slate-600' 
-                      : 'border border-gray-300 bg-white text-gray-800 hover:bg-gray-50'}`}
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Notifications Section */}
-            <div className={`backdrop-blur-sm rounded-3xl shadow-2xl p-8 ${darkMode 
-              ? 'bg-slate-800/80 border border-slate-700/50 text-slate-100' 
-              : 'bg-white/80 border border-white/50 text-gray-800'}`}>
-              <div className="flex items-center mb-8">
-                <div className="p-3 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-2xl mr-4">
-                  <BellIcon className="h-8 w-8 text-white" />
-                </div>
-                <div>
-                  <h2 className={`text-2xl font-bold ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>Notifications</h2>
-                  <p className={`${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>Stay updated with important alerts</p>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                {notifications.map((notification, index) => (
-                  <NotificationItem
-                    key={notification.id}
-                    notification={notification}
-                    onMarkAsRead={markNotificationAsRead}
-                    onDelete={deleteNotification}
-                    index={index}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Messages Section */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-white/50 xl:col-span-2">
-              <div className="flex items-center mb-8">
-                <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl mr-4">
-                  <ChatBubbleLeftRightIcon className="h-8 w-8 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-800">Messages</h2>
-                  <p className="text-gray-600">Chat with your landlord</p>
-                </div>
-              </div>
-              
-              <div className="bg-gradient-to-b from-gray-50 to-white rounded-2xl p-6 h-80 overflow-y-auto mb-6 border border-gray-200 custom-scrollbar">
-                <div className="space-y-4">
-                  {messages.map((message, index) => (
-                    <MessageBubble key={message.id} message={message} index={index} />
-                  ))}
-                  {isTyping && (
-                    <div className="flex justify-start">
-                      <div className="max-w-xs p-4 rounded-2xl bg-white border border-gray-200 text-gray-600 animate-pulse">
-                        <div className="flex space-x-2">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              <div className="flex space-x-4 items-end">
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type your message..."
-                  className="flex-1 border-2 border-gray-200 rounded-xl px-6 py-4 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
-                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                />
-                <input
-                  type="file"
-                  multiple
-                  onChange={(e) => setAttachments(Array.from(e.target.files))}
-                  className="hidden"
-                  id="attachment-input"
-                />
-                <label htmlFor="attachment-input" className="cursor-pointer bg-gray-200 p-4 rounded-xl hover:bg-gray-300 transition-all duration-300 hover:scale-105">
-                  📎
-                </label>
-                <GlowingButton
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl group"
-                  onClick={sendMessage}
-                >
-                  Send
-                </GlowingButton>
-              </div>
-              
-              {attachments.length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {attachments.map((file, idx) => (
-                    <div key={idx} className="bg-blue-100 px-3 py-2 rounded-lg text-sm text-blue-800 border border-blue-200">
-                      {file.name}
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
         </main>
@@ -2039,7 +1752,7 @@ const TenantDashboard = () => {
                   </div>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-3">Actions</h4>
+                  <h4 className={`font-semibold mb-3 ${darkMode ? 'text-slate-100' : 'text-gray-900'}`}>Actions</h4>
                   <div className="space-y-3">
                     <GlowingButton
                       className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl group"
@@ -2047,7 +1760,7 @@ const TenantDashboard = () => {
                     >
                       Schedule Visit
                     </GlowingButton>
-                    <button className="w-full bg-gray-100 text-gray-800 py-3 rounded-xl hover:bg-gray-200 transition-colors duration-300">
+                    <button className={`w-full py-3 rounded-xl transition-colors duration-300 ${darkMode ? 'bg-slate-700 text-slate-200 hover:bg-slate-600' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}>
                       Contact Landlord
                     </button>
                   </div>
@@ -2069,14 +1782,14 @@ const TenantDashboard = () => {
                 placeholder="Property Title"
                 value={newProperty.title}
                 onChange={(e) => setNewProperty(prev => ({ ...prev, title: e.target.value }))}
-                className="border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
+                className={`border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 ${darkMode ? 'border-slate-600 bg-slate-700 text-slate-200' : 'border-gray-200 bg-white text-gray-700'}`}
               />
               <input
                 type="text"
                 placeholder="Location"
                 value={newProperty.location}
                 onChange={(e) => setNewProperty(prev => ({ ...prev, location: e.target.value }))}
-                className="border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
+                className={`border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 ${darkMode ? 'border-slate-600 bg-slate-700 text-slate-200' : 'border-gray-200 bg-white text-gray-700'}`}
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -2085,26 +1798,26 @@ const TenantDashboard = () => {
                 placeholder="Price (e.g., $1,200/month)"
                 value={newProperty.price}
                 onChange={(e) => setNewProperty(prev => ({ ...prev, price: e.target.value }))}
-                className="border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
+                className={`border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 ${darkMode ? 'border-slate-600 bg-slate-700 text-slate-200' : 'border-gray-200 bg-white text-gray-700'}`}
               />
               <input
                 type="number"
                 placeholder="Bedrooms"
                 value={newProperty.bedrooms}
                 onChange={(e) => setNewProperty(prev => ({ ...prev, bedrooms: parseInt(e.target.value) || 0 }))}
-                className="border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
+                className={`border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 ${darkMode ? 'border-slate-600 bg-slate-700 text-slate-200' : 'border-gray-200 bg-white text-gray-700'}`}
               />
               <input
                 type="number"
                 placeholder="Bathrooms"
                 value={newProperty.bathrooms}
                 onChange={(e) => setNewProperty(prev => ({ ...prev, bathrooms: parseInt(e.target.value) || 0 }))}
-                className="border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
+                className={`border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 ${darkMode ? 'border-slate-600 bg-slate-700 text-slate-200' : 'border-gray-200 bg-white text-gray-700'}`}
               />
             </div>
             <div className="flex justify-end space-x-4 pt-6">
               <button
-                className="bg-gray-200 text-gray-800 px-6 py-3 rounded-xl hover:bg-gray-300 transition-all duration-300"
+                className={`px-6 py-3 rounded-xl transition-all duration-300 ${darkMode ? 'bg-slate-700 text-slate-200 hover:bg-slate-600' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
                 onClick={() => setIsAddModalOpen(false)}
               >
                 Cancel
@@ -2120,7 +1833,7 @@ const TenantDashboard = () => {
         </Modal>
       </div>
 
-      {/* Custom Styles - FIXED: Removed jsx attribute */}
+      {/* Custom Styles */}
       <style>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px) rotateZ(0deg); }

@@ -114,7 +114,7 @@ const GlowingButton = ({ children, onClick, className = '', glowColor = 'blue', 
       disabled={disabled}
       className={`relative overflow-hidden transform transition-all duration-300 hover:scale-105 disabled:hover:scale-100 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
-      <div className={`absolute inset-0 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity ${
+      <div className={`absolute inset-0 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity ${ 
         glowColor === 'blue' ? 'bg-gradient-to-r from-blue-500 to-purple-600' :
         glowColor === 'green' ? 'bg-gradient-to-r from-green-500 to-emerald-600' :
         glowColor === 'purple' ? 'bg-gradient-to-r from-purple-500 to-pink-600' :
@@ -135,7 +135,7 @@ const PaymentSummaryCard = ({ title, value, icon, gradient, delay = 0, subtitle 
   return (
     <div
       ref={setRef}
-      className={`transform transition-all duration-500 ${
+      className={`transform transition-all duration-500 ${ 
         isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
       }`}
       style={{ transitionDelay: `${delay}ms` }}
@@ -192,7 +192,7 @@ const UpcomingPaymentCard = ({ payment, index, onPayNow }) => {
   return (
     <div
       ref={setRef}
-      className={`transform transition-all duration-500 ${
+      className={`transform transition-all duration-500 ${ 
         isVisible ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'
       }`}
       style={{ transitionDelay: `${index * 100}ms` }}
@@ -262,7 +262,7 @@ const PaymentHistoryRow = ({ payment, index, onDownloadReceipt }) => {
   return (
     <tr
       ref={setRef}
-      className={`border-b border-gray-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-300 transform ${
+      className={`border-b border-gray-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-300 transform ${ 
         isVisible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
       }`}
       style={{ transitionDelay: `${index * 50}ms` }}
@@ -320,7 +320,7 @@ const PaymentHistoryRow = ({ payment, index, onDownloadReceipt }) => {
 const PaymentMethodCard = ({ method, icon, isSelected, onSelect }) => {
   return (
     <div 
-      className={`border rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:scale-105 ${
+      className={`border rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:scale-105 ${ 
         isSelected 
           ? 'border-blue-500 bg-gradient-to-r from-blue-50 to-purple-50 shadow-lg ring-2 ring-blue-200' 
           : 'border-gray-200 hover:border-blue-300 hover:shadow-md'
@@ -499,7 +499,7 @@ const TenantPayment = () => {
       <div className="flex h-screen">
         <TenantSideBar />
         <div className="flex flex-col flex-1">
-          <TenantNavBar />
+          <TenantNavBar currentSection="Payments" />
           <main className={`flex-1 flex items-center justify-center ${darkMode 
             ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' 
             : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'}`}>
@@ -525,7 +525,7 @@ const TenantPayment = () => {
       : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'}`}>
       <TenantSideBar />
       <div className="flex flex-col flex-1">
-        <TenantNavBar />
+        <TenantNavBar currentSection="Payments" />
         <main className="flex-1 p-6 overflow-y-auto custom-scrollbar">
           {/* Hero Section */}
           <div className="mb-12">
