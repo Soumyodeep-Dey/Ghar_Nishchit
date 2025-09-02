@@ -1,11 +1,11 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { useDarkMode } from '../../../DarkModeContext';
+import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
-import { 
-  WrenchScrewdriverIcon, 
-  PlusIcon, 
-  TrashIcon, 
+import {
+  WrenchScrewdriverIcon,
+  PlusIcon,
+  TrashIcon,
   PencilIcon,
   CheckCircleIcon,
   ClockIcon,
@@ -91,7 +91,7 @@ const AnimatedCounter = ({ value, duration = 2000, prefix = '', suffix = '' }) =
 
 const FloatingCard = ({ children, delay = 0, className = '' }) => {
   return (
-    <div 
+    <div
       className={`animate-float ${className}`}
       style={{
         animationDelay: `${delay}ms`,
@@ -111,13 +111,12 @@ const GlowingButton = ({ children, onClick, className = '', glowColor = 'blue', 
       disabled={disabled}
       className={`relative overflow-hidden transform transition-all duration-300 hover:scale-105 disabled:hover:scale-100 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
-      <div className={`absolute inset-0 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity ${
-        glowColor === 'blue' ? 'bg-gradient-to-r from-blue-500 to-purple-600' :
-        glowColor === 'red' ? 'bg-gradient-to-r from-red-500 to-pink-600' :
-        glowColor === 'green' ? 'bg-gradient-to-r from-green-500 to-emerald-600' :
-        glowColor === 'orange' ? 'bg-gradient-to-r from-orange-500 to-yellow-600' :
-        'bg-gradient-to-r from-blue-500 to-purple-600'
-      }`}></div>
+      <div className={`absolute inset-0 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity ${glowColor === 'blue' ? 'bg-gradient-to-r from-blue-500 to-purple-600' :
+          glowColor === 'red' ? 'bg-gradient-to-r from-red-500 to-pink-600' :
+            glowColor === 'green' ? 'bg-gradient-to-r from-green-500 to-emerald-600' :
+              glowColor === 'orange' ? 'bg-gradient-to-r from-orange-500 to-yellow-600' :
+                'bg-gradient-to-r from-blue-500 to-purple-600'
+        }`}></div>
       <div className="relative z-10">
         {children}
       </div>
@@ -161,9 +160,8 @@ const RequestCard = React.memo(({ request, onEdit, onDelete, isEditing, editData
   return (
     <div
       ref={setRef}
-      className={`transform transition-all duration-500 ${
-        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-      }`}
+      className={`transform transition-all duration-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+        }`}
       style={{ transitionDelay: `${index * 100}ms` }}
     >
       <FloatingCard delay={index * 200}>
@@ -245,19 +243,18 @@ const RequestCard = React.memo(({ request, onEdit, onDelete, isEditing, editData
               <div className="mb-4">
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
-                    className={`h-2 rounded-full transition-all duration-1000 ${
-                      request.status === "Completed"
+                    className={`h-2 rounded-full transition-all duration-1000 ${request.status === "Completed"
                         ? "bg-gradient-to-r from-green-500 to-emerald-600 w-full"
                         : request.status === "In Progress"
-                        ? "bg-gradient-to-r from-blue-500 to-indigo-600 w-2/3"
-                        : "bg-gradient-to-r from-yellow-500 to-orange-600 w-1/3"
-                    }`}
+                          ? "bg-gradient-to-r from-blue-500 to-indigo-600 w-2/3"
+                          : "bg-gradient-to-r from-yellow-500 to-orange-600 w-1/3"
+                      }`}
                   ></div>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
                   {request.status === "Completed" ? "100% Complete" :
-                   request.status === "In Progress" ? "67% Complete" :
-                   "33% Complete"}
+                    request.status === "In Progress" ? "67% Complete" :
+                      "33% Complete"}
                 </p>
               </div>
 
@@ -296,9 +293,8 @@ const StatsCard = ({ title, value, icon, gradient, delay = 0 }) => {
   return (
     <div
       ref={setRef}
-      className={`transform transition-all duration-500 ${
-        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-      }`}
+      className={`transform transition-all duration-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+        }`}
       style={{ transitionDelay: `${delay}ms` }}
     >
       <FloatingCard delay={delay}>
@@ -356,10 +352,10 @@ const TenantMaintenance = () => {
   });
 
   const [editingRequestId, setEditingRequestId] = useState(null);
-  const [editRequestData, setEditRequestData] = useState({ 
-    title: '', 
-    description: '', 
-    priority: 'Medium' 
+  const [editRequestData, setEditRequestData] = useState({
+    title: '',
+    description: '',
+    priority: 'Medium'
   });
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -378,10 +374,10 @@ const TenantMaintenance = () => {
   const filteredRequests = useMemo(() => {
     return requests.filter(request => {
       const matchesSearch = request.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           request.description.toLowerCase().includes(searchTerm.toLowerCase());
+        request.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'All' || request.status === statusFilter;
       const matchesPriority = priorityFilter === 'All' || request.priority === priorityFilter;
-      
+
       return matchesSearch && matchesStatus && matchesPriority;
     });
   }, [requests, searchTerm, statusFilter, priorityFilter]);
@@ -444,8 +440,8 @@ const TenantMaintenance = () => {
         <TenantSideBar />
         <div className="flex flex-col flex-1">
           <TenantNavBar currentSection="Maintenance" />
-          <main className={`flex-1 flex items-center justify-center ${darkMode 
-            ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' 
+          <main className={`flex-1 flex items-center justify-center ${darkMode
+            ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950'
             : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'}`}>
             <div className="text-center">
               <div className="relative">
@@ -462,10 +458,10 @@ const TenantMaintenance = () => {
   }
 
   const { darkMode } = useDarkMode();
-  
+
   return (
-    <div className={`flex h-screen ${darkMode 
-      ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' 
+    <div className={`flex h-screen ${darkMode
+      ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950'
       : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'}`}>
       <TenantSideBar />
       <div className="flex flex-col flex-1">
@@ -662,8 +658,8 @@ const TenantMaintenance = () => {
                     {requests.length === 0 ? 'No maintenance requests found' : 'No requests match your filters'}
                   </h3>
                   <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'} text-lg mb-8`}>
-                    {requests.length === 0 
-                      ? 'Submit your first maintenance request to get started' 
+                    {requests.length === 0
+                      ? 'Submit your first maintenance request to get started'
                       : 'Try adjusting your search criteria or filters'
                     }
                   </p>

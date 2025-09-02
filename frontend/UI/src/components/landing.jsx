@@ -1,5 +1,5 @@
 ﻿﻿import { useEffect, useRef, useState } from 'react';
-import { useDarkMode } from '../DarkModeContext';
+import { useDarkMode } from '../useDarkMode.js';
 import { Link } from 'react-router-dom';
 import { Home, Building, Info, DollarSign, Users, HelpCircle, Menu, X, BookOpen } from 'lucide-react';
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
@@ -343,8 +343,8 @@ export default function Landing() {
                   tabIndex={0}
                   className={`flex items-center space-x-1
           ${darkMode
-            ? 'text-cyan-200 hover:text-cyan-400'
-            : 'text-indigo-700 hover:text-indigo-900'}
+                      ? 'text-cyan-200 hover:text-cyan-400'
+                      : 'text-indigo-700 hover:text-indigo-900'}
           cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded transition-transform transform hover:scale-110`}
                 >
                   <Icon size={18} aria-hidden="true" />

@@ -19,7 +19,7 @@ import {
   Users,
   DollarSign
 } from 'lucide-react';
-import { useDarkMode } from '../../../DarkModeContext';
+import { useDarkMode } from '../../../useDarkMode.js';
 import { Link } from 'react-router-dom';
 
 const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
@@ -28,10 +28,10 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  
+
   // Get user data from localStorage - use 'user' key from authentication
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')) || { name: '', email: '' });
-  
+
   // Logout handler function
   const handleLogout = () => {
     // Clear authentication (example: remove token from localStorage)
@@ -39,7 +39,7 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
     // Redirect to login page
     window.location.href = '/login';
   };
-  
+
   const profileDropdownRef = useRef(null);
   const notificationsRef = useRef(null);
   const searchRef = useRef(null);
@@ -306,11 +306,10 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
                       return (
                         <div
                           key={notification.id}
-                          className={`p-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer border-l-4 ${
-                            notification.isRead 
-                              ? 'border-transparent' 
+                          className={`p-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer border-l-4 ${notification.isRead
+                              ? 'border-transparent'
                               : 'border-primary-500 bg-primary-50/30 dark:bg-primary-900/10'
-                          }`}
+                            }`}
                           onClick={() => markAsRead(notification.id)}
                         >
                           <div className="flex items-start space-x-3">
@@ -370,8 +369,8 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
               >
                 <div className="relative">
                   <div className="h-9 w-9 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 relative overflow-hidden group-hover:scale-110 hover:rotate-6">
-                   <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
-                   <div className="absolute -inset-1 bg-gradient-to-br from-primary-300 to-primary-600 opacity-0 group-hover:opacity-30 blur-md transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+                    <div className="absolute -inset-1 bg-gradient-to-br from-primary-300 to-primary-600 opacity-0 group-hover:opacity-30 blur-md transition-opacity duration-300" />
                     <User className="h-4 w-4 text-white" />
                   </div>
                   {/* Online indicator */}
@@ -411,8 +410,8 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
 
                   {/* Menu Options */}
                   <div className="p-2">
-                    <Link 
-                      to="/landlord/profile" 
+                    <Link
+                      to="/landlord/profile"
                       className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200 group hover:translate-x-1"
                       onClick={() => setIsProfileDropdownOpen(false)} // Close dropdown on click
                     >

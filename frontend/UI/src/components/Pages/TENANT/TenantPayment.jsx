@@ -1,11 +1,11 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { useDarkMode } from '../../../DarkModeContext';
+import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
-import { 
-  CreditCardIcon, 
-  BanknotesIcon, 
-  ReceiptRefundIcon, 
+import {
+  CreditCardIcon,
+  BanknotesIcon,
+  ReceiptRefundIcon,
   ArrowDownTrayIcon,
   CalendarIcon,
   CheckCircleIcon,
@@ -94,7 +94,7 @@ const AnimatedCounter = ({ value, duration = 2000, prefix = '', suffix = '' }) =
 
 const FloatingCard = ({ children, delay = 0, className = '' }) => {
   return (
-    <div 
+    <div
       className={`animate-float ${className}`}
       style={{
         animationDelay: `${delay}ms`,
@@ -114,13 +114,12 @@ const GlowingButton = ({ children, onClick, className = '', glowColor = 'blue', 
       disabled={disabled}
       className={`relative overflow-hidden transform transition-all duration-300 hover:scale-105 disabled:hover:scale-100 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
-      <div className={`absolute inset-0 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity ${ 
-        glowColor === 'blue' ? 'bg-gradient-to-r from-blue-500 to-purple-600' :
-        glowColor === 'green' ? 'bg-gradient-to-r from-green-500 to-emerald-600' :
-        glowColor === 'purple' ? 'bg-gradient-to-r from-purple-500 to-pink-600' :
-        glowColor === 'orange' ? 'bg-gradient-to-r from-orange-500 to-yellow-600' :
-        'bg-gradient-to-r from-blue-500 to-purple-600'
-      }`}></div>
+      <div className={`absolute inset-0 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity ${glowColor === 'blue' ? 'bg-gradient-to-r from-blue-500 to-purple-600' :
+          glowColor === 'green' ? 'bg-gradient-to-r from-green-500 to-emerald-600' :
+            glowColor === 'purple' ? 'bg-gradient-to-r from-purple-500 to-pink-600' :
+              glowColor === 'orange' ? 'bg-gradient-to-r from-orange-500 to-yellow-600' :
+                'bg-gradient-to-r from-blue-500 to-purple-600'
+        }`}></div>
       <div className="relative z-10">
         {children}
       </div>
@@ -135,9 +134,8 @@ const PaymentSummaryCard = ({ title, value, icon, gradient, delay = 0, subtitle 
   return (
     <div
       ref={setRef}
-      className={`transform transition-all duration-500 ${ 
-        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-      }`}
+      className={`transform transition-all duration-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+        }`}
       style={{ transitionDelay: `${delay}ms` }}
     >
       <FloatingCard delay={delay}>
@@ -147,7 +145,7 @@ const PaymentSummaryCard = ({ title, value, icon, gradient, delay = 0, subtitle 
             <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white transform translate-x-16 -translate-y-16"></div>
             <div className="absolute bottom-0 left-0 w-20 h-20 rounded-full bg-white transform -translate-x-10 translate-y-10"></div>
           </div>
-          
+
           <div className="relative z-10 flex items-center justify-between">
             <div className="flex-1">
               <p className="text-sm font-medium text-gray-700 mb-2">{title}</p>
@@ -192,9 +190,8 @@ const UpcomingPaymentCard = ({ payment, index, onPayNow }) => {
   return (
     <div
       ref={setRef}
-      className={`transform transition-all duration-500 ${ 
-        isVisible ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'
-      }`}
+      className={`transform transition-all duration-500 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'
+        }`}
       style={{ transitionDelay: `${index * 100}ms` }}
     >
       <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-gray-100 relative overflow-hidden">
@@ -204,7 +201,7 @@ const UpcomingPaymentCard = ({ payment, index, onPayNow }) => {
             Due Soon!
           </div>
         )}
-        
+
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50">
@@ -262,9 +259,8 @@ const PaymentHistoryRow = ({ payment, index, onDownloadReceipt }) => {
   return (
     <tr
       ref={setRef}
-      className={`border-b border-gray-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-300 transform ${ 
-        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
-      }`}
+      className={`border-b border-gray-100 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-300 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
+        }`}
       style={{ transitionDelay: `${index * 50}ms` }}
     >
       <td className="py-4 px-6">
@@ -319,20 +315,19 @@ const PaymentHistoryRow = ({ payment, index, onDownloadReceipt }) => {
 
 const PaymentMethodCard = ({ method, icon, isSelected, onSelect }) => {
   return (
-    <div 
-      className={`border rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:scale-105 ${ 
-        isSelected 
-          ? 'border-blue-500 bg-gradient-to-r from-blue-50 to-purple-50 shadow-lg ring-2 ring-blue-200' 
+    <div
+      className={`border rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:scale-105 ${isSelected
+          ? 'border-blue-500 bg-gradient-to-r from-blue-50 to-purple-50 shadow-lg ring-2 ring-blue-200'
           : 'border-gray-200 hover:border-blue-300 hover:shadow-md'
-      }`}
+        }`}
       onClick={onSelect}
     >
       <div className="flex items-center">
-        <input 
-          type="radio" 
+        <input
+          type="radio"
           checked={isSelected}
           onChange={onSelect}
-          className="mr-4 w-4 h-4 text-blue-600" 
+          className="mr-4 w-4 h-4 text-blue-600"
         />
         <div className="flex items-center">
           <div className={`p-2 rounded-xl mr-3 ${isSelected ? 'bg-blue-100' : 'bg-gray-100'}`}>
@@ -442,11 +437,11 @@ const TenantPayment = () => {
     const totalPaid = paymentHistory
       .filter(p => p.status === 'Paid')
       .reduce((sum, p) => sum + parseFloat(p.amount.replace(/[^0-9.-]/g, '')), 0);
-    
+
     const pendingAmount = upcomingPayments
       .reduce((sum, p) => sum + parseFloat(p.amount.replace(/[^0-9.-]/g, '')), 0);
-    
-    const nextPaymentDue = upcomingPayments.length > 0 
+
+    const nextPaymentDue = upcomingPayments.length > 0
       ? new Date(Math.min(...upcomingPayments.map(p => new Date(p.date)))).toLocaleDateString()
       : 'N/A';
 
@@ -476,7 +471,7 @@ const TenantPayment = () => {
         status: 'Paid',
         receipt: `#REC-${Date.now()}`
       };
-      
+
       setPaymentHistory(prev => [newHistoryItem, ...prev]);
       setUpcomingPayments(prev => prev.filter(p => p.id !== selectedPayment.id));
       setShowPaymentModal(false);
@@ -500,8 +495,8 @@ const TenantPayment = () => {
         <TenantSideBar />
         <div className="flex flex-col flex-1">
           <TenantNavBar currentSection="Payments" />
-          <main className={`flex-1 flex items-center justify-center ${darkMode 
-            ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' 
+          <main className={`flex-1 flex items-center justify-center ${darkMode
+            ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950'
             : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'}`}>
             <div className="text-center">
               <div className="relative">
@@ -518,10 +513,10 @@ const TenantPayment = () => {
   }
 
   const { darkMode } = useDarkMode();
-  
+
   return (
-    <div className={`flex h-screen ${darkMode 
-      ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' 
+    <div className={`flex h-screen ${darkMode
+      ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950'
       : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'}`}>
       <TenantSideBar />
       <div className="flex flex-col flex-1">
@@ -535,7 +530,7 @@ const TenantPayment = () => {
                 <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white transform translate-x-32 -translate-y-32"></div>
                 <div className="absolute bottom-0 left-0 w-40 h-40 rounded-full bg-white transform -translate-x-20 translate-y-20"></div>
               </div>
-              
+
               <div className="relative z-10 flex items-center mb-6">
                 <div className="p-4 bg-white/20 rounded-2xl mr-4">
                   <CurrencyDollarIcon className="h-10 w-10" />
@@ -549,7 +544,7 @@ const TenantPayment = () => {
                   </p>
                 </div>
               </div>
-              
+
               <div className="relative z-10 flex items-center space-x-4">
                 <div className="flex items-center">
                   <ShieldCheckIcon className="h-6 w-6 mr-2" />
@@ -577,7 +572,7 @@ const TenantPayment = () => {
               delay={0}
               subtitle="+12% from last year"
             />
-            
+
             <PaymentSummaryCard
               title="Pending Payments"
               value={calculations.pendingCount}
@@ -586,7 +581,7 @@ const TenantPayment = () => {
               delay={100}
               subtitle={`$${calculations.pendingAmount.toFixed(2)} total`}
             />
-            
+
             <PaymentSummaryCard
               title="Next Payment Due"
               value={calculations.nextPaymentDue}
@@ -594,7 +589,7 @@ const TenantPayment = () => {
               gradient="from-blue-50 to-indigo-100"
               delay={200}
             />
-            
+
             <PaymentSummaryCard
               title="Payment Success Rate"
               value="99.8%"
@@ -616,7 +611,7 @@ const TenantPayment = () => {
                 <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Quick and secure payment processing</p>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Upcoming Payments */}
               <div>
@@ -643,7 +638,7 @@ const TenantPayment = () => {
                   </div>
                 )}
               </div>
-              
+
               {/* Payment Methods */}
               <div>
                 <h3 className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-800'} mb-6 flex items-center text-lg`}>
@@ -657,14 +652,14 @@ const TenantPayment = () => {
                     isSelected={selectedPaymentMethod === 'bank'}
                     onSelect={() => setSelectedPaymentMethod('bank')}
                   />
-                  
+
                   <PaymentMethodCard
                     method="Credit Card"
                     icon={<CreditCardIcon className="h-6 w-6 text-purple-600" />}
                     isSelected={selectedPaymentMethod === 'card'}
                     onSelect={() => setSelectedPaymentMethod('card')}
                   />
-                  
+
                   <GlowingButton
                     onClick={() => handleMakePayment()}
                     className="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-4 rounded-xl text-lg font-semibold group mt-6"
@@ -696,7 +691,7 @@ const TenantPayment = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gradient-to-r from-gray-50 to-blue-50">
@@ -740,7 +735,7 @@ const TenantPayment = () => {
                 </button>
               </div>
             </div>
-            
+
             <div className="p-6">
               <div className="text-center mb-6">
                 <div className="p-4 bg-blue-100 rounded-2xl w-fit mx-auto mb-4">
@@ -749,7 +744,7 @@ const TenantPayment = () => {
                 <h4 className="text-2xl font-bold text-gray-800">{selectedPayment.amount}</h4>
                 <p className="text-gray-600">for {selectedPayment.type}</p>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="bg-gray-50 rounded-xl p-4">
                   <div className="flex justify-between text-sm">
@@ -757,7 +752,7 @@ const TenantPayment = () => {
                     <span className="font-semibold">{selectedPaymentMethod === 'bank' ? 'Bank Transfer' : 'Credit Card'}</span>
                   </div>
                 </div>
-                
+
                 <div className="flex space-x-3">
                   <button
                     onClick={() => setShowPaymentModal(false)}

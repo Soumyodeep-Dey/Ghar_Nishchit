@@ -1,97 +1,97 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
-import { useDarkMode } from '../../../DarkModeContext';
+import { useDarkMode } from '../../../useDarkMode.js';
 // Removed SidebarContext usage
-import { 
-  MessageSquare, 
-  Send, 
-  Paperclip, 
-  MoreVertical, 
-  Search, 
-  Filter, 
-  Phone, 
-  Video, 
-  Info, 
-  Smile, 
-  Image as ImageIcon, 
-  File, 
-  Calendar, 
-  MapPin, 
-  Star, 
-  Archive, 
-  Trash2, 
-  Forward, 
-  Reply, 
-  Edit3, 
-  Copy, 
-  Download, 
-  ExternalLink, 
-  Clock, 
-  Check, 
-  CheckCheck, 
-  AlertCircle, 
-  Pin, 
-  Bookmark, 
-  Plus, 
-  X, 
-  ChevronDown, 
-  ChevronRight, 
-  Users, 
-  Hash, 
-  Settings, 
-  Bell, 
-  BellOff, 
-  Volume2, 
-  VolumeX, 
-  Mic, 
-  MicOff, 
-  Camera, 
-  CameraOff, 
-  Share2, 
-  Eye, 
-  EyeOff, 
-  Lock, 
-  Unlock, 
-  Zap, 
-  Heart, 
-  ThumbsUp, 
-  ThumbsDown, 
-  Laugh, 
-  Angry, 
-  Frown, 
-  Meh, 
-  ChevronLeft, 
-  ChevronUp, 
-  Maximize2, 
-  Minimize2, 
-  RefreshCw, 
-  Loader, 
-  WifiOff, 
-  Wifi, 
-  UserPlus, 
-  UserMinus, 
-  Crown, 
-  Shield, 
-  Flag, 
-  Moon, 
-  Sun, 
-  Palette, 
-  Type, 
-  Bold, 
-  Italic, 
-  Underline, 
-  Link, 
-  List, 
-  AtSign, 
-  Hash as HashTag, 
-  DollarSign, 
-  Home, 
-  Wrench, 
-  CreditCard, 
-  FileText, 
-  Upload, 
-  Folder, 
+import {
+  MessageSquare,
+  Send,
+  Paperclip,
+  MoreVertical,
+  Search,
+  Filter,
+  Phone,
+  Video,
+  Info,
+  Smile,
+  Image as ImageIcon,
+  File,
+  Calendar,
+  MapPin,
+  Star,
+  Archive,
+  Trash2,
+  Forward,
+  Reply,
+  Edit3,
+  Copy,
+  Download,
+  ExternalLink,
+  Clock,
+  Check,
+  CheckCheck,
+  AlertCircle,
+  Pin,
+  Bookmark,
+  Plus,
+  X,
+  ChevronDown,
+  ChevronRight,
+  Users,
+  Hash,
+  Settings,
+  Bell,
+  BellOff,
+  Volume2,
+  VolumeX,
+  Mic,
+  MicOff,
+  Camera,
+  CameraOff,
+  Share2,
+  Eye,
+  EyeOff,
+  Lock,
+  Unlock,
+  Zap,
+  Heart,
+  ThumbsUp,
+  ThumbsDown,
+  Laugh,
+  Angry,
+  Frown,
+  Meh,
+  ChevronLeft,
+  ChevronUp,
+  Maximize2,
+  Minimize2,
+  RefreshCw,
+  Loader,
+  WifiOff,
+  Wifi,
+  UserPlus,
+  UserMinus,
+  Crown,
+  Shield,
+  Flag,
+  Moon,
+  Sun,
+  Palette,
+  Type,
+  Bold,
+  Italic,
+  Underline,
+  Link,
+  List,
+  AtSign,
+  Hash as HashTag,
+  DollarSign,
+  Home,
+  Wrench,
+  CreditCard,
+  FileText,
+  Upload,
+  Folder,
   FolderOpen,
   Building2,
   User
@@ -127,15 +127,15 @@ const useSound = () => {
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
-    
+
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
-    
+
     oscillator.frequency.value = 800;
     oscillator.type = 'sine';
     gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-    
+
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.3);
   };
@@ -162,7 +162,7 @@ const AnimatedCard = ({ children, delay = 0, className = '', ...props }) => {
 const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, onForward, onDelete }) => {
   const [showActions, setShowActions] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
-  
+
   const reactions = [
     { emoji: '👍', icon: ThumbsUp, label: 'Like' },
     { emoji: '❤️', icon: Heart, label: 'Love' },
@@ -195,11 +195,10 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
         {/* Message content */}
         <motion.div
           whileHover={{ scale: 1.02 }}
-          className={`relative p-4 rounded-2xl shadow-lg ${
-            isOwn
+          className={`relative p-4 rounded-2xl shadow-lg ${isOwn
               ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 dark:from-cyan-500 dark:to-cyan-600 text-white'
               : 'bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-indigo-200 dark:border-slate-700 text-indigo-700 dark:text-cyan-100'
-          } ${message.isForwarded ? 'border-l-4 border-pink-400 dark:border-pink-500' : ''}`}
+            } ${message.isForwarded ? 'border-l-4 border-pink-400 dark:border-pink-500' : ''}`}
         >
           {/* Forwarded indicator */}
           {message.isForwarded && (
@@ -283,9 +282,8 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
           </div>
 
           {/* Message metadata */}
-          <div className={`flex items-center justify-between mt-3 text-xs ${
-            isOwn ? 'text-white/70' : 'text-gray-500 dark:text-blue-300'
-          }`}>
+          <div className={`flex items-center justify-between mt-3 text-xs ${isOwn ? 'text-white/70' : 'text-gray-500 dark:text-blue-300'
+            }`}>
             <span>{message.time}</span>
             <div className="flex items-center space-x-1">
               {message.edited && <Edit3 className="w-3 h-3" />}
@@ -418,11 +416,10 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
     <motion.div
       whileHover={{ scale: 1.02, x: 5 }}
       onClick={onClick}
-      className={`relative p-4 rounded-xl cursor-pointer transition-all duration-200 group ${
-        isActive 
-          ? 'bg-gradient-to-r from-indigo-500/20 to-indigo-600/20 dark:from-cyan-500/20 dark:to-cyan-600/20 border border-indigo-500/30 dark:border-cyan-500/30' 
+      className={`relative p-4 rounded-xl cursor-pointer transition-all duration-200 group ${isActive
+          ? 'bg-gradient-to-r from-indigo-500/20 to-indigo-600/20 dark:from-cyan-500/20 dark:to-cyan-600/20 border border-indigo-500/30 dark:border-cyan-500/30'
           : 'hover:bg-indigo-50 dark:hover:bg-slate-800/50 border border-transparent'
-      }`}
+        }`}
     >
       <div className="flex items-center space-x-3">
         {/* Avatar */}
@@ -450,17 +447,15 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
         {/* Conversation info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
-            <h3 className={`font-semibold truncate ${
-              isActive ? 'text-indigo-700 dark:text-cyan-100' : 'text-indigo-700 dark:text-cyan-100'
-            }`}>
+            <h3 className={`font-semibold truncate ${isActive ? 'text-indigo-700 dark:text-cyan-100' : 'text-indigo-700 dark:text-cyan-100'
+              }`}>
               {conversation.name}
               {conversation.isPinned && <Pin className="w-3 h-3 inline ml-1 text-pink-400 dark:text-pink-300" />}
               {conversation.isMuted && <VolumeX className="w-3 h-3 inline ml-1 text-gray-400 dark:text-gray-500" />}
             </h3>
             <div className="flex items-center space-x-1">
-              <span className={`text-xs ${
-                conversation.unread > 0 ? 'text-indigo-600 dark:text-cyan-300 font-medium' : 'text-gray-500 dark:text-blue-300'
-              }`}>
+              <span className={`text-xs ${conversation.unread > 0 ? 'text-indigo-600 dark:text-cyan-300 font-medium' : 'text-gray-500 dark:text-blue-300'
+                }`}>
                 {conversation.time}
               </span>
               {conversation.priority === 'high' && (
@@ -468,14 +463,13 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
               )}
             </div>
           </div>
-          
+
           <div className="flex items-center justify-between">
-            <p className={`text-sm truncate ${
-              conversation.unread > 0 ? 'text-indigo-600 dark:text-cyan-200 font-medium' : 'text-gray-600 dark:text-blue-200'
-            }`}>
+            <p className={`text-sm truncate ${conversation.unread > 0 ? 'text-indigo-600 dark:text-cyan-200 font-medium' : 'text-gray-600 dark:text-blue-200'
+              }`}>
               {conversation.lastMessage}
             </p>
-            
+
             {/* Typing indicator */}
             {conversation.isTyping && (
               <div className="flex items-center space-x-1">
@@ -533,7 +527,7 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
                 className="absolute right-0 top-full mt-2 w-48 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-indigo-200 dark:border-slate-700 rounded-xl shadow-xl z-50"
               >
                 <div className="p-2">
-                  <button 
+                  <button
                     onClick={() => {
                       // Toggle pin
                       setShowMenu(false);
@@ -543,7 +537,7 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
                     <Pin className="w-4 h-4" />
                     <span>{conversation.isPinned ? 'Unpin' : 'Pin'} Chat</span>
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       // Toggle mute
                       setShowMenu(false);
@@ -553,7 +547,7 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
                     {conversation.isMuted ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
                     <span>{conversation.isMuted ? 'Unmute' : 'Mute'}</span>
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       onArchive(conversation.id);
                       setShowMenu(false);
@@ -563,7 +557,7 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
                     <Archive className="w-4 h-4" />
                     <span>Archive</span>
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       onDelete(conversation.id);
                       setShowMenu(false);
@@ -927,9 +921,8 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
               }}
               onKeyPress={handleKeyPress}
               placeholder={placeholder}
-              className={`w-full p-3 bg-indigo-50 dark:bg-slate-700 border border-indigo-200 dark:border-slate-600 rounded-xl text-indigo-700 dark:text-cyan-100 placeholder-gray-500 dark:placeholder-blue-300 focus:border-indigo-500 dark:focus:border-cyan-400 focus:outline-none transition-colors resize-none ${
-                isBold ? 'font-bold' : ''
-              } ${isItalic ? 'italic' : ''}`}
+              className={`w-full p-3 bg-indigo-50 dark:bg-slate-700 border border-indigo-200 dark:border-slate-600 rounded-xl text-indigo-700 dark:text-cyan-100 placeholder-gray-500 dark:placeholder-blue-300 focus:border-indigo-500 dark:focus:border-cyan-400 focus:outline-none transition-colors resize-none ${isBold ? 'font-bold' : ''
+                } ${isItalic ? 'italic' : ''}`}
               rows={1}
               style={{ minHeight: '48px' }}
             />
@@ -941,11 +934,10 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
             whileTap={{ scale: 0.95 }}
             onClick={message.trim() || attachments.length > 0 ? handleSend : undefined}
             disabled={!message.trim() && attachments.length === 0}
-            className={`p-3 rounded-xl font-semibold transition-all duration-300 ${
-              message.trim() || attachments.length > 0
+            className={`p-3 rounded-xl font-semibold transition-all duration-300 ${message.trim() || attachments.length > 0
                 ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 dark:from-cyan-500 dark:to-cyan-600 text-white hover:from-indigo-600 hover:to-indigo-700 dark:hover:from-cyan-600 dark:hover:to-cyan-700 shadow-lg'
                 : 'bg-indigo-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-            }`}
+              }`}
           >
             <Send className="w-5 h-5" />
           </motion.button>
@@ -1086,11 +1078,11 @@ const LandlordMessage = () => {
   const filteredConversations = useMemo(() => {
     return conversations.filter(conv => {
       const matchesSearch = conv.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           conv.lastMessage.toLowerCase().includes(searchTerm.toLowerCase());
+        conv.lastMessage.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesFilter = filterStatus === 'all' ||
-                           (filterStatus === 'unread' && conv.unread > 0) ||
-                           (filterStatus === 'pinned' && conv.isPinned) ||
-                           (filterStatus === 'online' && conv.online);
+        (filterStatus === 'unread' && conv.unread > 0) ||
+        (filterStatus === 'pinned' && conv.isPinned) ||
+        (filterStatus === 'online' && conv.online);
       return matchesSearch && matchesFilter;
     });
   }, [conversations, searchTerm, filterStatus]);
@@ -1128,22 +1120,22 @@ const LandlordMessage = () => {
     setMessages(prev => [...prev, newMessage]);
 
     // Update last message in conversation
-    setConversations(prev => prev.map(conv => 
-      conv.id === activeConversation.id 
+    setConversations(prev => prev.map(conv =>
+      conv.id === activeConversation.id
         ? { ...conv, lastMessage: messageData.content, time: "now" }
         : conv
     ));
 
     // Simulate message delivery
     setTimeout(() => {
-      setMessages(prev => prev.map(msg => 
+      setMessages(prev => prev.map(msg =>
         msg.id === newMessage.id ? { ...msg, status: "delivered" } : msg
       ));
     }, 1000);
 
     // Simulate message read
     setTimeout(() => {
-      setMessages(prev => prev.map(msg => 
+      setMessages(prev => prev.map(msg =>
         msg.id === newMessage.id ? { ...msg, status: "read" } : msg
       ));
     }, 3000);
@@ -1223,10 +1215,10 @@ const LandlordMessage = () => {
       </div>
 
       <LandlordSideBar currentSection={currentSection} />
-      
+
       <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
         <LandlordNavBar currentSection={currentSection} />
-        
+
         <main className="flex-1 overflow-hidden">
           <div className="h-full flex">
             {/* Conversations Sidebar */}
@@ -1240,7 +1232,7 @@ const LandlordMessage = () => {
                 >
                   Messages
                 </motion.h1>
-                
+
                 {/* Search */}
                 <div className="relative mb-4">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-blue-300" />
@@ -1252,7 +1244,7 @@ const LandlordMessage = () => {
                     className="w-full pl-10 pr-4 py-2 bg-indigo-50 dark:bg-slate-700 border border-indigo-200 dark:border-slate-600 rounded-xl text-indigo-700 dark:text-cyan-100 placeholder-gray-500 dark:placeholder-blue-300 focus:border-indigo-500 dark:focus:border-cyan-400 focus:outline-none transition-colors"
                   />
                 </div>
-                
+
                 {/* Filter tabs */}
                 <div className="flex space-x-2">
                   {[
@@ -1266,18 +1258,17 @@ const LandlordMessage = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setFilterStatus(key)}
-                      className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
-                        filterStatus === key
+                      className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${filterStatus === key
                           ? 'bg-indigo-500 dark:bg-cyan-500 text-white'
                           : 'bg-indigo-100 dark:bg-slate-700 text-indigo-700 dark:text-cyan-200 hover:bg-indigo-200 dark:hover:bg-slate-600'
-                      }`}
+                        }`}
                     >
                       {label}
                     </motion.button>
                   ))}
                 </div>
               </div>
-              
+
               {/* Conversations List */}
               <div className="flex-1 overflow-y-auto p-4 space-y-2">
                 <AnimatePresence>
@@ -1299,7 +1290,7 @@ const LandlordMessage = () => {
                     </motion.div>
                   ))}
                 </AnimatePresence>
-                
+
                 {filteredConversations.length === 0 && (
                   <div className="text-center py-8">
                     <MessageSquare className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-600 mb-3" />
@@ -1328,7 +1319,7 @@ const LandlordMessage = () => {
                             <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-800"></div>
                           )}
                         </motion.div>
-                        
+
                         <div>
                           <h2 className="text-xl font-bold text-indigo-700 dark:text-cyan-100 flex items-center space-x-2">
                             <span>{activeConversation.name}</span>
@@ -1377,8 +1368,8 @@ const LandlordMessage = () => {
                           )}
                         </div>
                       </div>
-                      
-                      
+
+
                     </div>
                   </div>
 

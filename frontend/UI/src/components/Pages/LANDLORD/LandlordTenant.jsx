@@ -1,143 +1,143 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
-import { useDarkMode } from '../../../DarkModeContext';
+import { useDarkMode } from '../../../useDarkMode.js';
 // Removed SidebarContext usage
-import { 
-  Users, 
-  Plus, 
-  Search, 
-  Filter, 
-  MoreVertical, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  Calendar, 
-  MapPin, 
-  User, 
-  Clock, 
-  CheckCircle, 
-  XCircle, 
-  AlertCircle, 
-  Phone, 
-  Mail, 
-  MessageCircle, 
-  Star, 
-  Flag, 
-  Bookmark, 
-  Archive, 
-  RefreshCw, 
-  Bell, 
-  BellOff, 
-  Settings, 
-  TrendingUp, 
-  TrendingDown, 
-  BarChart3, 
-  PieChart, 
-  Activity, 
-  DollarSign, 
-  Home, 
-  Building2, 
-  CreditCard, 
-  FileText, 
-  Download, 
-  Upload, 
-  Share2, 
-  Copy, 
-  ExternalLink, 
-  Send, 
-  Reply, 
-  Forward, 
-  Paperclip, 
-  Smile, 
-  Heart, 
-  ThumbsUp, 
-  MessageSquare, 
-  ChevronDown, 
-  ChevronUp, 
-  ChevronLeft, 
-  ChevronRight, 
-  ArrowUp, 
-  ArrowDown, 
-  ArrowLeft, 
-  ArrowRight, 
-  X, 
-  Check, 
-  Loader, 
-  Save, 
-  Undo, 
-  Redo, 
-  Shield, 
-  Lock, 
-  Unlock, 
-  Key, 
-  Gift, 
-  Tag, 
-  Percent, 
-  Calculator, 
-  Wallet, 
-  Banknote, 
-  PiggyBank, 
-  Coins, 
-  HandCoins, 
-  BadgeCheck, 
-  Award, 
-  Trophy, 
-  Target, 
-  Sparkles, 
-  Info, 
-  HelpCircle, 
-  Globe, 
-  Smartphone, 
-  Tablet, 
-  Monitor, 
-  Laptop, 
-  Wifi, 
-  Database, 
-  Server, 
-  Cloud, 
-  ShieldCheck, 
-  Fingerprint, 
-  Scan, 
-  QrCode, 
-  Link, 
-  Image as ImageIcon, 
-  Video, 
-  PlayCircle, 
-  PauseCircle, 
-  StopCircle, 
-  VolumeX, 
-  Volume2, 
-  Mic, 
-  Camera, 
-  Navigation, 
-  Compass, 
-  Map, 
-  Route, 
-  Car, 
-  Truck, 
-  Bus, 
-  Train, 
-  Plane, 
-  Ship, 
-  Bike, 
-  UserPlus, 
-  UserMinus, 
-  UserCheck, 
-  UserX, 
-  Crown, 
-  Zap, 
-  Flame, 
-  Droplets, 
-  Sun, 
-  Moon, 
-  CloudRain, 
-  Thermometer, 
-  Wind, 
-  Snowflake, 
-  Umbrella, 
-  TreePine, 
-  Flower, 
+import {
+  Users,
+  Plus,
+  Search,
+  Filter,
+  MoreVertical,
+  Edit,
+  Trash2,
+  Eye,
+  Calendar,
+  MapPin,
+  User,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Phone,
+  Mail,
+  MessageCircle,
+  Star,
+  Flag,
+  Bookmark,
+  Archive,
+  RefreshCw,
+  Bell,
+  BellOff,
+  Settings,
+  TrendingUp,
+  TrendingDown,
+  BarChart3,
+  PieChart,
+  Activity,
+  DollarSign,
+  Home,
+  Building2,
+  CreditCard,
+  FileText,
+  Download,
+  Upload,
+  Share2,
+  Copy,
+  ExternalLink,
+  Send,
+  Reply,
+  Forward,
+  Paperclip,
+  Smile,
+  Heart,
+  ThumbsUp,
+  MessageSquare,
+  ChevronDown,
+  ChevronUp,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUp,
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  X,
+  Check,
+  Loader,
+  Save,
+  Undo,
+  Redo,
+  Shield,
+  Lock,
+  Unlock,
+  Key,
+  Gift,
+  Tag,
+  Percent,
+  Calculator,
+  Wallet,
+  Banknote,
+  PiggyBank,
+  Coins,
+  HandCoins,
+  BadgeCheck,
+  Award,
+  Trophy,
+  Target,
+  Sparkles,
+  Info,
+  HelpCircle,
+  Globe,
+  Smartphone,
+  Tablet,
+  Monitor,
+  Laptop,
+  Wifi,
+  Database,
+  Server,
+  Cloud,
+  ShieldCheck,
+  Fingerprint,
+  Scan,
+  QrCode,
+  Link,
+  Image as ImageIcon,
+  Video,
+  PlayCircle,
+  PauseCircle,
+  StopCircle,
+  VolumeX,
+  Volume2,
+  Mic,
+  Camera,
+  Navigation,
+  Compass,
+  Map,
+  Route,
+  Car,
+  Truck,
+  Bus,
+  Train,
+  Plane,
+  Ship,
+  Bike,
+  UserPlus,
+  UserMinus,
+  UserCheck,
+  UserX,
+  Crown,
+  Zap,
+  Flame,
+  Droplets,
+  Sun,
+  Moon,
+  CloudRain,
+  Thermometer,
+  Wind,
+  Snowflake,
+  Umbrella,
+  TreePine,
+  Flower,
   Leaf
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -171,11 +171,11 @@ const useIntersectionObserver = (options = {}) => {
 
   useEffect(() => {
     if (!element) return;
-    
+
     const observer = new IntersectionObserver(([entry]) => {
       setIsIntersecting(entry.isIntersecting);
     }, options);
-    
+
     observer.observe(element);
     return () => observer.disconnect();
   }, [element, options]);
@@ -189,7 +189,7 @@ const useNotification = () => {
   const addNotification = (notification) => {
     const id = Date.now();
     setNotifications(prev => [...prev, { ...notification, id }]);
-    
+
     setTimeout(() => {
       removeNotification(id);
     }, notification.duration || 5000);
@@ -205,15 +205,15 @@ const useNotification = () => {
 // Animated Components
 const AnimatedCard = ({ children, delay = 0, className = '', ...props }) => {
   const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
-  
+
   return (
     <motion.div
       ref={ref}
       initial={{ opacity: 0, y: 30, scale: 0.95 }}
       animate={isVisible ? { opacity: 1, y: 0, scale: 1 } : {}}
-      transition={{ 
-        duration: 0.5, 
-        delay, 
+      transition={{
+        duration: 0.5,
+        delay,
         type: "spring",
         stiffness: 100,
         damping: 15
@@ -281,9 +281,8 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`w-3 h-3 ${
-          i < rating ? 'text-yellow-400 fill-current' : 'text-gray-400'
-        }`}
+        className={`w-3 h-3 ${i < rating ? 'text-yellow-400 fill-current' : 'text-gray-400'
+          }`}
       />
     ));
   };
@@ -300,7 +299,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
     >
       {/* Background gradient effect */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      
+
       {/* Header */}
       <div className="relative z-10 p-6">
         <div className="flex items-start justify-between mb-4">
@@ -320,18 +319,18 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
                   {tenant.name.split(' ').map(n => n[0]).join('')}
                 </div>
               )}
-              
+
               {tenant.isOnline && (
                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white shadow-lg" />
               )}
-              
+
               {tenant.isVerified && (
                 <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
                   <BadgeCheck className="w-3 h-3 text-white" />
                 </div>
               )}
             </motion.div>
-            
+
             <div className="flex-1">
               <div className="flex items-center space-x-2 mb-1">
                 <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'} group-hover:text-blue-300 transition-colors`}>
@@ -346,7 +345,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
                   </div>
                 )}
               </div>
-              
+
               <div className={`space-y-1 text-sm ${darkMode ? 'text-white/70' : 'text-gray-600'}`}>
                 <div className="flex items-center space-x-1">
                   <Mail className="w-3 h-3" />
@@ -365,7 +364,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
               </div>
             </div>
           </div>
-          
+
           <div className="relative" ref={menuRef}>
             <motion.button
               whileHover={{ scale: 1.1 }}
@@ -375,7 +374,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
             >
               <MoreVertical className={`w-4 h-4 ${darkMode ? 'text-white/70' : 'text-gray-600'}`} />
             </motion.button>
-            
+
             <AnimatePresence>
               {showMenu && (
                 <motion.div
@@ -385,28 +384,28 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
                   className={`absolute right-0 top-full mt-2 w-56 backdrop-blur-xl border rounded-xl shadow-xl z-50 ${darkMode ? 'bg-white/20 border-white/30' : 'bg-white/80 border-black/10'}`}
                 >
                   <div className="p-2">
-                    <button 
+                    <button
                       onClick={() => { onView(tenant); setShowMenu(false); }}
                       className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-black/10 text-black/80'}`}
                     >
                       <Eye className="w-4 h-4" />
                       <span>View Profile</span>
                     </button>
-                    <button 
+                    <button
                       onClick={() => { onEdit(tenant); setShowMenu(false); }}
                       className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-black/10 text-black/80'}`}
                     >
                       <Edit className="w-4 h-4" />
                       <span>Edit Details</span>
                     </button>
-                    <button 
+                    <button
                       onClick={() => { onMessage(tenant); setShowMenu(false); }}
                       className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-black/10 text-black/80'}`}
                     >
                       <MessageCircle className="w-4 h-4" />
                       <span>Send Message</span>
                     </button>
-                    <button 
+                    <button
                       onClick={() => { onScheduleVisit(tenant); setShowMenu(false); }}
                       className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-black/10 text-black/80'}`}
                     >
@@ -414,7 +413,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
                       <span>Schedule Visit</span>
                     </button>
                     {tenant.status === 'Prospect' && (
-                      <button 
+                      <button
                         onClick={() => { onSendContract(tenant); setShowMenu(false); }}
                         className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-black/10 text-black/80'}`}
                       >
@@ -422,7 +421,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
                         <span>Send Contract</span>
                       </button>
                     )}
-                    <button 
+                    <button
                       onClick={() => { onDelete(tenant.id); setShowMenu(false); }}
                       className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-red-500/20 transition-colors text-red-300"
                     >
@@ -435,14 +434,14 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
             </AnimatePresence>
           </div>
         </div>
-        
+
         {/* Status and Info */}
         <div className="flex items-center justify-between mb-4">
           <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs ${getStatusColor(tenant.status)}`}>
             {getStatusIcon(tenant.status)}
             <span>{tenant.status}</span>
           </div>
-          
+
           {tenant.rentAmount && (
             <div className="text-right">
               <div className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
@@ -456,7 +455,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
             </div>
           )}
         </div>
-        
+
         {/* Additional Info */}
         <div className={`grid grid-cols-2 gap-4 mb-4 text-xs ${darkMode ? 'text-white/70' : 'text-gray-600'}`}>
           {tenant.moveInDate && (
@@ -467,7 +466,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
               </div>
             </div>
           )}
-          
+
           {tenant.leaseEndDate && (
             <div>
               <span className={`${darkMode ? 'text-white/50' : 'text-gray-400'}`}>Lease Ends</span>
@@ -477,7 +476,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
             </div>
           )}
         </div>
-        
+
         {/* Visit Requests */}
         {tenant.visitRequests && tenant.visitRequests.length > 0 && (
           <div className="mb-4 p-3 bg-blue-500 rounded-lg">
@@ -492,7 +491,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
             </div>
           </div>
         )}
-        
+
         {/* Quick Actions */}
         <div className="flex space-x-2">
           <motion.button
@@ -504,7 +503,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
             <MessageCircle className="w-3 h-3" />
             <span>Message</span>
           </motion.button>
-          
+
           {tenant.status === 'Prospect' ? (
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -527,7 +526,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
             </motion.button>
           )}
         </div>
-        
+
         {/* Tags */}
         {tenant.tags && tenant.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-3">
@@ -567,7 +566,7 @@ const VisitRequestModal = ({ isOpen, onClose, tenant, onSchedule }) => {
 
   const handleSchedule = () => {
     if (!selectedDate || !selectedTime || !selectedProperty) return;
-    
+
     onSchedule({
       tenantId: tenant.id,
       date: selectedDate,
@@ -622,25 +621,23 @@ const VisitRequestModal = ({ isOpen, onClose, tenant, onSchedule }) => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setVisitType('in-person')}
-                className={`p-3 rounded-lg border-2 transition-all ${
-                  visitType === 'in-person'
+                className={`p-3 rounded-lg border-2 transition-all ${visitType === 'in-person'
                     ? 'border-blue-500 bg-blue-500/10 text-blue-300'
                     : 'border-white/20 text-white/70 hover:border-white/40'
-                }`}
+                  }`}
               >
                 <Home className="w-5 h-5 mx-auto mb-1" />
                 <div className="text-sm font-medium">In-Person</div>
               </motion.button>
-              
+
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setVisitType('virtual')}
-                className={`p-3 rounded-lg border-2 transition-all ${
-                  visitType === 'virtual'
+                className={`p-3 rounded-lg border-2 transition-all ${visitType === 'virtual'
                     ? 'border-blue-500 bg-blue-500/10 text-blue-300'
                     : 'border-white/20 text-white/70 hover:border-white/40'
-                }`}
+                  }`}
               >
                 <Video className="w-5 h-5 mx-auto mb-1" />
                 <div className="text-sm font-medium">Virtual Tour</div>
@@ -686,11 +683,10 @@ const VisitRequestModal = ({ isOpen, onClose, tenant, onSchedule }) => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setSelectedTime(time)}
-                  className={`p-2 rounded-lg text-sm font-medium transition-all ${
-                    selectedTime === time
+                  className={`p-2 rounded-lg text-sm font-medium transition-all ${selectedTime === time
                       ? 'bg-blue-500 text-white'
                       : 'bg-white/10 text-white/70 hover:bg-white/20'
-                  }`}
+                    }`}
                 >
                   {time}
                 </motion.button>
@@ -720,7 +716,7 @@ const VisitRequestModal = ({ isOpen, onClose, tenant, onSchedule }) => {
             >
               Cancel
             </motion.button>
-            
+
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -757,7 +753,7 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
 
   const handleSendContract = () => {
     if (!selectedProperty || !rentAmount || !securityDeposit || !startDate) return;
-    
+
     onSendContract({
       tenantId: tenant.id,
       contractType,
@@ -821,11 +817,10 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setContractType(key)}
-                  className={`p-3 rounded-lg border-2 transition-all ${
-                    contractType === key
+                  className={`p-3 rounded-lg border-2 transition-all ${contractType === key
                       ? 'border-blue-500 bg-blue-500/10 text-blue-300'
                       : 'border-white/20 text-white/70 hover:border-white/40'
-                  }`}
+                    }`}
                 >
                   <Icon className="w-5 h-5 mx-auto mb-1" />
                   <div className="text-sm font-medium">{label}</div>
@@ -850,7 +845,7 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
                 <option value="garden-view">Garden View Apartment</option>
               </select>
             </div>
-            
+
             <div>
               <label className="block text-white/80 text-sm font-medium mb-2">Duration (months)</label>
               <select
@@ -878,7 +873,7 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
                 className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
               />
             </div>
-            
+
             <div>
               <label className="block text-white/80 text-sm font-medium mb-2">Security Deposit ($)</label>
               <input
@@ -889,7 +884,7 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
                 className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
               />
             </div>
-            
+
             <div>
               <label className="block text-white/80 text-sm font-medium mb-2">Start Date</label>
               <input
@@ -949,7 +944,7 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
             >
               Cancel
             </motion.button>
-            
+
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -970,7 +965,7 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
 // Tenant Detail Modal Component
 const TenantDetailModal = ({ isOpen, onClose, tenant, onUpdate }) => {
   const [activeTab, setActiveTab] = useState('profile');
-  
+
   if (!isOpen || !tenant) return null;
 
   return (
@@ -1009,7 +1004,7 @@ const TenantDetailModal = ({ isOpen, onClose, tenant, onUpdate }) => {
               <X className="w-6 h-6 text-white/70" />
             </motion.button>
           </div>
-          
+
           {/* Tab Navigation */}
           <div className="flex space-x-1 mt-6 bg-white/5 p-1 rounded-xl">
             {[
@@ -1023,11 +1018,10 @@ const TenantDetailModal = ({ isOpen, onClose, tenant, onUpdate }) => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveTab(key)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                  activeTab === key
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${activeTab === key
                     ? 'bg-blue-500 text-white shadow-lg'
                     : 'text-white/70 hover:text-white hover:bg-white/10'
-                }`}
+                  }`}
               >
                 <Icon className="w-4 h-4" />
                 <span>{label}</span>
@@ -1062,7 +1056,7 @@ const TenantDetailModal = ({ isOpen, onClose, tenant, onUpdate }) => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Property Information */}
               {tenant.property && (
                 <div className="bg-white/5 rounded-xl p-6">
@@ -1093,7 +1087,7 @@ const TenantDetailModal = ({ isOpen, onClose, tenant, onUpdate }) => {
               )}
             </div>
           )}
-          
+
           {activeTab === 'visits' && (
             <div className="space-y-4">
               <h3 className="text-lg font-bold text-white">Visit History</h3>
@@ -1107,11 +1101,10 @@ const TenantDetailModal = ({ isOpen, onClose, tenant, onUpdate }) => {
                         </div>
                         <div className="text-white/60 text-sm">{visit.property}</div>
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        visit.status === 'completed' ? 'bg-green-500/20 text-green-300' :
-                        visit.status === 'scheduled' ? 'bg-blue-500/20 text-blue-300' :
-                        'bg-yellow-500/20 text-yellow-300'
-                      }`}>
+                      <span className={`px-2 py-1 rounded-full text-xs ${visit.status === 'completed' ? 'bg-green-500/20 text-green-300' :
+                          visit.status === 'scheduled' ? 'bg-blue-500/20 text-blue-300' :
+                            'bg-yellow-500/20 text-yellow-300'
+                        }`}>
                         {visit.status}
                       </span>
                     </div>
@@ -1127,7 +1120,7 @@ const TenantDetailModal = ({ isOpen, onClose, tenant, onUpdate }) => {
               )}
             </div>
           )}
-          
+
           {activeTab === 'contracts' && (
             <div className="space-y-4">
               <h3 className="text-lg font-bold text-white">Contract History</h3>
@@ -1142,11 +1135,10 @@ const TenantDetailModal = ({ isOpen, onClose, tenant, onUpdate }) => {
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          contract.status === 'active' ? 'bg-green-500/20 text-green-300' :
-                          contract.status === 'pending' ? 'bg-yellow-500/20 text-yellow-300' :
-                          'bg-gray-500/20 text-gray-300'
-                        }`}>
+                        <span className={`px-2 py-1 rounded-full text-xs ${contract.status === 'active' ? 'bg-green-500/20 text-green-300' :
+                            contract.status === 'pending' ? 'bg-yellow-500/20 text-yellow-300' :
+                              'bg-gray-500/20 text-gray-300'
+                          }`}>
                           {contract.status}
                         </span>
                         <button className="p-1 hover:bg-white/10 rounded">
@@ -1163,7 +1155,7 @@ const TenantDetailModal = ({ isOpen, onClose, tenant, onUpdate }) => {
               )}
             </div>
           )}
-          
+
           {activeTab === 'communication' && (
             <div className="space-y-4">
               <h3 className="text-lg font-bold text-white">Message History</h3>
@@ -1174,18 +1166,17 @@ const TenantDetailModal = ({ isOpen, onClose, tenant, onUpdate }) => {
                   { sender: tenant.name, message: 'Hi, I would like to schedule a visit to see the apartment.', time: '3 hours ago' }
                 ].map((msg, index) => (
                   <div key={index} className={`flex ${msg.sender === 'You' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-xs p-3 rounded-lg ${
-                      msg.sender === 'You' 
-                        ? 'bg-blue-500 text-white' 
+                    <div className={`max-w-xs p-3 rounded-lg ${msg.sender === 'You'
+                        ? 'bg-blue-500 text-white'
                         : 'bg-white/10 text-white'
-                    }`}>
+                      }`}>
                       <div className="text-sm">{msg.message}</div>
                       <div className="text-xs opacity-70 mt-1">{msg.time}</div>
                     </div>
                   </div>
                 ))}
               </div>
-              
+
               {/* Message input */}
               <div className="flex space-x-2 mt-4">
                 <input
@@ -1216,12 +1207,11 @@ const NotificationToast = ({ notifications, onRemove }) => {
             initial={{ opacity: 0, x: 300 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 300 }}
-            className={`p-4 rounded-lg shadow-lg backdrop-blur-xl border max-w-sm ${
-              notification.type === 'success' ? 'bg-green-500/20 border-green-500/30 text-green-300' :
-              notification.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-300' :
-              notification.type === 'warning' ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-300' :
-              'bg-blue-500/20 border-blue-500/30 text-blue-300'
-            }`}
+            className={`p-4 rounded-lg shadow-lg backdrop-blur-xl border max-w-sm ${notification.type === 'success' ? 'bg-green-500/20 border-green-500/30 text-green-300' :
+                notification.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-300' :
+                  notification.type === 'warning' ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-300' :
+                    'bg-blue-500/20 border-blue-500/30 text-blue-300'
+              }`}
           >
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0">
@@ -1230,14 +1220,14 @@ const NotificationToast = ({ notifications, onRemove }) => {
                 {notification.type === 'warning' && <AlertCircle className="w-5 h-5" />}
                 {notification.type === 'info' && <Info className="w-5 h-5" />}
               </div>
-              
+
               <div className="flex-1">
                 <h4 className="font-semibold">{notification.title}</h4>
                 {notification.message && (
                   <p className="text-sm opacity-90 mt-1">{notification.message}</p>
                 )}
               </div>
-              
+
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
@@ -1259,7 +1249,7 @@ const LandlordTenant = () => {
   const [currentSection] = useState('Tenants');
   const { darkMode } = useDarkMode();
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
-  
+
   // Sample tenants data with enhanced information
   const [tenants, setTenants] = useLocalStorage('landlord_tenants', [
     {
@@ -1415,19 +1405,19 @@ const LandlordTenant = () => {
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [showContractModal, setShowContractModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { notifications, addNotification, removeNotification } = useNotification();
 
   // Filter and sort tenants
   useEffect(() => {
     let filtered = tenants.filter(tenant => {
       const matchesSearch = tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           tenant.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           (tenant.property && tenant.property.toLowerCase().includes(searchTerm.toLowerCase()));
-      
+        tenant.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (tenant.property && tenant.property.toLowerCase().includes(searchTerm.toLowerCase()));
+
       const matchesStatus = statusFilter === 'All' || tenant.status === statusFilter;
       const matchesProperty = propertyFilter === 'All' || tenant.property === propertyFilter;
-      
+
       return matchesSearch && matchesStatus && matchesProperty;
     });
 
@@ -1435,7 +1425,7 @@ const LandlordTenant = () => {
     filtered.sort((a, b) => {
       let aValue = a[sortBy];
       let bValue = b[sortBy];
-      
+
       if (sortBy === 'moveInDate' || sortBy === 'leaseEndDate' || sortBy === 'nextPaymentDate') {
         aValue = aValue ? new Date(aValue) : new Date(0);
         bValue = bValue ? new Date(bValue) : new Date(0);
@@ -1443,7 +1433,7 @@ const LandlordTenant = () => {
         aValue = aValue.toLowerCase();
         bValue = bValue ? bValue.toLowerCase() : '';
       }
-      
+
       if (sortOrder === 'asc') {
         return aValue > bValue ? 1 : -1;
       } else {
@@ -1467,7 +1457,7 @@ const LandlordTenant = () => {
     const avgRating = tenants
       .filter(t => t.rating > 0)
       .reduce((sum, t) => sum + t.rating, 0) / tenants.filter(t => t.rating > 0).length || 0;
-    
+
     return {
       total,
       active,
@@ -1523,25 +1513,25 @@ const LandlordTenant = () => {
   };
 
   const handleVisitScheduled = (visitData) => {
-    setTenants(prev => prev.map(t => 
-      t.id === visitData.tenantId 
+    setTenants(prev => prev.map(t =>
+      t.id === visitData.tenantId
         ? {
-            ...t,
-            visitRequests: [
-              ...(t.visitRequests || []),
-              {
-                requestedDate: visitData.date,
-                time: visitData.time,
-                property: visitData.property,
-                status: 'scheduled',
-                notes: visitData.notes,
-                type: visitData.type
-              }
-            ]
-          }
+          ...t,
+          visitRequests: [
+            ...(t.visitRequests || []),
+            {
+              requestedDate: visitData.date,
+              time: visitData.time,
+              property: visitData.property,
+              status: 'scheduled',
+              notes: visitData.notes,
+              type: visitData.type
+            }
+          ]
+        }
         : t
     ));
-    
+
     addNotification({
       type: 'success',
       title: 'Visit Scheduled',
@@ -1555,27 +1545,27 @@ const LandlordTenant = () => {
   };
 
   const handleContractSent = (contractData) => {
-    setTenants(prev => prev.map(t => 
-      t.id === contractData.tenantId 
+    setTenants(prev => prev.map(t =>
+      t.id === contractData.tenantId
         ? {
-            ...t,
-            contracts: [
-              ...(t.contracts || []),
-              {
-                type: contractData.contractType,
-                startDate: contractData.startDate,
-                endDate: new Date(new Date(contractData.startDate).setMonth(new Date(contractData.startDate).getMonth() + contractData.duration)).toISOString().split('T')[0],
-                status: 'pending',
-                rentAmount: contractData.rentAmount,
-                securityDeposit: contractData.securityDeposit,
-                property: contractData.property,
-                terms: contractData.terms
-              }
-            ]
-          }
+          ...t,
+          contracts: [
+            ...(t.contracts || []),
+            {
+              type: contractData.contractType,
+              startDate: contractData.startDate,
+              endDate: new Date(new Date(contractData.startDate).setMonth(new Date(contractData.startDate).getMonth() + contractData.duration)).toISOString().split('T')[0],
+              status: 'pending',
+              rentAmount: contractData.rentAmount,
+              securityDeposit: contractData.securityDeposit,
+              property: contractData.property,
+              terms: contractData.terms
+            }
+          ]
+        }
         : t
     ));
-    
+
     addNotification({
       type: 'success',
       title: 'Contract Sent',
@@ -1587,7 +1577,7 @@ const LandlordTenant = () => {
     <div className={`min-h-screen transition-colors duration-500 ${darkMode
       ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100'
       : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 text-gray-900'
-    } flex relative overflow-hidden`}>
+      } flex relative overflow-hidden`}>
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
@@ -1603,10 +1593,10 @@ const LandlordTenant = () => {
       </div>
 
       <LandlordSideBar currentSection={currentSection} />
-      
+
       <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
         <LandlordNavBar currentSection={currentSection} />
-        
+
         <main className="flex-1 overflow-y-auto">
           <div className="p-8 space-y-8">
             {/* Header */}
@@ -1643,7 +1633,7 @@ const LandlordTenant = () => {
                 <div className="text-2xl font-bold mb-1">{stats.total}</div>
                 <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>Total Tenants</div>
               </AnimatedCard>
-              
+
               <AnimatedCard delay={0.1} className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
@@ -1654,7 +1644,7 @@ const LandlordTenant = () => {
                 <div className="text-2xl font-bold mb-1">{stats.active}</div>
                 <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>Active</div>
               </AnimatedCard>
-              
+
               <AnimatedCard delay={0.2} className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
@@ -1665,7 +1655,7 @@ const LandlordTenant = () => {
                 <div className="text-2xl font-bold mb-1">{stats.prospects}</div>
                 <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>Prospects</div>
               </AnimatedCard>
-              
+
               <AnimatedCard delay={0.3} className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
@@ -1676,7 +1666,7 @@ const LandlordTenant = () => {
                 <div className="text-2xl font-bold mb-1">{stats.overdue}</div>
                 <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>Overdue</div>
               </AnimatedCard>
-              
+
               <AnimatedCard delay={0.4} className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
@@ -1687,7 +1677,7 @@ const LandlordTenant = () => {
                 <div className="text-2xl font-bold mb-1">{stats.pendingVisits}</div>
                 <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>Pending Visits</div>
               </AnimatedCard>
-              
+
               <AnimatedCard delay={0.5} className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
@@ -1698,7 +1688,7 @@ const LandlordTenant = () => {
                 <div className="text-2xl font-bold mb-1">${stats.totalRevenue.toLocaleString()}</div>
                 <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>Monthly Revenue</div>
               </AnimatedCard>
-              
+
               <AnimatedCard delay={0.6} className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
@@ -1726,7 +1716,7 @@ const LandlordTenant = () => {
                       className={`pl-10 pr-4 py-3 w-64 rounded-xl focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'}`}
                     />
                   </div>
-                  
+
                   {/* Filters */}
                   <div className="flex space-x-3">
                     <select
@@ -1741,7 +1731,7 @@ const LandlordTenant = () => {
                       <option value="Overdue">Overdue</option>
                       <option value="Inactive">Inactive</option>
                     </select>
-                    
+
                     <select
                       value={propertyFilter}
                       onChange={(e) => setPropertyFilter(e.target.value)}
@@ -1754,7 +1744,7 @@ const LandlordTenant = () => {
                     </select>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-4">
                   {/* Sort controls */}
                   <div className="flex items-center space-x-2">
@@ -1770,7 +1760,7 @@ const LandlordTenant = () => {
                       <option value="moveInDate">Move-in Date</option>
                       <option value="rating">Rating</option>
                     </select>
-                    
+
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -1780,8 +1770,8 @@ const LandlordTenant = () => {
                       {sortOrder === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
                     </motion.button>
                   </div>
-                  
-                  
+
+
                 </div>
               </div>
             </AnimatedCard>
@@ -1811,7 +1801,7 @@ const LandlordTenant = () => {
                         : 'Start by adding your first tenant or prospect'
                       }
                     </p>
-                    
+
                   </motion.div>
                 </div>
               ) : (
@@ -1844,13 +1834,13 @@ const LandlordTenant = () => {
             onClose={() => setShowDetailModal(false)}
             tenant={selectedTenant}
             onUpdate={(updatedTenant) => {
-              setTenants(prev => prev.map(t => 
+              setTenants(prev => prev.map(t =>
                 t.id === updatedTenant.id ? updatedTenant : t
               ));
             }}
           />
         )}
-        
+
         {showVisitModal && selectedTenant && (
           <VisitRequestModal
             isOpen={showVisitModal}
@@ -1859,7 +1849,7 @@ const LandlordTenant = () => {
             onSchedule={handleVisitScheduled}
           />
         )}
-        
+
         {showContractModal && selectedTenant && (
           <ContractModal
             isOpen={showContractModal}

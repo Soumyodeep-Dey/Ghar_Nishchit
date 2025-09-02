@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useDarkMode } from '../../../DarkModeContext';
+import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from '../../Pages/TENANT/TenantSideBar';
 import TenantNavBar from '../../Pages/TENANT/TenantNavBar';
 import { HeartIcon, BellIcon, ChatBubbleLeftRightIcon, WrenchScrewdriverIcon, CreditCardIcon, PlusIcon, TrashIcon, EyeIcon, XMarkIcon, ChartBarIcon, ChevronUpIcon, ChevronDownIcon, ExclamationTriangleIcon, SparklesIcon, FireIcon, TrophyIcon, ClockIcon, DocumentArrowDownIcon, CheckCircleIcon, ArrowTrendingUpIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
@@ -55,9 +55,9 @@ const useIntersectionObserver = (options = {}) => {
 
 const usePagination = (items, itemsPerPage = ITEMS_PER_PAGE) => {
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   const totalPages = Math.ceil(items.length / itemsPerPage);
-  
+
   const paginatedItems = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     return items.slice(startIndex, startIndex + itemsPerPage);
@@ -105,7 +105,7 @@ const AnimatedCounter = ({ value, duration = 2000, prefix = '', suffix = '' }) =
 
 const FloatingCard = ({ children, delay = 0, className = '' }) => {
   return (
-    <div 
+    <div
       className={`animate-float ${className}`}
       style={{
         animationDelay: `${delay}ms`,
@@ -125,12 +125,11 @@ const GlowingButton = ({ children, onClick, className = '', glowColor = 'blue', 
       disabled={disabled}
       className={`relative overflow-hidden transform transition-all duration-300 hover:scale-105 group ${disabled ? 'opacity-60 cursor-not-allowed' : ''} ${className}`}
     >
-      <div className={`absolute inset-0 rounded-lg blur opacity-0 group-hover:opacity-75 transition-opacity bg-gradient-to-r ${
-        glowColor === 'blue' ? 'from-blue-500 to-purple-600' :
-        glowColor === 'red' ? 'from-red-500 to-pink-600' :
-        glowColor === 'green' ? 'from-green-500 to-emerald-600' :
-        'from-blue-500 to-purple-600'
-      }`}></div>
+      <div className={`absolute inset-0 rounded-lg blur opacity-0 group-hover:opacity-75 transition-opacity bg-gradient-to-r ${glowColor === 'blue' ? 'from-blue-500 to-purple-600' :
+          glowColor === 'red' ? 'from-red-500 to-pink-600' :
+            glowColor === 'green' ? 'from-green-500 to-emerald-600' :
+              'from-blue-500 to-purple-600'
+        }`}></div>
       <div className="relative z-10">
         {children}
       </div>
@@ -147,37 +146,35 @@ const PropertyCard = React.memo(({ property, onView, onRemove, removeConfirmId, 
   return (
     <div
       ref={setRef}
-      className={`transform transition-all duration-700 ease-out ${
-        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-      }`}
+      className={`transform transition-all duration-700 ease-out ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+        }`}
       style={{ transitionDelay: `${index * 100}ms` }}
     >
       <FloatingCard delay={index * 200}>
-        <div className={`rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden group hover:scale-105 border ${darkMode 
-          ? 'bg-slate-800 border-slate-700 hover:shadow-blue-500/10' 
+        <div className={`rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden group hover:scale-105 border ${darkMode
+          ? 'bg-slate-800 border-slate-700 hover:shadow-blue-500/10'
           : 'bg-white border-gray-100 hover:shadow-blue-500/20'}`}>
           <div className="relative overflow-hidden">
             {!imageLoaded && (
-              <div className={`absolute inset-0 animate-pulse ${darkMode 
-                ? 'bg-gradient-to-r from-slate-700 to-slate-600' 
+              <div className={`absolute inset-0 animate-pulse ${darkMode
+                ? 'bg-gradient-to-r from-slate-700 to-slate-600'
                 : 'bg-gradient-to-r from-gray-200 to-gray-300'}`}></div>
             )}
             <img
               src={property.image}
               alt={property.title}
-              className={`w-full h-48 object-cover transition-all duration-700 group-hover:scale-110 ${
-                imageLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
+              className={`w-full h-48 object-cover transition-all duration-700 group-hover:scale-110 ${imageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
               onLoad={() => setImageLoaded(true)}
               loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            
+
             {/* Floating Action Buttons */}
             <div className="absolute top-4 right-4 space-y-2">
               <button
-                className={`p-2 backdrop-blur-sm rounded-full shadow-lg hover:scale-110 transition-all duration-300 ${darkMode 
-                  ? 'bg-slate-800/90 hover:bg-slate-700' 
+                className={`p-2 backdrop-blur-sm rounded-full shadow-lg hover:scale-110 transition-all duration-300 ${darkMode
+                  ? 'bg-slate-800/90 hover:bg-slate-700'
                   : 'bg-white/90 hover:bg-white'}`}
                 onClick={() => onView(property)}
                 aria-label={`View details of ${property.title}`}
@@ -187,16 +184,16 @@ const PropertyCard = React.memo(({ property, onView, onRemove, removeConfirmId, 
             </div>
 
             {/* Price Badge */}
-            <div className={`absolute bottom-4 left-4 px-4 py-2 rounded-full font-semibold shadow-lg text-white ${darkMode 
-              ? 'bg-gradient-to-r from-blue-700 to-purple-800' 
+            <div className={`absolute bottom-4 left-4 px-4 py-2 rounded-full font-semibold shadow-lg text-white ${darkMode
+              ? 'bg-gradient-to-r from-blue-700 to-purple-800'
               : 'bg-gradient-to-r from-blue-600 to-purple-600'}`}>
               {property.price}
             </div>
           </div>
-          
+
           <div className="p-6">
-            <h3 className={`font-bold text-xl mb-2 transition-colors duration-300 ${darkMode 
-              ? 'text-slate-100 group-hover:text-blue-400' 
+            <h3 className={`font-bold text-xl mb-2 transition-colors duration-300 ${darkMode
+              ? 'text-slate-100 group-hover:text-blue-400'
               : 'text-gray-800 group-hover:text-blue-600'}`}>
               {property.title}
             </h3>
@@ -205,7 +202,7 @@ const PropertyCard = React.memo(({ property, onView, onRemove, removeConfirmId, 
               {property.location}
             </p>
             <p className={`text-sm mb-4 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>{property.bedrooms} bed • {property.bathrooms} bath</p>
-            
+
             <div className="flex justify-between items-center">
               {removeConfirmId === property.id ? (
                 <div className="flex space-x-2">
@@ -218,8 +215,8 @@ const PropertyCard = React.memo(({ property, onView, onRemove, removeConfirmId, 
                   </GlowingButton>
                   <button
                     onClick={onCancelRemove}
-                    className={`text-sm px-4 py-2 rounded-lg transition-colors duration-200 ${darkMode 
-                      ? 'bg-slate-700 text-slate-200 hover:bg-slate-600' 
+                    className={`text-sm px-4 py-2 rounded-lg transition-colors duration-200 ${darkMode
+                      ? 'bg-slate-700 text-slate-200 hover:bg-slate-600'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
                   >
                     Cancel
@@ -265,19 +262,16 @@ const NotificationItem = React.memo(({ notification, onMarkAsRead, onDelete, ind
   return (
     <div
       ref={setRef}
-      className={`transform transition-all duration-500 ${
-        isVisible ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'
-      }`}
+      className={`transform transition-all duration-500 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'
+        }`}
       style={{ transitionDelay: `${index * 100}ms` }}
     >
       <div
-        className={`relative p-4 rounded-xl border-l-4 cursor-pointer transition-all duration-300 shadow-md hover:shadow-xl bg-gradient-to-r ${
-          bgGradient[notification.type]
-        } ${
-          notification.read 
-            ? (darkMode ? 'border-slate-600' : 'border-gray-300') 
+        className={`relative p-4 rounded-xl border-l-4 cursor-pointer transition-all duration-300 shadow-md hover:shadow-xl bg-gradient-to-r ${bgGradient[notification.type]
+          } ${notification.read
+            ? (darkMode ? 'border-slate-600' : 'border-gray-300')
             : (darkMode ? 'border-blue-400 animate-pulse' : 'border-blue-500 animate-pulse')
-        } hover:scale-105 group`}
+          } hover:scale-105 group`}
         onClick={() => onMarkAsRead(notification.id)}
       >
         <div className="flex items-start">
@@ -316,16 +310,14 @@ const MessageBubble = React.memo(({ message, index }) => {
   return (
     <div
       ref={setRef}
-      className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'} transform transition-all duration-500 ${
-        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-      }`}
+      className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'} transform transition-all duration-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+        }`}
       style={{ transitionDelay: `${index * 50}ms` }}
     >
-      <div className={`max-w-xs p-4 rounded-2xl shadow-lg transition-all duration-300 hover:scale-105 ${
-        message.isOwn 
-          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
+      <div className={`max-w-xs p-4 rounded-2xl shadow-lg transition-all duration-300 hover:scale-105 ${message.isOwn
+          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
           : 'bg-white text-gray-800 border border-gray-200'
-      }`}>
+        }`}>
         <p className="text-sm leading-relaxed">{message.message}</p>
         {message.attachments && message.attachments.length > 0 && (
           <div className="mt-3 space-y-2">
@@ -364,9 +356,8 @@ const AnalyticsWidget = React.memo(({ title, children, className = "", icon, gra
   return (
     <div
       ref={setRef}
-      className={`transform transition-all duration-500 ${
-        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-      }`}
+      className={`transform transition-all duration-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+        }`}
     >
       <div className={`bg-gradient-to-br ${gradient} rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 ${darkMode ? 'border border-slate-700/50' : 'border border-white/50'} ${className}`}>
         <div className="flex items-center mb-4">
@@ -423,17 +414,15 @@ const Modal = React.memo(({ isOpen, onClose, title, children, size = "md" }) => 
   };
 
   return (
-    <div 
-      className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 ${
-        isOpen && !isClosing ? 'opacity-100' : 'opacity-0'
-      }`}
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 ${isOpen && !isClosing ? 'opacity-100' : 'opacity-0'
+        }`}
       style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
       onClick={handleClose}
     >
-      <div 
-        className={`${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-2xl ${sizeClasses[size]} w-full max-h-[90vh] overflow-y-auto m-4 transform transition-all duration-300 ${
-          isOpen && !isClosing ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
-        }`}
+      <div
+        className={`${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-2xl ${sizeClasses[size]} w-full max-h-[90vh] overflow-y-auto m-4 transform transition-all duration-300 ${isOpen && !isClosing ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
+          }`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className={`sticky top-0 ${darkMode ? 'bg-slate-800/95' : 'bg-white/95'} backdrop-blur-sm border-b ${darkMode ? 'border-slate-700' : 'border-gray-200'} p-6 rounded-t-2xl`}>
@@ -459,7 +448,7 @@ const Modal = React.memo(({ isOpen, onClose, title, children, size = "md" }) => 
 // Main Component
 const TenantDashboard = () => {
   const { darkMode } = useDarkMode();
-  
+
   // Initial data with enhanced properties
   const INITIAL_PROPERTIES = [
     {
@@ -614,10 +603,10 @@ const TenantDashboard = () => {
     description: '',
     priority: 'Medium'
   });
-  const [editRequestData, setEditRequestData] = useState({ 
-    title: '', 
-    description: '', 
-    priority: 'Medium' 
+  const [editRequestData, setEditRequestData] = useState({
+    title: '',
+    description: '',
+    priority: 'Medium'
   });
   const [newProperty, setNewProperty] = useState({
     title: '',
@@ -679,12 +668,12 @@ const TenantDashboard = () => {
       filtered = [...filtered].sort((a, b) => {
         let aValue = a[sortKey];
         let bValue = b[sortKey];
-        
+
         if (sortKey === 'price') {
           aValue = extractNumericValue(aValue);
           bValue = extractNumericValue(bValue);
         }
-        
+
         if (aValue < bValue) return sortAsc ? -1 : 1;
         if (aValue > bValue) return sortAsc ? 1 : -1;
         return 0;
@@ -786,15 +775,15 @@ const TenantDashboard = () => {
         isError: true,
         message: 'Please fill in all required fields'
       });
-      
+
       // Clear error message after 3 seconds
       setTimeout(() => {
         setFormSubmitStatus(prev => ({ ...prev, isError: false, message: '' }));
       }, 3000);
-      
+
       return;
     }
-    
+
     // Set submitting state
     setFormSubmitStatus({
       isSubmitting: true,
@@ -802,7 +791,7 @@ const TenantDashboard = () => {
       isError: false,
       message: 'Submitting request...'
     });
-    
+
     // Simulate API call with timeout
     setTimeout(() => {
       try {
@@ -815,9 +804,9 @@ const TenantDashboard = () => {
           date: new Date().toISOString().split('T')[0],
           photos: maintenanceForm.photos
         };
-        
+
         setMaintenanceRequests(prev => [...prev, request]);
-        
+
         // Reset form
         setMaintenanceForm({
           issueType: '',
@@ -825,7 +814,7 @@ const TenantDashboard = () => {
           description: '',
           photos: []
         });
-        
+
         // Show success message
         setFormSubmitStatus({
           isSubmitting: false,
@@ -833,12 +822,12 @@ const TenantDashboard = () => {
           isError: false,
           message: 'Maintenance request submitted successfully!'
         });
-        
+
         // Clear success message after 3 seconds
         setTimeout(() => {
           setFormSubmitStatus(prev => ({ ...prev, isSuccess: false, message: '' }));
         }, 3000);
-        
+
       } catch (error) {
         // Show error message
         setFormSubmitStatus({
@@ -847,7 +836,7 @@ const TenantDashboard = () => {
           isError: true,
           message: 'Failed to submit request. Please try again.'
         });
-        
+
         // Clear error message after 3 seconds
         setTimeout(() => {
           setFormSubmitStatus(prev => ({ ...prev, isError: false, message: '' }));
@@ -868,7 +857,7 @@ const TenantDashboard = () => {
       setNewMaintenanceRequest({ title: '', description: '', priority: 'Medium' });
     }
   }, [newMaintenanceRequest, setMaintenanceRequests]);
-  
+
   const sendMessage = useCallback(() => {
     if (newMessage.trim() || attachments.length) {
       const newMsg = {
@@ -920,13 +909,13 @@ const TenantDashboard = () => {
 
   return (
     <div className={`flex h-screen transition-colors duration-500 ${darkMode
-        ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100'
-        : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 text-gray-900'
-        }`}>
+      ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100'
+      : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 text-gray-900'
+      }`}>
       <TenantSideBar setCurrentSection={setCurrentSection} />
       <div className="flex flex-col flex-1">
         <TenantNavBar currentSection={currentSection} />
-        
+
         <main
           className="flex-1 p-6 overflow-y-auto custom-scrollbar"
           role="main"
@@ -934,11 +923,11 @@ const TenantDashboard = () => {
         >
           {/* Enhanced Hero Section */}
           <div className="relative mb-12 overflow-hidden">
-            <div className={`rounded-3xl p-8 text-white shadow-2xl ${darkMode 
-              ? 'bg-gradient-to-r from-blue-950 via-slate-900 to-gray-900' 
+            <div className={`rounded-3xl p-8 text-white shadow-2xl ${darkMode
+              ? 'bg-gradient-to-r from-blue-950 via-slate-900 to-gray-900'
               : 'bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600'}`}>
-              <div className={`absolute inset-0 backdrop-blur-sm ${darkMode 
-                ? 'bg-gradient-to-r from-blue-900/20 to-slate-800/20' 
+              <div className={`absolute inset-0 backdrop-blur-sm ${darkMode
+                ? 'bg-gradient-to-r from-blue-900/20 to-slate-800/20'
                 : 'bg-gradient-to-r from-blue-600/20 to-purple-600/20'}`}></div>
               <div className="relative z-10">
                 <div className="flex items-center mb-6">
@@ -947,18 +936,18 @@ const TenantDashboard = () => {
                   </div>
                   <div>
                     <h1 className="text-4xl font-extrabold mb-2 animate-slideDown">
-                      Welcome Back! 
+                      Welcome Back!
                     </h1>
                     <p className="text-blue-100 text-lg animate-slideUp">
                       Your rental journey continues here
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
                   <FloatingCard delay={0}>
-                    <div className={`backdrop-blur-md rounded-2xl p-6 border transition-all duration-300 ${darkMode 
-                      ? 'bg-slate-800/50 border-slate-700/50 hover:bg-slate-700/50' 
+                    <div className={`backdrop-blur-md rounded-2xl p-6 border transition-all duration-300 ${darkMode
+                      ? 'bg-slate-800/50 border-slate-700/50 hover:bg-slate-700/50'
                       : 'bg-white/10 border-white/20 hover:bg-white/20'}`}>
                       <div className="flex items-center justify-between">
                         <div>
@@ -973,8 +962,8 @@ const TenantDashboard = () => {
                   </FloatingCard>
 
                   <FloatingCard delay={200}>
-                    <div className={`backdrop-blur-md rounded-2xl p-6 border transition-all duration-300 ${darkMode 
-                      ? 'bg-slate-800/50 border-slate-700/50 hover:bg-slate-700/50' 
+                    <div className={`backdrop-blur-md rounded-2xl p-6 border transition-all duration-300 ${darkMode
+                      ? 'bg-slate-800/50 border-slate-700/50 hover:bg-slate-700/50'
                       : 'bg-white/10 border-white/20 hover:bg-white/20'}`}>
                       <div className="flex items-center justify-between">
                         <div>
@@ -989,8 +978,8 @@ const TenantDashboard = () => {
                   </FloatingCard>
 
                   <FloatingCard delay={400}>
-                    <div className={`backdrop-blur-md rounded-2xl p-6 border transition-all duration-300 ${darkMode 
-                      ? 'bg-slate-800/50 border-slate-700/50 hover:bg-slate-700/50' 
+                    <div className={`backdrop-blur-md rounded-2xl p-6 border transition-all duration-300 ${darkMode
+                      ? 'bg-slate-800/50 border-slate-700/50 hover:bg-slate-700/50'
                       : 'bg-white/10 border-white/20 hover:bg-white/20'}`}>
                       <div className="flex items-center justify-between">
                         <div>
@@ -1012,15 +1001,15 @@ const TenantDashboard = () => {
           <div className="mb-8">
             <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4`}>
               {/* Analytics Overview Button */}
-              <button 
-                onClick={() => setCurrentSection('Analytics')} 
-                className={`flex items-center p-4 rounded-xl transition-all duration-300 hover:scale-105 ${darkMode 
-                  ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700' 
+              <button
+                onClick={() => setCurrentSection('Analytics')}
+                className={`flex items-center p-4 rounded-xl transition-all duration-300 hover:scale-105 ${darkMode
+                  ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
                   : 'bg-white hover:bg-blue-50 border border-gray-200 hover:border-blue-200'} 
                   ${currentSection === 'Analytics' ? (darkMode ? 'ring-2 ring-blue-500' : 'ring-2 ring-blue-500') : ''}`}
               >
-                <div className={`p-3 rounded-lg mr-3 ${darkMode 
-                  ? 'bg-blue-900/50 text-blue-400' 
+                <div className={`p-3 rounded-lg mr-3 ${darkMode
+                  ? 'bg-blue-900/50 text-blue-400'
                   : 'bg-blue-100 text-blue-600'}`}>
                   <ChartBarIcon className="h-6 w-6" />
                 </div>
@@ -1031,15 +1020,15 @@ const TenantDashboard = () => {
               </button>
 
               {/* Favorite Properties Button */}
-              <button 
-                onClick={() => setCurrentSection('Favorites')} 
-                className={`flex items-center p-4 rounded-xl transition-all duration-300 hover:scale-105 ${darkMode 
-                  ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700' 
+              <button
+                onClick={() => setCurrentSection('Favorites')}
+                className={`flex items-center p-4 rounded-xl transition-all duration-300 hover:scale-105 ${darkMode
+                  ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
                   : 'bg-white hover:bg-red-50 border border-gray-200 hover:border-red-200'} 
                   ${currentSection === 'Favorites' ? (darkMode ? 'ring-2 ring-red-500' : 'ring-2 ring-red-500') : ''}`}
               >
-                <div className={`p-3 rounded-lg mr-3 ${darkMode 
-                  ? 'bg-red-900/50 text-red-400' 
+                <div className={`p-3 rounded-lg mr-3 ${darkMode
+                  ? 'bg-red-900/50 text-red-400'
                   : 'bg-red-100 text-red-600'}`}>
                   <HeartSolidIcon className="h-6 w-6" />
                 </div>
@@ -1050,15 +1039,15 @@ const TenantDashboard = () => {
               </button>
 
               {/* Notifications Button */}
-              <button 
-                onClick={() => setCurrentSection('Notifications')} 
-                className={`flex items-center p-4 rounded-xl transition-all duration-300 hover:scale-105 ${darkMode 
-                  ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700' 
+              <button
+                onClick={() => setCurrentSection('Notifications')}
+                className={`flex items-center p-4 rounded-xl transition-all duration-300 hover:scale-105 ${darkMode
+                  ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
                   : 'bg-white hover:bg-yellow-50 border border-gray-200 hover:border-yellow-200'} 
                   ${currentSection === 'Notifications' ? (darkMode ? 'ring-2 ring-yellow-500' : 'ring-2 ring-yellow-500') : ''}`}
               >
-                <div className={`p-3 rounded-lg mr-3 relative ${darkMode 
-                  ? 'bg-yellow-900/50 text-yellow-400' 
+                <div className={`p-3 rounded-lg mr-3 relative ${darkMode
+                  ? 'bg-yellow-900/50 text-yellow-400'
                   : 'bg-yellow-100 text-yellow-600'}`}>
                   <BellIcon className="h-6 w-6" />
                   {analyticsData.unreadNotifications > 0 && (
@@ -1074,15 +1063,15 @@ const TenantDashboard = () => {
               </button>
 
               {/* Maintenance Button */}
-              <button 
-                onClick={() => setCurrentSection('Maintenance')} 
-                className={`flex items-center p-4 rounded-xl transition-all duration-300 hover:scale-105 ${darkMode 
-                  ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700' 
+              <button
+                onClick={() => setCurrentSection('Maintenance')}
+                className={`flex items-center p-4 rounded-xl transition-all duration-300 hover:scale-105 ${darkMode
+                  ? 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
                   : 'bg-white hover:bg-green-50 border border-gray-200 hover:border-green-200'} 
                   ${currentSection === 'Maintenance' ? (darkMode ? 'ring-2 ring-green-500' : 'ring-2 ring-green-500') : ''}`}
               >
-                <div className={`p-3 rounded-lg mr-3 ${darkMode 
-                  ? 'bg-green-900/50 text-green-400' 
+                <div className={`p-3 rounded-lg mr-3 ${darkMode
+                  ? 'bg-green-900/50 text-green-400'
                   : 'bg-green-100 text-green-600'}`}>
                   <WrenchScrewdriverIcon className="h-6 w-6" />
                 </div>
@@ -1096,8 +1085,8 @@ const TenantDashboard = () => {
 
           {/* Dashboard Welcome Section - Only visible when no section is selected */}
           <div className={`mb-12 ${currentSection !== 'Dashboard' ? 'hidden' : ''}`}>
-            <div className={`rounded-3xl p-8 text-center ${darkMode 
-              ? 'bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700' 
+            <div className={`rounded-3xl p-8 text-center ${darkMode
+              ? 'bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700'
               : 'bg-white border border-gray-200 shadow-lg'}`}>
               <div className="max-w-2xl mx-auto">
                 <div className="mb-6">
@@ -1152,8 +1141,8 @@ const TenantDashboard = () => {
           {/* Enhanced Analytics Section */}
           <div className={`mb-12 ${currentSection !== 'Analytics' ? 'hidden' : ''}`}>
             <div className="flex items-center mb-8">
-              <div className={`p-3 rounded-2xl mr-4 ${darkMode 
-                ? 'bg-gradient-to-r from-blue-700 to-indigo-800' 
+              <div className={`p-3 rounded-2xl mr-4 ${darkMode
+                ? 'bg-gradient-to-r from-blue-700 to-indigo-800'
                 : 'bg-gradient-to-r from-blue-500 to-purple-600'}`}>
                 <ChartBarIcon className="h-8 w-8 text-white" />
               </div>
@@ -1164,8 +1153,8 @@ const TenantDashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <AnalyticsWidget 
-                title="Monthly Rent Trend" 
+              <AnalyticsWidget
+                title="Monthly Rent Trend"
                 icon={<ArrowTrendingUpIcon className={`h-6 w-6 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />}
                 gradient={darkMode ? 'from-slate-800 to-blue-900' : 'from-blue-50 to-indigo-100'}
               >
@@ -1173,26 +1162,26 @@ const TenantDashboard = () => {
                   <AreaChart data={analyticsData.monthlyRentData}>
                     <defs>
                       <linearGradient id="rentGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={darkMode ? "#60a5fa" : "#3b82f6"} stopOpacity={0.8}/>
-                        <stop offset="95%" stopColor={darkMode ? "#60a5fa" : "#3b82f6"} stopOpacity={0.1}/>
+                        <stop offset="5%" stopColor={darkMode ? "#60a5fa" : "#3b82f6"} stopOpacity={0.8} />
+                        <stop offset="95%" stopColor={darkMode ? "#60a5fa" : "#3b82f6"} stopOpacity={0.1} />
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                     <YAxis tick={{ fontSize: 12 }} />
-                    <Tooltip 
+                    <Tooltip
                       formatter={(value) => [formatCurrency(value), 'Rent']}
-                      contentStyle={{ 
-                        backgroundColor: darkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)', 
+                      contentStyle={{
+                        backgroundColor: darkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)',
                         borderRadius: '12px',
                         border: 'none',
                         boxShadow: darkMode ? '0 10px 25px rgba(0, 0, 0, 0.3)' : '0 10px 25px rgba(0, 0, 0, 0.1)',
                         color: darkMode ? '#e2e8f0' : 'inherit'
                       }}
                     />
-                    <Area 
-                      type="monotone" 
-                      dataKey="rent" 
-                      stroke="#3b82f6" 
+                    <Area
+                      type="monotone"
+                      dataKey="rent"
+                      stroke="#3b82f6"
                       strokeWidth={3}
                       fill="url(#rentGradient)"
                     />
@@ -1200,19 +1189,19 @@ const TenantDashboard = () => {
                 </ResponsiveContainer>
               </AnalyticsWidget>
 
-              <AnalyticsWidget 
-                title="Payment Breakdown" 
+              <AnalyticsWidget
+                title="Payment Breakdown"
                 icon={<CurrencyDollarIcon className={`h-6 w-6 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />}
                 gradient={darkMode ? 'from-slate-800 to-green-900' : 'from-green-50 to-emerald-100'}
               >
                 <ResponsiveContainer width="100%" height={120}>
                   <PieChart>
-                    <Pie 
-                      data={analyticsData.paymentBreakdownData} 
-                      dataKey="value" 
-                      nameKey="name" 
-                      cx="50%" 
-                      cy="50%" 
+                    <Pie
+                      data={analyticsData.paymentBreakdownData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
                       outerRadius={45}
                       innerRadius={25}
                     >
@@ -1220,10 +1209,10 @@ const TenantDashboard = () => {
                         <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip 
+                    <Tooltip
                       formatter={(value) => [formatCurrency(value)]}
-                      contentStyle={{ 
-                        backgroundColor: darkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)', 
+                      contentStyle={{
+                        backgroundColor: darkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)',
                         borderRadius: '12px',
                         border: 'none',
                         boxShadow: darkMode ? '0 10px 25px rgba(0, 0, 0, 0.3)' : '0 10px 25px rgba(0, 0, 0, 0.1)',
@@ -1234,8 +1223,8 @@ const TenantDashboard = () => {
                 </ResponsiveContainer>
               </AnalyticsWidget>
 
-              <AnalyticsWidget 
-                title="Maintenance Status" 
+              <AnalyticsWidget
+                title="Maintenance Status"
                 icon={<WrenchScrewdriverIcon className={`h-6 w-6 ${darkMode ? 'text-orange-400' : 'text-orange-600'}`} />}
                 gradient={darkMode ? 'from-slate-800 to-orange-900' : 'from-orange-50 to-red-100'}
               >
@@ -1243,9 +1232,9 @@ const TenantDashboard = () => {
                   <BarChart data={analyticsData.maintenanceTimelineData}>
                     <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                     <YAxis tick={{ fontSize: 12 }} />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: darkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)', 
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: darkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)',
                         borderRadius: '12px',
                         border: 'none',
                         boxShadow: darkMode ? '0 10px 25px rgba(0, 0, 0, 0.3)' : '0 10px 25px rgba(0, 0, 0, 0.1)',
@@ -1257,8 +1246,8 @@ const TenantDashboard = () => {
                 </ResponsiveContainer>
               </AnalyticsWidget>
 
-              <AnalyticsWidget 
-                title="Total Paid This Year" 
+              <AnalyticsWidget
+                title="Total Paid This Year"
                 icon={<TrophyIcon className={`h-6 w-6 ${darkMode ? 'text-yellow-400' : 'text-yellow-600'}`} />}
                 gradient={darkMode ? 'from-slate-800 to-yellow-900' : 'from-yellow-50 to-orange-100'}
               >
@@ -1270,8 +1259,8 @@ const TenantDashboard = () => {
                 </div>
               </AnalyticsWidget>
 
-              <AnalyticsWidget 
-                title="Notifications Summary" 
+              <AnalyticsWidget
+                title="Notifications Summary"
                 icon={<BellIcon className={`h-6 w-6 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`} />}
                 gradient={darkMode ? 'from-slate-800 to-purple-900' : 'from-purple-50 to-pink-100'}
               >
@@ -1291,13 +1280,13 @@ const TenantDashboard = () => {
                 </div>
               </AnalyticsWidget>
 
-              <AnalyticsWidget 
-                title="Quick Actions" 
+              <AnalyticsWidget
+                title="Quick Actions"
                 icon={<FireIcon className={`h-6 w-6 ${darkMode ? 'text-red-400' : 'text-red-600'}`} />}
                 gradient={darkMode ? 'from-slate-800 to-red-900' : 'from-red-50 to-pink-100'}
               >
                 <div className="space-y-2">
-                  <GlowingButton 
+                  <GlowingButton
                     className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg text-sm group"
                     onClick={() => alert('Export feature coming soon!')}
                   >
@@ -1313,8 +1302,8 @@ const TenantDashboard = () => {
           <div className={`mb-12 ${currentSection !== 'Favorites' ? 'hidden' : ''}`}>
             <div className="flex items-center mb-8">
               <div className="flex items-center">
-                <div className={`p-3 rounded-2xl mr-4 ${darkMode 
-                  ? 'bg-gradient-to-r from-red-700 to-pink-800' 
+                <div className={`p-3 rounded-2xl mr-4 ${darkMode
+                  ? 'bg-gradient-to-r from-red-700 to-pink-800'
                   : 'bg-gradient-to-r from-red-500 to-pink-600'}`}>
                   <HeartSolidIcon className="h-8 w-8 text-white" />
                 </div>
@@ -1333,8 +1322,8 @@ const TenantDashboard = () => {
                     placeholder="Search properties..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className={`w-full pl-10 pr-4 py-2 rounded-xl border ${darkMode 
-                      ? 'bg-slate-800 border-slate-700 focus:border-blue-500 text-slate-200' 
+                    className={`w-full pl-10 pr-4 py-2 rounded-xl border ${darkMode
+                      ? 'bg-slate-800 border-slate-700 focus:border-blue-500 text-slate-200'
                       : 'bg-white border-gray-300 focus:border-blue-500 text-gray-700'} focus:outline-none focus:ring-2 focus:ring-blue-500/40`}
                   />
                   <div className="absolute left-3 top-2.5">
@@ -1346,8 +1335,8 @@ const TenantDashboard = () => {
                 <div className="flex space-x-2">
                   <button
                     onClick={() => toggleSort('price')}
-                    className={`flex items-center px-3 py-2 rounded-lg border transition-colors duration-200 ${darkMode 
-                      ? 'bg-slate-800 border-slate-700 hover:bg-slate-700 text-slate-200' 
+                    className={`flex items-center px-3 py-2 rounded-lg border transition-colors duration-200 ${darkMode
+                      ? 'bg-slate-800 border-slate-700 hover:bg-slate-700 text-slate-200'
                       : 'bg-white border-gray-300 hover:bg-gray-100 text-gray-700'}`}
                   >
                     <span>Price</span>
@@ -1357,8 +1346,8 @@ const TenantDashboard = () => {
                   </button>
                   <button
                     onClick={() => toggleSort('title')}
-                    className={`flex items-center px-3 py-2 rounded-lg border transition-colors duration-200 ${darkMode 
-                      ? 'bg-slate-800 border-slate-700 hover:bg-slate-700 text-slate-200' 
+                    className={`flex items-center px-3 py-2 rounded-lg border transition-colors duration-200 ${darkMode
+                      ? 'bg-slate-800 border-slate-700 hover:bg-slate-700 text-slate-200'
                       : 'bg-white border-gray-300 hover:bg-gray-100 text-gray-700'}`}
                   >
                     <span>Name</span>
@@ -1392,8 +1381,8 @@ const TenantDashboard = () => {
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className={`px-4 py-2 rounded-lg transition-colors duration-200 ${darkMode 
-                      ? 'bg-slate-800 border border-slate-700 text-slate-200 disabled:opacity-50' 
+                    className={`px-4 py-2 rounded-lg transition-colors duration-200 ${darkMode
+                      ? 'bg-slate-800 border border-slate-700 text-slate-200 disabled:opacity-50'
                       : 'bg-white border border-gray-300 text-gray-700 disabled:opacity-50'}`}
                   >
                     Previous
@@ -1402,12 +1391,12 @@ const TenantDashboard = () => {
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`px-4 py-2 rounded-lg transition-colors duration-200 ${darkMode 
-                        ? currentPage === page 
-                          ? 'bg-blue-700 text-white' 
-                          : 'bg-slate-800 border border-slate-700 text-slate-200' 
-                        : currentPage === page 
-                          ? 'bg-blue-600 text-white' 
+                      className={`px-4 py-2 rounded-lg transition-colors duration-200 ${darkMode
+                        ? currentPage === page
+                          ? 'bg-blue-700 text-white'
+                          : 'bg-slate-800 border border-slate-700 text-slate-200'
+                        : currentPage === page
+                          ? 'bg-blue-600 text-white'
                           : 'bg-white border border-gray-300 text-gray-700'}`}
                     >
                       {page}
@@ -1416,8 +1405,8 @@ const TenantDashboard = () => {
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className={`px-4 py-2 rounded-lg transition-colors duration-200 ${darkMode 
-                      ? 'bg-slate-800 border border-slate-700 text-slate-200 disabled:opacity-50' 
+                    className={`px-4 py-2 rounded-lg transition-colors duration-200 ${darkMode
+                      ? 'bg-slate-800 border border-slate-700 text-slate-200 disabled:opacity-50'
                       : 'bg-white border border-gray-300 text-gray-700 disabled:opacity-50'}`}
                   >
                     Next
@@ -1430,8 +1419,8 @@ const TenantDashboard = () => {
           {/* Notifications Section */}
           <div className={`mb-12 ${currentSection !== 'Notifications' ? 'hidden' : ''}`}>
             <div className="flex items-center mb-8">
-              <div className={`p-3 rounded-2xl mr-4 ${darkMode 
-                ? 'bg-gradient-to-r from-yellow-700 to-orange-800' 
+              <div className={`p-3 rounded-2xl mr-4 ${darkMode
+                ? 'bg-gradient-to-r from-yellow-700 to-orange-800'
                 : 'bg-gradient-to-r from-yellow-500 to-orange-600'}`}>
                 <BellIcon className="h-8 w-8 text-white" />
               </div>
@@ -1465,8 +1454,8 @@ const TenantDashboard = () => {
           {/* Maintenance Section */}
           <div className={`mb-12 ${currentSection !== 'Maintenance' ? 'hidden' : ''}`}>
             <div className="flex items-center mb-8">
-              <div className={`p-3 rounded-2xl mr-4 ${darkMode 
-                ? 'bg-gradient-to-r from-green-700 to-teal-800' 
+              <div className={`p-3 rounded-2xl mr-4 ${darkMode
+                ? 'bg-gradient-to-r from-green-700 to-teal-800'
                 : 'bg-gradient-to-r from-green-500 to-teal-600'}`}>
                 <WrenchScrewdriverIcon className="h-8 w-8 text-white" />
               </div>
@@ -1490,11 +1479,11 @@ const TenantDashboard = () => {
                         Issue Type <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
-                        <select 
+                        <select
                           value={maintenanceForm.issueType}
-                          onChange={(e) => setMaintenanceForm({...maintenanceForm, issueType: e.target.value})}
-                          className={`w-full p-4 pl-12 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500/40 ${darkMode 
-                            ? 'bg-slate-700 border-slate-600 text-slate-200 hover:border-green-500/50' 
+                          onChange={(e) => setMaintenanceForm({ ...maintenanceForm, issueType: e.target.value })}
+                          className={`w-full p-4 pl-12 rounded-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500/40 ${darkMode
+                            ? 'bg-slate-700 border-slate-600 text-slate-200 hover:border-green-500/50'
                             : 'bg-white border-gray-300 text-gray-700 hover:border-green-500/50'}`}
                         >
                           <option value="">Select issue type</option>
@@ -1511,7 +1500,7 @@ const TenantDashboard = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Priority Field with Visual Indicators */}
                     <div>
                       <label className={`block mb-2 font-medium ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
@@ -1520,45 +1509,45 @@ const TenantDashboard = () => {
                       <div className="grid grid-cols-4 gap-3">
                         <button
                           type="button"
-                          onClick={() => setMaintenanceForm({...maintenanceForm, priority: 'Low'})}
-                          className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-300 ${maintenanceForm.priority === 'Low' 
-                            ? (darkMode ? 'bg-blue-900/50 border-blue-700 ring-2 ring-blue-500' : 'bg-blue-100 border-blue-300 ring-2 ring-blue-500') 
+                          onClick={() => setMaintenanceForm({ ...maintenanceForm, priority: 'Low' })}
+                          className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-300 ${maintenanceForm.priority === 'Low'
+                            ? (darkMode ? 'bg-blue-900/50 border-blue-700 ring-2 ring-blue-500' : 'bg-blue-100 border-blue-300 ring-2 ring-blue-500')
                             : (darkMode ? 'bg-slate-700 border-slate-600 hover:bg-slate-600' : 'bg-white border-gray-300 hover:bg-gray-100')}`}
                         >
                           <div className={`w-4 h-4 rounded-full mb-2 ${darkMode ? 'bg-blue-500' : 'bg-blue-600'}`}></div>
                           <span className={`text-sm font-medium ${darkMode ? 'text-slate-200' : 'text-gray-700'}`}>Low</span>
                           <span className={`text-xs mt-1 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Not urgent</span>
                         </button>
-                        
+
                         <button
                           type="button"
-                          onClick={() => setMaintenanceForm({...maintenanceForm, priority: 'Medium'})}
-                          className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-300 ${maintenanceForm.priority === 'Medium' 
-                            ? (darkMode ? 'bg-yellow-900/50 border-yellow-700 ring-2 ring-yellow-500' : 'bg-yellow-100 border-yellow-300 ring-2 ring-yellow-500') 
+                          onClick={() => setMaintenanceForm({ ...maintenanceForm, priority: 'Medium' })}
+                          className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-300 ${maintenanceForm.priority === 'Medium'
+                            ? (darkMode ? 'bg-yellow-900/50 border-yellow-700 ring-2 ring-yellow-500' : 'bg-yellow-100 border-yellow-300 ring-2 ring-yellow-500')
                             : (darkMode ? 'bg-slate-700 border-slate-600 hover:bg-slate-600' : 'bg-white border-gray-300 hover:bg-gray-100')}`}
                         >
                           <div className={`w-4 h-4 rounded-full mb-2 ${darkMode ? 'bg-yellow-500' : 'bg-yellow-600'}`}></div>
                           <span className={`text-sm font-medium ${darkMode ? 'text-slate-200' : 'text-gray-700'}`}>Medium</span>
                           <span className={`text-xs mt-1 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Soon</span>
                         </button>
-                        
+
                         <button
                           type="button"
-                          onClick={() => setMaintenanceForm({...maintenanceForm, priority: 'High'})}
-                          className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-300 ${maintenanceForm.priority === 'High' 
-                            ? (darkMode ? 'bg-orange-900/50 border-orange-700 ring-2 ring-orange-500' : 'bg-orange-100 border-orange-300 ring-2 ring-orange-500') 
+                          onClick={() => setMaintenanceForm({ ...maintenanceForm, priority: 'High' })}
+                          className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-300 ${maintenanceForm.priority === 'High'
+                            ? (darkMode ? 'bg-orange-900/50 border-orange-700 ring-2 ring-orange-500' : 'bg-orange-100 border-orange-300 ring-2 ring-orange-500')
                             : (darkMode ? 'bg-slate-700 border-slate-600 hover:bg-slate-600' : 'bg-white border-gray-300 hover:bg-gray-100')}`}
                         >
                           <div className={`w-4 h-4 rounded-full mb-2 ${darkMode ? 'bg-orange-500' : 'bg-orange-600'}`}></div>
                           <span className={`text-sm font-medium ${darkMode ? 'text-slate-200' : 'text-gray-700'}`}>High</span>
                           <span className={`text-xs mt-1 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Urgent</span>
                         </button>
-                        
+
                         <button
                           type="button"
-                          onClick={() => setMaintenanceForm({...maintenanceForm, priority: 'Emergency'})}
-                          className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-300 ${maintenanceForm.priority === 'Emergency' 
-                            ? (darkMode ? 'bg-red-900/50 border-red-700 ring-2 ring-red-500' : 'bg-red-100 border-red-300 ring-2 ring-red-500') 
+                          onClick={() => setMaintenanceForm({ ...maintenanceForm, priority: 'Emergency' })}
+                          className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-300 ${maintenanceForm.priority === 'Emergency'
+                            ? (darkMode ? 'bg-red-900/50 border-red-700 ring-2 ring-red-500' : 'bg-red-100 border-red-300 ring-2 ring-red-500')
                             : (darkMode ? 'bg-slate-700 border-slate-600 hover:bg-slate-600' : 'bg-white border-gray-300 hover:bg-gray-100')}`}
                         >
                           <div className={`w-4 h-4 rounded-full mb-2 ${darkMode ? 'bg-red-500' : 'bg-red-600'}`}></div>
@@ -1567,7 +1556,7 @@ const TenantDashboard = () => {
                         </button>
                       </div>
                     </div>
-                    
+
                     {/* Description Field with Enhanced Textarea */}
                     <div>
                       <label className={`block mb-2 font-medium ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
@@ -1576,10 +1565,10 @@ const TenantDashboard = () => {
                       <div className="relative">
                         <textarea
                           value={maintenanceForm.description}
-                          onChange={(e) => setMaintenanceForm({...maintenanceForm, description: e.target.value})}
+                          onChange={(e) => setMaintenanceForm({ ...maintenanceForm, description: e.target.value })}
                           placeholder="Describe the issue in detail..."
-                          className={`w-full p-4 rounded-xl border resize-none transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500/40 ${darkMode 
-                            ? 'bg-slate-700 border-slate-600 text-slate-200 placeholder-slate-400 hover:border-green-500/50' 
+                          className={`w-full p-4 rounded-xl border resize-none transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500/40 ${darkMode
+                            ? 'bg-slate-700 border-slate-600 text-slate-200 placeholder-slate-400 hover:border-green-500/50'
                             : 'bg-white border-gray-300 text-gray-700 placeholder-gray-400 hover:border-green-500/50'}`}
                           rows="5"
                         />
@@ -1588,37 +1577,37 @@ const TenantDashboard = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Upload Photos with Enhanced UI */}
                     <div>
                       <label className={`block mb-2 font-medium ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                         Upload Photos (Optional)
                       </label>
-                      <div 
-                        className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${darkMode 
+                      <div
+                        className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${darkMode
                           ? 'border-slate-600 bg-slate-700/30 hover:border-green-500/50 hover:bg-slate-700/50'
                           : 'border-gray-300 bg-gray-50 hover:border-green-500/50 hover:bg-gray-100/80'}`}
                       >
                         <DocumentArrowDownIcon className={`h-16 w-16 mx-auto mb-4 ${darkMode ? 'text-slate-400' : 'text-gray-400'}`} />
                         <p className={`text-lg mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>Drag and drop files here</p>
                         <p className={`mb-4 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>or</p>
-                        <input 
-                          type="file" 
-                          id="maintenance-photos" 
-                          className="hidden" 
-                          multiple 
-                          accept="image/*" 
+                        <input
+                          type="file"
+                          id="maintenance-photos"
+                          className="hidden"
+                          multiple
+                          accept="image/*"
                           onChange={(e) => {
                             const files = Array.from(e.target.files);
                             if (files.length > 0) {
-                              setMaintenanceForm({...maintenanceForm, photos: files});
+                              setMaintenanceForm({ ...maintenanceForm, photos: files });
                             }
                           }}
                         />
-                        <label 
+                        <label
                           htmlFor="maintenance-photos"
-                          className={`px-6 py-3 rounded-xl text-sm inline-block cursor-pointer transition-all duration-300 ${darkMode 
-                            ? 'bg-green-700 hover:bg-green-600 text-white' 
+                          className={`px-6 py-3 rounded-xl text-sm inline-block cursor-pointer transition-all duration-300 ${darkMode
+                            ? 'bg-green-700 hover:bg-green-600 text-white'
                             : 'bg-green-600 hover:bg-green-700 text-white'}`}>
                           <div className="flex items-center">
                             <PlusIcon className="h-5 w-5 mr-2" />
@@ -1626,7 +1615,7 @@ const TenantDashboard = () => {
                           </div>
                         </label>
                         <p className={`mt-4 text-sm ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Maximum 5 photos, 5MB each</p>
-                        
+
                         {/* Photo Preview Section */}
                         {maintenanceForm.photos.length > 0 && (
                           <div className="mt-6 border-t pt-4 border-dashed border-gray-300">
@@ -1637,18 +1626,18 @@ const TenantDashboard = () => {
                               {Array.from(maintenanceForm.photos).map((file, index) => (
                                 <div key={index} className="relative group">
                                   <div className={`w-20 h-20 rounded-lg overflow-hidden border-2 ${darkMode ? 'border-slate-600' : 'border-gray-300'}`}>
-                                    <img 
-                                      src={URL.createObjectURL(file)} 
-                                      alt={`Preview ${index}`} 
+                                    <img
+                                      src={URL.createObjectURL(file)}
+                                      alt={`Preview ${index}`}
                                       className="w-full h-full object-cover"
                                     />
                                   </div>
-                                  <button 
+                                  <button
                                     type="button"
                                     onClick={() => {
                                       const newPhotos = Array.from(maintenanceForm.photos);
                                       newPhotos.splice(index, 1);
-                                      setMaintenanceForm({...maintenanceForm, photos: newPhotos});
+                                      setMaintenanceForm({ ...maintenanceForm, photos: newPhotos });
                                     }}
                                     className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                                   >
@@ -1661,15 +1650,15 @@ const TenantDashboard = () => {
                         )}
                       </div>
                     </div>
-                    
+
                     {/* Form Status Feedback */}
                     {formSubmitStatus.message && (
-                      <div className={`p-4 rounded-xl text-center transition-all duration-300 ${formSubmitStatus.isError 
-                        ? (darkMode ? 'bg-red-900/30 text-red-300 border border-red-700' : 'bg-red-100 text-red-700 border border-red-300') 
-                        : formSubmitStatus.isSuccess 
+                      <div className={`p-4 rounded-xl text-center transition-all duration-300 ${formSubmitStatus.isError
+                        ? (darkMode ? 'bg-red-900/30 text-red-300 border border-red-700' : 'bg-red-100 text-red-700 border border-red-300')
+                        : formSubmitStatus.isSuccess
                           ? (darkMode ? 'bg-green-900/30 text-green-300 border border-green-700' : 'bg-green-100 text-green-700 border border-green-300')
                           : (darkMode ? 'bg-blue-900/30 text-blue-300 border border-blue-700' : 'bg-blue-100 text-blue-700 border border-blue-300')
-                      }`}>
+                        }`}>
                         <div className="flex items-center justify-center">
                           {formSubmitStatus.isError && (
                             <ExclamationTriangleIcon className="h-5 w-5 mr-2 text-red-500" />
@@ -1684,15 +1673,15 @@ const TenantDashboard = () => {
                         </div>
                       </div>
                     )}
-                    
+
                     {/* Submit Button with Glowing Effect */}
                     <div className="pt-6">
-                      <GlowingButton 
+                      <GlowingButton
                         onClick={handleMaintenanceSubmit}
                         disabled={formSubmitStatus.isSubmitting}
-                        className={`w-full py-4 rounded-xl font-medium text-white flex items-center justify-center transition-all duration-300 ${darkMode 
-                        ? 'bg-gradient-to-r from-green-700 to-teal-700' 
-                        : 'bg-gradient-to-r from-green-600 to-teal-600'} ${formSubmitStatus.isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        className={`w-full py-4 rounded-xl font-medium text-white flex items-center justify-center transition-all duration-300 ${darkMode
+                          ? 'bg-gradient-to-r from-green-700 to-teal-700'
+                          : 'bg-gradient-to-r from-green-600 to-teal-600'} ${formSubmitStatus.isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
                         glowColor="green"
                       >
                         {formSubmitStatus.isSubmitting ? (
@@ -1728,9 +1717,9 @@ const TenantDashboard = () => {
           {selectedProperty && (
             <div className="space-y-6">
               <div className="relative h-64 rounded-2xl overflow-hidden">
-                <img 
-                  src={selectedProperty.image} 
-                  alt={selectedProperty.title} 
+                <img
+                  src={selectedProperty.image}
+                  alt={selectedProperty.title}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
@@ -1739,7 +1728,7 @@ const TenantDashboard = () => {
                   <p className="text-lg">{selectedProperty.price}</p>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className={`font-semibold mb-3 flex items-center ${darkMode ? 'text-slate-100' : 'text-gray-900'}`}>

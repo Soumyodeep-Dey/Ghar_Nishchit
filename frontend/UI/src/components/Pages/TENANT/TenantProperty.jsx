@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useDarkMode } from '../../../DarkModeContext';
+import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
-import { 
-  BuildingOfficeIcon, 
-  HeartIcon, 
-  EyeIcon, 
-  MapPinIcon, 
+import {
+  BuildingOfficeIcon,
+  HeartIcon,
+  EyeIcon,
+  MapPinIcon,
   CurrencyDollarIcon,
   XMarkIcon,
   FunnelIcon,
@@ -65,7 +65,7 @@ const useIntersectionObserver = (options = {}) => {
 // Floating Animation Component
 const FloatingCard = ({ children, delay = 0 }) => {
   return (
-    <div 
+    <div
       className="animate-float"
       style={{
         animationDelay: `${delay}ms`,
@@ -108,18 +108,16 @@ const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, in
   return (
     <div
       ref={setRef}
-      className={`transform transition-all duration-700 ease-out ${
-        isVisible 
-          ? 'translate-y-0 opacity-100' 
+      className={`transform transition-all duration-700 ease-out ${isVisible
+          ? 'translate-y-0 opacity-100'
           : 'translate-y-8 opacity-0'
-      }`}
+        }`}
       style={{ transitionDelay: `${index * 100}ms` }}
     >
       <FloatingCard delay={index * 200}>
-        <div 
-          className={`${darkMode ? 'bg-slate-800 text-white' : 'bg-white'} rounded-xl shadow-lg overflow-hidden transition-all duration-500 hover:shadow-2xl hover:scale-105 cursor-pointer group ${
-            isHovered ? `ring-2 ${darkMode ? 'ring-cyan-400' : 'ring-blue-400'} ring-opacity-50` : ''
-          }`}
+        <div
+          className={`${darkMode ? 'bg-slate-800 text-white' : 'bg-white'} rounded-xl shadow-lg overflow-hidden transition-all duration-500 hover:shadow-2xl hover:scale-105 cursor-pointer group ${isHovered ? `ring-2 ${darkMode ? 'ring-cyan-400' : 'ring-blue-400'} ring-opacity-50` : ''
+            }`}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
@@ -127,19 +125,18 @@ const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, in
             {!imageLoaded && (
               <div className="absolute inset-0 bg-gray-300 animate-pulse"></div>
             )}
-            <img 
-              src={property.image} 
-              alt={property.title} 
-              className={`w-full h-48 object-cover transition-transform duration-700 group-hover:scale-110 ${
-                imageLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
+            <img
+              src={property.image}
+              alt={property.title}
+              className={`w-full h-48 object-cover transition-transform duration-700 group-hover:scale-110 ${imageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
               onLoad={() => setImageLoaded(true)}
               loading="lazy"
             />
-            
+
             {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            
+
             {/* Favorite Button with Animation */}
             <button
               onClick={(e) => {
@@ -168,21 +165,21 @@ const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, in
               {property.price}
             </div>
           </div>
-          
+
           <div className="p-5">
             <div className="flex items-start justify-between mb-2">
               <h3 className={`font-bold text-lg mb-1 group-hover:${darkMode ? 'text-cyan-400' : 'text-blue-600'} transition-colors duration-300 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                 {property.title}
               </h3>
             </div>
-            
+
             <p className={`${darkMode ? 'text-slate-300' : 'text-gray-600'} text-sm mb-3 flex items-center`}>
               <MapPinIcon className={`h-4 w-4 mr-1 ${darkMode ? 'text-slate-400' : 'text-gray-400'}`} />
               {property.location}
             </p>
-            
+
             <p className={`${darkMode ? 'text-slate-400' : 'text-gray-700'} mb-4 text-sm line-clamp-2`}>{property.description}</p>
-            
+
             <div className="flex justify-between items-center mb-4">
               <div className="flex space-x-4 text-sm">
                 <span className={`flex items-center ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>
@@ -195,7 +192,7 @@ const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, in
                 </span>
               </div>
             </div>
-            
+
             <div className="flex justify-between items-center">
               <button
                 onClick={() => onViewDetails(property)}
@@ -253,17 +250,15 @@ const PropertyModal = ({ property, isOpen, onClose, onToggleFavorite }) => {
   if (!isOpen && !isClosing) return null;
 
   return (
-    <div 
-      className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 ${
-        isOpen && !isClosing ? 'opacity-100' : 'opacity-0'
-      }`}
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 ${isOpen && !isClosing ? 'opacity-100' : 'opacity-0'
+        }`}
       style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }}
       onClick={handleClose}
     >
-      <div 
-        className={`bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto m-4 transform transition-all duration-300 ${
-          isOpen && !isClosing ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
-        }`}
+      <div
+        className={`bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto m-4 transform transition-all duration-300 ${isOpen && !isClosing ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
+          }`}
         onClick={(e) => e.stopPropagation()}
       >
         {property && (
@@ -280,13 +275,13 @@ const PropertyModal = ({ property, isOpen, onClose, onToggleFavorite }) => {
 
             {/* Image with gradient overlay */}
             <div className="relative h-96 overflow-hidden rounded-t-2xl">
-              <img 
-                src={property.image} 
-                alt={property.title} 
+              <img
+                src={property.image}
+                alt={property.title}
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-              
+
               {/* Favorite button */}
               <button
                 onClick={() => onToggleFavorite(property.id)}
@@ -336,8 +331,8 @@ const PropertyModal = ({ property, isOpen, onClose, onToggleFavorite }) => {
                     <h4 className="font-semibold text-gray-900 mb-3">Features</h4>
                     <div className="grid grid-cols-2 gap-2">
                       {['WiFi', 'Parking', 'Gym', 'Pool', 'Balcony', 'AC'].map((feature, index) => (
-                        <div 
-                          key={feature} 
+                        <div
+                          key={feature}
                           className="flex items-center text-sm text-gray-600 animate-fadeIn"
                           style={{ animationDelay: `${index * 100}ms` }}
                         >
@@ -463,10 +458,10 @@ const TenantProperty = () => {
   }, []);
 
   const toggleFavorite = useCallback((id) => {
-    setProperties(prev => 
-      prev.map(property => 
-        property.id === id 
-          ? { ...property, favorite: !property.favorite } 
+    setProperties(prev =>
+      prev.map(property =>
+        property.id === id
+          ? { ...property, favorite: !property.favorite }
           : property
       )
     );
@@ -479,15 +474,15 @@ const TenantProperty = () => {
   const filteredAndSortedProperties = useMemo(() => {
     let filtered = properties.filter(property => {
       const matchesSearch = property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            property.location.toLowerCase().includes(searchTerm.toLowerCase());
-      
+        property.location.toLowerCase().includes(searchTerm.toLowerCase());
+
       const price = extractPrice(property.price);
       const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
-      
+
       if (filter === 'favorite') {
         return matchesSearch && property.favorite && matchesPrice;
       }
-      
+
       return matchesSearch && matchesPrice;
     });
 
@@ -515,7 +510,7 @@ const TenantProperty = () => {
           <main className={`flex-1 p-6 overflow-y-auto ${darkMode
             ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100'
             : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 text-gray-900'
-          }`}>
+            }`}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, index) => (
                 <PropertyCardSkeleton key={index} />
@@ -535,7 +530,7 @@ const TenantProperty = () => {
         <main className={`flex-1 p-6 overflow-y-auto ${darkMode
           ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100'
           : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 text-gray-900'
-        }`}>
+          }`}>
           {/* Hero Section */}
           <div className="mb-8 animate-fadeIn">
             <div className="text-center mb-6">
@@ -564,7 +559,7 @@ const TenantProperty = () => {
                   <MagnifyingGlassIcon className={`h-6 w-6 absolute left-4 top-5 ${darkMode ? 'text-slate-400' : 'text-gray-400'}`} />
                 </div>
               </div>
-              
+
               {/* Filters */}
               <div className="flex flex-wrap gap-3">
                 {/* Sort Dropdown */}
@@ -581,21 +576,19 @@ const TenantProperty = () => {
                 {/* Filter Buttons */}
                 <button
                   onClick={() => setFilter('all')}
-                  className={`px-6 py-3 rounded-xl transition-all duration-300 ${
-                    filter === 'all' 
-                      ? `${darkMode ? 'bg-cyan-600' : 'bg-blue-600'} text-white shadow-lg scale-105` 
+                  className={`px-6 py-3 rounded-xl transition-all duration-300 ${filter === 'all'
+                      ? `${darkMode ? 'bg-cyan-600' : 'bg-blue-600'} text-white shadow-lg scale-105`
                       : darkMode ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:scale-105' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105'
-                  }`}
+                    }`}
                 >
                   All Properties
                 </button>
                 <button
                   onClick={() => setFilter('favorite')}
-                  className={`px-6 py-3 rounded-xl flex items-center transition-all duration-300 ${
-                    filter === 'favorite' 
-                      ? 'bg-red-600 text-white shadow-lg scale-105' 
+                  className={`px-6 py-3 rounded-xl flex items-center transition-all duration-300 ${filter === 'favorite'
+                      ? 'bg-red-600 text-white shadow-lg scale-105'
                       : darkMode ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:scale-105' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105'
-                  }`}
+                    }`}
                 >
                   <HeartSolidIcon className="h-5 w-5 mr-2" />
                   Favorites

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { User, Mail, Lock, Phone, Eye, EyeOff } from 'lucide-react';
-import { useDarkMode } from '../DarkModeContext';
+import { useDarkMode } from '../useDarkMode.js';
 import p1 from '../assets/p1.jpg';
 import { signInWithGoogle, handleGoogleRedirectResult } from '../firebase';
 import { useNavigate } from 'react-router-dom';

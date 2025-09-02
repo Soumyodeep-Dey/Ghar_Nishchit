@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useDarkMode } from '../../../DarkModeContext';
+import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
-import { 
-  ChatBubbleLeftRightIcon, 
-  PaperAirplaneIcon, 
-  PaperClipIcon, 
+import {
+  ChatBubbleLeftRightIcon,
+  PaperAirplaneIcon,
+  PaperClipIcon,
   EllipsisVerticalIcon,
   PhotoIcon,
   DocumentIcon,
@@ -64,13 +64,12 @@ const useIntersectionObserver = (options = {}) => {
 // Animated Components
 const AnimatedMessage = ({ children, isOwn, index }) => {
   const [setRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });
-  
+
   return (
     <div
       ref={setRef}
-      className={`transform transition-all duration-500 ${
-        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-      }`}
+      className={`transform transition-all duration-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+        }`}
       style={{ transitionDelay: `${index * 50}ms` }}
     >
       {children}
@@ -103,21 +102,18 @@ const ConversationItem = ({ conversation, isActive, onClick, index, darkMode }) 
   return (
     <div
       ref={setRef}
-      className={`transform transition-all duration-500 ${
-        isVisible ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'
-      }`}
+      className={`transform transition-all duration-500 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'
+        }`}
       style={{ transitionDelay: `${index * 100}ms` }}
     >
       <div
-        className={`flex items-center p-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-100'} cursor-pointer transition-all duration-300 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'} hover:scale-105 ${
-          isActive ? darkMode ? 'bg-gradient-to-r from-blue-900 to-purple-900 border-l-4 border-blue-500' : 'bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-blue-500' : ''
-        }`}
+        className={`flex items-center p-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-100'} cursor-pointer transition-all duration-300 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'} hover:scale-105 ${isActive ? darkMode ? 'bg-gradient-to-r from-blue-900 to-purple-900 border-l-4 border-blue-500' : 'bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-blue-500' : ''
+          }`}
         onClick={onClick}
       >
         <div className="relative">
-          <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-lg transition-transform duration-300 hover:scale-110 ${
-            isActive ? darkMode ? 'ring-4 ring-blue-900' : 'ring-4 ring-blue-200' : ''
-          }`}>
+          <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-lg transition-transform duration-300 hover:scale-110 ${isActive ? darkMode ? 'ring-4 ring-blue-900' : 'ring-4 ring-blue-200' : ''
+            }`}>
             {conversation.avatar}
           </div>
           {conversation.online && (
@@ -162,28 +158,26 @@ const MessageBubble = ({ message, index }) => {
           </div>
         )}
         <div
-          className={`max-w-xs md:max-w-md px-4 py-3 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 ${
-            message.isOwn
+          className={`max-w-xs md:max-w-md px-4 py-3 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 ${message.isOwn
               ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-br-md'
-              : darkMode 
+              : darkMode
                 ? 'bg-gray-800 text-gray-100 rounded-bl-md border border-gray-700'
                 : 'bg-white text-gray-800 rounded-bl-md border border-gray-200'
-          }`}
+            }`}
         >
           <p className="leading-relaxed">{message.message}</p>
-          
+
           {message.attachments && message.attachments.length > 0 && (
             <div className="mt-3 space-y-2">
               {message.attachments.map((file, idx) => (
-                <div 
-                  key={idx} 
-                  className={`text-xs rounded-lg px-3 py-2 flex items-center transition-all duration-200 hover:scale-105 ${
-                    message.isOwn 
-                      ? 'bg-white/20 text-blue-100' 
+                <div
+                  key={idx}
+                  className={`text-xs rounded-lg px-3 py-2 flex items-center transition-all duration-200 hover:scale-105 ${message.isOwn
+                      ? 'bg-white/20 text-blue-100'
                       : darkMode
                         ? 'bg-gray-700 text-gray-300'
                         : 'bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   {getFileIcon(file.name)}
                   <span className="ml-2 truncate">{file.name}</span>
@@ -191,7 +185,7 @@ const MessageBubble = ({ message, index }) => {
               ))}
             </div>
           )}
-          
+
           <div className="flex items-center justify-between mt-2">
             <p className={`text-xs ${message.isOwn ? 'text-blue-200' : darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
               {message.time}
@@ -376,10 +370,10 @@ const TenantMessage = () => {
   const sendMessage = useCallback(() => {
     if (newMessage.trim() || attachments.length) {
       // Ensure we have a valid array for the current conversation
-      const currentMessages = Array.isArray(messages[activeConversation.id]) 
-        ? messages[activeConversation.id] 
+      const currentMessages = Array.isArray(messages[activeConversation.id])
+        ? messages[activeConversation.id]
         : [];
-      
+
       const message = {
         id: currentMessages.length + 1,
         sender: "You",
@@ -388,19 +382,19 @@ const TenantMessage = () => {
         isOwn: true,
         attachments: attachments,
       };
-      
+
       setMessages(prev => ({
         ...prev,
         [activeConversation.id]: [...currentMessages, message]
       }));
-      
+
       // Update conversation last message
-      setConversations(prev => prev.map(conv => 
-        conv.id === activeConversation.id 
+      setConversations(prev => prev.map(conv =>
+        conv.id === activeConversation.id
           ? { ...conv, lastMessage: newMessage || `${attachments.length} file(s)`, unread: false }
           : conv
       ));
-      
+
       setNewMessage('');
       setAttachments([]);
       setShowEmojiPicker(false);
@@ -486,145 +480,144 @@ const TenantMessage = () => {
           {/* Chat Area */}
           <div className={`flex-1 flex flex-col ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
             {activeConversation ? (
-            <>
-            {/* Chat Header */}
-            <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'} ${darkMode ? 'bg-gradient-to-r from-gray-800 to-blue-900' : 'bg-gradient-to-r from-white to-blue-50'}`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-lg">
-                      {activeConversation.avatar}
+              <>
+                {/* Chat Header */}
+                <div className={`p-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'} ${darkMode ? 'bg-gradient-to-r from-gray-800 to-blue-900' : 'bg-gradient-to-r from-white to-blue-50'}`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="relative">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-lg">
+                          {activeConversation.avatar}
+                        </div>
+                        {activeConversation.online && (
+                          <div className={`absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 ${darkMode ? 'border-gray-800' : 'border-white'} animate-pulse`}></div>
+                        )}
+                      </div>
+                      <div className="ml-4">
+                        <h3 className={`font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-900'} text-lg`}>{activeConversation.name}</h3>
+                        <p className={`text-sm ${activeConversation.online ? darkMode ? 'text-green-400' : 'text-green-600' : darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                          {activeConversation.online ? 'Online' : 'Offline'}
+                        </p>
+                      </div>
                     </div>
-                    {activeConversation.online && (
-                      <div className={`absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 ${darkMode ? 'border-gray-800' : 'border-white'} animate-pulse`}></div>
+
+                  </div>
+                </div>
+
+                {/* Messages */}
+                <div className={`flex-1 overflow-y-auto p-6 ${darkMode ? 'bg-gradient-to-b from-gray-900 to-gray-800' : 'bg-gradient-to-b from-gray-50 to-white'} custom-scrollbar`}>
+                  {Array.isArray(messages[activeConversation.id]) ?
+                    messages[activeConversation.id].map((message, index) => (
+                      <MessageBubble key={message.id} message={message} index={index} />
+                    ))
+                    : (
+                      <div className="text-center py-12">
+                        <ChatBubbleLeftRightIcon className={`h-16 w-16 ${darkMode ? 'text-gray-600' : 'text-gray-400'} mx-auto mb-4`} />
+                        <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>No messages in this conversation</p>
+                      </div>
                     )}
-                  </div>
-                  <div className="ml-4">
-                    <h3 className={`font-semibold ${darkMode ? 'text-gray-100' : 'text-gray-900'} text-lg`}>{activeConversation.name}</h3>
-                    <p className={`text-sm ${activeConversation.online ? darkMode ? 'text-green-400' : 'text-green-600' : darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                      {activeConversation.online ? 'Online' : 'Offline'}
-                    </p>
-                  </div>
+                  <TypingIndicator isVisible={isTyping && newMessage} />
+                  <div ref={messagesEndRef} />
                 </div>
-                
-              </div>
-            </div>
 
-            {/* Messages */}
-            <div className={`flex-1 overflow-y-auto p-6 ${darkMode ? 'bg-gradient-to-b from-gray-900 to-gray-800' : 'bg-gradient-to-b from-gray-50 to-white'} custom-scrollbar`}>
-              {Array.isArray(messages[activeConversation.id]) ? 
-                messages[activeConversation.id].map((message, index) => (
-                  <MessageBubble key={message.id} message={message} index={index} />
-                ))
-              : (
-                <div className="text-center py-12">
-                  <ChatBubbleLeftRightIcon className={`h-16 w-16 ${darkMode ? 'text-gray-600' : 'text-gray-400'} mx-auto mb-4`} />
-                  <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>No messages in this conversation</p>
-                </div>
-              )}
-              <TypingIndicator isVisible={isTyping && newMessage} />
-              <div ref={messagesEndRef} />
-            </div>
+                {/* Message Input */}
+                <div className={`p-4 border-t ${darkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
+                  {/* Attachments Preview */}
+                  {attachments.length > 0 && (
+                    <div className={`flex flex-wrap gap-2 mb-4 p-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-xl`}>
+                      {attachments.map((file, idx) => (
+                        <div key={idx} className={`${darkMode ? 'bg-gray-800 text-gray-300' : 'bg-white text-gray-700'} px-3 py-2 rounded-lg shadow-md text-sm flex items-center transition-all duration-200 hover:shadow-lg`}>
+                          {file.type?.startsWith('image/') ? (
+                            <PhotoIcon className="h-4 w-4 mr-2 text-blue-600" />
+                          ) : (
+                            <DocumentIcon className="h-4 w-4 mr-2 text-gray-600" />
+                          )}
+                          <span className="truncate max-w-[150px]">{file.name}</span>
+                          <button
+                            className="ml-2 text-gray-400 hover:text-red-500 transition-colors duration-200"
+                            onClick={() => removeAttachment(idx)}
+                          >
+                            <XMarkIcon className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-            {/* Message Input */}
-            <div className={`p-4 border-t ${darkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
-              {/* Attachments Preview */}
-              {attachments.length > 0 && (
-                <div className={`flex flex-wrap gap-2 mb-4 p-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-xl`}>
-                  {attachments.map((file, idx) => (
-                    <div key={idx} className={`${darkMode ? 'bg-gray-800 text-gray-300' : 'bg-white text-gray-700'} px-3 py-2 rounded-lg shadow-md text-sm flex items-center transition-all duration-200 hover:shadow-lg`}>
-                      {file.type?.startsWith('image/') ? (
-                        <PhotoIcon className="h-4 w-4 mr-2 text-blue-600" />
-                      ) : (
-                        <DocumentIcon className="h-4 w-4 mr-2 text-gray-600" />
-                      )}
-                      <span className="truncate max-w-[150px]">{file.name}</span>
+                  {/* Emoji Picker */}
+                  {showEmojiPicker && (
+                    <div className={`mb-4 p-4 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-xl shadow-lg border animate-slideUp`}>
+                      <div className="grid grid-cols-8 gap-2">
+                        {emojis.map((emoji, idx) => (
+                          <button
+                            key={idx}
+                            className={`p-2 text-2xl ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} rounded-lg transition-all duration-200 hover:scale-125`}
+                            onClick={() => {
+                              setNewMessage(prev => prev + emoji);
+                              setShowEmojiPicker(false);
+                            }}
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Input Area */}
+                  <div className="flex items-end space-x-3">
+                    <div className="flex-1 relative">
+                      <textarea
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        placeholder="Type a message..."
+                        className={`w-full border-2 ${darkMode ? 'border-gray-700 bg-gray-800 text-gray-200 placeholder-gray-500' : 'border-gray-200 bg-white text-gray-800 placeholder-gray-400'} rounded-2xl px-6 py-4 pr-16 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 resize-none`}
+                        rows="1"
+                        style={{ minHeight: '56px', maxHeight: '120px' }}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            sendMessage();
+                          }
+                        }}
+                      />
                       <button
-                        className="ml-2 text-gray-400 hover:text-red-500 transition-colors duration-200"
-                        onClick={() => removeAttachment(idx)}
+                        className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${darkMode ? 'text-gray-500 hover:text-yellow-400' : 'text-gray-400 hover:text-yellow-500'} transition-all duration-200 hover:scale-110`}
+                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                       >
-                        <XMarkIcon className="h-4 w-4" />
+                        <FaceSmileIcon className="h-6 w-6" />
                       </button>
                     </div>
-                  ))}
-                </div>
-              )}
 
-              {/* Emoji Picker */}
-              {showEmojiPicker && (
-                <div className={`mb-4 p-4 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-xl shadow-lg border animate-slideUp`}>
-                  <div className="grid grid-cols-8 gap-2">
-                    {emojis.map((emoji, idx) => (
-                      <button
-                        key={idx}
-                        className={`p-2 text-2xl ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} rounded-lg transition-all duration-200 hover:scale-125`}
-                        onClick={() => {
-                          setNewMessage(prev => prev + emoji);
-                          setShowEmojiPicker(false);
-                        }}
-                      >
-                        {emoji}
-                      </button>
-                    ))}
+                    {/* Action Buttons */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      onChange={handleAttachment}
+                      className="hidden"
+                      accept="image/*,application/pdf,.doc,.docx,.txt"
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className={`p-4 ${darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-gray-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800'} rounded-2xl transition-all duration-300 hover:scale-110`}
+                    >
+                      <PaperClipIcon className="h-6 w-6" />
+                    </button>
+
+                    <button
+                      className={`p-4 rounded-2xl transition-all duration-300 hover:scale-110 ${newMessage.trim() || attachments.length
+                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl'
+                          : darkMode ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        }`}
+                      onClick={sendMessage}
+                      disabled={!newMessage.trim() && attachments.length === 0}
+                    >
+                      <PaperAirplaneIcon className="h-6 w-6" />
+                    </button>
                   </div>
                 </div>
-              )}
-
-              {/* Input Area */}
-              <div className="flex items-end space-x-3">
-                <div className="flex-1 relative">
-                  <textarea
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type a message..."
-                    className={`w-full border-2 ${darkMode ? 'border-gray-700 bg-gray-800 text-gray-200 placeholder-gray-500' : 'border-gray-200 bg-white text-gray-800 placeholder-gray-400'} rounded-2xl px-6 py-4 pr-16 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 resize-none`}
-                    rows="1"
-                    style={{ minHeight: '56px', maxHeight: '120px' }}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        sendMessage();
-                      }
-                    }}
-                  />
-                  <button
-                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${darkMode ? 'text-gray-500 hover:text-yellow-400' : 'text-gray-400 hover:text-yellow-500'} transition-all duration-200 hover:scale-110`}
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                  >
-                    <FaceSmileIcon className="h-6 w-6" />
-                  </button>
-                </div>
-
-                {/* Action Buttons */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  onChange={handleAttachment}
-                  className="hidden"
-                  accept="image/*,application/pdf,.doc,.docx,.txt"
-                />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`p-4 ${darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-gray-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800'} rounded-2xl transition-all duration-300 hover:scale-110`}
-                >
-                  <PaperClipIcon className="h-6 w-6" />
-                </button>
-
-                <button
-                  className={`p-4 rounded-2xl transition-all duration-300 hover:scale-110 ${
-                    newMessage.trim() || attachments.length
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl'
-                      : darkMode ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  }`}
-                  onClick={sendMessage}
-                  disabled={!newMessage.trim() && attachments.length === 0}
-                >
-                  <PaperAirplaneIcon className="h-6 w-6" />
-                </button>
-              </div>
-            </div>
-            </>
+              </>
             ) : (
               <div className={`flex-1 flex flex-col items-center justify-center ${darkMode ? 'bg-gradient-to-b from-gray-900 to-gray-800' : 'bg-gradient-to-b from-gray-50 to-white'}`}>
                 <ChatBubbleLeftRightIcon className={`h-24 w-24 ${darkMode ? 'text-gray-700' : 'text-gray-300'} mb-6`} />

@@ -1,122 +1,122 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
-import { useDarkMode } from '../../../DarkModeContext';
+import { useDarkMode } from '../../../useDarkMode.js';
 // Removed SidebarContext usage
-import { 
-  Wrench, 
-  Plus, 
-  Search, 
-  Filter, 
-  MoreVertical, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  Upload, 
-  Calendar, 
-  MapPin, 
-  User, 
-  Clock, 
-  AlertCircle, 
-  CheckCircle, 
-  XCircle, 
-  Pause, 
-  Play, 
-  FileText, 
-  Image as ImageIcon, 
-  Camera, 
-  Download, 
-  Share2, 
-  Copy, 
-  Phone, 
-  Mail, 
-  MessageCircle, 
-  Star, 
-  Flag, 
-  Bookmark, 
-  Archive, 
+import {
+  Wrench,
+  Plus,
+  Search,
+  Filter,
+  MoreVertical,
+  Edit,
+  Trash2,
+  Eye,
+  Upload,
+  Calendar,
+  MapPin,
+  User,
+  Clock,
+  AlertCircle,
+  CheckCircle,
+  XCircle,
+  Pause,
+  Play,
+  FileText,
+  Image as ImageIcon,
+  Camera,
+  Download,
+  Share2,
+  Copy,
+  Phone,
+  Mail,
+  MessageCircle,
+  Star,
+  Flag,
+  Bookmark,
+  Archive,
   RefreshCw,
-  Bell, 
-  BellOff, 
-  Settings, 
-  TrendingUp, 
-  TrendingDown, 
-  BarChart3, 
-  PieChart, 
-  Activity, 
-  DollarSign, 
-  Home, 
-  Building2, 
-  Users, 
-  Zap, 
-  Hammer, 
-  Paintbrush, 
-  Droplets, 
-  Thermometer, 
-  Shield, 
-  Lock, 
-  Key, 
-  Lightbulb, 
-  Wifi, 
-  Tv, 
-  AirVent, 
-  Wind, 
-  Snowflake, 
-  Sun, 
-  Moon, 
-  Battery, 
-  Plug, 
-  Router, 
-  Monitor, 
-  Smartphone, 
-  Tablet, 
-  Laptop, 
-  HardDrive, 
-  Cpu, 
-  MemoryStick, 
-  Database, 
-  Server, 
-  Globe, 
-  Link, 
-  ExternalLink, 
-  Send, 
-  Reply, 
-  Forward, 
-  Paperclip, 
-  Smile, 
-  Heart, 
-  ThumbsUp, 
-  MessageSquare, 
-  ChevronDown, 
-  ChevronUp, 
-  ChevronLeft, 
-  ChevronRight, 
-  ArrowUp, 
-  ArrowDown, 
-  ArrowLeft, 
-  ArrowRight, 
-  X, 
-  Check, 
-  Loader, 
-  Save, 
-  Undo, 
-  Redo, 
-  Volume2, 
-  VolumeX, 
-  Mic, 
-  MicOff, 
-  Video, 
-  VideoOff, 
-  Navigation, 
-  Compass, 
-  Map, 
-  Route, 
-  Car, 
-  Truck, 
-  Bus, 
-  Train, 
-  Plane, 
-  Ship, 
+  Bell,
+  BellOff,
+  Settings,
+  TrendingUp,
+  TrendingDown,
+  BarChart3,
+  PieChart,
+  Activity,
+  DollarSign,
+  Home,
+  Building2,
+  Users,
+  Zap,
+  Hammer,
+  Paintbrush,
+  Droplets,
+  Thermometer,
+  Shield,
+  Lock,
+  Key,
+  Lightbulb,
+  Wifi,
+  Tv,
+  AirVent,
+  Wind,
+  Snowflake,
+  Sun,
+  Moon,
+  Battery,
+  Plug,
+  Router,
+  Monitor,
+  Smartphone,
+  Tablet,
+  Laptop,
+  HardDrive,
+  Cpu,
+  MemoryStick,
+  Database,
+  Server,
+  Globe,
+  Link,
+  ExternalLink,
+  Send,
+  Reply,
+  Forward,
+  Paperclip,
+  Smile,
+  Heart,
+  ThumbsUp,
+  MessageSquare,
+  ChevronDown,
+  ChevronUp,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUp,
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  X,
+  Check,
+  Loader,
+  Save,
+  Undo,
+  Redo,
+  Volume2,
+  VolumeX,
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  Navigation,
+  Compass,
+  Map,
+  Route,
+  Car,
+  Truck,
+  Bus,
+  Train,
+  Plane,
+  Ship,
   Bike,
   // Removed 'Scooter' and 'Skateboard' as they don't exist in Lucide
 } from 'lucide-react';
@@ -152,11 +152,11 @@ const useIntersectionObserver = (options = {}) => {
 
   useEffect(() => {
     if (!element) return;
-    
+
     const observer = new IntersectionObserver(([entry]) => {
       setIsIntersecting(entry.isIntersecting);
     }, options);
-    
+
     observer.observe(element);
     return () => observer.disconnect();
   }, [element, options]);
@@ -170,7 +170,7 @@ const useNotification = () => {
   const addNotification = (notification) => {
     const id = Date.now();
     setNotifications(prev => [...prev, { ...notification, id }]);
-    
+
     setTimeout(() => {
       removeNotification(id);
     }, notification.duration || 5000);
@@ -186,15 +186,15 @@ const useNotification = () => {
 // Animated Components
 const AnimatedCard = ({ children, delay = 0, className = '', ...props }) => {
   const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
-  
+
   return (
     <motion.div
       ref={ref}
       initial={{ opacity: 0, y: 30, scale: 0.95 }}
       animate={isVisible ? { opacity: 1, y: 0, scale: 1 } : {}}
-      transition={{ 
-        duration: 0.5, 
-        delay, 
+      transition={{
+        duration: 0.5,
+        delay,
         type: "spring",
         stiffness: 100,
         damping: 15
@@ -244,46 +244,46 @@ const StatusBadge = ({ status, priority, darkMode }) => { // Added darkMode prop
   const getStatusConfig = () => {
     switch (status) {
       case 'Pending':
-        return { 
-          bg: darkMode ? 'bg-yellow-600' : 'bg-yellow-100', 
-          text: darkMode ? 'text-white' : 'text-yellow-800', 
+        return {
+          bg: darkMode ? 'bg-yellow-600' : 'bg-yellow-100',
+          text: darkMode ? 'text-white' : 'text-yellow-800',
           border: darkMode ? 'border-yellow-600' : 'border-yellow-100', // Border matches background for solid look
-          icon: Clock 
+          icon: Clock
         };
       case 'In Progress':
-        return { 
-          bg: darkMode ? 'bg-blue-600' : 'bg-blue-100', 
-          text: darkMode ? 'text-white' : 'text-blue-800', 
+        return {
+          bg: darkMode ? 'bg-blue-600' : 'bg-blue-100',
+          text: darkMode ? 'text-white' : 'text-blue-800',
           border: darkMode ? 'border-blue-600' : 'border-blue-100',
-          icon: Play 
+          icon: Play
         };
       case 'On Hold':
-        return { 
-          bg: darkMode ? 'bg-orange-600' : 'bg-orange-100', 
-          text: darkMode ? 'text-white' : 'text-orange-800', 
+        return {
+          bg: darkMode ? 'bg-orange-600' : 'bg-orange-100',
+          text: darkMode ? 'text-white' : 'text-orange-800',
           border: darkMode ? 'border-orange-600' : 'border-orange-100',
-          icon: Pause 
+          icon: Pause
         };
       case 'Completed':
-        return { 
-          bg: darkMode ? 'bg-emerald-600' : 'bg-emerald-100', 
-          text: darkMode ? 'text-white' : 'text-emerald-800', 
+        return {
+          bg: darkMode ? 'bg-emerald-600' : 'bg-emerald-100',
+          text: darkMode ? 'text-white' : 'text-emerald-800',
           border: darkMode ? 'border-emerald-600' : 'border-emerald-100',
-          icon: CheckCircle 
+          icon: CheckCircle
         };
       case 'Cancelled':
-        return { 
-          bg: darkMode ? 'bg-red-600' : 'bg-red-100', 
-          text: darkMode ? 'text-white' : 'text-red-800', 
+        return {
+          bg: darkMode ? 'bg-red-600' : 'bg-red-100',
+          text: darkMode ? 'text-white' : 'text-red-800',
           border: darkMode ? 'border-red-600' : 'border-red-100',
-          icon: XCircle 
+          icon: XCircle
         };
       default:
-        return { 
-          bg: darkMode ? 'bg-gray-600' : 'bg-gray-100', 
-          text: darkMode ? 'text-white' : 'text-gray-800', 
+        return {
+          bg: darkMode ? 'bg-gray-600' : 'bg-gray-100',
+          text: darkMode ? 'text-white' : 'text-gray-800',
           border: darkMode ? 'border-gray-600' : 'border-gray-100',
-          icon: AlertCircle 
+          icon: AlertCircle
         };
     }
   };
@@ -426,7 +426,7 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
     >
       {/* Background Gradient Effect */}
       <div className={`absolute inset-0 bg-gradient-to-br ${darkMode ? 'from-white/5' : 'from-indigo-200/20'} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-      
+
       {/* Header */}
       <div className="relative z-10 flex items-start justify-between mb-4">
         <div className="flex items-start space-x-3">
@@ -436,7 +436,7 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
           >
             {getCategoryIcon(request.category)}
           </motion.div>
-          
+
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1">
               <h3 className={`text-lg font-bold ${darkMode ? 'text-white group-hover:text-blue-300' : 'text-indigo-900 group-hover:text-blue-600'} transition-colors`}>
@@ -452,11 +452,11 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
                 </motion.div>
               )}
             </div>
-            
+
             <p className={`text-sm mb-2 line-clamp-2 ${darkMode ? 'text-white/70' : 'text-indigo-700/80'}`}>
               {request.description}
             </p>
-            
+
             <div className={`flex items-center space-x-4 text-xs ${darkMode ? 'text-white/60' : 'text-indigo-600/70'}`}>
               <div className="flex items-center space-x-1">
                 <Building2 className="w-3 h-3" />
@@ -473,7 +473,7 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
             </div>
           </div>
         </div>
-        
+
         <div className="relative" ref={menuRef}>
           <motion.button
             whileHover={{ scale: 1.1 }}
@@ -483,7 +483,7 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
           >
             <MoreVertical className={`w-4 h-4 ${darkMode ? 'text-white/70' : 'text-indigo-600/70'}`} />
           </motion.button>
-          
+
           <AnimatePresence>
             {showMenu && (
               <motion.div
@@ -493,14 +493,14 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
                 className={`absolute right-0 top-full mt-2 w-56 ${darkMode ? 'bg-white/20 border-white/30' : 'bg-white/90 border-indigo-200/50'} backdrop-blur-xl border rounded-xl shadow-xl z-50`}
               >
                 <div className="p-2">
-                  <button 
+                  <button
                     onClick={() => { onView(request); setShowMenu(false); }}
                     className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-indigo-100/50 text-indigo-700'} transition-colors`}
                   >
                     <Eye className="w-4 h-4" />
                     <span>View Details</span>
                   </button>
-                  <button 
+                  <button
                     onClick={() => { onEdit(request); setShowMenu(false); }}
                     className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-indigo-100/50 text-indigo-700'} transition-colors`}
                   >
@@ -515,7 +515,7 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
                     <Share2 className="w-4 h-4" />
                     <span>Share Report</span>
                   </button>
-                  <button 
+                  <button
                     onClick={() => { onDelete(request.id); setShowMenu(false); }}
                     className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-red-500/20 transition-colors text-red-400"
                   >
@@ -528,13 +528,13 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
           </AnimatePresence>
         </div>
       </div>
-      
+
       {/* Status and Priority */}
       <div className="relative z-10 flex items-center justify-between mb-4">
         <StatusBadge status={request.status} priority={request.priority} darkMode={darkMode} />
         <PriorityIndicator priority={request.priority} />
       </div>
-      
+
       {/* Progress Bar */}
       <div className="relative z-10 mb-4">
         <div className="flex items-center justify-between mb-2">
@@ -543,7 +543,7 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
         </div>
         <ProgressBar progress={request.progress} status={request.status} />
       </div>
-      
+
       {/* Assignment */}
       {request.assignedTo && (
         <div className={`relative z-10 mb-4 p-3 rounded-lg border ${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-50/50 border-indigo-100'}`}>
@@ -574,7 +574,7 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
           </div>
         </div>
       )}
-      
+
       {/* Attachments Preview */}
       {request.attachments && request.attachments.length > 0 && (
         <div className="relative z-10 mb-4">
@@ -587,10 +587,10 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
                 className={`w-12 h-12 rounded-lg flex items-center justify-center cursor-pointer ${darkMode ? 'bg-white/10' : 'bg-indigo-100/50'}`}
               >
                 {attachment.type === 'image' ? (
-                  <img 
-                    src={attachment.url} 
-                    alt="Attachment" 
-                    className="w-full h-full object-cover rounded-lg" 
+                  <img
+                    src={attachment.url}
+                    alt="Attachment"
+                    className="w-full h-full object-cover rounded-lg"
                   />
                 ) : (
                   <FileText className={`w-5 h-5 ${darkMode ? 'text-white/60' : 'text-indigo-600/70'}`} />
@@ -605,7 +605,7 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
           </div>
         </div>
       )}
-      
+
       {/* Quick Actions */}
       <div className="relative z-10 flex items-center justify-between">
         <div className="flex space-x-2">
@@ -613,31 +613,29 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onView(request)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              darkMode
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${darkMode
                 ? 'bg-sky-500/20 text-sky-300 hover:bg-sky-500/30'
                 : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
-            }`}
+              }`}
           >
             View Details
           </motion.button>
-          
+
           {request.status !== 'Completed' && (
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => onStatusChange(request.id, 'In Progress')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                darkMode
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${darkMode
                   ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'
                   : 'bg-green-100 text-green-600 hover:bg-green-200'
-              }`}
+                }`}
             >
               Start Work
             </motion.button>
           )}
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <div className={`text-xs ${darkMode ? 'text-white/40' : 'text-indigo-500/60'}`}>
             {Math.floor((Date.now() - new Date(request.createdAt)) / (1000 * 60 * 60 * 24))}d ago
@@ -734,7 +732,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <StatusBadge status={request.status} priority={request.priority} />
               <motion.button
@@ -747,7 +745,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
               </motion.button>
             </div>
           </div>
-          
+
           {/* Tab Navigation */}
           <div className={`flex space-x-1 mt-6 ${darkMode ? 'bg-white/5' : 'bg-indigo-100/70'} p-1 rounded-xl`}>
             {[
@@ -761,13 +759,12 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveTab(key)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                  activeTab === key
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${activeTab === key
                     ? 'bg-blue-500 text-white shadow-lg'
-                    : darkMode 
+                    : darkMode
                       ? 'text-white/70 hover:text-white hover:bg-white/10'
                       : 'text-indigo-700 hover:text-indigo-900 hover:bg-indigo-200/70'
-                }`}
+                  }`}
               >
                 <Icon className="w-4 h-4" />
                 <span>{label}</span>
@@ -784,13 +781,13 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
               <div className="space-y-6">
                 <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-xl p-6 border`}>
                   <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-indigo-900'} mb-4`}>Request Details</h3>
-                  
+
                   <div className="space-y-4">
                     <div>
                       <label className={`text-sm font-medium ${darkMode ? 'text-white/70' : 'text-indigo-700/70'}`}>Description</label>
                       <p className={`${darkMode ? 'text-white' : 'text-indigo-900'} mt-1`}>{request.description}</p>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className={`text-sm font-medium ${darkMode ? 'text-white/70' : 'text-indigo-700/70'}`}>Property</label>
@@ -799,7 +796,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                           <span className={`${darkMode ? 'text-white' : 'text-indigo-900'}`}>{request.property}</span>
                         </div>
                       </div>
-                      
+
                       <div>
                         <label className={`text-sm font-medium ${darkMode ? 'text-white/70' : 'text-indigo-700/70'}`}>Tenant</label>
                         <div className="flex items-center space-x-2 mt-1">
@@ -808,7 +805,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className={`text-sm font-medium ${darkMode ? 'text-white/70' : 'text-indigo-700/70'}`}>Priority</label>
@@ -816,7 +813,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                           <PriorityIndicator priority={request.priority} />
                         </div>
                       </div>
-                      
+
                       <div>
                         <label className={`text-sm font-medium ${darkMode ? 'text-white/70' : 'text-indigo-700/70'}`}>Category</label>
                         <p className={`${darkMode ? 'text-white' : 'text-indigo-900'} mt-1 capitalize`}>{request.category || 'General'}</p>
@@ -824,11 +821,11 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Progress Section */}
                 <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-xl p-6 border`}>
                   <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-indigo-900'} mb-4`}>Progress Tracking</h3>
-                  
+
                   <div className="space-y-4">
                     <div>
                       <div className="flex items-center justify-between mb-2">
@@ -837,7 +834,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                       </div>
                       <ProgressBar progress={request.progress} status={request.status} />
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4 pt-4">
                       <div className={`text-center p-4 ${darkMode ? 'bg-white/5' : 'bg-indigo-100'} rounded-lg`}>
                         <div className={`text-2xl font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
@@ -845,7 +842,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                         </div>
                         <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Days Open</div>
                       </div>
-                      
+
                       <div className={`text-center p-4 ${darkMode ? 'bg-white/5' : 'bg-indigo-100'} rounded-lg`}>
                         <div className={`text-2xl font-bold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
                           ${request.estimatedCost || '0'}
@@ -856,13 +853,13 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                   </div>
                 </div>
               </div>
-              
+
               {/* Assignment and Actions */}
               <div className="space-y-6">
                 {/* Status Update */}
                 <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-xl p-6 border`}>
                   <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-indigo-900'} mb-4`}>Update Status</h3>
-                  
+
                   <div className="space-y-4">
                     <div>
                       <label className={`block text-sm font-medium ${darkMode ? 'text-white/70' : 'text-indigo-700/70'} mb-2`}>
@@ -880,7 +877,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                         <option value="Cancelled">Cancelled</option>
                       </select>
                     </div>
-                    
+
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -892,11 +889,11 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                     </motion.button>
                   </div>
                 </div>
-                
+
                 {/* Assignment */}
                 <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-xl p-6 border`}>
                   <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-indigo-900'} mb-4`}>Assignment</h3>
-                  
+
                   {request.assignedTo ? (
                     <div className={`flex items-center space-x-3 p-4 ${darkMode ? 'bg-white/5' : 'bg-indigo-100'} rounded-lg`}>
                       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
@@ -937,11 +934,11 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                     </div>
                   )}
                 </div>
-                
+
                 {/* Quick Actions */}
                 <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-xl p-6 border`}>
                   <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-indigo-900'} mb-4`}>Quick Actions</h3>
-                  
+
                   <div className="grid grid-cols-2 gap-3">
                     <motion.button
                       whileHover={{ scale: 1.02 }}
@@ -951,7 +948,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                       <MessageCircle className={`w-4 h-4 ${darkMode ? 'text-blue-300' : 'text-blue-600'}`} />
                       <span className={`${darkMode ? 'text-blue-300' : 'text-blue-600'} text-sm`}>Message Tenant</span>
                     </motion.button>
-                    
+
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -960,7 +957,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                       <Calendar className={`w-4 h-4 ${darkMode ? 'text-green-300' : 'text-green-600'}`} />
                       <span className={`${darkMode ? 'text-green-300' : 'text-green-600'} text-sm`}>Schedule Visit</span>
                     </motion.button>
-                    
+
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -969,7 +966,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                       <Share2 className={`w-4 h-4 ${darkMode ? 'text-purple-300' : 'text-purple-600'}`} />
                       <span className={`${darkMode ? 'text-purple-300' : 'text-purple-600'} text-sm`}>Share Report</span>
                     </motion.button>
-                    
+
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -983,7 +980,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
               </div>
             </div>
           )}
-          
+
           {activeTab === 'comments' && (
             <div className="space-y-6">
               {/* Comments List */}
@@ -999,7 +996,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
                       {comment.author?.charAt(0) || 'L'}
                     </div>
-                    
+
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-2">
                         <span className={`font-semibold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{comment.author}</span>
@@ -1007,18 +1004,18 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                           {new Date(comment.timestamp).toLocaleString()}
                         </span>
                       </div>
-                      
+
                       <p className={`${darkMode ? 'text-white/80' : 'text-indigo-800/80'}`}>{comment.text}</p>
-                      
+
                       {comment.attachments && comment.attachments.length > 0 && (
                         <div className="flex space-x-2 mt-3">
                           {comment.attachments.map((attachment, idx) => (
                             <div key={idx} className={`w-16 h-16 rounded-lg ${darkMode ? 'bg-white/10' : 'bg-indigo-100'} flex items-center justify-center`}>
                               {attachment.type === 'image' ? (
-                                <img 
-                                  src={attachment.url} 
-                                  alt="Comment attachment" 
-                                  className="w-full h-full object-cover rounded-lg" 
+                                <img
+                                  src={attachment.url}
+                                  alt="Comment attachment"
+                                  className="w-full h-full object-cover rounded-lg"
                                 />
                               ) : (
                                 <FileText className={`w-6 h-6 ${darkMode ? 'text-white/60' : 'text-indigo-600/60'}`} />
@@ -1030,7 +1027,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                     </div>
                   </motion.div>
                 ))}
-                
+
                 {!request.comments?.length && (
                   <div className="text-center py-12">
                     <MessageCircle className={`w-16 h-16 mx-auto ${darkMode ? 'text-white/30' : 'text-indigo-400/30'} mb-4`} />
@@ -1039,7 +1036,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                   </div>
                 )}
               </div>
-              
+
               {/* Add Comment */}
               <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-lg p-4 border`}>
                 <div className="space-y-4">
@@ -1050,7 +1047,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                     className={`w-full p-4 ${darkMode ? 'bg-white/10 border-white/20 text-white placeholder-white/50' : 'bg-white border-indigo-200 text-indigo-900 placeholder-indigo-400/50'} border rounded-lg focus:border-blue-500 focus:outline-none resize-none`}
                     rows={3}
                   />
-                  
+
                   {/* Attachment Preview */}
                   {attachments.length > 0 && (
                     <div className="flex space-x-2">
@@ -1058,10 +1055,10 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                         <div key={index} className="relative group">
                           <div className={`w-16 h-16 rounded-lg ${darkMode ? 'bg-white/10' : 'bg-indigo-100'} flex items-center justify-center`}>
                             {attachment.type === 'image' ? (
-                              <img 
-                                src={attachment.url} 
-                                alt="Attachment" 
-                                className="w-full h-full object-cover rounded-lg" 
+                              <img
+                                src={attachment.url}
+                                alt="Attachment"
+                                className="w-full h-full object-cover rounded-lg"
                               />
                             ) : (
                               <FileText className={`w-6 h-6 ${darkMode ? 'text-white/60' : 'text-indigo-600/60'}`} />
@@ -1079,7 +1076,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                       ))}
                     </div>
                   )}
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <input
@@ -1100,7 +1097,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                         <span className={`text-sm ${darkMode ? 'text-white/70' : 'text-indigo-600/70'}`}>Attach</span>
                       </motion.button>
                     </div>
-                    
+
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -1115,7 +1112,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
               </div>
             </div>
           )}
-          
+
           {activeTab === 'history' && (
             <div className="space-y-4">
               {request.history?.map((event, index) => (
@@ -1126,18 +1123,17 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                   transition={{ delay: index * 0.1 }}
                   className={`flex items-start space-x-4 p-4 ${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-lg border`}
                 >
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    event.type === 'status' ? 'bg-blue-500/20' :
-                    event.type === 'assignment' ? 'bg-purple-500/20' :
-                    event.type === 'comment' ? 'bg-green-500/20' :
-                    'bg-gray-500/20'
-                  }`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${event.type === 'status' ? 'bg-blue-500/20' :
+                      event.type === 'assignment' ? 'bg-purple-500/20' :
+                        event.type === 'comment' ? 'bg-green-500/20' :
+                          'bg-gray-500/20'
+                    }`}>
                     {event.type === 'status' && <RefreshCw className="w-4 h-4 text-blue-400" />}
                     {event.type === 'assignment' && <Users className="w-4 h-4 text-purple-400" />}
                     {event.type === 'comment' && <MessageCircle className="w-4 h-4 text-green-400" />}
                     {event.type === 'created' && <Plus className="w-4 h-4 text-yellow-400" />}
                   </div>
-                  
+
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
                       <span className={`font-medium ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{event.description}</span>
@@ -1151,7 +1147,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                   </div>
                 </motion.div>
               ))}
-              
+
               {!request.history?.length && (
                 <div className="text-center py-12">
                   <Clock className={`w-16 h-16 mx-auto ${darkMode ? 'text-white/30' : 'text-indigo-400/30'} mb-4`} />
@@ -1160,7 +1156,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
               )}
             </div>
           )}
-          
+
           {activeTab === 'attachments' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {request.attachments?.map((attachment, index) => (
@@ -1173,20 +1169,20 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                 >
                   <div className={`aspect-square mb-4 rounded-lg overflow-hidden ${darkMode ? 'bg-white/10' : 'bg-indigo-100'} flex items-center justify-center`}>
                     {attachment.type === 'image' ? (
-                      <img 
-                        src={attachment.url} 
-                        alt={attachment.name} 
-                        className="w-full h-full object-cover" 
+                      <img
+                        src={attachment.url}
+                        alt={attachment.name}
+                        className="w-full h-full object-cover"
                       />
                     ) : (
                       <FileText className={`w-12 h-12 ${darkMode ? 'text-white/40' : 'text-indigo-600/40'}`} />
                     )}
                   </div>
-                  
+
                   <div className="space-y-2">
                     <h4 className={`font-medium ${darkMode ? 'text-white' : 'text-indigo-900'} truncate`}>{attachment.name}</h4>
                     <p className={`text-xs ${darkMode ? 'text-white/50' : 'text-indigo-700/50'}`}>{attachment.size}</p>
-                    
+
                     <div className="flex space-x-2">
                       <motion.button
                         whileHover={{ scale: 1.05 }}
@@ -1196,7 +1192,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                         <Eye className={`w-4 h-4 ${darkMode ? 'text-blue-300' : 'text-blue-600'}`} />
                         <span className={`text-xs ${darkMode ? 'text-blue-300' : 'text-blue-600'}`}>View</span>
                       </motion.button>
-                      
+
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -1209,7 +1205,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                   </div>
                 </motion.div>
               ))}
-              
+
               {!request.attachments?.length && (
                 <div className="col-span-full text-center py-12">
                   <ImageIcon className={`w-16 h-16 mx-auto ${darkMode ? 'text-white/30' : 'text-indigo-400/30'} mb-4`} />
@@ -1235,12 +1231,11 @@ const NotificationToast = ({ notifications, onRemove }) => {
             initial={{ opacity: 0, x: 300 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 300 }}
-            className={`p-4 rounded-lg shadow-lg backdrop-blur-xl border max-w-sm ${
-              notification.type === 'success' ? 'bg-green-500/20 border-green-500/30 text-green-300' :
-              notification.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-300' :
-              notification.type === 'warning' ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-300' :
-              'bg-blue-500/20 border-blue-500/30 text-blue-300'
-            }`}
+            className={`p-4 rounded-lg shadow-lg backdrop-blur-xl border max-w-sm ${notification.type === 'success' ? 'bg-green-500/20 border-green-500/30 text-green-300' :
+                notification.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-300' :
+                  notification.type === 'warning' ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-300' :
+                    'bg-blue-500/20 border-blue-500/30 text-blue-300'
+              }`}
           >
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0">
@@ -1249,14 +1244,14 @@ const NotificationToast = ({ notifications, onRemove }) => {
                 {notification.type === 'warning' && <AlertCircle className="w-5 h-5" />}
                 {notification.type === 'info' && <Bell className="w-5 h-5" />}
               </div>
-              
+
               <div className="flex-1">
                 <h4 className="font-semibold">{notification.title}</h4>
                 {notification.message && (
                   <p className="text-sm opacity-90 mt-1">{notification.message}</p>
                 )}
               </div>
-              
+
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
@@ -1278,7 +1273,7 @@ const LandlordMaintenance = () => {
   const [currentSection] = useState('Maintenance');
   const { darkMode } = useDarkMode();
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
-  
+
   // Sample maintenance requests data
   const [maintenanceRequests, setMaintenanceRequests] = useLocalStorage('landlord_maintenance_requests', [
     {
@@ -1502,21 +1497,21 @@ const LandlordMaintenance = () => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { notifications, addNotification, removeNotification } = useNotification();
 
   // Filter and sort requests
   useEffect(() => {
     let filtered = maintenanceRequests.filter(request => {
       const matchesSearch = request.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           request.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           request.tenant.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           request.property.toLowerCase().includes(searchTerm.toLowerCase());
-      
+        request.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        request.tenant.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        request.property.toLowerCase().includes(searchTerm.toLowerCase());
+
       const matchesStatus = statusFilter === 'All' || request.status === statusFilter;
       const matchesPriority = priorityFilter === 'All' || request.priority === priorityFilter;
       const matchesProperty = propertyFilter === 'All' || request.property === propertyFilter;
-      
+
       return matchesSearch && matchesStatus && matchesPriority && matchesProperty;
     });
 
@@ -1524,7 +1519,7 @@ const LandlordMaintenance = () => {
     filtered.sort((a, b) => {
       let aValue = a[sortBy];
       let bValue = b[sortBy];
-      
+
       if (sortBy === 'createdAt' || sortBy === 'updatedAt') {
         aValue = new Date(aValue);
         bValue = new Date(bValue);
@@ -1532,7 +1527,7 @@ const LandlordMaintenance = () => {
         aValue = aValue.toLowerCase();
         bValue = bValue.toLowerCase();
       }
-      
+
       if (sortOrder === 'asc') {
         return aValue > bValue ? 1 : -1;
       } else {
@@ -1552,7 +1547,7 @@ const LandlordMaintenance = () => {
     const highPriority = maintenanceRequests.filter(r => r.priority === 'High').length;
     const avgResponseTime = 2.4; // hours - could be calculated from actual data
     const totalCost = maintenanceRequests.reduce((sum, r) => sum + (r.estimatedCost || 0), 0);
-    
+
     return {
       total,
       completed,
@@ -1593,25 +1588,25 @@ const LandlordMaintenance = () => {
   };
 
   const handleStatusChange = (requestId, newStatus) => {
-    setMaintenanceRequests(prev => prev.map(r => 
-      r.id === requestId 
-        ? { 
-            ...r, 
-            status: newStatus, 
-            updatedAt: new Date().toISOString(),
-            progress: newStatus === 'Completed' ? 100 : newStatus === 'In Progress' ? 50 : 0,
-            history: [
-              ...(r.history || []),
-              {
-                type: 'status',
-                description: `Status changed to ${newStatus}`,
-                timestamp: new Date().toISOString()
-              }
-            ]
-          }
+    setMaintenanceRequests(prev => prev.map(r =>
+      r.id === requestId
+        ? {
+          ...r,
+          status: newStatus,
+          updatedAt: new Date().toISOString(),
+          progress: newStatus === 'Completed' ? 100 : newStatus === 'In Progress' ? 50 : 0,
+          history: [
+            ...(r.history || []),
+            {
+              type: 'status',
+              description: `Status changed to ${newStatus}`,
+              timestamp: new Date().toISOString()
+            }
+          ]
+        }
         : r
     ));
-    
+
     addNotification({
       type: 'success',
       title: 'Status Updated',
@@ -1620,24 +1615,24 @@ const LandlordMaintenance = () => {
   };
 
   const handleAddComment = (requestId, comment) => {
-    setMaintenanceRequests(prev => prev.map(r => 
-      r.id === requestId 
-        ? { 
-            ...r, 
-            comments: [...(r.comments || []), comment],
-            updatedAt: new Date().toISOString(),
-            history: [
-              ...(r.history || []),
-              {
-                type: 'comment',
-                description: `Comment added by ${comment.author}`,
-                timestamp: comment.timestamp
-              }
-            ]
-          }
+    setMaintenanceRequests(prev => prev.map(r =>
+      r.id === requestId
+        ? {
+          ...r,
+          comments: [...(r.comments || []), comment],
+          updatedAt: new Date().toISOString(),
+          history: [
+            ...(r.history || []),
+            {
+              type: 'comment',
+              description: `Comment added by ${comment.author}`,
+              timestamp: comment.timestamp
+            }
+          ]
+        }
         : r
     ));
-    
+
     addNotification({
       type: 'success',
       title: 'Comment Added',
@@ -1646,24 +1641,24 @@ const LandlordMaintenance = () => {
   };
 
   const handleAssignTechnician = (requestId, technician) => {
-    setMaintenanceRequests(prev => prev.map(r => 
-      r.id === requestId 
-        ? { 
-            ...r, 
-            assignedTo: technician,
-            updatedAt: new Date().toISOString(),
-            history: [
-              ...(r.history || []),
-              {
-                type: 'assignment',
-                description: `Assigned to ${technician}`,
-                timestamp: new Date().toISOString()
-              }
-            ]
-          }
+    setMaintenanceRequests(prev => prev.map(r =>
+      r.id === requestId
+        ? {
+          ...r,
+          assignedTo: technician,
+          updatedAt: new Date().toISOString(),
+          history: [
+            ...(r.history || []),
+            {
+              type: 'assignment',
+              description: `Assigned to ${technician}`,
+              timestamp: new Date().toISOString()
+            }
+          ]
+        }
         : r
     ));
-    
+
     addNotification({
       type: 'success',
       title: 'Technician Assigned',
@@ -1688,10 +1683,10 @@ const LandlordMaintenance = () => {
       </div>
 
       <LandlordSideBar currentSection={currentSection} />
-      
+
       <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
         <LandlordNavBar currentSection={currentSection} />
-        
+
         <main className="flex-1 overflow-y-auto">
           <div className="p-8 space-y-8">
             {/* Header */}
@@ -1729,7 +1724,7 @@ const LandlordMaintenance = () => {
                 <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Total Requests</div>
                 <div className={`text-xs mt-1 ${darkMode ? 'text-white/40' : 'text-indigo-600/50'}`}>+12% this month</div>
               </AnimatedCard>
-              
+
               <AnimatedCard delay={0.1} className={`xl:col-span-2 backdrop-blur-xl rounded-2xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
@@ -1741,7 +1736,7 @@ const LandlordMaintenance = () => {
                 <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Completed</div>
                 <div className={`text-xs mt-1 ${darkMode ? 'text-white/40' : 'text-indigo-600/50'}`}>{stats.completionRate}% rate</div>
               </AnimatedCard>
-              
+
               <AnimatedCard delay={0.2} className={`xl:col-span-2 backdrop-blur-xl rounded-2xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
@@ -1753,7 +1748,7 @@ const LandlordMaintenance = () => {
                 <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Pending</div>
                 <div className={`text-xs mt-1 ${darkMode ? 'text-white/40' : 'text-indigo-600/50'}`}>Need attention</div>
               </AnimatedCard>
-              
+
               <AnimatedCard delay={0.3} className={`xl:col-span-2 backdrop-blur-xl rounded-2xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
@@ -1774,19 +1769,19 @@ const LandlordMaintenance = () => {
                 <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.inProgress}</div>
                 <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>In Progress</div>
               </AnimatedCard>
-              
+
               <AnimatedCard delay={0.5} className={`backdrop-blur-xl rounded-xl p-4 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
                 <Clock className={`w-6 h-6 mx-auto mb-2 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                 <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.avgResponseTime}h</div>
                 <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Avg Response</div>
               </AnimatedCard>
-              
+
               <AnimatedCard delay={0.6} className={`backdrop-blur-xl rounded-xl p-4 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
                 <DollarSign className={`w-6 h-6 mx-auto mb-2 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
                 <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>${stats.totalCost}</div>
                 <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Total Cost</div>
               </AnimatedCard>
-              
+
               <AnimatedCard delay={0.7} className={`backdrop-blur-xl rounded-xl p-4 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
                 <TrendingUp className={`w-6 h-6 mx-auto mb-2 ${darkMode ? 'text-cyan-400' : 'text-cyan-600'}`} />
                 <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.completionRate}%</div>
@@ -1809,7 +1804,7 @@ const LandlordMaintenance = () => {
                       className={`pl-10 pr-4 py-3 w-64 rounded-xl focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white placeholder-white/50' : 'bg-white/70 border border-indigo-200/50 text-indigo-900 placeholder-indigo-400/70'}`}
                     />
                   </div>
-                  
+
                   {/* Filters */}
                   <div className="flex space-x-3">
                     <select
@@ -1824,7 +1819,7 @@ const LandlordMaintenance = () => {
                       <option value="Completed">Completed</option>
                       <option value="Cancelled">Cancelled</option>
                     </select>
-                    
+
                     <select
                       value={priorityFilter}
                       onChange={(e) => setPriorityFilter(e.target.value)}
@@ -1835,7 +1830,7 @@ const LandlordMaintenance = () => {
                       <option value="Medium">Medium Priority</option>
                       <option value="Low">Low Priority</option>
                     </select>
-                    
+
                     <select
                       value={propertyFilter}
                       onChange={(e) => setPropertyFilter(e.target.value)}
@@ -1848,7 +1843,7 @@ const LandlordMaintenance = () => {
                     </select>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-4">
                   {/* Sort controls */}
                   <div className="flex items-center space-x-2">
@@ -1863,7 +1858,7 @@ const LandlordMaintenance = () => {
                       <option value="status">Status</option>
                       <option value="property">Property</option>
                     </select>
-                    
+
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -1873,8 +1868,8 @@ const LandlordMaintenance = () => {
                       {sortOrder === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
                     </motion.button>
                   </div>
-                  
-                  
+
+
                 </div>
               </div>
             </AnimatedCard>
@@ -1945,7 +1940,7 @@ const LandlordMaintenance = () => {
             onClose={() => setShowDetailModal(false)}
             request={selectedRequest}
             onUpdate={(updatedRequest) => {
-              setMaintenanceRequests(prev => prev.map(r => 
+              setMaintenanceRequests(prev => prev.map(r =>
                 r.id === updatedRequest.id ? updatedRequest : r
               ));
               setSelectedRequest(updatedRequest);

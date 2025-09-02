@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
+import {
   Home,
   Building2,
   Users,
@@ -20,7 +20,7 @@ import {
   Heart
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useDarkMode } from '../../../DarkModeContext';
+import { useDarkMode } from '../../../useDarkMode.js';
 
 // We'll use the centralized DarkModeContext instead of a custom hook
 
@@ -72,7 +72,7 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
 
     // Listen for the custom event dispatched when user data is updated
     window.addEventListener('user:updated', handleUserUpdate);
-    
+
     // Also check localStorage directly in case it was updated without the event
     const checkUserData = () => {
       const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -80,9 +80,9 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
         setUser(storedUser);
       }
     };
-    
+
     const interval = setInterval(checkUserData, 5000); // Check every 5 seconds
-    
+
     return () => {
       window.removeEventListener('user:updated', handleUserUpdate);
       clearInterval(interval);
@@ -311,8 +311,8 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
       <motion.div
         ref={sidebarRef}
         initial={{ x: -400, opacity: 0 }}
-        animate={{ 
-          x: 0, 
+        animate={{
+          x: 0,
           opacity: 1,
           width: sidebarWidth
         }}
@@ -363,7 +363,7 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                     transition={{ duration: 0.5, delay: 0.1 }}
                     className="flex flex-col"
                   >
-                    <motion.h1 
+                    <motion.h1
                       className={`text-2xl font-bold bg-gradient-to-r ${isDark ? 'from-slate-200 via-blue-200 to-indigo-200' : 'from-slate-700 via-blue-600 to-indigo-600'} bg-clip-text text-transparent`}
                       animate={{ backgroundPosition: ["0%", "100%", "0%"] }}
                       transition={{ duration: 6, repeat: Infinity }}
@@ -411,7 +411,7 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                       </motion.div>
                       <span className={`${themeClasses.textSecondary} text-sm font-medium`}>{greeting}</span>
                     </div>
-                    <motion.div 
+                    <motion.div
                       className={`${themeClasses.textSoft} text-xs font-mono ${isDark ? 'bg-slate-800/60' : 'bg-slate-100/60'} px-2 py-1 rounded-lg`}
                       animate={{ opacity: [0.7, 1, 0.7] }}
                       transition={{ duration: 3, repeat: Infinity }}
@@ -434,7 +434,7 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                             } else {
                               return 'UN';
                             }
-                          })()} 
+                          })()}
                         </span>
                       </div>
                       <motion.div
@@ -482,7 +482,7 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <motion.div 
+                    <motion.div
                       whileHover={{ scale: 1.05, y: -1 }}
                       whileTap={{ scale: 0.98 }}
                       className={`text-center p-3 ${isDark ? 'bg-slate-800/60 border-slate-700' : 'bg-blue-50/80 border-blue-100/60'} rounded-2xl cursor-pointer border hover:border-blue-300/60 transition-all duration-300 group relative overflow-hidden`}
@@ -499,7 +499,7 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                       </div>
                     </motion.div>
 
-                    <motion.div 
+                    <motion.div
                       whileHover={{ scale: 1.05, y: -1 }}
                       whileTap={{ scale: 0.98 }}
                       className={`text-center p-3 ${isDark ? 'bg-slate-800/60 border-slate-700' : 'bg-emerald-50/80 border-emerald-100/60'} rounded-2xl cursor-pointer border hover:border-emerald-300/60 transition-all duration-300 group relative overflow-hidden`}
@@ -557,11 +557,10 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                     whileHover={{ x: isCollapsed ? 2 : 5, scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleItemClick(item)}
-                    className={`w-full flex items-center p-4 rounded-2xl transition-all duration-400 group relative overflow-hidden backdrop-blur-sm ${
-                      isItemActive(item)
+                    className={`w-full flex items-center p-4 rounded-2xl transition-all duration-400 group relative overflow-hidden backdrop-blur-sm ${isItemActive(item)
                         ? `bg-gradient-to-r ${item.color} border border-white/30 shadow-lg ${item.glowColor} text-white`
                         : `${themeClasses.menuIdle} border border-transparent`
-                    }`}
+                      }`}
                   >
                     {isItemActive(item) && (
                       <>
@@ -596,9 +595,8 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                     <motion.div
                       whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0], y: -1 }}
                       transition={{ duration: 0.5 }}
-                      className={`relative w-12 h-12 rounded-2xl flex items-center justify-center z-10 ${
-                        isItemActive(item) ? themeClasses.iconWrapActive : themeClasses.iconWrapIdle
-                      }`}
+                      className={`relative w-12 h-12 rounded-2xl flex items-center justify-center z-10 ${isItemActive(item) ? themeClasses.iconWrapActive : themeClasses.iconWrapIdle
+                        }`}
                     >
                       <item.icon className={`w-6 h-6 ${isItemActive(item) ? 'text-white' : isDark ? 'text-slate-300 group-hover:text-slate-200' : 'text-slate-600 group-hover:text-slate-700'} transition-colors duration-300`} />
                       {item.premium && (
@@ -622,13 +620,13 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                           transition={{ duration: 0.3 }}
                           className="flex-1 ml-4 text-left z-10"
                         >
-                          <motion.div 
+                          <motion.div
                             className={`font-bold text-lg transition-colors duration-300 ${isItemActive(item) ? 'text-white' : themeClasses.textPrimary}`}
                             whileHover={{ x: 3 }}
                           >
                             {item.label}
                           </motion.div>
-                          <motion.div 
+                          <motion.div
                             className={`text-sm transition-colors duration-300 ${isItemActive(item) ? 'text-white/80' : themeClasses.textMuted}`}
                             whileHover={{ x: 3 }}
                           >
@@ -657,7 +655,7 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                         >
                           {!isCollapsed ? (
                             <motion.div
-                              animate={{ 
+                              animate={{
                                 scale: [1, 1.05, 1],
                                 boxShadow: [
                                   '0 0 0 0 rgba(239, 68, 68, 0.3)',

@@ -1,8 +1,7 @@
-import { createContext, useState, useContext, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import DarkModeContext from './DarkModeContext.js';
 
-const DarkModeContext = createContext();
-
-export function DarkModeProvider({ children }) {
+function DarkModeProvider({ children }) {
   // Initialize darkMode from localStorage or system preference
   const [darkMode, setDarkMode] = useState(() => {
     // Check if theme preference exists in localStorage
@@ -18,17 +17,17 @@ export function DarkModeProvider({ children }) {
   useEffect(() => {
     // Update localStorage
     localStorage.setItem('theme', darkMode ? 'dark' : 'light');
-    
+
     // Update document class
     if (darkMode) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-    
+
     // Dispatch custom event for components not directly using the context
     window.dispatchEvent(new CustomEvent('themeChange', { detail: { darkMode } }));
-    
+
     // Add smooth transition animation
     const body = document.body;
     body.style.transition = 'all 0.3s ease-in-out';
@@ -48,10 +47,6 @@ export function DarkModeProvider({ children }) {
   );
 }
 
-export function useDarkMode() {
-  const context = useContext(DarkModeContext);
-  if (!context) {
-    throw new Error('useDarkMode must be used within a DarkModeProvider');
-  }
-  return context;
-}
+export default DarkModeProvider;
+
+

@@ -3,10 +3,10 @@ import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import AddNewPropertyModal from './AddNewPropertyModal';
 import GenerateReportModal from './GenerateReportModal';
-import { 
-  Home, 
-  DollarSign, 
-  Users, 
+import {
+  Home,
+  DollarSign,
+  Users,
   Wrench,
   BarChart3,
   TrendingUp,
@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
-import { useDarkMode } from '../../../DarkModeContext';
+import { useDarkMode } from '../../../useDarkMode.js';
 // Removed SidebarContext usage
 
 // Enhanced Custom Hooks with better performance
@@ -99,9 +99,9 @@ const AnimatedCard = React.memo(({ children, delay = 0, className = '', ...props
     <motion.div
       ref={ref}
       initial={{ opacity: 0, y: 40, scale: 0.95 }}
-      animate={isVisible ? { 
-        opacity: 1, 
-        y: 0, 
+      animate={isVisible ? {
+        opacity: 1,
+        y: 0,
         scale: 1,
         transition: {
           type: "spring",
@@ -111,7 +111,7 @@ const AnimatedCard = React.memo(({ children, delay = 0, className = '', ...props
           delay
         }
       } : {}}
-      whileHover={{ 
+      whileHover={{
         y: -4,
         scale: 1.01,
         transition: { type: "spring", stiffness: 400, damping: 25 }
@@ -127,11 +127,10 @@ const AnimatedCard = React.memo(({ children, delay = 0, className = '', ...props
 // Enhanced Floating Particles - Smaller Size
 const FloatingParticle = React.memo(({ delay = 0, index = 0, isDark = true }) => (
   <motion.div
-    className={`absolute w-0.5 h-0.5 ${
-      isDark 
-        ? 'bg-gradient-to-r from-cyan-400 to-indigo-500' 
+    className={`absolute w-0.5 h-0.5 ${isDark
+        ? 'bg-gradient-to-r from-cyan-400 to-indigo-500'
         : 'bg-gradient-to-r from-indigo-400 to-purple-500'
-    } rounded-full`}
+      } rounded-full`}
     style={{
       left: `${20 + (index * 15) % 60}%`,
       top: `${80 + (index * 10) % 20}%`,
@@ -152,15 +151,15 @@ const FloatingParticle = React.memo(({ delay = 0, index = 0, isDark = true }) =>
 ));
 
 // Enhanced StatCard - Reduced Size
-const StatCard = React.memo(({ 
-  icon: Icon, 
-  title, 
-  value, 
-  change, 
-  trend, 
-  color, 
-  delay = 0, 
-  prefix = '', 
+const StatCard = React.memo(({
+  icon: Icon,
+  title,
+  value,
+  change,
+  trend,
+  color,
+  delay = 0,
+  prefix = '',
   suffix = '',
   isDark = true
 }) => {
@@ -170,47 +169,47 @@ const StatCard = React.memo(({
 
   const TrendIcon = trend === 'up' ? TrendingUp : TrendingDown;
 
-  const themeStyles = isDark 
+  const themeStyles = isDark
     ? {
-        cardBg: 'bg-slate-800/80',
-        cardBorder: 'border-slate-700/50',
-        cardShadow: 'hover:shadow-cyan-500/10',
-        iconBg: 'from-cyan-500/20 to-indigo-500/20',
-        iconBorder: 'border-cyan-400/30',
-        iconColor: 'text-cyan-300',
-        textPrimary: 'text-slate-100',
-        textSecondary: 'text-slate-300',
-        glowEffect: 'from-cyan-400/20 to-purple-500/20',
-        shimmer: 'via-cyan-300/20',
-        trendUp: 'bg-cyan-400/20 text-cyan-300 border-cyan-400/40',
-        trendDown: 'bg-pink-400/20 text-pink-300 border-pink-400/40'
-      }
+      cardBg: 'bg-slate-800/80',
+      cardBorder: 'border-slate-700/50',
+      cardShadow: 'hover:shadow-cyan-500/10',
+      iconBg: 'from-cyan-500/20 to-indigo-500/20',
+      iconBorder: 'border-cyan-400/30',
+      iconColor: 'text-cyan-300',
+      textPrimary: 'text-slate-100',
+      textSecondary: 'text-slate-300',
+      glowEffect: 'from-cyan-400/20 to-purple-500/20',
+      shimmer: 'via-cyan-300/20',
+      trendUp: 'bg-cyan-400/20 text-cyan-300 border-cyan-400/40',
+      trendDown: 'bg-pink-400/20 text-pink-300 border-pink-400/40'
+    }
     : {
-        cardBg: 'bg-white/80',
-        cardBorder: 'border-indigo-200/50',
-        cardShadow: 'hover:shadow-indigo-500/20',
-        iconBg: 'from-indigo-100/80 to-purple-100/80',
-        iconBorder: 'border-indigo-300/50',
-        iconColor: 'text-indigo-700',
-        textPrimary: 'text-gray-900',
-        textSecondary: 'text-indigo-600',
-        glowEffect: 'from-indigo-400/20 to-purple-500/20',
-        shimmer: 'via-indigo-300/20',
-        trendUp: 'bg-indigo-100/60 text-indigo-700 border-indigo-300/60',
-        trendDown: 'bg-pink-100/60 text-pink-700 border-pink-300/60'
-      };
+      cardBg: 'bg-white/80',
+      cardBorder: 'border-indigo-200/50',
+      cardShadow: 'hover:shadow-indigo-500/20',
+      iconBg: 'from-indigo-100/80 to-purple-100/80',
+      iconBorder: 'border-indigo-300/50',
+      iconColor: 'text-indigo-700',
+      textPrimary: 'text-gray-900',
+      textSecondary: 'text-indigo-600',
+      glowEffect: 'from-indigo-400/20 to-purple-500/20',
+      shimmer: 'via-indigo-300/20',
+      trendUp: 'bg-indigo-100/60 text-indigo-700 border-indigo-300/60',
+      trendDown: 'bg-pink-100/60 text-pink-700 border-pink-300/60'
+    };
 
   return (
     <motion.div
       ref={ref}
       initial={{ opacity: 0, scale: 0.8, rotateY: -20 }}
-      animate={isVisible ? { 
-        opacity: 1, 
-        scale: 1, 
+      animate={isVisible ? {
+        opacity: 1,
+        scale: 1,
         rotateY: 0,
         transition: { type: "spring", stiffness: 120, damping: 20, delay }
       } : {}}
-      whileHover={{ 
+      whileHover={{
         scale: 1.05,
         rotateY: 5,
         transition: { type: "spring", stiffness: 300, damping: 20 }
@@ -227,7 +226,7 @@ const StatCard = React.memo(({
       </div>
 
       {/* Animated gradient overlay */}
-      <motion.div 
+      <motion.div
         className={`absolute inset-0 bg-gradient-to-br ${themeStyles.glowEffect}`}
         animate={isHovered ? { opacity: 1, scale: 1.1 } : { opacity: 0.5, scale: 1 }}
         transition={{ duration: 0.4 }}
@@ -242,10 +241,10 @@ const StatCard = React.memo(({
 
       <div className="relative z-20">
         <div className="flex items-center justify-between mb-4">
-          <motion.div 
+          <motion.div
             className={`p-3 rounded-xl bg-gradient-to-br ${themeStyles.iconBg} backdrop-blur-sm border ${themeStyles.iconBorder}`}
-            whileHover={{ 
-              rotate: 15, 
+            whileHover={{
+              rotate: 15,
               scale: 1.1,
               boxShadow: isDark ? "0 8px 25px rgba(6, 182, 212, 0.3)" : "0 8px 25px rgba(99, 102, 241, 0.3)"
             }}
@@ -254,10 +253,9 @@ const StatCard = React.memo(({
             <Icon className={`w-6 h-6 ${themeStyles.iconColor} drop-shadow-lg`} />
           </motion.div>
 
-          <motion.div 
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm border ${
-              trend === 'up' ? themeStyles.trendUp : themeStyles.trendDown
-            }`}
+          <motion.div
+            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm border ${trend === 'up' ? themeStyles.trendUp : themeStyles.trendDown
+              }`}
             initial={{ opacity: 0, x: 20, scale: 0.8 }}
             animate={isVisible ? { opacity: 1, x: 0, scale: 1 } : {}}
             transition={{ delay: delay + 0.4, type: "spring", stiffness: 200 }}
@@ -273,7 +271,7 @@ const StatCard = React.memo(({
           </motion.div>
         </div>
 
-        <motion.h3 
+        <motion.h3
           className={`text-2xl font-bold ${themeStyles.textPrimary} mb-2 drop-shadow-lg`}
           initial={{ opacity: 0, scale: 0.5 }}
           animate={isVisible ? { opacity: 1, scale: 1 } : {}}
@@ -282,7 +280,7 @@ const StatCard = React.memo(({
           {prefix}{isVisible ? animatedValue.toLocaleString() : 0}{suffix}
         </motion.h3>
 
-        <motion.p 
+        <motion.p
           className={`${themeStyles.textSecondary} font-medium text-sm`}
           initial={{ opacity: 0 }}
           animate={isVisible ? { opacity: 1 } : {}}
@@ -306,59 +304,59 @@ const StatCard = React.memo(({
 const PropertyCard = React.memo(({ property, delay = 0, isDark = true }) => {
   const [isHovered, setIsHovered] = useState(false);
 
-  const statusColors = isDark 
+  const statusColors = isDark
     ? {
-        'Occupied': 'bg-cyan-400/20 text-cyan-300 border-cyan-400/50',
-        'Available': 'bg-indigo-400/20 text-indigo-300 border-indigo-400/50',
-        'Maintenance': 'bg-pink-400/20 text-pink-300 border-pink-400/50'
-      }
+      'Occupied': 'bg-cyan-400/20 text-cyan-300 border-cyan-400/50',
+      'Available': 'bg-indigo-400/20 text-indigo-300 border-indigo-400/50',
+      'Maintenance': 'bg-pink-400/20 text-pink-300 border-pink-400/50'
+    }
     : {
-        'Occupied': 'bg-indigo-100/60 text-indigo-700 border-indigo-300/60',
-        'Available': 'bg-purple-100/60 text-purple-700 border-purple-300/60',
-        'Maintenance': 'bg-pink-100/60 text-pink-700 border-pink-300/60'
-      };
+      'Occupied': 'bg-indigo-100/60 text-indigo-700 border-indigo-300/60',
+      'Available': 'bg-purple-100/60 text-purple-700 border-purple-300/60',
+      'Maintenance': 'bg-pink-100/60 text-pink-700 border-pink-300/60'
+    };
 
   const themeStyles = isDark
     ? {
-        cardBg: 'from-slate-800/80 to-blue-950/80',
-        cardBorder: 'border-slate-700/50',
-        cardShadow: 'hover:shadow-cyan-500/20',
-        imageBg: 'from-pink-500 via-purple-500 to-indigo-600',
-        overlay: 'from-gray-900/80 via-slate-800/40',
-        textPrimary: 'text-slate-100',
-        textSecondary: 'text-slate-300',
-        textTertiary: 'text-slate-200',
-        buttonBg: 'from-cyan-500 to-indigo-600',
-        buttonHover: 'hover:from-cyan-400 hover:to-indigo-500',
-        buttonText: 'text-blue-950'
-      }
+      cardBg: 'from-slate-800/80 to-blue-950/80',
+      cardBorder: 'border-slate-700/50',
+      cardShadow: 'hover:shadow-cyan-500/20',
+      imageBg: 'from-pink-500 via-purple-500 to-indigo-600',
+      overlay: 'from-gray-900/80 via-slate-800/40',
+      textPrimary: 'text-slate-100',
+      textSecondary: 'text-slate-300',
+      textTertiary: 'text-slate-200',
+      buttonBg: 'from-cyan-500 to-indigo-600',
+      buttonHover: 'hover:from-cyan-400 hover:to-indigo-500',
+      buttonText: 'text-blue-950'
+    }
     : {
-        cardBg: 'from-white/90 to-indigo-50/80',
-        cardBorder: 'border-indigo-200/50',
-        cardShadow: 'hover:shadow-indigo-500/20',
-        imageBg: 'from-pink-300 via-purple-300 to-indigo-400',
-        overlay: 'from-gray-800/70 via-indigo-900/30',
-        textPrimary: 'text-gray-900',
-        textSecondary: 'text-indigo-600',
-        textTertiary: 'text-white',
-        buttonBg: 'from-indigo-600 to-purple-600',
-        buttonHover: 'hover:from-indigo-700 hover:to-purple-700',
-        buttonText: 'text-white'
-      };
+      cardBg: 'from-white/90 to-indigo-50/80',
+      cardBorder: 'border-indigo-200/50',
+      cardShadow: 'hover:shadow-indigo-500/20',
+      imageBg: 'from-pink-300 via-purple-300 to-indigo-400',
+      overlay: 'from-gray-800/70 via-indigo-900/30',
+      textPrimary: 'text-gray-900',
+      textSecondary: 'text-indigo-600',
+      textTertiary: 'text-white',
+      buttonBg: 'from-indigo-600 to-purple-600',
+      buttonHover: 'hover:from-indigo-700 hover:to-purple-700',
+      buttonText: 'text-white'
+    };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 30, rotateX: 15 }}
       animate={{ opacity: 1, y: 0, rotateX: 0 }}
-      transition={{ 
-        delay, 
+      transition={{
+        delay,
         duration: 0.8,
         type: "spring",
         stiffness: 100,
         damping: 20
       }}
-      whileHover={{ 
-        scale: 1.03, 
+      whileHover={{
+        scale: 1.03,
         y: -8,
         rotateY: 3,
         transition: { type: "spring", stiffness: 300, damping: 25 }
@@ -375,7 +373,7 @@ const PropertyCard = React.memo(({ property, delay = 0, isDark = true }) => {
           transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
         >
           <motion.div
-            animate={isHovered ? { 
+            animate={isHovered ? {
               rotate: 360,
               scale: 1.1,
               filter: "brightness(1.2)"
@@ -386,7 +384,7 @@ const PropertyCard = React.memo(({ property, delay = 0, isDark = true }) => {
           </motion.div>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           className={`absolute inset-0 bg-gradient-to-t ${themeStyles.overlay} to-transparent`}
           animate={isHovered ? { opacity: 0.9 } : { opacity: 0.7 }}
           transition={{ duration: 0.4 }}
@@ -403,19 +401,19 @@ const PropertyCard = React.memo(({ property, delay = 0, isDark = true }) => {
         </motion.div>
 
         {/* Property info overlay */}
-        <motion.div 
+        <motion.div
           className={`absolute bottom-4 left-4 ${themeStyles.textTertiary}`}
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: delay + 0.3 }}
         >
-          <motion.h3 
+          <motion.h3
             className="font-bold text-lg mb-1 drop-shadow-lg"
             whileHover={{ scale: 1.03 }}
           >
             {property.title}
           </motion.h3>
-          <motion.div 
+          <motion.div
             className={`flex items-center space-x-1.5 text-xs ${isDark ? 'text-slate-200' : 'text-white/90'}`}
             whileHover={{ x: 3 }}
             transition={{ type: "spring", stiffness: 300 }}
@@ -429,21 +427,21 @@ const PropertyCard = React.memo(({ property, delay = 0, isDark = true }) => {
       {/* Content section - Reduced Size */}
       <div className="p-5">
         <div className="flex items-center justify-between mb-4">
-          <motion.div 
+          <motion.div
             className={`text-xl font-bold ${themeStyles.textPrimary} drop-shadow-sm`}
             whileHover={{ scale: 1.05 }}
           >
             ${property.rent.toLocaleString()}<span className={`text-sm ${themeStyles.textSecondary} font-normal`}>/month</span>
           </motion.div>
           <div className={`flex items-center space-x-4 ${themeStyles.textSecondary}`}>
-            <motion.span 
+            <motion.span
               className="flex items-center space-x-1.5"
               whileHover={{ scale: 1.05, color: isDark ? "#e2e8f0" : "#374151" }}
             >
               <Home className="w-4 h-4" />
               <span>{property.bedrooms} bed</span>
             </motion.span>
-            <motion.span 
+            <motion.span
               className="flex items-center space-x-1.5"
               whileHover={{ scale: 1.05, color: isDark ? "#e2e8f0" : "#374151" }}
             >
@@ -454,10 +452,10 @@ const PropertyCard = React.memo(({ property, delay = 0, isDark = true }) => {
         </div>
 
         <motion.button
-          whileHover={{ 
-            scale: 1.02, 
-            boxShadow: isDark 
-              ? "0 15px 30px rgba(6, 182, 212, 0.3)" 
+          whileHover={{
+            scale: 1.02,
+            boxShadow: isDark
+              ? "0 15px 30px rgba(6, 182, 212, 0.3)"
               : "0 15px 30px rgba(99, 102, 241, 0.3)"
           }}
           whileTap={{ scale: 0.98 }}
@@ -480,56 +478,56 @@ const PropertyCard = React.memo(({ property, delay = 0, isDark = true }) => {
 const NotificationCard = React.memo(({ notification, delay = 0, isDark = true }) => {
   const priorityConfig = isDark
     ? {
-        high: { bg: 'bg-pink-500/20', text: 'text-pink-300', icon: AlertTriangle },
-        medium: { bg: 'bg-purple-500/20', text: 'text-purple-300', icon: Clock },
-        low: { bg: 'bg-cyan-500/20', text: 'text-cyan-300', icon: CheckCircle }
-      }
+      high: { bg: 'bg-pink-500/20', text: 'text-pink-300', icon: AlertTriangle },
+      medium: { bg: 'bg-purple-500/20', text: 'text-purple-300', icon: Clock },
+      low: { bg: 'bg-cyan-500/20', text: 'text-cyan-300', icon: CheckCircle }
+    }
     : {
-        high: { bg: 'bg-pink-100/60', text: 'text-pink-700', icon: AlertTriangle },
-        medium: { bg: 'bg-purple-100/60', text: 'text-purple-700', icon: Clock },
-        low: { bg: 'bg-indigo-100/60', text: 'text-indigo-700', icon: CheckCircle }
-      };
+      high: { bg: 'bg-pink-100/60', text: 'text-pink-700', icon: AlertTriangle },
+      medium: { bg: 'bg-purple-100/60', text: 'text-purple-700', icon: Clock },
+      low: { bg: 'bg-indigo-100/60', text: 'text-indigo-700', icon: CheckCircle }
+    };
 
   const config = priorityConfig[notification.priority];
   const IconComponent = config.icon;
 
   const themeStyles = isDark
     ? {
-        cardBg: 'bg-slate-800/60 hover:bg-slate-800/80',
-        cardBorder: 'border-slate-700/50 hover:border-cyan-400/30',
-        iconBorder: 'border-slate-600/30',
-        textPrimary: 'text-slate-100 group-hover:text-cyan-200',
-        textSecondary: 'text-slate-300',
-        textTertiary: 'text-slate-400',
-        buttonHover: 'hover:bg-cyan-400/20',
-        buttonIcon: 'text-slate-400',
-        shadow: 'rgba(6, 182, 212, 0.1)'
-      }
+      cardBg: 'bg-slate-800/60 hover:bg-slate-800/80',
+      cardBorder: 'border-slate-700/50 hover:border-cyan-400/30',
+      iconBorder: 'border-slate-600/30',
+      textPrimary: 'text-slate-100 group-hover:text-cyan-200',
+      textSecondary: 'text-slate-300',
+      textTertiary: 'text-slate-400',
+      buttonHover: 'hover:bg-cyan-400/20',
+      buttonIcon: 'text-slate-400',
+      shadow: 'rgba(6, 182, 212, 0.1)'
+    }
     : {
-        cardBg: 'bg-white/60 hover:bg-white/80',
-        cardBorder: 'border-indigo-200/50 hover:border-indigo-400/40',
-        iconBorder: 'border-indigo-300/40',
-        textPrimary: 'text-gray-900 group-hover:text-indigo-700',
-        textSecondary: 'text-indigo-600',
-        textTertiary: 'text-indigo-500',
-        buttonHover: 'hover:bg-indigo-100/40',
-        buttonIcon: 'text-indigo-500',
-        shadow: 'rgba(99, 102, 241, 0.1)'
-      };
+      cardBg: 'bg-white/60 hover:bg-white/80',
+      cardBorder: 'border-indigo-200/50 hover:border-indigo-400/40',
+      iconBorder: 'border-indigo-300/40',
+      textPrimary: 'text-gray-900 group-hover:text-indigo-700',
+      textSecondary: 'text-indigo-600',
+      textTertiary: 'text-indigo-500',
+      buttonHover: 'hover:bg-indigo-100/40',
+      buttonIcon: 'text-indigo-500',
+      shadow: 'rgba(99, 102, 241, 0.1)'
+    };
 
   return (
     <motion.div
       initial={{ opacity: 0, x: -30, scale: 0.95 }}
       animate={{ opacity: 1, x: 0, scale: 1 }}
-      transition={{ 
-        delay, 
+      transition={{
+        delay,
         duration: 0.6,
         type: "spring",
         stiffness: 120,
         damping: 20
       }}
-      whileHover={{ 
-        scale: 1.02, 
+      whileHover={{
+        scale: 1.02,
         x: 5,
         boxShadow: `0 8px 25px ${themeStyles.shadow}`
       }}
@@ -543,7 +541,7 @@ const NotificationCard = React.memo(({ notification, delay = 0, isDark = true })
       </motion.div>
 
       <div className="flex-1">
-        <motion.h4 
+        <motion.h4
           className={`font-semibold ${themeStyles.textPrimary} transition-colors text-sm mb-1`}
           whileHover={{ x: 3 }}
         >
@@ -569,63 +567,63 @@ const NotificationCard = React.memo(({ notification, delay = 0, isDark = true })
 const MaintenanceRow = React.memo(({ request, delay = 0, isDark = true }) => {
   const priorityColors = isDark
     ? {
-        High: 'bg-pink-500/20 text-pink-300',
-        Medium: 'bg-purple-500/20 text-purple-300',
-        Low: 'bg-cyan-500/20 text-cyan-300'
-      }
+      High: 'bg-pink-500/20 text-pink-300',
+      Medium: 'bg-purple-500/20 text-purple-300',
+      Low: 'bg-cyan-500/20 text-cyan-300'
+    }
     : {
-        High: 'bg-pink-100/60 text-pink-700',
-        Medium: 'bg-purple-100/60 text-purple-700',
-        Low: 'bg-indigo-100/60 text-indigo-700'
-      };
+      High: 'bg-pink-100/60 text-pink-700',
+      Medium: 'bg-purple-100/60 text-purple-700',
+      Low: 'bg-indigo-100/60 text-indigo-700'
+    };
 
   const statusColors = isDark
     ? {
-        Completed: 'bg-cyan-500/20 text-cyan-300',
-        'In Progress': 'bg-indigo-500/20 text-indigo-300',
-        Pending: 'bg-slate-500/20 text-slate-300'
-      }
+      Completed: 'bg-cyan-500/20 text-cyan-300',
+      'In Progress': 'bg-indigo-500/20 text-indigo-300',
+      Pending: 'bg-slate-500/20 text-slate-300'
+    }
     : {
-        Completed: 'bg-indigo-100/60 text-indigo-700',
-        'In Progress': 'bg-purple-100/60 text-purple-700',
-        Pending: 'bg-gray-100/60 text-gray-700'
-      };
+      Completed: 'bg-indigo-100/60 text-indigo-700',
+      'In Progress': 'bg-purple-100/60 text-purple-700',
+      Pending: 'bg-gray-100/60 text-gray-700'
+    };
 
   const themeStyles = isDark
     ? {
-        rowHover: 'rgba(51, 65, 85, 0.3)',
-        borderColor: 'border-slate-700/50 hover:border-cyan-400/30',
-        textPrimary: 'text-slate-100',
-        textSecondary: 'text-slate-300',
-        textTertiary: 'text-slate-200',
-        buttonBg: 'from-cyan-500 to-indigo-600',
-        buttonHover: 'hover:from-cyan-400 hover:to-indigo-500',
-        buttonText: 'text-blue-950',
-        buttonShadow: 'rgba(6, 182, 212, 0.3)'
-      }
+      rowHover: 'rgba(51, 65, 85, 0.3)',
+      borderColor: 'border-slate-700/50 hover:border-cyan-400/30',
+      textPrimary: 'text-slate-100',
+      textSecondary: 'text-slate-300',
+      textTertiary: 'text-slate-200',
+      buttonBg: 'from-cyan-500 to-indigo-600',
+      buttonHover: 'hover:from-cyan-400 hover:to-indigo-500',
+      buttonText: 'text-blue-950',
+      buttonShadow: 'rgba(6, 182, 212, 0.3)'
+    }
     : {
-        rowHover: 'rgba(199, 210, 254, 0.3)',
-        borderColor: 'border-indigo-200/50 hover:border-indigo-400/40',
-        textPrimary: 'text-gray-900',
-        textSecondary: 'text-indigo-600',
-        textTertiary: 'text-indigo-700',
-        buttonBg: 'from-indigo-600 to-purple-600',
-        buttonHover: 'hover:from-indigo-700 hover:to-purple-700',
-        buttonText: 'text-white',
-        buttonShadow: 'rgba(99, 102, 241, 0.3)'
-      };
+      rowHover: 'rgba(199, 210, 254, 0.3)',
+      borderColor: 'border-indigo-200/50 hover:border-indigo-400/40',
+      textPrimary: 'text-gray-900',
+      textSecondary: 'text-indigo-600',
+      textTertiary: 'text-indigo-700',
+      buttonBg: 'from-indigo-600 to-purple-600',
+      buttonHover: 'hover:from-indigo-700 hover:to-purple-700',
+      buttonText: 'text-white',
+      buttonShadow: 'rgba(99, 102, 241, 0.3)'
+    };
 
   return (
     <motion.tr
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ 
-        delay, 
+      transition={{
+        delay,
         duration: 0.6,
         type: "spring",
         stiffness: 100
       }}
-      whileHover={{ 
+      whileHover={{
         backgroundColor: themeStyles.rowHover,
         scale: 1.005
       }}
@@ -640,7 +638,7 @@ const MaintenanceRow = React.memo(({ request, delay = 0, isDark = true }) => {
       <td className={`py-4 px-4 ${themeStyles.textTertiary} text-sm`}>{request.property}</td>
       <td className={`py-4 px-4 ${themeStyles.textSecondary} text-sm`}>{request.date}</td>
       <td className="py-4 px-4">
-        <motion.span 
+        <motion.span
           className={`px-3 py-1.5 rounded-full text-xs font-semibold ${priorityColors[request.priority]}`}
           whileHover={{ scale: 1.05 }}
         >
@@ -648,7 +646,7 @@ const MaintenanceRow = React.memo(({ request, delay = 0, isDark = true }) => {
         </motion.span>
       </td>
       <td className="py-4 px-4">
-        <motion.span 
+        <motion.span
           className={`px-3 py-1.5 rounded-full text-xs font-semibold ${statusColors[request.status]}`}
           whileHover={{ scale: 1.05 }}
         >
@@ -657,7 +655,7 @@ const MaintenanceRow = React.memo(({ request, delay = 0, isDark = true }) => {
       </td>
       <td className="py-4 px-4">
         <motion.button
-          whileHover={{ 
+          whileHover={{
             scale: 1.03,
             boxShadow: `0 8px 20px ${themeStyles.buttonShadow}`
           }}
@@ -704,37 +702,37 @@ const LandlordDashboard = () => {
   }, [location.pathname, updateSection]);
 
   const stats = useMemo(() => [
-    { 
-      icon: Building2, 
-      title: 'Total Properties', 
-      value: '24', 
-      change: '+12%', 
-      trend: 'up', 
+    {
+      icon: Building2,
+      title: 'Total Properties',
+      value: '24',
+      change: '+12%',
+      trend: 'up',
       color: isDarkMode ? 'from-cyan-500 to-indigo-600' : 'from-indigo-500 to-purple-600'
     },
-    { 
-      icon: DollarSign, 
-      title: 'Monthly Revenue', 
-      value: '28500', 
-      change: '+8.2%', 
-      trend: 'up', 
+    {
+      icon: DollarSign,
+      title: 'Monthly Revenue',
+      value: '28500',
+      change: '+8.2%',
+      trend: 'up',
       color: isDarkMode ? 'from-indigo-500 to-purple-600' : 'from-purple-500 to-pink-500',
       prefix: '$'
     },
-    { 
-      icon: Users, 
-      title: 'Active Tenants', 
-      value: '156', 
-      change: '+5.1%', 
-      trend: 'up', 
+    {
+      icon: Users,
+      title: 'Active Tenants',
+      value: '156',
+      change: '+5.1%',
+      trend: 'up',
       color: isDarkMode ? 'from-purple-500 to-pink-600' : 'from-pink-400 to-rose-500'
     },
-    { 
-      icon: Wrench, 
-      title: 'Maintenance Requests', 
-      value: '8', 
-      change: '-23%', 
-      trend: 'down', 
+    {
+      icon: Wrench,
+      title: 'Maintenance Requests',
+      value: '8',
+      change: '-23%',
+      trend: 'down',
       color: isDarkMode ? 'from-pink-500 to-rose-600' : 'from-rose-400 to-pink-500'
     }
   ], [isDarkMode]);
@@ -823,69 +821,69 @@ const LandlordDashboard = () => {
     }
   ], []);
 
-  const themeConfig = isDarkMode 
+  const themeConfig = isDarkMode
     ? {
-        mainBg: 'from-gray-900 via-slate-800 to-blue-950',
-        loadingBg: 'from-gray-900 via-slate-800 to-blue-950',
-        cardBg: 'bg-slate-800/50',
-        cardBorder: 'border-slate-700/50',
-        textPrimary: 'text-slate-100',
-        textSecondary: 'text-slate-200',
-        textAccent: 'text-cyan-300',
-        headerGradient: 'from-cyan-300 via-purple-300 to-pink-300',
-        tabBg: 'bg-slate-800/50',
-        tabBorder: 'border-slate-700/50',
-        tabActive: 'from-cyan-500 to-indigo-600',
-        tabActiveText: 'text-blue-950',
-        tabInactive: 'text-slate-300 hover:text-slate-100 hover:bg-slate-700/50',
-        buttonPrimary: 'from-cyan-500 to-indigo-600',
-        buttonSecondary: 'from-purple-500 to-pink-600',
-        iconColors: {
-          flame: 'text-pink-400',
-          trend: 'text-cyan-400',
-          building: 'text-cyan-400',
-          bell: 'text-purple-400',
-          wrench: 'text-pink-400'
-        },
-        backgroundParticles: [
-          'from-purple-500/15 to-pink-500/15',
-          'from-cyan-500/15 to-indigo-500/15',
-          'from-indigo-500/10 to-purple-500/10'
-        ],
-        spinnerBorder: 'border-cyan-500/30 border-t-cyan-400',
-        loadingText: 'text-cyan-200'
-      }
+      mainBg: 'from-gray-900 via-slate-800 to-blue-950',
+      loadingBg: 'from-gray-900 via-slate-800 to-blue-950',
+      cardBg: 'bg-slate-800/50',
+      cardBorder: 'border-slate-700/50',
+      textPrimary: 'text-slate-100',
+      textSecondary: 'text-slate-200',
+      textAccent: 'text-cyan-300',
+      headerGradient: 'from-cyan-300 via-purple-300 to-pink-300',
+      tabBg: 'bg-slate-800/50',
+      tabBorder: 'border-slate-700/50',
+      tabActive: 'from-cyan-500 to-indigo-600',
+      tabActiveText: 'text-blue-950',
+      tabInactive: 'text-slate-300 hover:text-slate-100 hover:bg-slate-700/50',
+      buttonPrimary: 'from-cyan-500 to-indigo-600',
+      buttonSecondary: 'from-purple-500 to-pink-600',
+      iconColors: {
+        flame: 'text-pink-400',
+        trend: 'text-cyan-400',
+        building: 'text-cyan-400',
+        bell: 'text-purple-400',
+        wrench: 'text-pink-400'
+      },
+      backgroundParticles: [
+        'from-purple-500/15 to-pink-500/15',
+        'from-cyan-500/15 to-indigo-500/15',
+        'from-indigo-500/10 to-purple-500/10'
+      ],
+      spinnerBorder: 'border-cyan-500/30 border-t-cyan-400',
+      loadingText: 'text-cyan-200'
+    }
     : {
-        mainBg: 'from-pink-300 via-purple-300 to-indigo-400',
-        loadingBg: 'from-pink-300 via-purple-300 to-indigo-400',
-        cardBg: 'bg-white/60',
-        cardBorder: 'border-indigo-200/50',
-        textPrimary: 'text-gray-900',
-        textSecondary: 'text-indigo-600',
-        textAccent: 'text-indigo-700',
-        headerGradient: 'from-indigo-700 via-purple-700 to-pink-700',
-        tabBg: 'bg-white/30',
-        tabBorder: 'border-indigo-200/50',
-        tabActive: 'from-indigo-600 to-purple-600',
-        tabActiveText: 'text-white',
-        tabInactive: 'text-indigo-600 hover:text-indigo-800 hover:bg-white/40',
-        buttonPrimary: 'from-indigo-600 to-purple-600',
-        buttonSecondary: 'from-purple-600 to-pink-600',
-        iconColors: {
-          flame: 'text-pink-600',
-          trend: 'text-indigo-600',
-          building: 'text-indigo-600',
-          bell: 'text-purple-600',
-          wrench: 'text-pink-600'
-        },
-        backgroundParticles: [
-          'from-purple-300/20 to-pink-300/20',
-          'from-indigo-300/20 to-purple-300/20',
-          'from-pink-300/15 to-indigo-300/15'
-        ],
-        spinnerBorder: 'border-indigo-400/40 border-t-indigo-600',
-        loadingText: 'text-indigo-700'
-      };
+      mainBg: 'from-pink-300 via-purple-300 to-indigo-400',
+      loadingBg: 'from-pink-300 via-purple-300 to-indigo-400',
+      cardBg: 'bg-white/60',
+      cardBorder: 'border-indigo-200/50',
+      textPrimary: 'text-gray-900',
+      textSecondary: 'text-indigo-600',
+      textAccent: 'text-indigo-700',
+      headerGradient: 'from-indigo-700 via-purple-700 to-pink-700',
+      tabBg: 'bg-white/30',
+      tabBorder: 'border-indigo-200/50',
+      tabActive: 'from-indigo-600 to-purple-600',
+      tabActiveText: 'text-white',
+      tabInactive: 'text-indigo-600 hover:text-indigo-800 hover:bg-white/40',
+      buttonPrimary: 'from-indigo-600 to-purple-600',
+      buttonSecondary: 'from-purple-600 to-pink-600',
+      iconColors: {
+        flame: 'text-pink-600',
+        trend: 'text-indigo-600',
+        building: 'text-indigo-600',
+        bell: 'text-purple-600',
+        wrench: 'text-pink-600'
+      },
+      backgroundParticles: [
+        'from-purple-300/20 to-pink-300/20',
+        'from-indigo-300/20 to-purple-300/20',
+        'from-pink-300/15 to-indigo-300/15'
+      ],
+      spinnerBorder: 'border-indigo-400/40 border-t-indigo-600',
+      loadingText: 'text-indigo-700'
+    };
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 2000);
@@ -897,26 +895,26 @@ const LandlordDashboard = () => {
       <div className={`min-h-screen bg-gradient-to-br ${themeConfig.loadingBg} flex items-center justify-center relative overflow-hidden`}>
         <div className="absolute inset-0">
           <motion.div
-            animate={{ 
+            animate={{
               rotate: 360,
               scale: [1, 1.2, 1]
             }}
-            transition={{ 
-              duration: 8, 
-              repeat: Infinity, 
-              ease: "linear" 
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "linear"
             }}
             className={`absolute top-1/4 left-1/4 w-48 h-48 bg-gradient-to-r ${themeConfig.backgroundParticles[0]} rounded-full blur-3xl`}
           />
           <motion.div
-            animate={{ 
+            animate={{
               rotate: -360,
               scale: [1.2, 1, 1.2]
             }}
-            transition={{ 
-              duration: 10, 
-              repeat: Infinity, 
-              ease: "linear" 
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "linear"
             }}
             className={`absolute bottom-1/4 right-1/4 w-48 h-48 bg-gradient-to-r ${themeConfig.backgroundParticles[1]} rounded-full blur-3xl`}
           />
@@ -933,7 +931,7 @@ const LandlordDashboard = () => {
             className={`w-16 h-16 border-4 ${themeConfig.spinnerBorder} rounded-full mx-auto mb-6`}
           />
           <motion.h2
-            animate={{ 
+            animate={{
               opacity: [0.5, 1, 0.5],
               scale: [1, 1.05, 1]
             }}
@@ -942,7 +940,7 @@ const LandlordDashboard = () => {
           >
             Loading Dashboard...
           </motion.h2>
-          <motion.p 
+          <motion.p
             className={`${themeConfig.loadingText} text-base`}
             animate={{ opacity: [0.4, 0.8, 0.4] }}
             transition={{ duration: 1.5, repeat: Infinity }}
@@ -958,8 +956,8 @@ const LandlordDashboard = () => {
     <div className={`min-h-screen bg-gradient-to-br ${themeConfig.mainBg} flex relative overflow-hidden`}>
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
-          animate={{ 
-            rotate: 360, 
+          animate={{
+            rotate: 360,
             scale: [1, 1.1, 1],
             x: [0, 30, 0],
             y: [0, -20, 0]
@@ -968,8 +966,8 @@ const LandlordDashboard = () => {
           className={`absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r ${themeConfig.backgroundParticles[0]} rounded-full blur-3xl`}
         />
         <motion.div
-          animate={{ 
-            rotate: -360, 
+          animate={{
+            rotate: -360,
             scale: [1.1, 1, 1.1],
             x: [0, -20, 0],
             y: [0, 30, 0]
@@ -978,7 +976,7 @@ const LandlordDashboard = () => {
           className={`absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r ${themeConfig.backgroundParticles[1]} rounded-full blur-3xl`}
         />
         <motion.div
-          animate={{ 
+          animate={{
             scale: [1, 1.1, 1],
             opacity: [0.3, 0.6, 0.3]
           }}
@@ -1003,23 +1001,23 @@ const LandlordDashboard = () => {
             >
               <motion.h1
                 className={`text-4xl font-bold ${themeConfig.textPrimary} mb-4 bg-gradient-to-r ${themeConfig.headerGradient} bg-clip-text text-transparent`}
-                animate={{ 
+                animate={{
                   backgroundPosition: ["0%", "100%", "0%"],
-                  textShadow: isDarkMode 
+                  textShadow: isDarkMode
                     ? [
-                        "0 0 15px rgba(6, 182, 212, 0.5)",
-                        "0 0 30px rgba(168, 85, 247, 0.5)",
-                        "0 0 15px rgba(6, 182, 212, 0.5)"
-                      ]
+                      "0 0 15px rgba(6, 182, 212, 0.5)",
+                      "0 0 30px rgba(168, 85, 247, 0.5)",
+                      "0 0 15px rgba(6, 182, 212, 0.5)"
+                    ]
                     : [
-                        "0 0 15px rgba(99, 102, 241, 0.3)",
-                        "0 0 30px rgba(168, 85, 247, 0.3)",
-                        "0 0 15px rgba(99, 102, 241, 0.3)"
-                      ]
+                      "0 0 15px rgba(99, 102, 241, 0.3)",
+                      "0 0 30px rgba(168, 85, 247, 0.3)",
+                      "0 0 15px rgba(99, 102, 241, 0.3)"
+                    ]
                 }}
                 transition={{ duration: 5, repeat: Infinity }}
               >
-                Welcome Back, Landlord! 
+                Welcome Back, Landlord!
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -1035,14 +1033,14 @@ const LandlordDashboard = () => {
                 {[...Array(6)].map((_, i) => (
                   <motion.div
                     key={i}
-                    animate={{ 
-                      y: [-10, 10, -10], 
+                    animate={{
+                      y: [-10, 10, -10],
                       rotate: [0, 8, 0],
                       opacity: [0.4, 0.8, 0.4]
                     }}
-                    transition={{ 
-                      duration: 4 + (i * 0.5), 
-                      repeat: Infinity, 
+                    transition={{
+                      duration: 4 + (i * 0.5),
+                      repeat: Infinity,
                       ease: "easeInOut",
                       delay: i * 0.3
                     }}
@@ -1091,11 +1089,10 @@ const LandlordDashboard = () => {
                   onClick={() => setActiveTab(key)}
                   whileHover={{ scale: 1.03, y: -1 }}
                   whileTap={{ scale: 0.97 }}
-                  className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-semibold transition-all duration-400 text-sm ${
-                    activeTab === key
+                  className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-semibold transition-all duration-400 text-sm ${activeTab === key
                       ? `bg-gradient-to-r ${themeConfig.tabActive} ${themeConfig.tabActiveText} shadow-lg shadow-${isDarkMode ? 'cyan' : 'indigo'}-500/25`
                       : themeConfig.tabInactive
-                  }`}
+                    }`}
                 >
                   <motion.div
                     animate={activeTab === key ? { rotate: 360 } : {}}
@@ -1121,7 +1118,7 @@ const LandlordDashboard = () => {
                 >
                   {/* Quick Actions */}
                   <AnimatedCard className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-2xl p-6 shadow-xl`}>
-                    <motion.h2 
+                    <motion.h2
                       className={`text-2xl font-bold ${themeConfig.textPrimary} mb-6 flex items-center space-x-3`}
                       whileHover={{ x: 5 }}
                     >
@@ -1142,16 +1139,16 @@ const LandlordDashboard = () => {
                         <motion.button
                           key={action.label}
                           onClick={action.onClick} // Added onClick
-                          whileHover={{ 
-                            scale: 1.05, 
+                          whileHover={{
+                            scale: 1.05,
                             y: -5,
                             boxShadow: "0 15px 30px rgba(0,0,0,0.25)"
                           }}
                           whileTap={{ scale: 0.95 }}
                           initial={{ opacity: 0, y: 30, rotateX: 15 }}
                           animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                          transition={{ 
-                            delay: index * 0.15, 
+                          transition={{
+                            delay: index * 0.15,
                             duration: 0.6,
                             type: "spring",
                             stiffness: 120
@@ -1172,7 +1169,7 @@ const LandlordDashboard = () => {
 
                   {/* Performance Metrics */}
                   <AnimatedCard delay={0.3} className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-2xl p-6 shadow-xl`}>
-                    <motion.h2 
+                    <motion.h2
                       className={`text-2xl font-bold ${themeConfig.textPrimary} mb-6 flex items-center space-x-3`}
                       whileHover={{ x: 5 }}
                     >
@@ -1190,11 +1187,11 @@ const LandlordDashboard = () => {
                         { value: '4.8', label: 'Avg Rating', color: isDarkMode ? 'text-indigo-400' : 'text-purple-600', delay: 0.1 },
                         { value: '2.1', label: 'Avg Response (hrs)', color: isDarkMode ? 'text-purple-400' : 'text-pink-600', delay: 0.2 }
                       ].map((metric, index) => (
-                        <motion.div 
+                        <motion.div
                           key={metric.label}
                           className={`text-center p-5 ${isDarkMode ? 'bg-slate-900/50' : 'bg-white/40'} rounded-xl border ${isDarkMode ? 'border-slate-700/50 hover:bg-slate-900/70' : 'border-indigo-200/50 hover:bg-white/60'} transition-all duration-300`}
-                          whileHover={{ 
-                            scale: 1.03, 
+                          whileHover={{
+                            scale: 1.03,
                             y: -3,
                             boxShadow: isDarkMode ? "0 15px 30px rgba(255,255,255,0.1)" : "0 15px 30px rgba(99, 102, 241, 0.1)"
                           }}
@@ -1202,7 +1199,7 @@ const LandlordDashboard = () => {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: metric.delay, duration: 0.6 }}
                         >
-                          <motion.div 
+                          <motion.div
                             className={`text-3xl font-bold ${metric.color} mb-2 drop-shadow-lg`}
                             whileHover={{ scale: 1.05 }}
                           >
@@ -1226,7 +1223,7 @@ const LandlordDashboard = () => {
                 >
                   <AnimatedCard className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-2xl p-6 shadow-xl`}>
                     <div className="flex justify-between items-center mb-8">
-                      <motion.h2 
+                      <motion.h2
                         className={`text-3xl font-bold ${themeConfig.textPrimary} flex items-center space-x-3`}
                         whileHover={{ x: 5 }}
                       >
@@ -1237,7 +1234,7 @@ const LandlordDashboard = () => {
                         </motion.div>
                         <span>Your Properties</span>
                       </motion.h2>
-                      
+
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -1263,13 +1260,13 @@ const LandlordDashboard = () => {
                   transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
                 >
                   <AnimatedCard className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-2xl p-6 shadow-xl`}>
-                    <motion.h2 
+                    <motion.h2
                       className={`text-3xl font-bold ${themeConfig.textPrimary} mb-8 flex items-center space-x-3`}
                       whileHover={{ x: 5 }}
                     >
                       <motion.div
                         whileHover={{ rotate: 15, scale: 1.1 }}
-                        animate={{ 
+                        animate={{
                           rotate: [0, 10, 0],
                           scale: [1, 1.05, 1]
                         }}
@@ -1298,10 +1295,10 @@ const LandlordDashboard = () => {
                       className="text-center mt-8"
                     >
                       <motion.button
-                        whileHover={{ 
+                        whileHover={{
                           scale: 1.03,
-                          boxShadow: isDarkMode 
-                            ? "0 15px 30px rgba(168, 85, 247, 0.4)" 
+                          boxShadow: isDarkMode
+                            ? "0 15px 30px rgba(168, 85, 247, 0.4)"
                             : "0 15px 30px rgba(168, 85, 247, 0.3)"
                         }}
                         whileTap={{ scale: 0.97 }}
@@ -1323,7 +1320,7 @@ const LandlordDashboard = () => {
                   transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
                 >
                   <AnimatedCard className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-2xl p-6 shadow-xl overflow-hidden`}>
-                    <motion.h2 
+                    <motion.h2
                       className={`text-3xl font-bold ${themeConfig.textPrimary} mb-8 flex items-center space-x-3`}
                       whileHover={{ x: 5 }}
                     >
@@ -1366,7 +1363,7 @@ const LandlordDashboard = () => {
           </div>
         </main>
       </div>
-    {/* Schedule Inspection Modal */}
+      {/* Schedule Inspection Modal */}
       <AnimatePresence>
         {showScheduleModal && (
           <ScheduleInspectionModal
@@ -1418,33 +1415,33 @@ const ScheduleInspectionModal = ({ isOpen, onClose, isDark }) => {
 
   const modalTheme = isDark
     ? {
-        bg: 'bg-slate-800/90',
-        border: 'border-slate-700/50',
-        text: 'text-white',
-        inputBg: 'bg-slate-700/50',
-        inputBorder: 'border-slate-600/50',
-        inputPlaceholder: 'placeholder-slate-400',
-        focusBorder: 'focus:border-cyan-500',
-        buttonPrimaryBg: 'bg-gradient-to-r from-cyan-500 to-indigo-600',
-        buttonPrimaryText: 'text-white',
-        buttonSecondaryBg: 'bg-slate-700/50',
-        buttonSecondaryText: 'text-slate-300',
-        buttonHover: 'hover:brightness-110',
-      }
+      bg: 'bg-slate-800/90',
+      border: 'border-slate-700/50',
+      text: 'text-white',
+      inputBg: 'bg-slate-700/50',
+      inputBorder: 'border-slate-600/50',
+      inputPlaceholder: 'placeholder-slate-400',
+      focusBorder: 'focus:border-cyan-500',
+      buttonPrimaryBg: 'bg-gradient-to-r from-cyan-500 to-indigo-600',
+      buttonPrimaryText: 'text-white',
+      buttonSecondaryBg: 'bg-slate-700/50',
+      buttonSecondaryText: 'text-slate-300',
+      buttonHover: 'hover:brightness-110',
+    }
     : {
-        bg: 'bg-white/90',
-        border: 'border-indigo-200/50',
-        text: 'text-gray-900',
-        inputBg: 'bg-white/70',
-        inputBorder: 'border-indigo-300/50',
-        inputPlaceholder: 'placeholder-indigo-400',
-        focusBorder: 'focus:border-indigo-500',
-        buttonPrimaryBg: 'bg-gradient-to-r from-indigo-600 to-purple-600',
-        buttonPrimaryText: 'text-white',
-        buttonSecondaryBg: 'bg-indigo-100/60',
-        buttonSecondaryText: 'text-indigo-700',
-        buttonHover: 'hover:brightness-105',
-      };
+      bg: 'bg-white/90',
+      border: 'border-indigo-200/50',
+      text: 'text-gray-900',
+      inputBg: 'bg-white/70',
+      inputBorder: 'border-indigo-300/50',
+      inputPlaceholder: 'placeholder-indigo-400',
+      focusBorder: 'focus:border-indigo-500',
+      buttonPrimaryBg: 'bg-gradient-to-r from-indigo-600 to-purple-600',
+      buttonPrimaryText: 'text-white',
+      buttonSecondaryBg: 'bg-indigo-100/60',
+      buttonSecondaryText: 'text-indigo-700',
+      buttonHover: 'hover:brightness-105',
+    };
 
   return (
     <motion.div
