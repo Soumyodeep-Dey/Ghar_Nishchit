@@ -175,7 +175,7 @@ function CustomerCard({ customer, darkMode }) {
 }
 
 // 3. FAQ item component
-function FaqItem({ faq, expandedFaq, toggleFaq }) {
+function FaqItem({ faq, expandedFaq, toggleFaq, darkMode }) {
   return (
     <div className="border rounded-lg p-4">
       <button
@@ -335,7 +335,8 @@ export default function Landing() {
 
           {/* Desktop Menu */}
           <ul className="hidden md:flex space-x-8" role="menubar">
-            {menu.map(({ href, label, icon: Icon }, idx) => (
+            {/* eslint-disable-next-line no-unused-vars */}
+            {menu.map(({ href, label, icon: IconComponent }) => (
               <li role="none" key={href}>
                 <a
                   href={href}
@@ -347,7 +348,7 @@ export default function Landing() {
                       : 'text-indigo-700 hover:text-indigo-900'}
           cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded transition-transform transform hover:scale-110`}
                 >
-                  <Icon size={18} aria-hidden="true" />
+                  <IconComponent size={18} aria-hidden="true" />
                   <span>{label}</span>
                 </a>
               </li>
@@ -391,7 +392,8 @@ export default function Landing() {
             role="menu"
             aria-label="Mobile menu"
           >
-            {menu.map(({ href, label, icon: Icon }) => (
+            {/* eslint-disable-next-line no-unused-vars */}
+            {menu.map(({ href, label, icon: IconComponent }) => (
               <li role="none" key={href}>
                 <a
                   href={href}
@@ -400,7 +402,7 @@ export default function Landing() {
                   className="flex items-center space-x-3 px-6 py-3 text-gray-700 hover:bg-indigo-100 focus:outline-none focus:bg-indigo-200 transition-colors text-lg"
                   onClick={() => setMenuOpen(false)}
                 >
-                  <Icon size={20} className="text-indigo-600" aria-hidden="true" />
+                  <IconComponent size={20} className="text-indigo-600" aria-hidden="true" />
                   <span>{label}</span>
                 </a>
               </li>
@@ -860,65 +862,180 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className={`${darkMode ? 'bg-gradient-to-r from-blue-950 via-slate-900 to-gray-900 text-cyan-200' : 'bg-indigo-900 text-indigo-200'} py-8 mt-4`}>
-        <div className="container mx-auto px-6 max-w-6xl">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Newsletter Subscription */}
-            <div className={`${darkMode ? 'text-cyan-200' : 'text-white'}`}>
-              <h2 className="text-3xl font-semibold mb-4">Subscribe to our Newsletter</h2>
-              <p className="mb-6">Get the latest updates and offers delivered to your inbox.</p>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  alert('Thank you for subscribing!');
-                }}
-                className="flex flex-col md:flex-row justify-start items-center gap-4"
-              >
-                <input
-                  type="email"
-                  aria-label="Email address"
-                  required
-                  placeholder="Enter your email"
-                  className={`p-3 rounded w-full md:w-64 ${darkMode ? 'bg-slate-800 text-cyan-200 placeholder:text-cyan-400' : 'bg-white text-gray-900'}`}
-                />
-                <button
-                  type="submit"
-                  className={`px-6 py-3 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-white text-indigo-600 hover:bg-gray-100'}`}
-                >
-                  Subscribe
-                </button>
-              </form>
-            </div>
-            {/* Help Section */}
-            <div id="help" className={`${darkMode ? 'text-cyan-200' : 'text-white'}`}>
-              <h2 className="text-3xl font-semibold mb-4">Help</h2>
-              <p className="mb-2">
-                Need assistance? Contact our support team at{' '}
-                <a href="mailto:support@ghar_nishchit.com" className="underline hover:text-indigo-300">
-                  support@ghar_nishchit.com
-                </a>{' '}
-                or call us at (123) 456-7890.
+      <footer className={`${darkMode ? 'bg-gradient-to-br from-gray-900 via-blue-950 to-slate-900 text-slate-100' : 'bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-800 text-white'} py-12 mt-8`}>
+        <div className="container mx-auto px-6 max-w-7xl">
+          {/* Main Footer Content */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+
+            {/* Company Info */}
+            <div className="lg:col-span-1">
+              <div className="flex items-center space-x-2 mb-4">
+                <Home size={28} className={`${darkMode ? 'text-cyan-400' : 'text-white'}`} />
+                <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-300' : 'text-white'}`}>
+                  Ghar_Nishchit
+                </h3>
+              </div>
+              <p className={`text-sm leading-relaxed mb-4 ${darkMode ? 'text-slate-300' : 'text-indigo-100'}`}>
+                Your trusted partner for seamless property management. Making rental property management easy, efficient, and rewarding for both landlords and tenants.
               </p>
-            </div>
-            {/* Social Media */}
-            <div className="flex flex-col justify-between">
-              <div className="flex space-x-6 mb-6 md:mb-0 justify-center md:justify-end">
-                {socialLinks.map(({ href, label, icon: Icon }) => (
+              <div className="flex space-x-4">
+                {/* eslint-disable-next-line no-unused-vars */}
+                {socialLinks.map(({ href, label, icon: IconComponent }) => (
                   <a
                     key={label}
                     href={href}
                     aria-label={label}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:text-white transition-colors"
+                    className={`p-2 rounded-full transition-all duration-300 hover:scale-110 ${darkMode
+                      ? 'bg-slate-800 text-cyan-400 hover:bg-cyan-400 hover:text-slate-900'
+                      : 'bg-indigo-800 text-white hover:bg-white hover:text-indigo-900'
+                      }`}
                   >
-                    <Icon size={24} />
+                    <IconComponent size={20} />
                   </a>
                 ))}
               </div>
             </div>
+
+            {/* Quick Links */}
+            <div>
+              <h4 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-cyan-300' : 'text-white'}`}>
+                Quick Links
+              </h4>
+              <ul className="space-y-2">
+                {[
+                  { href: '#properties', label: 'Properties' },
+                  { href: '#about', label: 'About Us' },
+                  { href: '#pricing', label: 'Pricing' },
+                  { href: '#customers', label: 'Testimonials' }
+                ].map(({ href, label }) => (
+                  <li key={href}>
+                    <a
+                      href={href}
+                      className={`text-sm transition-colors duration-300 hover:underline ${darkMode
+                        ? 'text-slate-300 hover:text-cyan-400'
+                        : 'text-indigo-200 hover:text-white'
+                        }`}
+                    >
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Support */}
+            <div id="help">
+              <h4 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-cyan-300' : 'text-white'}`}>
+                Support
+              </h4>
+              <div className="space-y-3">
+                <div>
+                  <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-indigo-200'}`}>
+                    Email Support:
+                  </p>
+                  <a
+                    href="mailto:support@ghar_nishchit.com"
+                    className={`text-sm transition-colors duration-300 hover:underline ${darkMode
+                      ? 'text-cyan-400 hover:text-cyan-300'
+                      : 'text-white hover:text-indigo-200'
+                      }`}
+                  >
+                    support@ghar_nishchit.com
+                  </a>
+                </div>
+                <div>
+                  <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-indigo-200'}`}>
+                    Phone Support:
+                  </p>
+                  <span className={`text-sm ${darkMode ? 'text-cyan-400' : 'text-white'}`}>
+                    (123) 456-7890
+                  </span>
+                </div>
+                <div>
+                  <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-indigo-200'}`}>
+                    Hours: Mon-Fri 9AM-6PM
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Newsletter */}
+            <div>
+              <h4 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-cyan-300' : 'text-white'}`}>
+                Stay Updated
+              </h4>
+              <p className={`text-sm mb-4 ${darkMode ? 'text-slate-300' : 'text-indigo-200'}`}>
+                Get the latest updates and offers delivered to your inbox.
+              </p>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  alert('Thank you for subscribing!');
+                }}
+                className="space-y-3"
+              >
+                <input
+                  type="email"
+                  aria-label="Email address"
+                  required
+                  placeholder="Enter your email"
+                  className={`w-full p-3 rounded-lg text-sm transition-all duration-300 focus:ring-2 focus:outline-none ${darkMode
+                    ? 'bg-slate-800 text-cyan-200 placeholder:text-slate-400 border border-slate-700 focus:ring-cyan-400 focus:border-cyan-400'
+                    : 'bg-white text-gray-900 placeholder:text-gray-500 border border-indigo-300 focus:ring-white focus:border-white'
+                    }`}
+                />
+                <button
+                  type="submit"
+                  className={`w-full px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 ${darkMode
+                    ? 'bg-cyan-500 text-slate-900 hover:bg-cyan-400 focus:ring-cyan-400'
+                    : 'bg-white text-indigo-900 hover:bg-indigo-100 focus:ring-white'
+                    }`}
+                >
+                  Subscribe Now
+                </button>
+              </form>
+            </div>
           </div>
-          <p className="text-center mt-8">© {new Date().getFullYear()} Ghar_Nishchit. All rights reserved.</p>
+
+          {/* Footer Bottom */}
+          <div className={`border-t pt-6 ${darkMode ? 'border-slate-700' : 'border-indigo-700'}`}>
+            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+              <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-indigo-200'}`}>
+                © {new Date().getFullYear()} Ghar_Nishchit. All rights reserved.
+              </p>
+              <div className="flex space-x-6">
+                <a
+                  href="#"
+                  className={`text-sm transition-colors duration-300 hover:underline ${darkMode
+                    ? 'text-slate-400 hover:text-cyan-400'
+                    : 'text-indigo-200 hover:text-white'
+                    }`}
+                >
+                  Privacy Policy
+                </a>
+                <a
+                  href="#"
+                  className={`text-sm transition-colors duration-300 hover:underline ${darkMode
+                    ? 'text-slate-400 hover:text-cyan-400'
+                    : 'text-indigo-200 hover:text-white'
+                    }`}
+                >
+                  Terms of Service
+                </a>
+                <a
+                  href="#"
+                  className={`text-sm transition-colors duration-300 hover:underline ${darkMode
+                    ? 'text-slate-400 hover:text-cyan-400'
+                    : 'text-indigo-200 hover:text-white'
+                    }`}
+                >
+                  Cookie Policy
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
