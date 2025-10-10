@@ -1,24 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  Search,
-  Bell,
-  Sun,
-  Moon,
-  User,
-  Settings,
-  HelpCircle,
-  LogOut,
-  ChevronDown,
-  X,
-  Check,
-  MessageSquare,
-  Wrench,
-  CreditCard,
-  Home,
-  Building2,
-  Users,
-  DollarSign
-} from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Search, Bell, Sun, Moon, User, Settings, HelpCircle, LogOut, ChevronDown, X, MessageSquare, Wrench, CreditCard, Home, Building2, Users, DollarSign } from 'lucide-react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import { Link } from 'react-router-dom';
 
@@ -67,24 +48,9 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
     'Messages': MessageSquare
   };
 
-  // Section colors mapping
-  const sectionColors = {
-    'Dashboard': 'from-blue-500 to-cyan-500',
-    'Properties': 'from-purple-500 to-pink-500',
-    'Tenants': 'from-green-500 to-emerald-500',
-    'Payments': 'from-yellow-500 to-orange-500',
-    'Maintenance': 'from-red-500 to-pink-500',
-    'Messages': 'from-teal-500 to-cyan-500'
-  };
-
   // Get the icon component for current section
   const getCurrentSectionIcon = () => {
     return sectionIcons[currentSection] || Home;
-  };
-
-  // Get the color for current section
-  const getCurrentSectionColor = () => {
-    return sectionColors[currentSection] || 'from-blue-500 to-cyan-500';
   };
 
   // Sample notifications data
@@ -178,28 +144,22 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
   const CurrentSectionIcon = getCurrentSectionIcon();
 
   return (
-    <nav className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-glass dark:shadow-glass-dark border-b border-gray-200/20 dark:border-gray-700/20 sticky top-0 z-50 transition-all duration-300 animate-fadeIn hover:shadow-lg"
+    <nav className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
           {/* Current Section Display */}
-          <div className="flex items-center space-x-4 min-w-0">
-            <div className="flex items-center space-x-3 group">
-              <div className="relative hover:scale-110 transition-all duration-300 hover:rotate-3 hover:shadow-lg">
-                <div className={`p-2.5 bg-gradient-to-br ${getCurrentSectionColor()} rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 hover:rotate-3`}>
-                  <CurrentSectionIcon className="h-5 w-5 text-white" />
-                </div>
-                {/* Animated glow effect */}
-                <div className={`absolute inset-0 p-2.5 bg-gradient-to-br ${getCurrentSectionColor()} rounded-xl opacity-0 group-hover:opacity-40 blur-md transition-all duration-500 group-hover:scale-110`} />
-                {/* Pulse effect */}
-                <div className={`absolute inset-0 p-2.5 bg-gradient-to-br ${getCurrentSectionColor()} rounded-xl animate-pulse opacity-0 group-hover:opacity-30`} />
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-blue-500 rounded-lg">
+                <CurrentSectionIcon className="h-5 w-5 text-white" />
               </div>
-              <div className="min-w-0 animate-fadeIn">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 via-indigo-700 to-gray-700 dark:from-white dark:via-blue-300 dark:to-gray-300 bg-clip-text text-transparent truncate hover:scale-105 transition-transform duration-300 animate-fadeIn">
+              <div>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                   {currentSection}
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   {currentSection === 'Dashboard' && 'Overview & Analytics'}
                   {currentSection === 'Properties' && 'Manage Properties'}
                   {currentSection === 'Tenants' && 'Tenant Management'}
@@ -213,9 +173,9 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
 
           {/* Search Bar */}
           <div className="hidden md:flex flex-1 max-w-xl mx-8 relative">
-            <div className="relative w-full group">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                <Search className={`h-4 w-4 transition-colors duration-200 ${isSearchFocused ? 'text-primary-500 dark:text-primary-400' : 'text-gray-400 dark:text-gray-500'}`} />
+            <div className="relative w-full">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-4">
+                <Search className="h-4 w-4 text-gray-400" />
               </div>
               <input
                 ref={searchRef}
@@ -225,12 +185,12 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
                 placeholder="Search properties, tenants, or requests..."
-                className="w-full pl-11 pr-4 py-2.5 bg-gray-100/80 dark:bg-gray-800/80 border border-gray-200/50 dark:border-gray-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 dark:focus:border-primary-400 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 backdrop-blur-sm hover:bg-gray-200/80 dark:hover:bg-gray-700/80 hover:shadow-inner"
+                className="w-full pl-11 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -238,7 +198,7 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
 
               {/* Search Suggestions Dropdown */}
               {isSearchFocused && filteredSuggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-xl shadow-glass dark:shadow-glass-dark border border-gray-200/20 dark:border-gray-700/20 overflow-hidden z-50">
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
                   {filteredSuggestions.map((suggestion, index) => (
                     <button
                       key={index}
@@ -246,7 +206,7 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
                         setSearchQuery(suggestion);
                         setIsSearchFocused(false);
                       }}
-                      className="w-full px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors text-sm"
+                      className="w-full px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm"
                     >
                       {suggestion}
                     </button>
@@ -263,29 +223,27 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
             <div className="relative" ref={notificationsRef}>
               <button
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                className="relative p-2.5 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200 group hover:scale-110 transform hover:rotate-6"
+                className="relative p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
               >
                 <Bell className="h-5 w-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-gradient-to-r from-error-500 to-error-600 text-white text-xs rounded-full flex items-center justify-center font-semibold animate-pulse">
+                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-semibold">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
-                {/* Hover glow effect */}
-                <div className="absolute inset-0 rounded-xl bg-primary-500/20 opacity-0 group-hover:opacity-100 blur-sm transition-all duration-300 group-hover:scale-110" />
               </button>
 
               {/* Notifications Dropdown */}
               {isNotificationsOpen && (
-                <div className="absolute right-0 mt-3 w-96 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-glass dark:shadow-glass-dark border border-gray-200/20 dark:border-gray-700/20 overflow-hidden z-50 animate-slideDown hover:shadow-xl transition-shadow duration-300">
+                <div className="absolute right-0 mt-3 w-96 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
                   {/* Header */}
-                  <div className="p-4 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-primary-50/50 to-transparent dark:from-primary-900/20">
+                  <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                     <div className="flex items-center justify-between">
                       <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
                       {unreadCount > 0 && (
                         <button
                           onClick={markAllAsRead}
-                          className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 font-medium transition-colors"
+                          className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
                         >
                           Mark all read
                         </button>
@@ -298,29 +256,29 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
                     {notifications.map((notification) => {
                       const IconComponent = notification.icon;
                       const colorClasses = {
-                        success: 'text-success-600 bg-success-100 dark:bg-success-900/30',
-                        warning: 'text-warning-600 bg-warning-100 dark:bg-warning-900/30',
-                        primary: 'text-primary-600 bg-primary-100 dark:bg-primary-900/30'
+                        success: 'text-green-600 bg-green-100 dark:bg-green-900/30',
+                        warning: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30',
+                        primary: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30'
                       };
 
                       return (
                         <div
                           key={notification.id}
-                          className={`p-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer border-l-4 ${notification.isRead
-                              ? 'border-transparent'
-                              : 'border-primary-500 bg-primary-50/30 dark:bg-primary-900/10'
+                          className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer border-l-4 ${notification.isRead
+                            ? 'border-transparent'
+                            : 'border-blue-500 bg-blue-50/30 dark:bg-blue-900/10'
                             }`}
                           onClick={() => markAsRead(notification.id)}
                         >
                           <div className="flex items-start space-x-3">
-                            <div className={`p-2 rounded-lg ${colorClasses[notification.color]} transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`}>
+                            <div className={`p-2 rounded-lg ${colorClasses[notification.color]}`}>
                               <IconComponent className="h-4 w-4" />
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <p className={`font-medium group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200 ${notification.isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'}`}>
+                            <div className="flex-1">
+                              <p className={`font-medium ${notification.isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'}`}>
                                 {notification.title}
                               </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-200">
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                                 {notification.message}
                               </p>
                               <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
@@ -328,7 +286,7 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
                               </p>
                             </div>
                             {!notification.isRead && (
-                              <div className="h-2 w-2 bg-primary-600 rounded-full animate-pulse" />
+                              <div className="h-2 w-2 bg-blue-600 rounded-full" />
                             )}
                           </div>
                         </div>
@@ -337,8 +295,8 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
                   </div>
 
                   {/* Footer */}
-                  <div className="p-4 border-t border-gray-200/50 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/50">
-                    <button className="w-full text-center text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 font-medium py-2 text-sm transition-colors">
+                  <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                    <button className="w-full text-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium py-2 text-sm">
                       View all notifications
                     </button>
                   </div>
@@ -349,61 +307,43 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2.5 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200 group relative overflow-hidden hover:scale-110 hover:rotate-12"
+              className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
             >
-              <div className="relative z-10">
-                {isDarkMode ? (
-                  <Sun className="h-5 w-5 animate-in spin-in-180 duration-300" />
-                ) : (
-                  <Moon className="h-5 w-5 animate-in spin-in-180 duration-300" />
-                )}
-              </div>
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-yellow-400/20 to-orange-400/20 opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-200" />
+              {isDarkMode ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
             </button>
 
             {/* Profile Dropdown */}
             <div className="relative" ref={profileDropdownRef}>
               <button
                 onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                className="flex items-center space-x-3 p-2 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200 group hover:scale-105"
+                className="flex items-center space-x-3 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
               >
-                <div className="relative">
-                  <div className="h-9 w-9 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 relative overflow-hidden group-hover:scale-110 hover:rotate-6">
-                    <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
-                    <div className="absolute -inset-1 bg-gradient-to-br from-primary-300 to-primary-600 opacity-0 group-hover:opacity-30 blur-md transition-opacity duration-300" />
-                    <User className="h-4 w-4 text-white" />
-                  </div>
-                  {/* Online indicator */}
-                  <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-success-500 rounded-full border-2 border-white dark:border-gray-900" />
+                <div className="h-8 w-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <User className="h-4 w-4 text-white" />
                 </div>
                 <div className="hidden md:block text-left">
                   <p className="font-semibold text-gray-900 dark:text-white">{user.name || 'Unknown User'}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{user.email || 'No Email'}</p>
-                  <div className="flex items-center mt-1">
-                    <div className="h-2 w-2 bg-success-500 rounded-full mr-2" />
-                    <span className="text-xs text-success-600 dark:text-success-400">Online</span>
-                  </div>
                 </div>
-                <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`h-4 w-4 text-gray-500 ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {/* Profile Dropdown Menu */}
               {isProfileDropdownOpen && (
-                <div className="absolute right-0 mt-3 w-64 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-glass dark:shadow-glass-dark border border-gray-200/20 dark:border-gray-700/20 overflow-hidden z-50 animate-slideDown hover:shadow-xl transition-shadow duration-300"
-                >
+                <div className="absolute right-0 mt-3 w-64 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
                   {/* Profile Info */}
-                  <div className="p-4 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-primary-50/50 to-transparent dark:from-primary-900/20">
+                  <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                     <div className="flex items-center space-x-3">
-                      <div className="h-12 w-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg">
+                      <div className="h-12 w-12 bg-blue-500 rounded-lg flex items-center justify-center">
                         <User className="h-6 w-6 text-white" />
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900 dark:text-white">{user.name || 'Unknown User'}</p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">{user.email || 'No Email'}</p>
-                        <div className="flex items-center mt-1">
-                          <div className="h-2 w-2 bg-success-500 rounded-full mr-2" />
-                          <span className="text-xs text-success-600 dark:text-success-400">Online</span>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -412,26 +352,26 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
                   <div className="p-2">
                     <Link
                       to="/landlord/profile"
-                      className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200 group hover:translate-x-1"
-                      onClick={() => setIsProfileDropdownOpen(false)} // Close dropdown on click
+                      className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                      onClick={() => setIsProfileDropdownOpen(false)}
                     >
-                      <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg group-hover:bg-primary-200 dark:group-hover:bg-primary-900/50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 hover:shadow-md">
-                        <Settings className="h-4 w-4 text-primary-600 dark:text-primary-400" />
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                        <Settings className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                       </div>
                       <span className="font-medium">Update Profile</span>
                     </Link>
 
-                    <button className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-xl transition-all duration-200 group hover:translate-x-1">
-                      <div className="p-2 bg-warning-100 dark:bg-warning-900/30 rounded-lg group-hover:bg-warning-200 dark:group-hover:bg-warning-900/50 transition-colors">
-                        <HelpCircle className="h-4 w-4 text-warning-600 dark:text-warning-400" />
+                    <button className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                      <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                        <HelpCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
                       </div>
                       <span className="font-medium">Help & Support</span>
                     </button>
 
-                    <hr className="my-2 border-gray-200/50 dark:border-gray-700/50" />
+                    <hr className="my-2 border-gray-200 dark:border-gray-700" />
 
-                    <button className="w-full flex items-center space-x-3 px-4 py-3 text-left text-error-600 dark:text-error-400 hover:bg-error-50/80 dark:hover:bg-error-900/20 rounded-xl transition-all duration-200 group hover:translate-x-1" onClick={handleLogout}>
-                      <div className="p-2 bg-error-100 dark:bg-error-900/30 rounded-lg group-hover:bg-error-200 dark:group-hover:bg-error-900/50 transition-colors">
+                    <button className="w-full flex items-center space-x-3 px-4 py-3 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" onClick={handleLogout}>
+                      <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
                         <LogOut className="h-4 w-4" />
                       </div>
                       <span className="font-medium">Logout</span>
@@ -453,7 +393,7 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search..."
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+            className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
           />
           {searchQuery && (
             <button
