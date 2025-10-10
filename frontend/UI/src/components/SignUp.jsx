@@ -7,6 +7,7 @@ import { signInWithGoogle, handleGoogleRedirectResult } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 
 // Update the GoogleIcon to add a white background and rounded style for visibility
+
 const GoogleIcon = () => (
   <span
     className="bg-white rounded-full flex items-center justify-center"
@@ -81,7 +82,7 @@ export default function SignUp() {
     setPasswordStrength(checkStrength(pwd));
   };
 
-  // Animation effect (same as before)
+  // Animation effects
   useEffect(() => {
     const initialDelay = setTimeout(() => {
       setAnimationState((prev) => ({ ...prev, containerVisible: true }));
@@ -422,7 +423,7 @@ export default function SignUp() {
                     autoComplete="new-password"
                     value={formData.password}
                     onChange={(e) => {
-                      setPassword(e.target.value);
+                      handlePasswordChange(e);
                       handleChange(e);
                     }}
                     className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${darkMode ? 'bg-slate-900 border-cyan-700 text-cyan-100 placeholder-cyan-300 focus:ring-cyan-400' : 'border-gray-300 focus:ring-indigo-400'}`}
