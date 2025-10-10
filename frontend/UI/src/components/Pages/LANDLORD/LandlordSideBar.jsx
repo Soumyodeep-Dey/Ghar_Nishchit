@@ -18,48 +18,66 @@ const USER_STATS = {
     messages: 3
 };
 
-// Menu configuration
-const getMenuItems = (isDark, userStats) => [
-  {
-    id: 'dashboard', label: 'Dashboard', icon: Home, route: '/landlord',
-    badge: null, description: 'Analytics & Overview',
+// Menu configuration - Static list for better performance
+const MENU_ITEMS = [
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: Home,
+      route: '/landlord',
+      badge: null,
+      description: 'Analytics & Overview',
       color: 'from-sky-400 via-sky-500 to-blue-500',
-      glowColor: isDark ? 'shadow-sky-400/20' : 'shadow-sky-500/15',
       premium: true
     },
     {
-    id: 'properties', label: 'Properties', icon: Building2, route: '/landlord/properties',
-    badge: userStats.properties, description: 'Property Portfolio',
+      id: 'properties',
+      label: 'Properties',
+      icon: Building2,
+      route: '/landlord/properties',
+    badge: 'properties',
+      description: 'Property Portfolio',
       color: 'from-emerald-400 via-emerald-500 to-green-500',
-      glowColor: isDark ? 'shadow-emerald-400/20' : 'shadow-emerald-500/15',
       premium: true
     },
     {
-    id: 'tenants', label: 'Tenants', icon: Users, route: '/landlord/tenants',
-    badge: userStats.tenants, description: 'Resident Management',
+      id: 'tenants',
+      label: 'Tenants',
+      icon: Users,
+      route: '/landlord/tenants',
+    badge: 'tenants',
+      description: 'Resident Management',
       color: 'from-teal-400 via-teal-500 to-cyan-500',
-      glowColor: isDark ? 'shadow-teal-400/20' : 'shadow-teal-500/15',
       premium: true
     },
     {
-    id: 'payments', label: 'Payments', icon: Wallet, route: '/landlord/payment',
-    badge: null, description: 'Revenue & Transactions',
+      id: 'payments',
+      label: 'Payments',
+      icon: Wallet,
+      route: '/landlord/payment',
+      badge: null,
+      description: 'Revenue & Transactions',
       color: 'from-indigo-400 via-indigo-500 to-purple-500',
-      glowColor: isDark ? 'shadow-indigo-400/20' : 'shadow-indigo-500/15',
       premium: true
     },
     {
-    id: 'maintenance', label: 'Maintenance', icon: Settings, route: '/landlord/maintenance',
-    badge: userStats.maintenance, description: 'Service Requests',
+      id: 'maintenance',
+      label: 'Maintenance',
+      icon: Settings,
+      route: '/landlord/maintenance',
+      badge: 'maintenance',
+      description: 'Service Requests',
       color: 'from-rose-400 via-pink-400 to-pink-500',
-      glowColor: isDark ? 'shadow-rose-400/20' : 'shadow-rose-500/15',
       premium: false
     },
     {
-    id: 'messages', label: 'Messages', icon: MessageSquare, route: '/landlord/messages',
-    badge: userStats.messages, description: 'Communication Hub',
+      id: 'messages',
+      label: 'Messages',
+      icon: MessageSquare,
+      route: '/landlord/messages',
+      badge: 'messages',
+      description: 'Communication Hub',
       color: 'from-violet-400 via-purple-400 to-purple-500',
-      glowColor: isDark ? 'shadow-violet-400/20' : 'shadow-violet-500/15',
       premium: false
     }
   ];
@@ -79,7 +97,19 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const sidebarRef = useRef(null);
-  const menuItems = getMenuItems(isDark, USER_STATS);
+
+  // Helper function to get badge value
+  const getBadgeValue = (badgeKey) => {
+    if (!badgeKey) return null;
+    return USER_STATS[badgeKey] || null;
+  };
+
+  // Process menu items with dynamic badge values
+  const menuItems = MENU_ITEMS.map(item => ({
+    ...item,
+    badge: getBadgeValue(item.badge),
+    glowColor: isDark ? 'shadow-slate-400/20' : 'shadow-slate-500/15'
+  }));
 
 
   useEffect(() => {
