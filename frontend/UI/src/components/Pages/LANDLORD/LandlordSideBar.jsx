@@ -1,24 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  Home,
-  Building2,
-  Users,
-  Wallet,
-  Settings,
-  MessageSquare,
-  ChevronLeft,
-  Crown,
-  Sparkles,
-  TrendingUp,
-  LogOut,
-  Edit,
-  Moon,
-  Sunrise,
-  Sun,
-  Wallet as WalletIcon,
-  Heart
-} from 'lucide-react';
+import { Home, Building2, Users, Wallet, Settings, MessageSquare, ChevronLeft, Crown, Sparkles, TrendingUp, LogOut, Edit, Moon, Sunrise, Sun, Wallet as WalletIcon, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDarkMode } from '../../../useDarkMode.js';
 
@@ -27,7 +9,7 @@ import { useDarkMode } from '../../../useDarkMode.js';
 const LandlordSideBar = ({ currentSection, onSectionChange }) => {
   const { darkMode: isDark } = useDarkMode();
   const [isCollapsed, setIsCollapsed] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 768 : false));
-  const [sidebarWidth, setSidebarWidth] = useState(() => (isCollapsed ? '4.5rem' : '18rem'));
+  const [sidebarWidth, setSidebarWidth] = useState(() => (isCollapsed ? '4.5rem' : '24rem'));
 
   const [hoveredItem, setHoveredItem] = useState(null);
   const [showTooltip, setShowTooltip] = useState(null);
@@ -171,9 +153,9 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
 
   useEffect(() => {
     // Keep width in sync with collapsed state
-    setSidebarWidth(isCollapsed ? '4.5rem' : '18rem');
+    setSidebarWidth(isCollapsed ? '4.5rem' : '24rem');
     if (typeof document !== 'undefined') {
-      document.documentElement.style.setProperty('--sidebar-width', isCollapsed ? '4.5rem' : '18rem');
+      document.documentElement.style.setProperty('--sidebar-width', isCollapsed ? '4.5rem' : '24rem');
     }
   }, [isCollapsed]);
 
@@ -558,8 +540,8 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleItemClick(item)}
                     className={`w-full flex items-center p-4 rounded-2xl transition-all duration-400 group relative overflow-hidden backdrop-blur-sm ${isItemActive(item)
-                        ? `bg-gradient-to-r ${item.color} border border-white/30 shadow-lg ${item.glowColor} text-white`
-                        : `${themeClasses.menuIdle} border border-transparent`
+                      ? `bg-gradient-to-r ${item.color} border border-white/30 shadow-lg ${item.glowColor} text-white`
+                      : `${themeClasses.menuIdle} border border-transparent`
                       }`}
                   >
                     {isItemActive(item) && (
