@@ -128,8 +128,8 @@ const AnimatedCard = React.memo(({ children, delay = 0, className = '', ...props
 const FloatingParticle = React.memo(({ delay = 0, index = 0, isDark = true }) => (
   <motion.div
     className={`absolute w-0.5 h-0.5 ${isDark
-        ? 'bg-gradient-to-r from-cyan-400 to-indigo-500'
-        : 'bg-gradient-to-r from-indigo-400 to-purple-500'
+      ? 'bg-gradient-to-r from-cyan-400 to-indigo-500'
+      : 'bg-gradient-to-r from-indigo-400 to-purple-500'
       } rounded-full`}
     style={{
       left: `${20 + (index * 15) % 60}%`,
@@ -671,7 +671,7 @@ const MaintenanceRow = React.memo(({ request, delay = 0, isDark = true }) => {
 
 const LandlordDashboard = () => {
   const location = useLocation();
-  const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
+  const sidebarWidthClass = '[margin-left:var(--sidebar-width,24rem)]';
   const [currentSection, setCurrentSection] = useState('Dashboard');
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showAddPropertyModal, setShowAddPropertyModal] = useState(false);
@@ -1090,8 +1090,8 @@ const LandlordDashboard = () => {
                   whileHover={{ scale: 1.03, y: -1 }}
                   whileTap={{ scale: 0.97 }}
                   className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-semibold transition-all duration-400 text-sm ${activeTab === key
-                      ? `bg-gradient-to-r ${themeConfig.tabActive} ${themeConfig.tabActiveText} shadow-lg shadow-${isDarkMode ? 'cyan' : 'indigo'}-500/25`
-                      : themeConfig.tabInactive
+                    ? `bg-gradient-to-r ${themeConfig.tabActive} ${themeConfig.tabActiveText} shadow-lg shadow-${isDarkMode ? 'cyan' : 'indigo'}-500/25`
+                    : themeConfig.tabInactive
                     }`}
                 >
                   <motion.div
