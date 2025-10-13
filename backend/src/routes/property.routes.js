@@ -7,16 +7,18 @@ import {
 
   getPropertyById,
 
+  getPropertiesByUser,
+
   updateProperty,
 
   deleteProperty,
-  
-  searchPropertiesByLocation,
-  
-  searchPropertiesNearby
-} 
 
-from '../controllers/property.controller.js';
+  searchPropertiesByLocation,
+
+  searchPropertiesNearby
+}
+
+  from '../controllers/property.controller.js';
 
 const router = Router();
 
@@ -24,6 +26,7 @@ const router = Router();
 router.post('/', createProperty);
 router.get('/search', searchPropertiesByLocation);
 router.get('/nearby', searchPropertiesNearby);
+router.get('/user/:userId', getPropertiesByUser);
 router.get('/', getAllProperties);
 router.get('/:id', getPropertyById);
 router.put('/:id', updateProperty);

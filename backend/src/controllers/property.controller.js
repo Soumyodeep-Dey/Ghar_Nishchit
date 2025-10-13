@@ -34,6 +34,23 @@ export const getPropertyById = async (req, res) => {
   }
 };
 
+// Get properties by postedBy user ID
+export const getPropertiesByUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Validate userId format
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Invalid user ID format' });
+    }
+
+    const properties = await Property.find({ postedBy: userId }).populate('postedBy', 'name email');
+    res.status(200).json(properties);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Update property
 export const updateProperty = async (req, res) => {
   try {
