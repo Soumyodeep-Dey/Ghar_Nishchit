@@ -4,9 +4,9 @@ import LandlordNavBar from './LandlordNavBar';
 import AddNewPropertyModal from './AddNewPropertyModal';
 import GenerateReportModal from './GenerateReportModal';
 import {
-  DollarSign, Users, Wrench, BarChart3, TrendingUp, TrendingDown, Plus, Calendar, Flame, Sparkles, Building2, Star
+  DollarSign, Users, Wrench, BarChart3, TrendingUp, TrendingDown, Plus, Calendar, Building2
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+// framer-motion removed to reduce animation overhead
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../../../useDarkMode.js';
 
@@ -71,36 +71,12 @@ const useCountUp = (end, duration = 2000, start = 0, shouldStart = true) => {
   return count;
 };
 
-// Enhanced Animated Components - Reduced Sizes
-const AnimatedCard = React.memo(({ children, delay = 0, className = '', ...props }) => {
-  const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
-
+// Lightweight Card (no animations)
+const AnimatedCard = React.memo(({ children, className = '', ...props }) => {
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 40, scale: 0.95 }}
-      animate={isVisible ? {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        transition: {
-          type: "spring",
-          stiffness: 100,
-          damping: 25,
-          duration: 0.8,
-          delay
-        }
-      } : {}}
-      whileHover={{
-        y: -4,
-        scale: 1.01,
-        transition: { type: "spring", stiffness: 400, damping: 25 }
-      }}
-      className={`relative ${className}`}
-      {...props}
-    >
+    <div className={`relative ${className}`} {...props}>
       {children}
-    </motion.div>
+    </div>
   );
 });
 
@@ -130,153 +106,54 @@ const FloatingParticle = React.memo(({ delay = 0, index = 0, isDark = true }) =>
   />
 ));
 
-// Enhanced StatCard - Reduced Size
-const StatCard = React.memo(({
-  icon: Icon,
-  title,
-  value,
-  change,
-  trend,
-  color,
-  delay = 0,
-  prefix = '',
-  suffix = '',
-  isDark = true
-}) => {
-  const [ref, isVisible] = useIntersectionObserver({ threshold: 0.3 });
-  const animatedValue = useCountUp(parseInt(value) || 0, 2500, 0, isVisible);
-  const [isHovered, setIsHovered] = useState(false);
-
+// Lightweight StatCard (no framer-motion)
+const StatCard = React.memo(({ icon: Icon, title, value, change, trend, color, prefix = '', suffix = '', isDark = true }) => {
   const TrendIcon = trend === 'up' ? TrendingUp : TrendingDown;
 
   const themeStyles = isDark
     ? {
       cardBg: 'bg-slate-800/80',
       cardBorder: 'border-slate-700/50',
-      cardShadow: 'hover:shadow-cyan-500/10',
       iconBg: 'from-cyan-500/20 to-indigo-500/20',
       iconBorder: 'border-cyan-400/30',
       iconColor: 'text-cyan-300',
       textPrimary: 'text-slate-100',
       textSecondary: 'text-slate-300',
-      glowEffect: 'from-cyan-400/20 to-purple-500/20',
-      shimmer: 'via-cyan-300/20',
       trendUp: 'bg-cyan-400/20 text-cyan-300 border-cyan-400/40',
       trendDown: 'bg-pink-400/20 text-pink-300 border-pink-400/40'
     }
     : {
       cardBg: 'bg-white/80',
       cardBorder: 'border-indigo-200/50',
-      cardShadow: 'hover:shadow-indigo-500/20',
       iconBg: 'from-indigo-100/80 to-purple-100/80',
       iconBorder: 'border-indigo-300/50',
       iconColor: 'text-indigo-700',
       textPrimary: 'text-gray-900',
       textSecondary: 'text-indigo-600',
-      glowEffect: 'from-indigo-400/20 to-purple-500/20',
-      shimmer: 'via-indigo-300/20',
       trendUp: 'bg-indigo-100/60 text-indigo-700 border-indigo-300/60',
       trendDown: 'bg-pink-100/60 text-pink-700 border-pink-300/60'
     };
 
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, scale: 0.8, rotateY: -20 }}
-      animate={isVisible ? {
-        opacity: 1,
-        scale: 1,
-        rotateY: 0,
-        transition: { type: "spring", stiffness: 120, damping: 20, delay }
-      } : {}}
-      whileHover={{
-        scale: 1.05,
-        rotateY: 5,
-        transition: { type: "spring", stiffness: 300, damping: 20 }
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className={`group relative overflow-hidden backdrop-blur-xl ${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-2xl p-5 shadow-xl ${themeStyles.cardShadow} transition-all duration-500 ${color}`}
-    >
-      {/* Enhanced Floating particles - Smaller */}
-      <div className="absolute inset-0 overflow-hidden opacity-60">
-        {[...Array(3)].map((_, i) => (
-          <FloatingParticle key={i} delay={i * 0.3} index={i} isDark={isDark} />
-        ))}
-      </div>
-
-      {/* Animated gradient overlay */}
-      <motion.div
-        className={`absolute inset-0 bg-gradient-to-br ${themeStyles.glowEffect}`}
-        animate={isHovered ? { opacity: 1, scale: 1.1 } : { opacity: 0.5, scale: 1 }}
-        transition={{ duration: 0.4 }}
-      />
-
-      {/* Theme-aware glow effect */}
-      <motion.div
-        className={`absolute inset-0 bg-gradient-to-br ${themeStyles.glowEffect} rounded-2xl blur-xl`}
-        animate={isHovered ? { opacity: 0.8, scale: 1.2 } : { opacity: 0, scale: 1 }}
-        transition={{ duration: 0.5 }}
-      />
-
+    <div className={`group relative overflow-hidden ${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-2xl p-5 shadow-sm ${color}`}>
       <div className="relative z-20">
         <div className="flex items-center justify-between mb-4">
-          <motion.div
-            className={`p-3 rounded-xl bg-gradient-to-br ${themeStyles.iconBg} backdrop-blur-sm border ${themeStyles.iconBorder}`}
-            whileHover={{
-              rotate: 15,
-              scale: 1.1,
-              boxShadow: isDark ? "0 8px 25px rgba(6, 182, 212, 0.3)" : "0 8px 25px rgba(99, 102, 241, 0.3)"
-            }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            <Icon className={`w-6 h-6 ${themeStyles.iconColor} drop-shadow-lg`} />
-          </motion.div>
-
-          <motion.div
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm border ${trend === 'up' ? themeStyles.trendUp : themeStyles.trendDown
-              }`}
-            initial={{ opacity: 0, x: 20, scale: 0.8 }}
-            animate={isVisible ? { opacity: 1, x: 0, scale: 1 } : {}}
-            transition={{ delay: delay + 0.4, type: "spring", stiffness: 200 }}
-            whileHover={{ scale: 1.05 }}
-          >
-            <motion.div
-              animate={{ rotate: trend === 'up' ? 0 : 180 }}
-              transition={{ duration: 0.3 }}
-            >
-              <TrendIcon className="w-3 h-3" />
-            </motion.div>
+          <div className={`p-3 rounded-xl bg-gradient-to-br ${themeStyles.iconBg} backdrop-blur-sm border ${themeStyles.iconBorder}`}>
+            <Icon className={`w-6 h-6 ${themeStyles.iconColor}`} />
+          </div>
+          <div className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm border ${trend === 'up' ? themeStyles.trendUp : themeStyles.trendDown}`}>
+            <TrendIcon className="w-3 h-3" />
             <span>{change}</span>
-          </motion.div>
+          </div>
         </div>
-
-        <motion.h3
-          className={`text-2xl font-bold ${themeStyles.textPrimary} mb-2 drop-shadow-lg`}
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={isVisible ? { opacity: 1, scale: 1 } : {}}
-          transition={{ delay: delay + 0.2, type: "spring", stiffness: 150 }}
-        >
-          {prefix}{isVisible ? animatedValue.toLocaleString() : 0}{suffix}
-        </motion.h3>
-
-        <motion.p
-          className={`${themeStyles.textSecondary} font-medium text-sm`}
-          initial={{ opacity: 0 }}
-          animate={isVisible ? { opacity: 1 } : {}}
-          transition={{ delay: delay + 0.6 }}
-        >
+        <h3 className={`text-2xl font-bold ${themeStyles.textPrimary} mb-2`}>
+          {prefix}{parseInt(value).toLocaleString()}{suffix}
+        </h3>
+        <p className={`${themeStyles.textSecondary} font-medium text-sm`}>
           {title}
-        </motion.p>
-
-        {/* Enhanced shimmer effect */}
-        <motion.div
-          className={`absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent ${themeStyles.shimmer} to-transparent`}
-          animate={isHovered ? { x: ['-100%', '200%'] } : {}}
-          transition={{ duration: 1.2, ease: "easeInOut" }}
-        />
+        </p>
       </div>
-    </motion.div>
+    </div>
   );
 });
 
@@ -412,104 +289,24 @@ const LandlordDashboard = () => {
     };
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 2000);
+    const timer = setTimeout(() => setIsLoading(false), 800);
     return () => clearTimeout(timer);
   }, []);
 
   if (isLoading) {
     return (
-      <div className={`min-h-screen bg-gradient-to-br ${themeConfig.loadingBg} flex items-center justify-center relative overflow-hidden`}>
-        <div className="absolute inset-0">
-          <motion.div
-            animate={{
-              rotate: 360,
-              scale: [1, 1.2, 1]
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-            className={`absolute top-1/4 left-1/4 w-48 h-48 bg-gradient-to-r ${themeConfig.backgroundParticles[0]} rounded-full blur-3xl`}
-          />
-          <motion.div
-            animate={{
-              rotate: -360,
-              scale: [1.2, 1, 1.2]
-            }}
-            transition={{
-              duration: 10,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-            className={`absolute bottom-1/4 right-1/4 w-48 h-48 bg-gradient-to-r ${themeConfig.backgroundParticles[1]} rounded-full blur-3xl`}
-          />
+      <div className={`min-h-screen bg-gradient-to-br ${themeConfig.loadingBg} flex items-center justify-center`}>
+        <div className="text-center">
+          <div className={`w-12 h-12 border-4 ${themeConfig.spinnerBorder} rounded-full mx-auto mb-4 animate-spin`} />
+          <h2 className={`text-xl font-bold ${themeConfig.textPrimary} mb-1`}>Loading Dashboard...</h2>
+          <p className={`${themeConfig.loadingText} text-sm`}>Preparing your property insights</p>
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center z-10"
-        >
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            className={`w-16 h-16 border-4 ${themeConfig.spinnerBorder} rounded-full mx-auto mb-6`}
-          />
-          <motion.h2
-            animate={{
-              opacity: [0.5, 1, 0.5],
-              scale: [1, 1.05, 1]
-            }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className={`text-2xl font-bold ${themeConfig.textPrimary} mb-3`}
-          >
-            Loading Dashboard...
-          </motion.h2>
-          <motion.p
-            className={`${themeConfig.loadingText} text-base`}
-            animate={{ opacity: [0.4, 0.8, 0.4] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            Preparing your property insights
-          </motion.p>
-        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${themeConfig.mainBg} flex relative overflow-hidden`}>
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          animate={{
-            rotate: 360,
-            scale: [1, 1.1, 1],
-            x: [0, 30, 0],
-            y: [0, -20, 0]
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className={`absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r ${themeConfig.backgroundParticles[0]} rounded-full blur-3xl`}
-        />
-        <motion.div
-          animate={{
-            rotate: -360,
-            scale: [1.1, 1, 1.1],
-            x: [0, -20, 0],
-            y: [0, 30, 0]
-          }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className={`absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r ${themeConfig.backgroundParticles[1]} rounded-full blur-3xl`}
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.1, 1],
-            opacity: [0.3, 0.6, 0.3]
-          }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-gradient-to-r ${themeConfig.backgroundParticles[2]} rounded-full blur-3xl`}
-        />
-      </div>
+    <div className={`min-h-screen bg-gradient-to-br ${themeConfig.mainBg} flex relative`}>
 
       <LandlordSideBar currentSection={currentSection} onSectionChange={setCurrentSection} />
 
@@ -518,72 +315,15 @@ const LandlordDashboard = () => {
 
         <main className="flex-1 overflow-y-auto">
           <div className="p-6 space-y-8">
-            {/* Header Section - Reduced Size */}
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
-              className="text-center mb-12"
-            >
-              <motion.h1
-                className={`text-4xl font-bold ${themeConfig.textPrimary} mb-4 bg-gradient-to-r ${themeConfig.headerGradient} bg-clip-text text-transparent`}
-                animate={{
-                  backgroundPosition: ["0%", "100%", "0%"],
-                  textShadow: isDarkMode
-                    ? [
-                      "0 0 15px rgba(6, 182, 212, 0.5)",
-                      "0 0 30px rgba(168, 85, 247, 0.5)",
-                      "0 0 15px rgba(6, 182, 212, 0.5)"
-                    ]
-                    : [
-                      "0 0 15px rgba(99, 102, 241, 0.3)",
-                      "0 0 30px rgba(168, 85, 247, 0.3)",
-                      "0 0 15px rgba(99, 102, 241, 0.3)"
-                    ]
-                }}
-                transition={{ duration: 5, repeat: Infinity }}
-              >
+            {/* Header Section - simplified */}
+            <div className="text-center mb-12">
+              <h1 className={`text-4xl font-bold ${themeConfig.textPrimary} mb-4 bg-gradient-to-r ${themeConfig.headerGradient} bg-clip-text text-transparent`}>
                 Welcome Back, Landlord!
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.4, duration: 0.8 }}
-                className={`text-lg ${themeConfig.textSecondary} max-w-2xl mx-auto leading-relaxed`}
-              >
+              </h1>
+              <p className={`text-lg ${themeConfig.textSecondary} max-w-2xl mx-auto leading-relaxed`}>
                 Your comprehensive property management dashboard with real-time insights and advanced analytics
-              </motion.p>
-
-              {/* Floating icons - Smaller Size */}
-              <div className="relative mt-8">
-                {[...Array(6)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    animate={{
-                      y: [-10, 10, -10],
-                      rotate: [0, 8, 0],
-                      opacity: [0.4, 0.8, 0.4]
-                    }}
-                    transition={{
-                      duration: 4 + (i * 0.5),
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                      delay: i * 0.3
-                    }}
-                    className="absolute"
-                    style={{
-                      left: `${20 + (i * 12)}%`,
-                      top: `${-10 + Math.sin(i) * 15}px`,
-                    }}
-                  >
-                    {i % 4 === 0 && <Sparkles className={`w-4 h-4 ${isDarkMode ? 'text-cyan-400' : 'text-indigo-500'} opacity-60`} />}
-                    {i % 4 === 1 && <Star className={`w-3.5 h-3.5 ${isDarkMode ? 'text-purple-400' : 'text-purple-500'} opacity-60`} />}
-                    {i % 4 === 2 && <Flame className={`w-3.5 h-3.5 ${isDarkMode ? 'text-pink-400' : 'text-pink-500'} opacity-60`} />}
-                    {i % 4 === 3 && <Building2 className={`w-3 h-3 ${isDarkMode ? 'text-indigo-400' : 'text-indigo-600'} opacity-60`} />}
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
+              </p>
+            </div>
 
             {/* Stats Grid - Reduced Size */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -597,19 +337,16 @@ const LandlordDashboard = () => {
               ))}
             </div>
 
-            {/* Enhanced Tab Navigation */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, type: "spring", stiffness: 100 }}
-              className={`flex flex-wrap gap-4 mb-8 ${themeConfig.tabBg} p-3 rounded-3xl backdrop-blur-xl border ${themeConfig.tabBorder} shadow-2xl`}
+            {/* Tab Navigation - simplified */}
+            <div
+              className={`flex flex-wrap gap-4 mb-8 ${themeConfig.tabBg} p-3 rounded-3xl backdrop-blur-xl border ${themeConfig.tabBorder}`}
             >
               {[
                 { key: 'overview', label: 'Overview', icon: BarChart3, action: 'tab' },
                 { key: 'properties', label: 'Properties', icon: Building2, action: 'navigate', route: '/landlord/properties' },
                 { key: 'maintenance', label: 'Maintenance', icon: Wrench, action: 'navigate', route: '/landlord/maintenance' }
               ].map(({ key, label, icon: Icon, action, route }) => (
-                <motion.button
+                <button
                   key={key}
                   onClick={() => {
                     if (action === 'tab') {
@@ -618,105 +355,25 @@ const LandlordDashboard = () => {
                       navigate(route);
                     }
                   }}
-                  whileHover={{
-                    scale: 1.05,
-                    y: -3,
-                    boxShadow: isDarkMode
-                      ? "0 10px 30px rgba(6, 182, 212, 0.3)"
-                      : "0 10px 30px rgba(99, 102, 241, 0.3)"
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`flex items-center space-x-3 px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-500 relative overflow-hidden group ${activeTab === key && action === 'tab'
-                    ? `bg-gradient-to-r ${themeConfig.tabActive} ${themeConfig.tabActiveText} shadow-lg shadow-${isDarkMode ? 'cyan' : 'indigo'}-500/30`
-                    : `${themeConfig.tabInactive} hover:shadow-lg`
+                  className={`flex items-center space-x-3 px-6 py-3 rounded-2xl font-bold text-sm relative overflow-hidden group ${activeTab === key && action === 'tab'
+                    ? `bg-gradient-to-r ${themeConfig.tabActive} ${themeConfig.tabActiveText}`
+                    : `${themeConfig.tabInactive}`
                     }`}
                 >
-                  {/* Animated background glow */}
-                  <motion.div
-                    className={`absolute inset-0 bg-gradient-to-r ${key === 'overview' ? 'from-cyan-500/20 to-indigo-500/20' :
-                      key === 'properties' ? 'from-indigo-500/20 to-purple-500/20' :
-                        'from-purple-500/20 to-pink-500/20'
-                      } rounded-2xl`}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    whileHover={{ opacity: 1, scale: 1.1 }}
-                    transition={{ duration: 0.3 }}
-                  />
-
-                  <motion.div
-                    animate={
-                      (activeTab === key && action === 'tab')
-                        ? { rotate: 360, scale: 1.1 }
-                        : { rotate: 0, scale: 1 }
-                    }
-                    whileHover={{ rotate: 15, scale: 1.15 }}
-                    transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
-                    className="relative z-10"
-                  >
-                    <Icon className="w-5 h-5" />
-                  </motion.div>
+                  <Icon className="w-5 h-5" />
                   <span className="relative z-10 font-semibold">{label}</span>
-
-                  {/* Shimmer effect */}
-                  <motion.div
-                    className={`absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent ${isDarkMode ? 'via-white/20' : 'via-white/40'
-                      } to-transparent`}
-                    initial={{ x: '-100%' }}
-                    whileHover={{ x: '200%' }}
-                    transition={{ duration: 0.8, ease: "easeInOut" }}
-                  />
-                </motion.button>
+                </button>
               ))}
-            </motion.div>
+            </div>
 
-            {/* Enhanced Overview Content */}
-            <AnimatePresence mode="wait">
-              {activeTab === 'overview' && (
-                <motion.div
-                  key="overview"
-                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -30, scale: 0.95 }}
-                  transition={{ duration: 0.8, type: "spring", stiffness: 120 }}
-                  className="space-y-10"
-                >
+            {/* Overview Content - simplified */}
+            {activeTab === 'overview' && (
+                <div className="space-y-10">
                   {/* Enhanced Quick Actions */}
-                  <AnimatedCard className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-3xl p-8 shadow-2xl relative overflow-hidden`}>
-                    {/* Animated background gradient */}
-                    <motion.div
-                      className={`absolute inset-0 bg-gradient-to-br ${isDarkMode
-                        ? 'from-cyan-500/10 via-purple-500/5 to-pink-500/10'
-                        : 'from-indigo-500/10 via-purple-500/5 to-pink-500/10'
-                        } rounded-3xl`}
-                      animate={{
-                        opacity: [0.3, 0.6, 0.3],
-                        scale: [1, 1.02, 1]
-                      }}
-                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    />
-
-                    <motion.h2
-                      className={`text-3xl font-bold ${themeConfig.textPrimary} mb-8 flex items-center space-x-4 relative z-10`}
-                      whileHover={{ x: 8, scale: 1.02 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                    >
-                      <motion.div
-                        whileHover={{ rotate: 25, scale: 1.2 }}
-                        animate={{
-                          rotate: [0, 5, 0],
-                          scale: [1, 1.05, 1]
-                        }}
-                        transition={{
-                          duration: 3,
-                          repeat: Infinity,
-                          ease: "easeInOut"
-                        }}
-                      >
-                        <Flame className={`w-8 h-8 ${themeConfig.iconColors.flame} drop-shadow-lg`} />
-                      </motion.div>
-                      <span className="bg-gradient-to-r from-current to-transparent bg-clip-text">
-                        Quick Actions
-                      </span>
-                    </motion.h2>
+                  <AnimatedCard className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-3xl p-8 relative overflow-hidden`}>
+                    <h2 className={`text-3xl font-bold ${themeConfig.textPrimary} mb-8 flex items-center space-x-4 relative z-10`}>
+                      <span className="bg-gradient-to-r from-current to-transparent bg-clip-text">Quick Actions</span>
+                    </h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
                       {[
@@ -741,97 +398,30 @@ const LandlordDashboard = () => {
                           onClick: () => setShowGenerateReportModal(true),
                           description: 'Analytics & insights'
                         }
-                      ].map((action, index) => (
-                        <motion.button
+                      ].map((action) => (
+                        <button
                           key={action.label}
                           onClick={action.onClick}
-                          whileHover={{
-                            scale: 1.08,
-                            y: -8,
-                            rotateY: 5,
-                            boxShadow: isDarkMode
-                              ? "0 20px 40px rgba(6, 182, 212, 0.4)"
-                              : "0 20px 40px rgba(99, 102, 241, 0.4)"
-                          }}
-                          whileTap={{ scale: 0.95 }}
-                          initial={{ opacity: 0, y: 40, rotateX: 20 }}
-                          animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                          transition={{
-                            delay: index * 0.2,
-                            duration: 0.8,
-                            type: "spring",
-                            stiffness: 150
-                          }}
-                          className={`group relative p-8 bg-gradient-to-br ${action.color} rounded-2xl text-white font-bold shadow-xl hover:shadow-2xl transition-all duration-700 text-base overflow-hidden`}
+                          className={`group relative p-8 bg-gradient-to-br ${action.color} rounded-2xl text-white font-bold shadow-sm text-base overflow-hidden hover:opacity-95`}
                         >
-                          {/* Animated glow effect */}
-                          <motion.div
-                            className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl"
-                            animate={{
-                              opacity: [0, 0.3, 0],
-                              scale: [0.8, 1.1, 0.8]
-                            }}
-                            transition={{ duration: 2, repeat: Infinity, delay: index * 0.5 }}
-                          />
-
-                          <motion.div
-                            whileHover={{ rotate: 20, scale: 1.2 }}
-                            className="mb-4 relative z-10"
-                          >
-                            <action.icon className="w-8 h-8 mx-auto group-hover:drop-shadow-2xl transition-all duration-500" />
-                          </motion.div>
+                          <div className="mb-4 relative z-10">
+                            <action.icon className="w-8 h-8 mx-auto" />
+                          </div>
                           <div className="relative z-10">
                             <div className="text-lg font-bold mb-2">{action.label}</div>
                             <div className="text-sm opacity-90 font-medium">{action.description}</div>
                           </div>
-
-                          {/* Shimmer effect */}
-                          <motion.div
-                            className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                            initial={{ x: '-100%' }}
-                            whileHover={{ x: '200%' }}
-                            transition={{ duration: 1, ease: "easeInOut" }}
-                          />
-                        </motion.button>
+                        </button>
                       ))}
                     </div>
                   </AnimatedCard>
 
                   {/* Enhanced Performance Metrics */}
-                  <AnimatedCard delay={0.4} className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-3xl p-8 shadow-2xl relative overflow-hidden`}>
-                    {/* Animated background */}
-                    <motion.div
-                      className={`absolute inset-0 bg-gradient-to-br ${isDarkMode
-                        ? 'from-indigo-500/10 via-cyan-500/5 to-purple-500/10'
-                        : 'from-purple-500/10 via-indigo-500/5 to-cyan-500/10'
-                        } rounded-3xl`}
-                      animate={{
-                        opacity: [0.3, 0.5, 0.3],
-                        rotate: [0, 1, 0]
-                      }}
-                      transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                    />
-
-                    <motion.h2
-                      className={`text-3xl font-bold ${themeConfig.textPrimary} mb-8 flex items-center space-x-4 relative z-10`}
-                      whileHover={{ x: 8, scale: 1.02 }}
-                    >
-                      <motion.div
-                        whileHover={{ rotate: 25, scale: 1.2 }}
-                        animate={{
-                          y: [0, -3, 0],
-                          rotate: [0, 10, 0]
-                        }}
-                        transition={{
-                          duration: 2.5,
-                          repeat: Infinity,
-                          ease: "easeInOut"
-                        }}
-                      >
-                        <TrendingUp className={`w-8 h-8 ${themeConfig.iconColors.trend} drop-shadow-lg`} />
-                      </motion.div>
+                  <AnimatedCard className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-3xl p-8 relative overflow-hidden`}>
+                    <h2 className={`text-3xl font-bold ${themeConfig.textPrimary} mb-8 flex items-center space-x-4 relative z-10`}>
+                      <TrendingUp className={`w-8 h-8 ${themeConfig.iconColors.trend}`} />
                       <span>Performance Overview</span>
-                    </motion.h2>
+                    </h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
                       {[
@@ -857,112 +447,51 @@ const LandlordDashboard = () => {
                           bgGradient: isDarkMode ? 'from-purple-500/20 to-pink-500/20' : 'from-pink-500/20 to-purple-500/20'
                         }
                       ].map((metric) => (
-                        <motion.div
+                        <div
                           key={metric.label}
-                          className={`relative text-center p-8 ${isDarkMode ? 'bg-slate-900/60' : 'bg-white/60'} rounded-2xl border ${isDarkMode ? 'border-slate-700/50 hover:bg-slate-900/80' : 'border-indigo-200/50 hover:bg-white/80'} transition-all duration-500 backdrop-blur-sm overflow-hidden group`}
-                          whileHover={{
-                            scale: 1.05,
-                            y: -5,
-                            rotateY: 3,
-                            boxShadow: isDarkMode
-                              ? "0 20px 40px rgba(255,255,255,0.15)"
-                              : "0 20px 40px rgba(99, 102, 241, 0.2)"
-                          }}
-                          initial={{ opacity: 0, y: 30, scale: 0.9 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          transition={{ delay: metric.delay, duration: 0.8, type: "spring", stiffness: 120 }}
+                          className={`relative text-center p-8 ${isDarkMode ? 'bg-slate-900/60' : 'bg-white/60'} rounded-2xl border ${isDarkMode ? 'border-slate-700/50' : 'border-indigo-200/50'} backdrop-blur-sm overflow-hidden group`}
                         >
-                          {/* Animated background gradient */}
-                          <motion.div
-                            className={`absolute inset-0 bg-gradient-to-br ${metric.bgGradient} rounded-2xl`}
-                            animate={{
-                              opacity: [0, 0.4, 0],
-                              scale: [0.8, 1.1, 0.8]
-                            }}
-                            transition={{ duration: 3, repeat: Infinity, delay: metric.delay }}
-                          />
-
-                          <motion.div
-                            className={`text-4xl font-bold ${metric.color} mb-3 drop-shadow-lg relative z-10`}
-                            whileHover={{ scale: 1.1, y: -2 }}
-                            animate={{
-                              textShadow: isDarkMode
-                                ? ["0 0 10px rgba(6, 182, 212, 0.5)", "0 0 20px rgba(168, 85, 247, 0.5)", "0 0 10px rgba(6, 182, 212, 0.5)"]
-                                : ["0 0 10px rgba(99, 102, 241, 0.3)", "0 0 20px rgba(168, 85, 247, 0.3)", "0 0 10px rgba(99, 102, 241, 0.3)"]
-                            }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                          >
+                          <div className={`text-4xl font-bold ${metric.color} mb-3 relative z-10`}>
                             {metric.value}
-                          </motion.div>
+                          </div>
                           <div className={`${themeConfig.textSecondary} text-lg font-semibold relative z-10`}>
                             {metric.label}
                           </div>
-
-                          {/* Hover effect particles */}
-                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                            {[...Array(5)].map((_, i) => (
-                              <motion.div
-                                key={i}
-                                className={`absolute w-1 h-1 ${metric.color.replace('text-', 'bg-')} rounded-full`}
-                                style={{
-                                  left: `${20 + (i * 15)}%`,
-                                  top: `${60 + (i * 5)}%`,
-                                }}
-                                animate={{
-                                  y: [-10, -30],
-                                  opacity: [0, 1, 0],
-                                  scale: [0.5, 1, 0.5]
-                                }}
-                                transition={{
-                                  duration: 2,
-                                  repeat: Infinity,
-                                  delay: i * 0.2
-                                }}
-                              />
-                            ))}
-                          </div>
-                        </motion.div>
+                        </div>
                       ))}
                     </div>
                   </AnimatedCard>
-                </motion.div>
+                </div>
               )}
-            </AnimatePresence>
           </div>
         </main>
       </div>
       {/* Schedule Inspection Modal */}
-      <AnimatePresence>
-        {showScheduleModal && (
-          <ScheduleInspectionModal
-            isOpen={showScheduleModal}
-            onClose={() => setShowScheduleModal(false)}
-            isDark={isDarkMode}
-          />
-        )}
-      </AnimatePresence>
+      {showScheduleModal && (
+        <ScheduleInspectionModal
+          isOpen={showScheduleModal}
+          onClose={() => setShowScheduleModal(false)}
+          isDark={isDarkMode}
+        />
+      )}
 
       {/* Add New Property Modal */}
-      <AnimatePresence>
-        {showAddPropertyModal && (
-          <AddNewPropertyModal
-            isOpen={showAddPropertyModal}
-            onClose={() => setShowAddPropertyModal(false)}
-            isDark={isDarkMode}
-          />
-        )}
-      </AnimatePresence>
+      {showAddPropertyModal && (
+        <AddNewPropertyModal
+          isOpen={showAddPropertyModal}
+          onClose={() => setShowAddPropertyModal(false)}
+          isDark={isDarkMode}
+        />
+      )}
 
       {/* Generate Report Modal */}
-      <AnimatePresence>
-        {showGenerateReportModal && (
-          <GenerateReportModal
-            isOpen={showGenerateReportModal}
-            onClose={() => setShowGenerateReportModal(false)}
-            isDark={isDarkMode}
-          />
-        )}
-      </AnimatePresence>
+      {showGenerateReportModal && (
+        <GenerateReportModal
+          isOpen={showGenerateReportModal}
+          onClose={() => setShowGenerateReportModal(false)}
+          isDark={isDarkMode}
+        />
+      )}
     </div>
   );
 };
@@ -1012,17 +541,11 @@ const ScheduleInspectionModal = ({ isOpen, onClose, isDark }) => {
     };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+    <div
       className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
       onClick={onClose}
     >
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
+      <div
         className={`${modalTheme.bg} ${modalTheme.border} border rounded-2xl w-full max-w-md p-6 shadow-xl`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -1074,27 +597,23 @@ const ScheduleInspectionModal = ({ isOpen, onClose, isDark }) => {
             </div>
           </div>
           <div className="flex justify-end space-x-4 pt-4">
-            <motion.button
+            <button
               type="button"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
               onClick={onClose}
               className={`px-6 py-2 rounded-lg font-semibold transition-all duration-200 ${modalTheme.buttonSecondaryBg} ${modalTheme.buttonSecondaryText} ${modalTheme.buttonHover}`}
             >
               Cancel
-            </motion.button>
-            <motion.button
+            </button>
+            <button
               type="submit"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
               className={`px-6 py-2 rounded-lg font-semibold transition-all duration-200 ${modalTheme.buttonPrimaryBg} ${modalTheme.buttonPrimaryText} ${modalTheme.buttonHover}`}
             >
               Schedule Visit
-            </motion.button>
+            </button>
           </div>
         </form>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 
