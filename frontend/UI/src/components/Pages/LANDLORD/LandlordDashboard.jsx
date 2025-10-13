@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import AddNewPropertyModal from './AddNewPropertyModal';
@@ -10,68 +10,68 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../../../useDarkMode.js';
 
-// Enhanced Custom Hooks with better performance
-const useIntersectionObserver = (options = {}) => {
-  const [isIntersecting, setIsIntersecting] = useState(false);
-  const [element, setElement] = useState(null);
-  const observerRef = useRef(null);
+// Enhanced Custom Hooks with better performance - commented out as they are not used
+// const useIntersectionObserver = (options = {}) => {
+//   const [isIntersecting, setIsIntersecting] = useState(false);
+//   const [element, setElement] = useState(null);
+//   const observerRef = useRef(null);
 
-  useEffect(() => {
-    if (!element) return;
+//   useEffect(() => {
+//     if (!element) return;
 
-    if (!observerRef.current) {
-      observerRef.current = new IntersectionObserver(([entry]) => {
-        setIsIntersecting(entry.isIntersecting);
-      }, { threshold: 0.1, rootMargin: '50px', ...options });
-    }
+//     if (!observerRef.current) {
+//       observerRef.current = new IntersectionObserver(([entry]) => {
+//         setIsIntersecting(entry.isIntersecting);
+//       }, { threshold: 0.1, rootMargin: '50px', ...options });
+//     }
 
-    observerRef.current.observe(element);
+//     observerRef.current.observe(element);
 
-    return () => {
-      if (observerRef.current && element) {
-        observerRef.current.unobserve(element);
-      }
-    };
-  }, [element, options]);
+//     return () => {
+//       if (observerRef.current && element) {
+//         observerRef.current.unobserve(element);
+//       }
+//     };
+//   }, [element, options]);
 
-  return [setElement, isIntersecting];
-};
+//   return [setElement, isIntersecting];
+// };
 
-const useCountUp = (end, duration = 2000, start = 0, shouldStart = true) => {
-  const [count, setCount] = useState(start);
-  const animationRef = useRef();
+// const useCountUp = (end, duration = 2000, start = 0, shouldStart = true) => {
+//   const [count, setCount] = useState(start);
+//   const animationRef = useRef();
 
-  useEffect(() => {
-    if (!shouldStart) return;
+//   useEffect(() => {
+//     if (!shouldStart) return;
 
-    const startTime = Date.now();
-    const animate = () => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
+//     const startTime = Date.now();
+//     const animate = () => {
+//       const elapsed = Date.now() - startTime;
+//       const progress = Math.min(elapsed / duration, 1);
 
-      const easeOutExpo = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-      const currentCount = Math.floor(start + (end - start) * easeOutExpo);
+//       const easeOutExpo = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+//       const currentCount = Math.floor(start + (end - start) * easeOutExpo);
 
-      setCount(currentCount);
+//       setCount(currentCount);
 
-      if (progress < 1) {
-        animationRef.current = requestAnimationFrame(animate);
-      }
-    };
+//       if (progress < 1) {
+//         animationRef.current = requestAnimationFrame(animate);
+//       }
+//     };
 
-    animationRef.current = requestAnimationFrame(animate);
+//     animationRef.current = requestAnimationFrame(animate);
 
-    return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-    };
-  }, [end, duration, start, shouldStart]);
+//     return () => {
+//       if (animationRef.current) {
+//         cancelAnimationFrame(animationRef.current);
+//       }
+//     };
+//   }, [end, duration, start, shouldStart]);
 
-  return count;
-};
+//   return count;
+// };
 
-// Lightweight Card (no animations)
+// Simplified Animated Card Wrapper (no framer-motion)
 const AnimatedCard = React.memo(({ children, className = '', ...props }) => {
   return (
     <div className={`relative ${className}`} {...props}>
@@ -80,28 +80,17 @@ const AnimatedCard = React.memo(({ children, className = '', ...props }) => {
   );
 });
 
-// Enhanced Floating Particles - Smaller Size
+// Enhanced Floating Particles - Smaller Size (converted to regular div without animation)
 const FloatingParticle = React.memo(({ delay = 0, index = 0, isDark = true }) => (
-  <motion.div
+  <div
     className={`absolute w-0.5 h-0.5 ${isDark
       ? 'bg-gradient-to-r from-cyan-400 to-indigo-500'
       : 'bg-gradient-to-r from-indigo-400 to-purple-500'
-      } rounded-full`}
+      } rounded-full opacity-60`}
     style={{
       left: `${20 + (index * 15) % 60}%`,
       top: `${80 + (index * 10) % 20}%`,
-    }}
-    animate={{
-      y: [-15, -80],
-      x: [0, (Math.sin(index) * 30)],
-      opacity: [0, isDark ? 0.8 : 0.6, 0],
-      scale: [0.5, 1, 0.5],
-    }}
-    transition={{
-      duration: 4 + (index % 3),
-      delay: delay + (index * 0.2),
-      repeat: Infinity,
-      ease: "easeOut",
+      animationDelay: `${delay + (index * 0.2)}s`,
     }}
   />
 ));
@@ -139,7 +128,7 @@ const StatCard = React.memo(({ icon: Icon, title, value, change, trend, color, p
       <div className="relative z-20">
         <div className="flex items-center justify-between mb-4">
           <div className={`p-3 rounded-xl bg-gradient-to-br ${themeStyles.iconBg} backdrop-blur-sm border ${themeStyles.iconBorder}`}>
-            <Icon className={`w-6 h-6 ${themeStyles.iconColor}`} />
+            {Icon && <Icon className={`w-6 h-6 ${themeStyles.iconColor}`} />}
           </div>
           <div className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm border ${trend === 'up' ? themeStyles.trendUp : themeStyles.trendDown}`}>
             <TrendIcon className="w-3 h-3" />
@@ -360,7 +349,7 @@ const LandlordDashboard = () => {
                     : `${themeConfig.tabInactive}`
                     }`}
                 >
-                  <Icon className="w-5 h-5" />
+                  {Icon && <Icon className="w-5 h-5" />}
                   <span className="relative z-10 font-semibold">{label}</span>
                 </button>
               ))}
@@ -368,101 +357,101 @@ const LandlordDashboard = () => {
 
             {/* Overview Content - simplified */}
             {activeTab === 'overview' && (
-                <div className="space-y-10">
-                  {/* Enhanced Quick Actions */}
-                  <AnimatedCard className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-3xl p-8 relative overflow-hidden`}>
-                    <h2 className={`text-3xl font-bold ${themeConfig.textPrimary} mb-8 flex items-center space-x-4 relative z-10`}>
-                      <span className="bg-gradient-to-r from-current to-transparent bg-clip-text">Quick Actions</span>
-                    </h2>
+              <div className="space-y-10">
+                {/* Enhanced Quick Actions */}
+                <AnimatedCard className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-3xl p-8 relative overflow-hidden`}>
+                  <h2 className={`text-3xl font-bold ${themeConfig.textPrimary} mb-8 flex items-center space-x-4 relative z-10`}>
+                    <span className="bg-gradient-to-r from-current to-transparent bg-clip-text">Quick Actions</span>
+                  </h2>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
-                      {[
-                        {
-                          label: 'Add New Property',
-                          icon: Plus,
-                          color: themeConfig.buttonPrimary,
-                          onClick: () => setShowAddPropertyModal(true),
-                          description: 'Expand your portfolio'
-                        },
-                        {
-                          label: 'Schedule Inspection',
-                          icon: Calendar,
-                          color: themeConfig.buttonPrimary,
-                          onClick: () => setShowScheduleModal(true),
-                          description: 'Plan property visits'
-                        },
-                        {
-                          label: 'Generate Report',
-                          icon: BarChart3,
-                          color: themeConfig.buttonSecondary,
-                          onClick: () => setShowGenerateReportModal(true),
-                          description: 'Analytics & insights'
-                        }
-                      ].map((action) => (
-                        <button
-                          key={action.label}
-                          onClick={action.onClick}
-                          className={`group relative p-8 bg-gradient-to-br ${action.color} rounded-2xl text-white font-bold shadow-sm text-base overflow-hidden hover:opacity-95`}
-                        >
-                          <div className="mb-4 relative z-10">
-                            <action.icon className="w-8 h-8 mx-auto" />
-                          </div>
-                          <div className="relative z-10">
-                            <div className="text-lg font-bold mb-2">{action.label}</div>
-                            <div className="text-sm opacity-90 font-medium">{action.description}</div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </AnimatedCard>
-
-                  {/* Enhanced Performance Metrics */}
-                  <AnimatedCard className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-3xl p-8 relative overflow-hidden`}>
-                    <h2 className={`text-3xl font-bold ${themeConfig.textPrimary} mb-8 flex items-center space-x-4 relative z-10`}>
-                      <TrendingUp className={`w-8 h-8 ${themeConfig.iconColors.trend}`} />
-                      <span>Performance Overview</span>
-                    </h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
-                      {[
-                        {
-                          value: '94%',
-                          label: 'Occupancy Rate',
-                          color: isDarkMode ? 'text-cyan-400' : 'text-indigo-600',
-                          delay: 0,
-                          bgGradient: isDarkMode ? 'from-cyan-500/20 to-indigo-500/20' : 'from-indigo-500/20 to-cyan-500/20'
-                        },
-                        {
-                          value: '4.8',
-                          label: 'Avg Rating',
-                          color: isDarkMode ? 'text-indigo-400' : 'text-purple-600',
-                          delay: 0.15,
-                          bgGradient: isDarkMode ? 'from-indigo-500/20 to-purple-500/20' : 'from-purple-500/20 to-indigo-500/20'
-                        },
-                        {
-                          value: '2.1',
-                          label: 'Avg Response (hrs)',
-                          color: isDarkMode ? 'text-purple-400' : 'text-pink-600',
-                          delay: 0.3,
-                          bgGradient: isDarkMode ? 'from-purple-500/20 to-pink-500/20' : 'from-pink-500/20 to-purple-500/20'
-                        }
-                      ].map((metric) => (
-                        <div
-                          key={metric.label}
-                          className={`relative text-center p-8 ${isDarkMode ? 'bg-slate-900/60' : 'bg-white/60'} rounded-2xl border ${isDarkMode ? 'border-slate-700/50' : 'border-indigo-200/50'} backdrop-blur-sm overflow-hidden group`}
-                        >
-                          <div className={`text-4xl font-bold ${metric.color} mb-3 relative z-10`}>
-                            {metric.value}
-                          </div>
-                          <div className={`${themeConfig.textSecondary} text-lg font-semibold relative z-10`}>
-                            {metric.label}
-                          </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                    {[
+                      {
+                        label: 'Add New Property',
+                        icon: Plus,
+                        color: themeConfig.buttonPrimary,
+                        onClick: () => setShowAddPropertyModal(true),
+                        description: 'Expand your portfolio'
+                      },
+                      {
+                        label: 'Schedule Inspection',
+                        icon: Calendar,
+                        color: themeConfig.buttonPrimary,
+                        onClick: () => setShowScheduleModal(true),
+                        description: 'Plan property visits'
+                      },
+                      {
+                        label: 'Generate Report',
+                        icon: BarChart3,
+                        color: themeConfig.buttonSecondary,
+                        onClick: () => setShowGenerateReportModal(true),
+                        description: 'Analytics & insights'
+                      }
+                    ].map((action) => (
+                      <button
+                        key={action.label}
+                        onClick={action.onClick}
+                        className={`group relative p-8 bg-gradient-to-br ${action.color} rounded-2xl text-white font-bold shadow-sm text-base overflow-hidden hover:opacity-95`}
+                      >
+                        <div className="mb-4 relative z-10">
+                          <action.icon className="w-8 h-8 mx-auto" />
                         </div>
-                      ))}
-                    </div>
-                  </AnimatedCard>
-                </div>
-              )}
+                        <div className="relative z-10">
+                          <div className="text-lg font-bold mb-2">{action.label}</div>
+                          <div className="text-sm opacity-90 font-medium">{action.description}</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </AnimatedCard>
+
+                {/* Enhanced Performance Metrics */}
+                <AnimatedCard className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-3xl p-8 relative overflow-hidden`}>
+                  <h2 className={`text-3xl font-bold ${themeConfig.textPrimary} mb-8 flex items-center space-x-4 relative z-10`}>
+                    <TrendingUp className={`w-8 h-8 ${themeConfig.iconColors.trend}`} />
+                    <span>Performance Overview</span>
+                  </h2>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+                    {[
+                      {
+                        value: '94%',
+                        label: 'Occupancy Rate',
+                        color: isDarkMode ? 'text-cyan-400' : 'text-indigo-600',
+                        delay: 0,
+                        bgGradient: isDarkMode ? 'from-cyan-500/20 to-indigo-500/20' : 'from-indigo-500/20 to-cyan-500/20'
+                      },
+                      {
+                        value: '4.8',
+                        label: 'Avg Rating',
+                        color: isDarkMode ? 'text-indigo-400' : 'text-purple-600',
+                        delay: 0.15,
+                        bgGradient: isDarkMode ? 'from-indigo-500/20 to-purple-500/20' : 'from-purple-500/20 to-indigo-500/20'
+                      },
+                      {
+                        value: '2.1',
+                        label: 'Avg Response (hrs)',
+                        color: isDarkMode ? 'text-purple-400' : 'text-pink-600',
+                        delay: 0.3,
+                        bgGradient: isDarkMode ? 'from-purple-500/20 to-pink-500/20' : 'from-pink-500/20 to-purple-500/20'
+                      }
+                    ].map((metric) => (
+                      <div
+                        key={metric.label}
+                        className={`relative text-center p-8 ${isDarkMode ? 'bg-slate-900/60' : 'bg-white/60'} rounded-2xl border ${isDarkMode ? 'border-slate-700/50' : 'border-indigo-200/50'} backdrop-blur-sm overflow-hidden group`}
+                      >
+                        <div className={`text-4xl font-bold ${metric.color} mb-3 relative z-10`}>
+                          {metric.value}
+                        </div>
+                        <div className={`${themeConfig.textSecondary} text-lg font-semibold relative z-10`}>
+                          {metric.label}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </AnimatedCard>
+              </div>
+            )}
           </div>
         </main>
       </div>
