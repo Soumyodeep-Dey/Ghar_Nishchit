@@ -4,31 +4,11 @@ import LandlordNavBar from './LandlordNavBar';
 import AddNewPropertyModal from './AddNewPropertyModal';
 import GenerateReportModal from './GenerateReportModal';
 import {
-  Home,
-  DollarSign,
-  Users,
-  Wrench,
-  BarChart3,
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Bell,
-  Eye,
-  Plus,
-  ArrowRight,
-  MapPin,
-  Calendar,
-  Star,
-  Flame,
-  Sparkles,
-  Building2
+  DollarSign, Users, Wrench, BarChart3, TrendingUp, TrendingDown, Plus, Calendar, Flame, Sparkles, Building2, Star
 } from 'lucide-react';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
-import { useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../../../useDarkMode.js';
-// Removed SidebarContext usage
 
 // Enhanced Custom Hooks with better performance
 const useIntersectionObserver = (options = {}) => {
@@ -300,377 +280,9 @@ const StatCard = React.memo(({
   );
 });
 
-// Enhanced PropertyCard - Reduced Size
-const PropertyCard = React.memo(({ property, delay = 0, isDark = true }) => {
-  const [isHovered, setIsHovered] = useState(false);
-
-  const statusColors = isDark
-    ? {
-      'Occupied': 'bg-cyan-400/20 text-cyan-300 border-cyan-400/50',
-      'Available': 'bg-indigo-400/20 text-indigo-300 border-indigo-400/50',
-      'Maintenance': 'bg-pink-400/20 text-pink-300 border-pink-400/50'
-    }
-    : {
-      'Occupied': 'bg-indigo-100/60 text-indigo-700 border-indigo-300/60',
-      'Available': 'bg-purple-100/60 text-purple-700 border-purple-300/60',
-      'Maintenance': 'bg-pink-100/60 text-pink-700 border-pink-300/60'
-    };
-
-  const themeStyles = isDark
-    ? {
-      cardBg: 'from-slate-800/80 to-blue-950/80',
-      cardBorder: 'border-slate-700/50',
-      cardShadow: 'hover:shadow-cyan-500/20',
-      imageBg: 'from-pink-500 via-purple-500 to-indigo-600',
-      overlay: 'from-gray-900/80 via-slate-800/40',
-      textPrimary: 'text-slate-100',
-      textSecondary: 'text-slate-300',
-      textTertiary: 'text-slate-200',
-      buttonBg: 'from-cyan-500 to-indigo-600',
-      buttonHover: 'hover:from-cyan-400 hover:to-indigo-500',
-      buttonText: 'text-blue-950'
-    }
-    : {
-      cardBg: 'from-white/90 to-indigo-50/80',
-      cardBorder: 'border-indigo-200/50',
-      cardShadow: 'hover:shadow-indigo-500/20',
-      imageBg: 'from-pink-300 via-purple-300 to-indigo-400',
-      overlay: 'from-gray-800/70 via-indigo-900/30',
-      textPrimary: 'text-gray-900',
-      textSecondary: 'text-indigo-600',
-      textTertiary: 'text-white',
-      buttonBg: 'from-indigo-600 to-purple-600',
-      buttonHover: 'hover:from-indigo-700 hover:to-purple-700',
-      buttonText: 'text-white'
-    };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30, rotateX: 15 }}
-      animate={{ opacity: 1, y: 0, rotateX: 0 }}
-      transition={{
-        delay,
-        duration: 0.8,
-        type: "spring",
-        stiffness: 100,
-        damping: 20
-      }}
-      whileHover={{
-        scale: 1.03,
-        y: -8,
-        rotateY: 3,
-        transition: { type: "spring", stiffness: 300, damping: 25 }
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className={`group relative overflow-hidden bg-gradient-to-br ${themeStyles.cardBg} backdrop-blur-xl border ${themeStyles.cardBorder} rounded-2xl shadow-xl ${themeStyles.cardShadow} transition-all duration-500`}
-    >
-      {/* Image section - Reduced Size */}
-      <div className="relative h-40 overflow-hidden rounded-t-2xl">
-        <motion.div
-          className={`w-full h-full bg-gradient-to-br ${themeStyles.imageBg} flex items-center justify-center`}
-          animate={isHovered ? { scale: 1.1 } : { scale: 1 }}
-          transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
-        >
-          <motion.div
-            animate={isHovered ? {
-              rotate: 360,
-              scale: 1.1,
-              filter: "brightness(1.2)"
-            } : {}}
-            transition={{ duration: 2, ease: "easeInOut" }}
-          >
-            <Building2 className="w-16 h-16 text-white/80 drop-shadow-lg" />
-          </motion.div>
-        </motion.div>
-
-        <motion.div
-          className={`absolute inset-0 bg-gradient-to-t ${themeStyles.overlay} to-transparent`}
-          animate={isHovered ? { opacity: 0.9 } : { opacity: 0.7 }}
-          transition={{ duration: 0.4 }}
-        />
-
-        {/* Status badge - Smaller */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8, y: -15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          whileHover={{ scale: 1.05, y: -2 }}
-          className={`absolute top-4 right-4 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border ${statusColors[property.status]}`}
-        >
-          {property.status}
-        </motion.div>
-
-        {/* Property info overlay */}
-        <motion.div
-          className={`absolute bottom-4 left-4 ${themeStyles.textTertiary}`}
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: delay + 0.3 }}
-        >
-          <motion.h3
-            className="font-bold text-lg mb-1 drop-shadow-lg"
-            whileHover={{ scale: 1.03 }}
-          >
-            {property.title}
-          </motion.h3>
-          <motion.div
-            className={`flex items-center space-x-1.5 text-xs ${isDark ? 'text-slate-200' : 'text-white/90'}`}
-            whileHover={{ x: 3 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <MapPin className="w-3 h-3" />
-            <span>{property.location}</span>
-          </motion.div>
-        </motion.div>
-      </div>
-
-      {/* Content section - Reduced Size */}
-      <div className="p-5">
-        <div className="flex items-center justify-between mb-4">
-          <motion.div
-            className={`text-xl font-bold ${themeStyles.textPrimary} drop-shadow-sm`}
-            whileHover={{ scale: 1.05 }}
-          >
-            ${property.rent.toLocaleString()}<span className={`text-sm ${themeStyles.textSecondary} font-normal`}>/month</span>
-          </motion.div>
-          <div className={`flex items-center space-x-4 ${themeStyles.textSecondary}`}>
-            <motion.span
-              className="flex items-center space-x-1.5"
-              whileHover={{ scale: 1.05, color: isDark ? "#e2e8f0" : "#374151" }}
-            >
-              <Home className="w-4 h-4" />
-              <span>{property.bedrooms} bed</span>
-            </motion.span>
-            <motion.span
-              className="flex items-center space-x-1.5"
-              whileHover={{ scale: 1.05, color: isDark ? "#e2e8f0" : "#374151" }}
-            >
-              <Users className="w-4 h-4" />
-              <span>{property.tenants}</span>
-            </motion.span>
-          </div>
-        </div>
-
-        <motion.button
-          whileHover={{
-            scale: 1.02,
-            boxShadow: isDark
-              ? "0 15px 30px rgba(6, 182, 212, 0.3)"
-              : "0 15px 30px rgba(99, 102, 241, 0.3)"
-          }}
-          whileTap={{ scale: 0.98 }}
-          className={`w-full bg-gradient-to-r ${themeStyles.buttonBg} ${themeStyles.buttonText} py-3 rounded-xl font-semibold ${themeStyles.buttonHover} transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg text-sm`}
-        >
-          <span>Manage Property</span>
-          <motion.div
-            animate={isHovered ? { x: 3 } : { x: 0 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <ArrowRight className="w-4 h-4" />
-          </motion.div>
-        </motion.button>
-      </div>
-    </motion.div>
-  );
-});
-
-// Enhanced NotificationCard - Reduced Size
-const NotificationCard = React.memo(({ notification, delay = 0, isDark = true }) => {
-  const priorityConfig = isDark
-    ? {
-      high: { bg: 'bg-pink-500/20', text: 'text-pink-300', icon: AlertTriangle },
-      medium: { bg: 'bg-purple-500/20', text: 'text-purple-300', icon: Clock },
-      low: { bg: 'bg-cyan-500/20', text: 'text-cyan-300', icon: CheckCircle }
-    }
-    : {
-      high: { bg: 'bg-pink-100/60', text: 'text-pink-700', icon: AlertTriangle },
-      medium: { bg: 'bg-purple-100/60', text: 'text-purple-700', icon: Clock },
-      low: { bg: 'bg-indigo-100/60', text: 'text-indigo-700', icon: CheckCircle }
-    };
-
-  const config = priorityConfig[notification.priority];
-  const IconComponent = config.icon;
-
-  const themeStyles = isDark
-    ? {
-      cardBg: 'bg-slate-800/60 hover:bg-slate-800/80',
-      cardBorder: 'border-slate-700/50 hover:border-cyan-400/30',
-      iconBorder: 'border-slate-600/30',
-      textPrimary: 'text-slate-100 group-hover:text-cyan-200',
-      textSecondary: 'text-slate-300',
-      textTertiary: 'text-slate-400',
-      buttonHover: 'hover:bg-cyan-400/20',
-      buttonIcon: 'text-slate-400',
-      shadow: 'rgba(6, 182, 212, 0.1)'
-    }
-    : {
-      cardBg: 'bg-white/60 hover:bg-white/80',
-      cardBorder: 'border-indigo-200/50 hover:border-indigo-400/40',
-      iconBorder: 'border-indigo-300/40',
-      textPrimary: 'text-gray-900 group-hover:text-indigo-700',
-      textSecondary: 'text-indigo-600',
-      textTertiary: 'text-indigo-500',
-      buttonHover: 'hover:bg-indigo-100/40',
-      buttonIcon: 'text-indigo-500',
-      shadow: 'rgba(99, 102, 241, 0.1)'
-    };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: -30, scale: 0.95 }}
-      animate={{ opacity: 1, x: 0, scale: 1 }}
-      transition={{
-        delay,
-        duration: 0.6,
-        type: "spring",
-        stiffness: 120,
-        damping: 20
-      }}
-      whileHover={{
-        scale: 1.02,
-        x: 5,
-        boxShadow: `0 8px 25px ${themeStyles.shadow}`
-      }}
-      className={`group flex items-start space-x-3 p-4 rounded-xl ${themeStyles.cardBg} border ${themeStyles.cardBorder} transition-all duration-400 backdrop-blur-sm`}
-    >
-      <motion.div
-        whileHover={{ rotate: 15, scale: 1.15 }}
-        className={`p-2.5 rounded-lg ${config.bg} ${config.text} border ${themeStyles.iconBorder}`}
-      >
-        <IconComponent className="w-4 h-4" />
-      </motion.div>
-
-      <div className="flex-1">
-        <motion.h4
-          className={`font-semibold ${themeStyles.textPrimary} transition-colors text-sm mb-1`}
-          whileHover={{ x: 3 }}
-        >
-          {notification.title}
-        </motion.h4>
-        <p className={`${themeStyles.textSecondary} text-sm mb-1`}>{notification.message}</p>
-        <span className={`${themeStyles.textTertiary} text-xs`}>{notification.time}</span>
-      </div>
-
-      <motion.button
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0 }}
-        whileHover={{ opacity: 1, scale: 1.1 }}
-        className={`p-1.5 rounded-lg ${themeStyles.buttonHover} transition-all duration-200`}
-      >
-        <Eye className={`w-4 h-4 ${themeStyles.buttonIcon}`} />
-      </motion.button>
-    </motion.div>
-  );
-});
-
-// Enhanced MaintenanceRow - Reduced Size
-const MaintenanceRow = React.memo(({ request, delay = 0, isDark = true }) => {
-  const priorityColors = isDark
-    ? {
-      High: 'bg-pink-500/20 text-pink-300',
-      Medium: 'bg-purple-500/20 text-purple-300',
-      Low: 'bg-cyan-500/20 text-cyan-300'
-    }
-    : {
-      High: 'bg-pink-100/60 text-pink-700',
-      Medium: 'bg-purple-100/60 text-purple-700',
-      Low: 'bg-indigo-100/60 text-indigo-700'
-    };
-
-  const statusColors = isDark
-    ? {
-      Completed: 'bg-cyan-500/20 text-cyan-300',
-      'In Progress': 'bg-indigo-500/20 text-indigo-300',
-      Pending: 'bg-slate-500/20 text-slate-300'
-    }
-    : {
-      Completed: 'bg-indigo-100/60 text-indigo-700',
-      'In Progress': 'bg-purple-100/60 text-purple-700',
-      Pending: 'bg-gray-100/60 text-gray-700'
-    };
-
-  const themeStyles = isDark
-    ? {
-      rowHover: 'rgba(51, 65, 85, 0.3)',
-      borderColor: 'border-slate-700/50 hover:border-cyan-400/30',
-      textPrimary: 'text-slate-100',
-      textSecondary: 'text-slate-300',
-      textTertiary: 'text-slate-200',
-      buttonBg: 'from-cyan-500 to-indigo-600',
-      buttonHover: 'hover:from-cyan-400 hover:to-indigo-500',
-      buttonText: 'text-blue-950',
-      buttonShadow: 'rgba(6, 182, 212, 0.3)'
-    }
-    : {
-      rowHover: 'rgba(199, 210, 254, 0.3)',
-      borderColor: 'border-indigo-200/50 hover:border-indigo-400/40',
-      textPrimary: 'text-gray-900',
-      textSecondary: 'text-indigo-600',
-      textTertiary: 'text-indigo-700',
-      buttonBg: 'from-indigo-600 to-purple-600',
-      buttonHover: 'hover:from-indigo-700 hover:to-purple-700',
-      buttonText: 'text-white',
-      buttonShadow: 'rgba(99, 102, 241, 0.3)'
-    };
-
-  return (
-    <motion.tr
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        delay,
-        duration: 0.6,
-        type: "spring",
-        stiffness: 100
-      }}
-      whileHover={{
-        backgroundColor: themeStyles.rowHover,
-        scale: 1.005
-      }}
-      className={`border-b ${themeStyles.borderColor} transition-all duration-300`}
-    >
-      <td className="py-4 px-4">
-        <motion.div whileHover={{ x: 3 }}>
-          <h4 className={`font-semibold ${themeStyles.textPrimary} text-sm mb-1`}>{request.title}</h4>
-          <p className={`${themeStyles.textSecondary} text-sm`}>{request.description}</p>
-        </motion.div>
-      </td>
-      <td className={`py-4 px-4 ${themeStyles.textTertiary} text-sm`}>{request.property}</td>
-      <td className={`py-4 px-4 ${themeStyles.textSecondary} text-sm`}>{request.date}</td>
-      <td className="py-4 px-4">
-        <motion.span
-          className={`px-3 py-1.5 rounded-full text-xs font-semibold ${priorityColors[request.priority]}`}
-          whileHover={{ scale: 1.05 }}
-        >
-          {request.priority}
-        </motion.span>
-      </td>
-      <td className="py-4 px-4">
-        <motion.span
-          className={`px-3 py-1.5 rounded-full text-xs font-semibold ${statusColors[request.status]}`}
-          whileHover={{ scale: 1.05 }}
-        >
-          {request.status}
-        </motion.span>
-      </td>
-      <td className="py-4 px-4">
-        <motion.button
-          whileHover={{
-            scale: 1.03,
-            boxShadow: `0 8px 20px ${themeStyles.buttonShadow}`
-          }}
-          whileTap={{ scale: 0.97 }}
-          className={`px-4 py-2 bg-gradient-to-r ${themeStyles.buttonBg} ${themeStyles.buttonText} rounded-lg text-xs font-semibold ${themeStyles.buttonHover} transition-all duration-200`}
-        >
-          View Details
-        </motion.button>
-      </td>
-    </motion.tr>
-  );
-});
-
 const LandlordDashboard = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,24rem)]';
   const [currentSection, setCurrentSection] = useState('Dashboard');
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -737,90 +349,6 @@ const LandlordDashboard = () => {
     }
   ], [isDarkMode]);
 
-  const properties = useMemo(() => [
-    {
-      id: 1,
-      title: "Modern Downtown Loft",
-      location: "Manhattan, NY",
-      rent: 2800,
-      bedrooms: 2,
-      tenants: 2,
-      status: "Occupied"
-    },
-    {
-      id: 2,
-      title: "Luxury Penthouse",
-      location: "Brooklyn, NY",
-      rent: 4200,
-      bedrooms: 3,
-      tenants: 1,
-      status: "Available"
-    },
-    {
-      id: 3,
-      title: "Cozy Studio Apartment",
-      location: "Queens, NY",
-      rent: 1800,
-      bedrooms: 1,
-      tenants: 1,
-      status: "Maintenance"
-    }
-  ], []);
-
-  const notifications = useMemo(() => [
-    {
-      id: 1,
-      title: "New Maintenance Request",
-      message: "Tenant reported a leaky faucet in Apt 4B",
-      time: "2 hours ago",
-      priority: "high"
-    },
-    {
-      id: 2,
-      title: "Rent Payment Received",
-      message: "Monthly rent payment from John Doe",
-      time: "1 day ago",
-      priority: "low"
-    },
-    {
-      id: 3,
-      title: "Property Inspection Due",
-      message: "Annual inspection for Downtown Loft",
-      time: "3 days ago",
-      priority: "medium"
-    }
-  ], []);
-
-  const maintenanceRequests = useMemo(() => [
-    {
-      id: 1,
-      title: "Plumbing Issue",
-      description: "Kitchen sink is clogged",
-      property: "Modern Downtown Loft",
-      date: "2024-01-15",
-      priority: "High",
-      status: "In Progress"
-    },
-    {
-      id: 2,
-      title: "AC Repair",
-      description: "Air conditioning not cooling",
-      property: "Luxury Penthouse",
-      date: "2024-01-14",
-      priority: "Medium",
-      status: "Pending"
-    },
-    {
-      id: 3,
-      title: "Light Fixture",
-      description: "Replace broken light in hallway",
-      property: "Cozy Studio",
-      date: "2024-01-13",
-      priority: "Low",
-      status: "Completed"
-    }
-  ], []);
-
   const themeConfig = isDarkMode
     ? {
       mainBg: 'from-gray-900 via-slate-800 to-blue-950',
@@ -842,7 +370,6 @@ const LandlordDashboard = () => {
         flame: 'text-pink-400',
         trend: 'text-cyan-400',
         building: 'text-cyan-400',
-        bell: 'text-purple-400',
         wrench: 'text-pink-400'
       },
       backgroundParticles: [
@@ -873,7 +400,6 @@ const LandlordDashboard = () => {
         flame: 'text-pink-600',
         trend: 'text-indigo-600',
         building: 'text-indigo-600',
-        bell: 'text-purple-600',
         wrench: 'text-pink-600'
       },
       backgroundParticles: [
@@ -1071,290 +597,332 @@ const LandlordDashboard = () => {
               ))}
             </div>
 
-            {/* Tab Navigation - Reduced Size */}
+            {/* Enhanced Tab Navigation */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, type: "spring", stiffness: 100 }}
-              className={`flex flex-wrap gap-3 mb-8 ${themeConfig.tabBg} p-2 rounded-2xl backdrop-blur-xl border ${themeConfig.tabBorder} shadow-xl`}
+              className={`flex flex-wrap gap-4 mb-8 ${themeConfig.tabBg} p-3 rounded-3xl backdrop-blur-xl border ${themeConfig.tabBorder} shadow-2xl`}
             >
               {[
-                { key: 'overview', label: 'Overview', icon: BarChart3 },
-                { key: 'properties', label: 'Properties', icon: Building2 },
-                { key: 'notifications', label: 'Notifications', icon: Bell },
-                { key: 'maintenance', label: 'Maintenance', icon: Wrench }
-              ].map(({ key, label, icon: Icon }) => (
+                { key: 'overview', label: 'Overview', icon: BarChart3, action: 'tab' },
+                { key: 'properties', label: 'Properties', icon: Building2, action: 'navigate', route: '/landlord/properties' },
+                { key: 'maintenance', label: 'Maintenance', icon: Wrench, action: 'navigate', route: '/landlord/maintenance' }
+              ].map(({ key, label, icon: Icon, action, route }) => (
                 <motion.button
                   key={key}
-                  onClick={() => setActiveTab(key)}
-                  whileHover={{ scale: 1.03, y: -1 }}
-                  whileTap={{ scale: 0.97 }}
-                  className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-semibold transition-all duration-400 text-sm ${activeTab === key
-                    ? `bg-gradient-to-r ${themeConfig.tabActive} ${themeConfig.tabActiveText} shadow-lg shadow-${isDarkMode ? 'cyan' : 'indigo'}-500/25`
-                    : themeConfig.tabInactive
+                  onClick={() => {
+                    if (action === 'tab') {
+                      setActiveTab(key);
+                    } else if (action === 'navigate') {
+                      navigate(route);
+                    }
+                  }}
+                  whileHover={{
+                    scale: 1.05,
+                    y: -3,
+                    boxShadow: isDarkMode
+                      ? "0 10px 30px rgba(6, 182, 212, 0.3)"
+                      : "0 10px 30px rgba(99, 102, 241, 0.3)"
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`flex items-center space-x-3 px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-500 relative overflow-hidden group ${activeTab === key && action === 'tab'
+                    ? `bg-gradient-to-r ${themeConfig.tabActive} ${themeConfig.tabActiveText} shadow-lg shadow-${isDarkMode ? 'cyan' : 'indigo'}-500/30`
+                    : `${themeConfig.tabInactive} hover:shadow-lg`
                     }`}
                 >
+                  {/* Animated background glow */}
                   <motion.div
-                    animate={activeTab === key ? { rotate: 360 } : {}}
-                    transition={{ duration: 0.5 }}
+                    className={`absolute inset-0 bg-gradient-to-r ${key === 'overview' ? 'from-cyan-500/20 to-indigo-500/20' :
+                      key === 'properties' ? 'from-indigo-500/20 to-purple-500/20' :
+                        'from-purple-500/20 to-pink-500/20'
+                      } rounded-2xl`}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    whileHover={{ opacity: 1, scale: 1.1 }}
+                    transition={{ duration: 0.3 }}
+                  />
+
+                  <motion.div
+                    animate={
+                      (activeTab === key && action === 'tab')
+                        ? { rotate: 360, scale: 1.1 }
+                        : { rotate: 0, scale: 1 }
+                    }
+                    whileHover={{ rotate: 15, scale: 1.15 }}
+                    transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
+                    className="relative z-10"
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-5 h-5" />
                   </motion.div>
-                  <span>{label}</span>
+                  <span className="relative z-10 font-semibold">{label}</span>
+
+                  {/* Shimmer effect */}
+                  <motion.div
+                    className={`absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent ${isDarkMode ? 'via-white/20' : 'via-white/40'
+                      } to-transparent`}
+                    initial={{ x: '-100%' }}
+                    whileHover={{ x: '200%' }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                  />
                 </motion.button>
               ))}
             </motion.div>
 
-            {/* Content Sections - Reduced Size */}
+            {/* Enhanced Overview Content */}
             <AnimatePresence mode="wait">
               {activeTab === 'overview' && (
                 <motion.div
                   key="overview"
-                  initial={{ opacity: 0, x: 20, scale: 0.95 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: -20, scale: 0.95 }}
-                  transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
-                  className="space-y-8"
+                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -30, scale: 0.95 }}
+                  transition={{ duration: 0.8, type: "spring", stiffness: 120 }}
+                  className="space-y-10"
                 >
-                  {/* Quick Actions */}
-                  <AnimatedCard className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-2xl p-6 shadow-xl`}>
+                  {/* Enhanced Quick Actions */}
+                  <AnimatedCard className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-3xl p-8 shadow-2xl relative overflow-hidden`}>
+                    {/* Animated background gradient */}
+                    <motion.div
+                      className={`absolute inset-0 bg-gradient-to-br ${isDarkMode
+                        ? 'from-cyan-500/10 via-purple-500/5 to-pink-500/10'
+                        : 'from-indigo-500/10 via-purple-500/5 to-pink-500/10'
+                        } rounded-3xl`}
+                      animate={{
+                        opacity: [0.3, 0.6, 0.3],
+                        scale: [1, 1.02, 1]
+                      }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    />
+
                     <motion.h2
-                      className={`text-2xl font-bold ${themeConfig.textPrimary} mb-6 flex items-center space-x-3`}
-                      whileHover={{ x: 5 }}
+                      className={`text-3xl font-bold ${themeConfig.textPrimary} mb-8 flex items-center space-x-4 relative z-10`}
+                      whileHover={{ x: 8, scale: 1.02 }}
+                      transition={{ type: "spring", stiffness: 300 }}
                     >
                       <motion.div
-                        whileHover={{ rotate: 15, scale: 1.1 }}
+                        whileHover={{ rotate: 25, scale: 1.2 }}
+                        animate={{
+                          rotate: [0, 5, 0],
+                          scale: [1, 1.05, 1]
+                        }}
+                        transition={{
+                          duration: 3,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
                       >
-                        <Flame className={`w-6 h-6 ${themeConfig.iconColors.flame}`} />
+                        <Flame className={`w-8 h-8 ${themeConfig.iconColors.flame} drop-shadow-lg`} />
                       </motion.div>
-                      <span>Quick Actions</span>
+                      <span className="bg-gradient-to-r from-current to-transparent bg-clip-text">
+                        Quick Actions
+                      </span>
                     </motion.h2>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
                       {[
-                        { label: 'Add New Property', icon: Plus, color: themeConfig.buttonPrimary, onClick: () => setShowAddPropertyModal(true) },
-                        { label: 'Schedule Inspection', icon: Calendar, color: themeConfig.buttonPrimary, onClick: () => setShowScheduleModal(true) },
-                        { label: 'Generate Report', icon: BarChart3, color: themeConfig.buttonSecondary, onClick: () => setShowGenerateReportModal(true) }
+                        {
+                          label: 'Add New Property',
+                          icon: Plus,
+                          color: themeConfig.buttonPrimary,
+                          onClick: () => setShowAddPropertyModal(true),
+                          description: 'Expand your portfolio'
+                        },
+                        {
+                          label: 'Schedule Inspection',
+                          icon: Calendar,
+                          color: themeConfig.buttonPrimary,
+                          onClick: () => setShowScheduleModal(true),
+                          description: 'Plan property visits'
+                        },
+                        {
+                          label: 'Generate Report',
+                          icon: BarChart3,
+                          color: themeConfig.buttonSecondary,
+                          onClick: () => setShowGenerateReportModal(true),
+                          description: 'Analytics & insights'
+                        }
                       ].map((action, index) => (
                         <motion.button
                           key={action.label}
-                          onClick={action.onClick} // Added onClick
+                          onClick={action.onClick}
                           whileHover={{
-                            scale: 1.05,
-                            y: -5,
-                            boxShadow: "0 15px 30px rgba(0,0,0,0.25)"
+                            scale: 1.08,
+                            y: -8,
+                            rotateY: 5,
+                            boxShadow: isDarkMode
+                              ? "0 20px 40px rgba(6, 182, 212, 0.4)"
+                              : "0 20px 40px rgba(99, 102, 241, 0.4)"
                           }}
                           whileTap={{ scale: 0.95 }}
-                          initial={{ opacity: 0, y: 30, rotateX: 15 }}
+                          initial={{ opacity: 0, y: 40, rotateX: 20 }}
                           animate={{ opacity: 1, y: 0, rotateX: 0 }}
                           transition={{
-                            delay: index * 0.15,
-                            duration: 0.6,
+                            delay: index * 0.2,
+                            duration: 0.8,
                             type: "spring",
-                            stiffness: 120
+                            stiffness: 150
                           }}
-                          className={`group p-6 bg-gradient-to-br ${action.color} rounded-xl text-white font-bold shadow-lg hover:shadow-xl transition-all duration-500 text-sm`}
+                          className={`group relative p-8 bg-gradient-to-br ${action.color} rounded-2xl text-white font-bold shadow-xl hover:shadow-2xl transition-all duration-700 text-base overflow-hidden`}
                         >
+                          {/* Animated glow effect */}
                           <motion.div
-                            whileHover={{ rotate: 15, scale: 1.15 }}
-                            className="mb-3"
+                            className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl"
+                            animate={{
+                              opacity: [0, 0.3, 0],
+                              scale: [0.8, 1.1, 0.8]
+                            }}
+                            transition={{ duration: 2, repeat: Infinity, delay: index * 0.5 }}
+                          />
+
+                          <motion.div
+                            whileHover={{ rotate: 20, scale: 1.2 }}
+                            className="mb-4 relative z-10"
                           >
-                            <action.icon className="w-6 h-6 mx-auto group-hover:drop-shadow-lg transition-all duration-300" />
+                            <action.icon className="w-8 h-8 mx-auto group-hover:drop-shadow-2xl transition-all duration-500" />
                           </motion.div>
-                          {action.label}
+                          <div className="relative z-10">
+                            <div className="text-lg font-bold mb-2">{action.label}</div>
+                            <div className="text-sm opacity-90 font-medium">{action.description}</div>
+                          </div>
+
+                          {/* Shimmer effect */}
+                          <motion.div
+                            className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                            initial={{ x: '-100%' }}
+                            whileHover={{ x: '200%' }}
+                            transition={{ duration: 1, ease: "easeInOut" }}
+                          />
                         </motion.button>
                       ))}
                     </div>
                   </AnimatedCard>
 
-                  {/* Performance Metrics */}
-                  <AnimatedCard delay={0.3} className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-2xl p-6 shadow-xl`}>
+                  {/* Enhanced Performance Metrics */}
+                  <AnimatedCard delay={0.4} className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-3xl p-8 shadow-2xl relative overflow-hidden`}>
+                    {/* Animated background */}
+                    <motion.div
+                      className={`absolute inset-0 bg-gradient-to-br ${isDarkMode
+                        ? 'from-indigo-500/10 via-cyan-500/5 to-purple-500/10'
+                        : 'from-purple-500/10 via-indigo-500/5 to-cyan-500/10'
+                        } rounded-3xl`}
+                      animate={{
+                        opacity: [0.3, 0.5, 0.3],
+                        rotate: [0, 1, 0]
+                      }}
+                      transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                    />
+
                     <motion.h2
-                      className={`text-2xl font-bold ${themeConfig.textPrimary} mb-6 flex items-center space-x-3`}
-                      whileHover={{ x: 5 }}
+                      className={`text-3xl font-bold ${themeConfig.textPrimary} mb-8 flex items-center space-x-4 relative z-10`}
+                      whileHover={{ x: 8, scale: 1.02 }}
                     >
                       <motion.div
-                        whileHover={{ rotate: 15, scale: 1.1 }}
+                        whileHover={{ rotate: 25, scale: 1.2 }}
+                        animate={{
+                          y: [0, -3, 0],
+                          rotate: [0, 10, 0]
+                        }}
+                        transition={{
+                          duration: 2.5,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
                       >
-                        <TrendingUp className={`w-6 h-6 ${themeConfig.iconColors.trend}`} />
+                        <TrendingUp className={`w-8 h-8 ${themeConfig.iconColors.trend} drop-shadow-lg`} />
                       </motion.div>
                       <span>Performance Overview</span>
                     </motion.h2>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
                       {[
-                        { value: '94%', label: 'Occupancy Rate', color: isDarkMode ? 'text-cyan-400' : 'text-indigo-600', delay: 0 },
-                        { value: '4.8', label: 'Avg Rating', color: isDarkMode ? 'text-indigo-400' : 'text-purple-600', delay: 0.1 },
-                        { value: '2.1', label: 'Avg Response (hrs)', color: isDarkMode ? 'text-purple-400' : 'text-pink-600', delay: 0.2 }
-                      ].map((metric, index) => (
+                        {
+                          value: '94%',
+                          label: 'Occupancy Rate',
+                          color: isDarkMode ? 'text-cyan-400' : 'text-indigo-600',
+                          delay: 0,
+                          bgGradient: isDarkMode ? 'from-cyan-500/20 to-indigo-500/20' : 'from-indigo-500/20 to-cyan-500/20'
+                        },
+                        {
+                          value: '4.8',
+                          label: 'Avg Rating',
+                          color: isDarkMode ? 'text-indigo-400' : 'text-purple-600',
+                          delay: 0.15,
+                          bgGradient: isDarkMode ? 'from-indigo-500/20 to-purple-500/20' : 'from-purple-500/20 to-indigo-500/20'
+                        },
+                        {
+                          value: '2.1',
+                          label: 'Avg Response (hrs)',
+                          color: isDarkMode ? 'text-purple-400' : 'text-pink-600',
+                          delay: 0.3,
+                          bgGradient: isDarkMode ? 'from-purple-500/20 to-pink-500/20' : 'from-pink-500/20 to-purple-500/20'
+                        }
+                      ].map((metric) => (
                         <motion.div
                           key={metric.label}
-                          className={`text-center p-5 ${isDarkMode ? 'bg-slate-900/50' : 'bg-white/40'} rounded-xl border ${isDarkMode ? 'border-slate-700/50 hover:bg-slate-900/70' : 'border-indigo-200/50 hover:bg-white/60'} transition-all duration-300`}
+                          className={`relative text-center p-8 ${isDarkMode ? 'bg-slate-900/60' : 'bg-white/60'} rounded-2xl border ${isDarkMode ? 'border-slate-700/50 hover:bg-slate-900/80' : 'border-indigo-200/50 hover:bg-white/80'} transition-all duration-500 backdrop-blur-sm overflow-hidden group`}
                           whileHover={{
-                            scale: 1.03,
-                            y: -3,
-                            boxShadow: isDarkMode ? "0 15px 30px rgba(255,255,255,0.1)" : "0 15px 30px rgba(99, 102, 241, 0.1)"
+                            scale: 1.05,
+                            y: -5,
+                            rotateY: 3,
+                            boxShadow: isDarkMode
+                              ? "0 20px 40px rgba(255,255,255,0.15)"
+                              : "0 20px 40px rgba(99, 102, 241, 0.2)"
                           }}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: metric.delay, duration: 0.6 }}
+                          initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          transition={{ delay: metric.delay, duration: 0.8, type: "spring", stiffness: 120 }}
                         >
+                          {/* Animated background gradient */}
                           <motion.div
-                            className={`text-3xl font-bold ${metric.color} mb-2 drop-shadow-lg`}
-                            whileHover={{ scale: 1.05 }}
+                            className={`absolute inset-0 bg-gradient-to-br ${metric.bgGradient} rounded-2xl`}
+                            animate={{
+                              opacity: [0, 0.4, 0],
+                              scale: [0.8, 1.1, 0.8]
+                            }}
+                            transition={{ duration: 3, repeat: Infinity, delay: metric.delay }}
+                          />
+
+                          <motion.div
+                            className={`text-4xl font-bold ${metric.color} mb-3 drop-shadow-lg relative z-10`}
+                            whileHover={{ scale: 1.1, y: -2 }}
+                            animate={{
+                              textShadow: isDarkMode
+                                ? ["0 0 10px rgba(6, 182, 212, 0.5)", "0 0 20px rgba(168, 85, 247, 0.5)", "0 0 10px rgba(6, 182, 212, 0.5)"]
+                                : ["0 0 10px rgba(99, 102, 241, 0.3)", "0 0 20px rgba(168, 85, 247, 0.3)", "0 0 10px rgba(99, 102, 241, 0.3)"]
+                            }}
+                            transition={{ duration: 2, repeat: Infinity }}
                           >
                             {metric.value}
                           </motion.div>
-                          <div className={`${themeConfig.textSecondary} text-base font-medium`}>{metric.label}</div>
+                          <div className={`${themeConfig.textSecondary} text-lg font-semibold relative z-10`}>
+                            {metric.label}
+                          </div>
+
+                          {/* Hover effect particles */}
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                            {[...Array(5)].map((_, i) => (
+                              <motion.div
+                                key={i}
+                                className={`absolute w-1 h-1 ${metric.color.replace('text-', 'bg-')} rounded-full`}
+                                style={{
+                                  left: `${20 + (i * 15)}%`,
+                                  top: `${60 + (i * 5)}%`,
+                                }}
+                                animate={{
+                                  y: [-10, -30],
+                                  opacity: [0, 1, 0],
+                                  scale: [0.5, 1, 0.5]
+                                }}
+                                transition={{
+                                  duration: 2,
+                                  repeat: Infinity,
+                                  delay: i * 0.2
+                                }}
+                              />
+                            ))}
+                          </div>
                         </motion.div>
                       ))}
-                    </div>
-                  </AnimatedCard>
-                </motion.div>
-              )}
-
-              {activeTab === 'properties' && (
-                <motion.div
-                  key="properties"
-                  initial={{ opacity: 0, x: 20, scale: 0.95 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: -20, scale: 0.95 }}
-                  transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
-                >
-                  <AnimatedCard className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-2xl p-6 shadow-xl`}>
-                    <div className="flex justify-between items-center mb-8">
-                      <motion.h2
-                        className={`text-3xl font-bold ${themeConfig.textPrimary} flex items-center space-x-3`}
-                        whileHover={{ x: 5 }}
-                      >
-                        <motion.div
-                          whileHover={{ rotate: 15, scale: 1.1 }}
-                        >
-                          <Building2 className={`w-8 h-8 ${themeConfig.iconColors.building}`} />
-                        </motion.div>
-                        <span>Your Properties</span>
-                      </motion.h2>
-
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                      {properties.map((property, index) => (
-                        <PropertyCard
-                          key={property.id}
-                          property={property}
-                          delay={index * 0.15}
-                          isDark={isDarkMode}
-                        />
-                      ))}
-                    </div>
-                  </AnimatedCard>
-                </motion.div>
-              )}
-
-              {activeTab === 'notifications' && (
-                <motion.div
-                  key="notifications"
-                  initial={{ opacity: 0, x: 20, scale: 0.95 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: -20, scale: 0.95 }}
-                  transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
-                >
-                  <AnimatedCard className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-2xl p-6 shadow-xl`}>
-                    <motion.h2
-                      className={`text-3xl font-bold ${themeConfig.textPrimary} mb-8 flex items-center space-x-3`}
-                      whileHover={{ x: 5 }}
-                    >
-                      <motion.div
-                        whileHover={{ rotate: 15, scale: 1.1 }}
-                        animate={{
-                          rotate: [0, 10, 0],
-                          scale: [1, 1.05, 1]
-                        }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      >
-                        <Bell className={`w-8 h-8 ${themeConfig.iconColors.bell}`} />
-                      </motion.div>
-                      <span>Recent Notifications</span>
-                    </motion.h2>
-
-                    <div className="space-y-4">
-                      {notifications.map((notification, index) => (
-                        <NotificationCard
-                          key={notification.id}
-                          notification={notification}
-                          delay={index * 0.15}
-                          isDark={isDarkMode}
-                        />
-                      ))}
-                    </div>
-
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.6 }}
-                      className="text-center mt-8"
-                    >
-                      <motion.button
-                        whileHover={{
-                          scale: 1.03,
-                          boxShadow: isDarkMode
-                            ? "0 15px 30px rgba(168, 85, 247, 0.4)"
-                            : "0 15px 30px rgba(168, 85, 247, 0.3)"
-                        }}
-                        whileTap={{ scale: 0.97 }}
-                        className={`px-8 py-3 bg-gradient-to-r ${themeConfig.buttonSecondary} text-white rounded-xl font-bold hover:brightness-110 transition-all duration-300 shadow-lg text-sm`}
-                      >
-                        View All Notifications
-                      </motion.button>
-                    </motion.div>
-                  </AnimatedCard>
-                </motion.div>
-              )}
-
-              {activeTab === 'maintenance' && (
-                <motion.div
-                  key="maintenance"
-                  initial={{ opacity: 0, x: 20, scale: 0.95 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: -20, scale: 0.95 }}
-                  transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
-                >
-                  <AnimatedCard className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-2xl p-6 shadow-xl overflow-hidden`}>
-                    <motion.h2
-                      className={`text-3xl font-bold ${themeConfig.textPrimary} mb-8 flex items-center space-x-3`}
-                      whileHover={{ x: 5 }}
-                    >
-                      <motion.div
-                        whileHover={{ rotate: 15, scale: 1.1 }}
-                      >
-                        <Wrench className={`w-8 h-8 ${themeConfig.iconColors.wrench}`} />
-                      </motion.div>
-                      <span>Maintenance Requests</span>
-                    </motion.h2>
-
-                    <div className={`overflow-x-auto rounded-xl border ${themeConfig.cardBorder}`}>
-                      <table className="w-full">
-                        <thead>
-                          <tr className={`border-b ${themeConfig.cardBorder} ${isDarkMode ? 'bg-slate-900/50' : 'bg-white/40'}`}>
-                            <th className={`text-left py-4 px-4 ${themeConfig.textSecondary} font-bold text-sm`}>Request</th>
-                            <th className={`text-left py-4 px-4 ${themeConfig.textSecondary} font-bold text-sm`}>Property</th>
-                            <th className={`text-left py-4 px-4 ${themeConfig.textSecondary} font-bold text-sm`}>Date</th>
-                            <th className={`text-left py-4 px-4 ${themeConfig.textSecondary} font-bold text-sm`}>Priority</th>
-                            <th className={`text-left py-4 px-4 ${themeConfig.textSecondary} font-bold text-sm`}>Status</th>
-                            <th className={`text-left py-4 px-4 ${themeConfig.textSecondary} font-bold text-sm`}>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {maintenanceRequests.map((request, index) => (
-                            <MaintenanceRow
-                              key={request.id}
-                              request={request}
-                              delay={index * 0.15}
-                              isDark={isDarkMode}
-                            />
-                          ))}
-                        </tbody>
-                      </table>
                     </div>
                   </AnimatedCard>
                 </motion.div>
