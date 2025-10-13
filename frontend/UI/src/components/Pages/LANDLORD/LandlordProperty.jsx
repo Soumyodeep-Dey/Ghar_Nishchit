@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
+import AddNewPropertyModal from './AddNewPropertyModal';
 import { useDarkMode } from '../../../useDarkMode.js';
 // Removed SidebarContext usage
 import {
@@ -534,8 +535,10 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
   );
 };
 
-// Property Form Modal
-const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
+// PropertyModal component removed - now using standardized AddNewPropertyModal
+
+// Inline modal component wrapper to contain hooks and JSX
+const PropertyFormModal = ({ isOpen, onClose, mode, property, onSave }) => {
   const { darkMode } = useDarkMode();
   const [formData, setFormData] = useState({
     title: '',
@@ -764,10 +767,10 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
             {steps.map((step, index) => (
               <div key={index} className="flex items-center space-x-2">
                 <div className={`p-2 rounded-lg ${currentStep === index + 1
-                    ? theme.stepActive
-                    : currentStep > index + 1
-                      ? theme.stepCompleted
-                      : theme.stepInactive
+                  ? theme.stepActive
+                  : currentStep > index + 1
+                    ? theme.stepCompleted
+                    : theme.stepInactive
                   }`}>
                   {currentStep > index + 1 ? (
                     <Check className="w-4 h-4" />
@@ -984,8 +987,8 @@ const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
                         whileTap={{ scale: 0.98 }}
                         onClick={() => handleAmenityToggle(key)}
                         className={`${theme.amenityButton} ${formData.amenities.includes(key)
-                            ? theme.amenityActive
-                            : theme.amenityInactive
+                          ? theme.amenityActive
+                          : theme.amenityInactive
                           }`}
                       >
                         <Icon className="w-6 h-6 mx-auto mb-2" />
@@ -1647,18 +1650,14 @@ const LandlordProperty = () => {
         </main>
       </div>
 
-      {/* Property Modal */}
-      <AnimatePresence>
-        {showModal && (
-          <PropertyModal
-            isOpen={showModal}
-            onClose={() => setShowModal(false)}
-            property={selectedProperty}
-            onSave={handleSaveProperty}
-            mode={modalMode}
-          />
-        )}
-      </AnimatePresence>
+      {/* Add New Property Modal */}
+      <PropertyFormModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        mode={modalMode}
+        property={selectedProperty}
+        onSave={handleSaveProperty}
+      />
     </div>
   );
 };
