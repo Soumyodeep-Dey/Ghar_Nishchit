@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { 
-  MessageSquare, 
-  Bell, 
-  LogOut, 
-  ChevronDown, 
+import {
+  MessageSquare,
+  Bell,
+  LogOut,
+  ChevronDown,
   Search,
   User,
   Shield,
@@ -12,13 +12,13 @@ import {
   Menu,
   X,
   Sparkles,
-  LayoutDashboard, 
-  Building2, 
-  BarChart3, 
-  Heart, 
-  Wrench, 
-  CreditCard, 
-  FileText 
+  LayoutDashboard,
+  Building2,
+  BarChart3,
+  Heart,
+  Wrench,
+  CreditCard,
+  FileText
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -54,14 +54,14 @@ const useTheme = () => {
     setIsDark(prev => {
       const newTheme = !prev;
       localStorage.setItem('theme', newTheme ? 'dark' : 'light');
-      
+
       // Update document class for Tailwind dark mode
       if (newTheme) {
         document.documentElement.classList.add('dark');
       } else {
         document.documentElement.classList.remove('dark');
       }
-      
+
       return newTheme;
     });
   }, []);
@@ -144,25 +144,25 @@ const SearchBar = ({ isExpanded, onToggle, searchTerm, onSearchChange }) => {
 
 const IconButton = ({ icon: Icon, onClick, badge = 0, className = '', ariaLabel, isActive }) => {
   const isThemeToggle = className.includes('theme-toggle');
-  
+
   return (
     <button
       onClick={onClick}
       className={`relative p-3 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 hover:scale-110 group ${isActive ? 'bg-blue-50 dark:bg-blue-900/30' : ''} ${className}`}
       aria-label={ariaLabel}
     >
-      <Icon 
-        className={`w-6 h-6 transition-colors duration-300 ${isThemeToggle 
-          ? (Icon.name === 'Sun' 
-              ? 'text-yellow-500 group-hover:text-yellow-600' 
-              : 'text-blue-500 group-hover:text-blue-600')
+      <Icon
+        className={`w-6 h-6 transition-colors duration-300 ${isThemeToggle
+          ? (Icon.name === 'Sun'
+            ? 'text-yellow-500 group-hover:text-yellow-600'
+            : 'text-blue-500 group-hover:text-blue-600')
           : `text-gray-600 dark:text-gray-300 ${isActive ? 'text-blue-600 dark:text-blue-400' : ''} group-hover:text-blue-600 dark:group-hover:text-blue-400`
-        }`} 
+          }`}
       />
       {badge > 0 && <NotificationBadge count={badge} />}
-      
-      <div className={`absolute inset-0 rounded-2xl bg-gradient-to-r transition-all duration-300 ${isActive 
-        ? 'from-blue-500/10 to-purple-500/10 animate-pulse' 
+
+      <div className={`absolute inset-0 rounded-2xl bg-gradient-to-r transition-all duration-300 ${isActive
+        ? 'from-blue-500/10 to-purple-500/10 animate-pulse'
         : 'from-blue-500/0 to-purple-500/0 group-hover:from-blue-500/10 group-hover:to-purple-500/10 group-hover:animate-pulse'}`}></div>
     </button>
   );
@@ -170,7 +170,7 @@ const IconButton = ({ icon: Icon, onClick, badge = 0, className = '', ariaLabel,
 
 const ProfileDropdown = ({ user, showDropdown, onToggle, onLogout, isDark }) => {
   const dropdownRef = useRef(null);
-  
+
   useClickOutside(dropdownRef, () => showDropdown && onToggle());
 
   const getInitials = (name) => {
@@ -198,10 +198,10 @@ const ProfileDropdown = ({ user, showDropdown, onToggle, onLogout, isDark }) => 
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 items-center justify-center text-white font-semibold text-sm hidden">
             {getInitials(user?.name)}
           </div>
-          
+
           <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-900 animate-pulse"></div>
         </div>
-        
+
         <div className="hidden md:block text-left">
           <div className="text-gray-900 dark:text-gray-100 font-semibold text-sm">
             {user?.name || 'User'}
@@ -210,7 +210,7 @@ const ProfileDropdown = ({ user, showDropdown, onToggle, onLogout, isDark }) => 
             {user?.role || 'Tenant'}
           </div>
         </div>
-        
+
         <ChevronDown className={`w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 ${showDropdown ? 'rotate-180' : ''}`} />
       </button>
 
@@ -332,7 +332,7 @@ const TenantNavBar = ({ currentSection }) => {
     const onUserUpdated = (e) => {
       try {
         setUser(e.detail || JSON.parse(localStorage.getItem('user')) || {});
-      } catch {}
+      } catch { }
     };
     window.addEventListener('user:updated', onUserUpdated);
     return () => window.removeEventListener('user:updated', onUserUpdated);
@@ -345,7 +345,7 @@ const TenantNavBar = ({ currentSection }) => {
       document.documentElement.classList.remove('dark');
     }
   }, [isDark]);
-  
+
   useEffect(() => {
     setActivePage(currentSection);
   }, [currentSection]);
@@ -354,14 +354,14 @@ const TenantNavBar = ({ currentSection }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('theme');
-    navigate('/login');
+    navigate('/');
   }, [navigate]);
 
   const handleSearch = useCallback((query) => {
     setSearchTerm(query);
     console.log('Searching for:', query);
   }, []);
-  
+
   const handleNavigation = useCallback((page, path) => {
     setActivePage(page);
     navigate(path);
@@ -384,7 +384,7 @@ const TenantNavBar = ({ currentSection }) => {
   };
 
   const getSectionIcon = (section) => {
-    switch(section) {
+    switch (section) {
       case 'Dashboard':
         return <LayoutDashboard className="w-6 h-6 text-white" />;
       case 'Properties':
@@ -445,7 +445,7 @@ const TenantNavBar = ({ currentSection }) => {
             ariaLabel="Messages"
             isActive={activePage === 'Messages'}
           />
-          
+
           <div className="relative" ref={notificationsRef}>
             <IconButton
               icon={Bell}
@@ -483,11 +483,10 @@ const TenantNavBar = ({ currentSection }) => {
                     return (
                       <div
                         key={notification.id}
-                        className={`p-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer border-l-4 ${
-                          notification.isRead 
-                            ? 'border-transparent' 
+                        className={`p-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer border-l-4 ${notification.isRead
+                            ? 'border-transparent'
                             : 'border-primary-500 bg-primary-50/30 dark:bg-primary-900/10'
-                        }`}
+                          }`}
                         onClick={() => markAsRead(notification.id)}
                       >
                         <div className="flex items-start space-x-3">
@@ -522,14 +521,14 @@ const TenantNavBar = ({ currentSection }) => {
               </div>
             )}
           </div>
-          
+
           <IconButton
             icon={isDark ? Sun : Moon}
             onClick={toggleTheme}
             className="theme-toggle"
             ariaLabel="Toggle Theme"
           />
-          
+
         </div>
 
         <div className="sm:hidden">
@@ -540,7 +539,7 @@ const TenantNavBar = ({ currentSection }) => {
             ariaLabel="Toggle Theme"
           />
         </div>
-        
+
         <button className="sm:hidden p-2 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300">
           <Menu className="w-6 h-6 text-gray-600 dark:text-gray-300" />
         </button>
