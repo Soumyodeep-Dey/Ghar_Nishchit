@@ -1,8 +1,9 @@
 
-import React, { useState } from 'react';
-import { X, Building, Home, Briefcase, DollarSign, Phone, Image, Upload, MapPin, Bed, Bath, Maximize } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { X, Building, Home, DollarSign, Image, Upload, MapPin, Bed, Bath } from 'lucide-react';
 
-const AddNewPropertyModal = ({ isOpen, onClose, isDark }) => {
+// Accept mode='add'|'edit', property to edit, and onSave callback
+const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property = null, onSave = null }) => {
   const [propertyData, setPropertyData] = useState({
     title: '',
     description: '',
@@ -19,6 +20,25 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark }) => {
     images: [],
     available: true,
   });
+
+  // Populate form when editing
+  useEffect(() => {
+    if (mode === 'edit' && property) {
+      // Map incoming property fields to modal shape where possible
+      setPropertyData(prev => ({
+        ...prev,
+        title: property.title || '',
+        description: property.description || '',
+        propertyType: property.propertyType || prev.propertyType,
+        address: property.address || prev.address,
+        price: property.rent || property.price || prev.price,
+        bedrooms: property.bedrooms ?? prev.bedrooms,
+        bathrooms: property.bathrooms ?? prev.bathrooms,
+        images: property.images || prev.images,
+        available: property.status ? property.status === 'Available' : prev.available,
+      }));
+    }
+  }, [mode, property]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,8 +59,17 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('New Property Data:', propertyData);
-    // Here you would typically send the data to your backend API
+    // If parent provided onSave, call it with the transformed property data
+    const out = {
+      ...propertyData,
+      id: property?.id || Date.now(),
+      rent: propertyData.price,
+      status: propertyData.available ? 'Available' : 'Occupied',
+      createdAt: property?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (typeof onSave === 'function') onSave(out);
     onClose();
   };
 
@@ -86,7 +115,7 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark }) => {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
-          <h2 className={`text-2xl font-bold ${modalTheme.text}`}>Add New Property</h2>
+          <h2 className={`text-2xl font-bold ${modalTheme.text}`}>{mode === 'edit' ? 'Edit Property' : 'Add New Property'}</h2>
           <button className="hover:scale-110 hover:rotate-90 transition-transform" onClick={onClose}>
             <X className={`w-6 h-6 ${modalTheme.text}`} />
           </button>
@@ -292,7 +321,7 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark }) => {
             >
               <div className="flex items-center">
                 <Upload className="w-5 h-5 mr-2" />
-                Add Property
+                {mode === 'edit' ? 'Update Property' : 'Add Property'}
               </div>
             </button>
           </div>

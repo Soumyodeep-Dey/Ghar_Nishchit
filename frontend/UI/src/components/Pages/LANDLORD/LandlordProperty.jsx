@@ -1655,6 +1655,9 @@ const LandlordProperty = () => {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         isDark={darkMode}
+        mode={modalMode}
+        property={selectedProperty}
+        onSave={handleSaveProperty}
       />
     </div>
   );
