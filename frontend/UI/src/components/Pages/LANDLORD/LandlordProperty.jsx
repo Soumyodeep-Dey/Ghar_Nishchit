@@ -8,6 +8,10 @@ import {
   Building2, Plus, Search, MoreVertical, Edit, Trash2, Eye, MapPin, Bed, Bath, Car, Wifi, Tv, AirVent, Maximize, Heart, ChevronLeft, ChevronRight, ChevronDown, RefreshCw, Download, Share2, Star, TrendingUp, TrendingDown, Users, DollarSign, CheckCircle, Settings, Grid3X3, List, SortAsc, SortDesc
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import api from '../../../services/api.js';
+
+// Ensure 'motion' symbol is referenced to satisfy some linters that may report it as unused
+void motion;
 
 // Custom Hooks
 const useIntersectionObserver = (options = {}) => {
@@ -590,6 +594,48 @@ const LandlordProperty = () => {
     setFilteredProperties(filtered);
   }, [properties, searchTerm, statusFilter, sortBy, sortOrder]);
 
+  // Try to fetch properties from backend on mount and update local storage fallback
+  // Fetch properties from API once on mount. We intentionally omit setProperties from deps.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      try {
+        const remote = await api.getProperties();
+        if (mounted && Array.isArray(remote) && remote.length > 0) {
+          // Normalize remote items to expected shape where necessary
+          const normalized = remote.map(r => ({
+            id: r._id || r.id || Date.now(),
+            title: r.title || r.name || '',
+            description: r.description || '',
+            location: r.address ? `${r.address.city || ''}, ${r.address.state || ''}` : (r.location || ''),
+            rent: r.rent || r.price || r.monthlyRent || 0,
+            bedrooms: r.bedrooms || 0,
+            bathrooms: r.bathrooms || 0,
+            area: r.area || r.size || 0,
+            propertyType: r.propertyType || r.type || 'apartment',
+            status: r.status || (r.available ? 'Available' : 'Occupied') || 'Available',
+            amenities: r.amenities || r.features || [],
+            images: r.images || [],
+            rating: r.rating || 4.5,
+            trend: r.trend || null,
+            createdAt: r.createdAt || new Date().toISOString(),
+            contact: r.contact || {},
+            policies: r.policies || {},
+          }));
+
+          setProperties(normalized);
+        }
+      } catch (err) {
+        // backend not available or failed — keep localStorage copy
+        console.warn('Could not load properties from API, using local data', err.message || err);
+      }
+    };
+
+    load();
+    return () => { mounted = false; };
+  }, []);
+
   const handleAddProperty = () => {
     setSelectedProperty(null);
     setModalMode('add');
@@ -609,17 +655,36 @@ const LandlordProperty = () => {
 
   const handleDeleteProperty = (propertyId) => {
     if (window.confirm('Are you sure you want to delete this property?')) {
+      // Optimistic local update
       setProperties(prev => prev.filter(p => p.id !== propertyId));
+      // Try backend delete
+      (async () => {
+        try {
+          await api.deleteProperty(propertyId);
+        } catch (err) {
+          console.warn('Failed to delete property on server, changes remain local', err.message || err);
+        }
+      })();
     }
   };
 
   const handleToggleStatus = (propertyId) => {
+    // Toggle locally and try to persist remotely
     setProperties(prev => prev.map(p => {
       if (p.id === propertyId) {
         const statuses = ['Available', 'Occupied', 'Maintenance'];
         const currentIndex = statuses.indexOf(p.status);
         const nextIndex = (currentIndex + 1) % statuses.length;
-        return { ...p, status: statuses[nextIndex] };
+        const updated = { ...p, status: statuses[nextIndex] };
+        // send update
+        (async () => {
+          try {
+            await api.updateProperty(propertyId, updated);
+          } catch (err) {
+            console.warn('Failed to update property status on server', err.message || err);
+          }
+        })();
+        return updated;
       }
       return p;
     }));
@@ -627,11 +692,31 @@ const LandlordProperty = () => {
 
   const handleSaveProperty = (propertyData) => {
     if (modalMode === 'edit') {
-      setProperties(prev => prev.map(p =>
-        p.id === propertyData.id ? propertyData : p
-      ));
+      setProperties(prev => prev.map(p => p.id === propertyData.id ? propertyData : p));
+      // Try remote update
+      (async () => {
+        try {
+          await api.updateProperty(propertyData.id, propertyData);
+        } catch (err) {
+          console.warn('Failed to update property on server, change kept locally', err.message || err);
+        }
+      })();
     } else {
-      setProperties(prev => [...prev, propertyData]);
+      // create locally with temporary id then try creating on server
+      const tempId = propertyData.id || Date.now();
+      const item = { ...propertyData, id: tempId };
+      setProperties(prev => [...prev, item]);
+      (async () => {
+        try {
+          const created = await api.createProperty(propertyData);
+          // replace temp item id with server id if provided
+          if (created && (created._id || created.id)) {
+            setProperties(prev => prev.map(p => p.id === tempId ? { ...p, id: created._id || created.id } : p));
+          }
+        } catch (err) {
+          console.warn('Failed to create property on server, saved locally', err.message || err);
+        }
+      })();
     }
   };
 

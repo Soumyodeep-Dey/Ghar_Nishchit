@@ -9,6 +9,7 @@ import {
 // framer-motion removed to reduce animation overhead
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../../../useDarkMode.js';
+import api from '../../../services/api.js';
 
 // Enhanced Custom Hooks with better performance - commented out as they are not used
 // const useIntersectionObserver = (options = {}) => {
@@ -158,6 +159,7 @@ const LandlordDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
 
   const { darkMode: isDarkMode } = useDarkMode();
+  const [properties, setProperties] = useState([]);
 
   const updateSection = useCallback((path) => {
     if (path === '/landlord' || path === '/landlord/') {
@@ -183,16 +185,16 @@ const LandlordDashboard = () => {
     {
       icon: Building2,
       title: 'Total Properties',
-      value: '24',
-      change: '+12%',
-      trend: 'up',
+      value: properties.length || 0,
+      change: '+0%',
+      trend: properties.length > 0 ? 'up' : 'down',
       color: isDarkMode ? 'from-cyan-500 to-indigo-600' : 'from-indigo-500 to-purple-600'
     },
     {
       icon: DollarSign,
       title: 'Monthly Revenue',
-      value: '28500',
-      change: '+8.2%',
+      value: properties.reduce((acc, p) => acc + (p.status === 'Occupied' ? Number(p.rent || p.price || 0) : 0), 0) || 0,
+      change: '+0%',
       trend: 'up',
       color: isDarkMode ? 'from-indigo-500 to-purple-600' : 'from-purple-500 to-pink-500',
       prefix: '$'
@@ -200,20 +202,44 @@ const LandlordDashboard = () => {
     {
       icon: Users,
       title: 'Active Tenants',
-      value: '156',
-      change: '+5.1%',
+      value: properties.reduce((acc, p) => acc + (p.tenantCount || 0), 0) || 0,
+      change: '+0%',
       trend: 'up',
       color: isDarkMode ? 'from-purple-500 to-pink-600' : 'from-pink-400 to-rose-500'
     },
     {
       icon: Wrench,
       title: 'Maintenance Requests',
-      value: '8',
-      change: '-23%',
+      value: properties.reduce((acc, p) => acc + (p.maintenanceRequests || 0), 0) || 0,
+      change: '-0%',
       trend: 'down',
       color: isDarkMode ? 'from-pink-500 to-rose-600' : 'from-rose-400 to-pink-500'
     }
-  ], [isDarkMode]);
+  ], [isDarkMode, properties]);
+
+  // Load properties on mount
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const remote = await api.getProperties();
+        if (mounted && Array.isArray(remote)) {
+          const normalized = remote.map(r => ({
+            id: r._id || r.id,
+            title: r.title,
+            rent: r.rent || r.price || r.monthlyRent || 0,
+            status: r.status || (r.available ? 'Available' : 'Occupied') || 'Available',
+            tenantCount: r.tenants ? r.tenants.length : (r.tenantCount || 0),
+            maintenanceRequests: r.maintenanceRequests || 0
+          }));
+          setProperties(normalized);
+        }
+      } catch (err) {
+        console.warn('Dashboard: failed to load properties from API', err.message || err);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   const themeConfig = isDarkMode
     ? {
