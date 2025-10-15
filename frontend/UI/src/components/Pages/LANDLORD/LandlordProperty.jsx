@@ -1650,13 +1650,11 @@ const LandlordProperty = () => {
         </main>
       </div>
 
-      {/* Add New Property Modal */}
-      <PropertyFormModal
+      {/* Add New Property Modal (standardized) */}
+      <AddNewPropertyModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        mode={modalMode}
-        property={selectedProperty}
-        onSave={handleSaveProperty}
+        isDark={darkMode}
       />
     </div>
   );
