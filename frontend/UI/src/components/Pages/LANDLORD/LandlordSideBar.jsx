@@ -9,85 +9,85 @@ const SIDEBAR_WIDTHS = { collapsed: '4.5rem', expanded: '24rem' };
 const BREAKPOINT = 768;
 const ANIMATION_DURATION = 0.3;
 const USER_STATS = {
-    properties: 12,
-    tenants: 34,
-    revenue: 45600,
-    occupancy: 92,
-    growth: 15.8,
-    maintenance: 5,
-    messages: 3
+  properties: 12,
+  tenants: 34,
+  revenue: 45600,
+  occupancy: 92,
+  growth: 15.8,
+  maintenance: 5,
+  messages: 3
 };
 
 // Menu configuration - Static list for better performance
 const MENU_ITEMS = [
-    {
-      id: 'dashboard',
-      label: 'Dashboard',
-      icon: Home,
-      route: '/landlord',
-      badge: null,
-      description: 'Analytics & Overview',
-      color: 'from-sky-400 via-sky-500 to-blue-500',
-      premium: true
-    },
-    {
-      id: 'properties',
-      label: 'Properties',
-      icon: Building2,
-      route: '/landlord/properties',
+  {
+    id: 'dashboard',
+    label: 'Dashboard',
+    icon: Home,
+    route: '/landlord',
+    badge: null,
+    description: 'Analytics & Overview',
+    color: 'from-sky-400 via-sky-500 to-blue-500',
+    premium: true
+  },
+  {
+    id: 'properties',
+    label: 'Properties',
+    icon: Building2,
+    route: '/landlord/properties',
     badge: 'properties',
-      description: 'Property Portfolio',
-      color: 'from-emerald-400 via-emerald-500 to-green-500',
-      premium: true
-    },
-    {
-      id: 'tenants',
-      label: 'Tenants',
-      icon: Users,
-      route: '/landlord/tenants',
+    description: 'Property Portfolio',
+    color: 'from-emerald-400 via-emerald-500 to-green-500',
+    premium: true
+  },
+  {
+    id: 'tenants',
+    label: 'Tenants',
+    icon: Users,
+    route: '/landlord/tenants',
     badge: 'tenants',
-      description: 'Resident Management',
-      color: 'from-teal-400 via-teal-500 to-cyan-500',
-      premium: true
-    },
-    {
-      id: 'payments',
-      label: 'Payments',
-      icon: Wallet,
-      route: '/landlord/payment',
-      badge: null,
-      description: 'Revenue & Transactions',
-      color: 'from-indigo-400 via-indigo-500 to-purple-500',
-      premium: true
-    },
-    {
-      id: 'maintenance',
-      label: 'Maintenance',
-      icon: Settings,
-      route: '/landlord/maintenance',
-      badge: 'maintenance',
-      description: 'Service Requests',
-      color: 'from-rose-400 via-pink-400 to-pink-500',
-      premium: false
-    },
-    {
-      id: 'messages',
-      label: 'Messages',
-      icon: MessageSquare,
-      route: '/landlord/messages',
-      badge: 'messages',
-      description: 'Communication Hub',
-      color: 'from-violet-400 via-purple-400 to-purple-500',
-      premium: false
-    }
-  ];
+    description: 'Resident Management',
+    color: 'from-teal-400 via-teal-500 to-cyan-500',
+    premium: true
+  },
+  {
+    id: 'payments',
+    label: 'Payments',
+    icon: Wallet,
+    route: '/landlord/payment',
+    badge: null,
+    description: 'Revenue & Transactions',
+    color: 'from-indigo-400 via-indigo-500 to-purple-500',
+    premium: true
+  },
+  {
+    id: 'maintenance',
+    label: 'Maintenance',
+    icon: Settings,
+    route: '/landlord/maintenance',
+    badge: 'maintenance',
+    description: 'Service Requests',
+    color: 'from-rose-400 via-pink-400 to-pink-500',
+    premium: false
+  },
+  {
+    id: 'messages',
+    label: 'Messages',
+    icon: MessageSquare,
+    route: '/landlord/messages',
+    badge: 'messages',
+    description: 'Communication Hub',
+    color: 'from-violet-400 via-purple-400 to-purple-500',
+    premium: false
+  }
+];
 
 const LandlordSideBar = ({ currentSection, onSectionChange }) => {
   const { darkMode: isDark } = useDarkMode();
-  const [isCollapsed, setIsCollapsed] = useState(() => 
+  const [isCollapsed, setIsCollapsed] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth < BREAKPOINT : false
   );
-  const [sidebarWidth, setSidebarWidth] = useState(() => 
+  const [sidebarWidth, setSidebarWidth] = useState(() =>
     isCollapsed ? SIDEBAR_WIDTHS.collapsed : SIDEBAR_WIDTHS.expanded
   );
   const [hoveredItem, setHoveredItem] = useState(null);
@@ -169,14 +169,15 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
   const handleTooltip = (itemId, show) => isCollapsed && setShowTooltip(show ? itemId : null);
   const isItemActive = (item) => {
     const pathname = location.pathname;
-    return pathname === item.route || (item.route === '/landlord' && pathname === '/landlord') || 
-           (pathname.startsWith(item.route + '/') && item.route !== '/landlord');
+    return pathname === item.route || (item.route === '/landlord' && pathname === '/landlord') ||
+      (pathname.startsWith(item.route + '/') && item.route !== '/landlord');
   };
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
       localStorage.removeItem('authToken');
       localStorage.removeItem('userData');
-      navigate('/login');
+      // Redirect to home page
+      navigate('/');
     }
   };
 
@@ -190,13 +191,13 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
           onClick={() => handleNavigation('/landlord', 'Dashboard')}
           className="flex items-center space-x-4 cursor-pointer group"
         >
-          <motion.div 
-            whileHover={{ 
-              rotate: [0, -2, 2, 0], 
+          <motion.div
+            whileHover={{
+              rotate: [0, -2, 2, 0],
               scale: 1.05,
               boxShadow: "0 10px 20px rgba(59, 130, 246, 0.2)"
-            }} 
-            transition={{ duration: 0.4 }} 
+            }}
+            transition={{ duration: 0.4 }}
             className="relative"
           >
             <div className="w-14 h-14 rounded-3xl bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-500 flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:shadow-blue-500/20 transition-all duration-300">
@@ -219,8 +220,8 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
           )}
         </motion.div>
         <motion.button
-          whileHover={{ 
-            scale: 1.1, 
+          whileHover={{
+            scale: 1.1,
             rotate: 3,
             boxShadow: isDark ? "0 10px 25px rgba(148, 163, 184, 0.2)" : "0 10px 25px rgba(148, 163, 184, 0.3)"
           }}
@@ -229,8 +230,8 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
           className={`p-3 rounded-2xl ${themeClasses.buttonIdle} border ${themeClasses.border} transition-all duration-500 shadow-sm group overflow-hidden hover:shadow-lg hover:shadow-slate-500/10 ${isCollapsed ? 'absolute -right-3 top-6 z-50' : 'relative'} hover:scale-105 hover:-translate-y-1`}
           title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          <motion.div 
-            animate={{ rotate: isCollapsed ? 180 : 0 }} 
+          <motion.div
+            animate={{ rotate: isCollapsed ? 180 : 0 }}
             transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
             className="group-hover:scale-110 transition-transform duration-300"
           >
@@ -370,14 +371,14 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                   className="relative"
                 >
                   <motion.button
-                    whileHover={{ 
-                      x: isCollapsed ? 2 : 5, 
+                    whileHover={{
+                      x: isCollapsed ? 2 : 5,
                       scale: 1.02,
                       y: -2,
-                      boxShadow: isItemActive(item) 
-                        ? "0 15px 35px rgba(0, 0, 0, 0.2)" 
-                        : isDark 
-                          ? "0 10px 25px rgba(148, 163, 184, 0.15)" 
+                      boxShadow: isItemActive(item)
+                        ? "0 15px 35px rgba(0, 0, 0, 0.2)"
+                        : isDark
+                          ? "0 10px 25px rgba(148, 163, 184, 0.15)"
                           : "0 10px 25px rgba(148, 163, 184, 0.2)"
                     }}
                     whileTap={{ scale: 0.98 }}
@@ -419,46 +420,46 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                       )}
                     </AnimatePresence>
 
-                      {item.badge && (
+                    {item.badge && (
                       <div className="relative">
-                          {!isCollapsed ? (
+                        {!isCollapsed ? (
                           <div className="px-3 py-1.5 bg-gradient-to-r from-rose-400 to-red-500 rounded-full text-white text-sm font-bold group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-lg group-hover:shadow-rose-500/30 transition-all duration-300">
-                                {item.badge}
+                            {item.badge}
                           </div>
                         ) : (
                           <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-rose-400 to-red-500 rounded-full flex items-center justify-center group-hover:scale-125 group-hover:rotate-12 group-hover:shadow-lg group-hover:shadow-rose-500/40 transition-all duration-300">
                             <span className="text-white text-xs font-bold group-hover:animate-pulse">
-                                {item.badge > 9 ? '9+' : item.badge}
-                              </span>
+                              {item.badge > 9 ? '9+' : item.badge}
+                            </span>
                           </div>
-                          )}
+                        )}
                       </div>
-                      )}
+                    )}
                   </motion.button>
 
-                    {isCollapsed && showTooltip === item.id && (
-                      <motion.div
-                        initial={{ opacity: 0, x: -15, scale: 0.9 }}
-                        animate={{ opacity: 1, x: 0, scale: 1 }}
-                        exit={{ opacity: 0, x: -15, scale: 0.9 }}
+                  {isCollapsed && showTooltip === item.id && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -15, scale: 0.9 }}
+                      animate={{ opacity: 1, x: 0, scale: 1 }}
+                      exit={{ opacity: 0, x: -15, scale: 0.9 }}
                       className={`absolute left-full top-1/2 transform -translate-y-1/2 ml-4 px-4 py-3 ${themeClasses.tooltipBg} backdrop-blur-2xl text-sm rounded-2xl shadow-xl border ${themeClasses.tooltipBorder} whitespace-nowrap z-50 min-w-[200px]`}
-                      >
-                        <div className="flex items-center space-x-3">
+                    >
+                      <div className="flex items-center space-x-3">
                         <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${item.color} flex items-center justify-center`}>
-                            <item.icon className="w-4 h-4 text-white" />
-                          </div>
-                          <div>
+                          <item.icon className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
                           <div className="font-bold text-base">{item.label}</div>
                           <div className="text-xs opacity-70">{item.description}</div>
-                            {item.badge && (
-                              <div className="text-xs text-rose-500 font-bold mt-1">
-                                {item.badge} notifications
-                              </div>
-                            )}
+                          {item.badge && (
+                            <div className="text-xs text-rose-500 font-bold mt-1">
+                              {item.badge} notifications
+                            </div>
+                          )}
                         </div>
-                        </div>
-                      </motion.div>
-                    )}
+                      </div>
+                    </motion.div>
+                  )}
                 </motion.div>
               ))}
             </div>
@@ -468,8 +469,8 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
         {/* Bottom Section */}
         <div className={`relative z-20 p-4 border-t ${themeClasses.border} flex-shrink-0`}>
           <motion.button
-            whileHover={{ 
-              x: isCollapsed ? 2 : 5, 
+            whileHover={{
+              x: isCollapsed ? 2 : 5,
               scale: 1.02,
               y: -2,
               boxShadow: "0 15px 35px rgba(239, 68, 68, 0.3)"
@@ -484,11 +485,11 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
             </div>
             <AnimatePresence>
               {!isCollapsed && (
-                <motion.div 
-                  initial={{ opacity: 0, x: -15 }} 
-                  animate={{ opacity: 1, x: 0 }} 
-                  exit={{ opacity: 0, x: -15 }} 
-                  transition={{ duration: 0.3 }} 
+                <motion.div
+                  initial={{ opacity: 0, x: -15 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -15 }}
+                  transition={{ duration: 0.3 }}
                   className="flex-1 ml-4 text-left"
                 >
                   <div className={`${isDark ? 'text-rose-300 group-hover:text-rose-200' : 'text-rose-600 group-hover:text-rose-700'} font-bold text-lg transition-all duration-300 group-hover:translate-x-1`}>
