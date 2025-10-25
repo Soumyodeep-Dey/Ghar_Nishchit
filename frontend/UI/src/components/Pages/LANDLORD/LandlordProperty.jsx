@@ -677,6 +677,7 @@ const LandlordProperty = () => {
   const [sortOrder, setSortOrder] = useState('asc');
   const [viewMode, setViewMode] = useState('grid');
   const [showModal, setShowModal] = useState(false);
+  const [updateSuccess, setUpdateSuccess] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [modalMode, setModalMode] = useState('add');
   // isLoading state removed — not used
@@ -834,19 +835,36 @@ const LandlordProperty = () => {
   };
 
   const handleSaveProperty = (propertyData) => {
+    console.log('🔄 Saving property:', { modalMode, propertyData });
+    
     if (modalMode === 'edit') {
+      console.log('✏️ Updating existing property...');
       // optimistic local update
       setProperties(prev => prev.map(p => p.id === propertyData.id ? { ...p, ...propertyData } : p));
       // Try remote update
       (async () => {
         try {
+          console.log('📡 Sending update to server...');
+          console.log('🆔 Property ID:', propertyData.id);
+          console.log('📦 Update data:', propertyData);
+          
           const updated = await api.updateProperty(propertyData.id, propertyData);
+          console.log('✅ Server response:', updated);
+          
           if (updated) {
             // normalize server response to frontend format
             const serverItem = normalizePropertyFromBackend(updated);
+            console.log('🔄 Normalized server item:', serverItem);
             setProperties(prev => prev.map(p => p.id === serverItem.id || p.id === propertyData.id ? serverItem : p));
+            console.log('✅ Property updated successfully in frontend!');
+            setUpdateSuccess(true);
+            setTimeout(() => setUpdateSuccess(false), 3000); // Hide success message after 3 seconds
+          } else {
+            console.warn('⚠️ Server returned empty response');
           }
         } catch (err) {
+          console.error('❌ Failed to update property on server:', err.message || err);
+          console.error('❌ Error details:', err);
           console.warn('Failed to update property on server, change kept locally', err.message || err);
         }
       })();
@@ -891,6 +909,18 @@ const LandlordProperty = () => {
 
   return (
     <div className={`min-h-screen flex relative overflow-hidden ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-r from-pink-100 via-purple-100 to-indigo-200'}`}>
+      {/* Success Notification */}
+      {updateSuccess && (
+        <motion.div
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -50 }}
+          className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg"
+        >
+          ✅ Property updated successfully!
+        </motion.div>
+      )}
+      
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div

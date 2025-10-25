@@ -59,6 +59,9 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log('📝 Modal form data:', propertyData);
+    console.log('🎯 Modal mode:', mode);
+    
     // Transform data to match backend schema
     const transformedData = {
       title: propertyData.title,
@@ -82,6 +85,13 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
         furnished: false
       }
     };
+
+    // Include the property ID for updates
+    if (mode === 'edit' && property?.id) {
+      transformedData.id = property.id;
+    }
+
+    console.log('📤 Transformed data being sent:', transformedData);
 
     if (typeof onSave === 'function') onSave(transformedData);
     onClose();
