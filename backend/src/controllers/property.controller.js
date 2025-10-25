@@ -2,12 +2,30 @@ import Property from '../models/property.model.js';
 import Favorite from '../models/favourites.model.js';
 import mongoose from 'mongoose';
 
+// Helper to resolve user id from different shapes
+const resolveUserId = (user) => {
+  if (!user) return null;
+  return user._id || user.id || user.userId || null;
+};
+
 // Create new property
 export const createProperty = async (req, res) => {
   try {
-    const property = new Property(req.body);
+    // Accept owner information from authenticated user or from client-provided ownerId
+    const payload = { ...req.body };
+    const authUserId = resolveUserId(req.user);
+    if (authUserId) {
+      payload.postedBy = authUserId;
+    } else if (payload.ownerId) {
+      // map ownerId -> postedBy for backward compatibility with frontend
+      payload.postedBy = payload.ownerId;
+      delete payload.ownerId;
+    }
+
+    const property = new Property(payload);
     await property.save();
-    res.status(201).json(property);
+    const populated = await Property.findById(property._id).populate('postedBy', 'name email');
+    res.status(201).json(populated);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -54,8 +72,25 @@ export const getPropertiesByUser = async (req, res) => {
 // Update property
 export const updateProperty = async (req, res) => {
   try {
-    const updated = await Property.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.status(200).json(updated);
+    // Prevent accidental owner field mismatch: map ownerId to postedBy
+    const payload = { ...req.body };
+    const authUserId = resolveUserId(req.user);
+    if (payload.ownerId) {
+      payload.postedBy = payload.ownerId;
+      delete payload.ownerId;
+    }
+
+    // If authenticated, ensure only owner can update OR keep postedBy unchanged
+    const existing = await Property.findById(req.params.id);
+    if (!existing) return res.status(404).json({ message: 'Property not found' });
+
+    if (authUserId && String(existing.postedBy) !== String(authUserId)) {
+      return res.status(403).json({ message: 'Forbidden: you are not the owner of this property' });
+    }
+
+    const updated = await Property.findByIdAndUpdate(req.params.id, payload, { new: true });
+    const populated = await Property.findById(updated._id).populate('postedBy', 'name email');
+    res.status(200).json(populated);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -64,10 +99,15 @@ export const updateProperty = async (req, res) => {
 // Delete property
 export const deleteProperty = async (req, res) => {
   try {
-    const deleted = await Property.findByIdAndDelete(req.params.id);
-    if (!deleted) {
-      return res.status(404).json({ message: 'Property not found' });
+    const existing = await Property.findById(req.params.id);
+    if (!existing) return res.status(404).json({ message: 'Property not found' });
+
+    const authUserId = resolveUserId(req.user);
+    if (authUserId && String(existing.postedBy) !== String(authUserId)) {
+      return res.status(403).json({ message: 'Forbidden: you are not the owner of this property' });
     }
+
+    await Property.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: 'Property deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -555,6 +555,7 @@ const LandlordProperty = () => {
   ]);
 
   const [filteredProperties, setFilteredProperties] = useState(properties);
+  const [currentUser, setCurrentUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [sortBy, setSortBy] = useState('title');
@@ -596,38 +597,103 @@ const LandlordProperty = () => {
 
   // Try to fetch properties from backend on mount and update local storage fallback
   // Fetch properties from API once on mount. We intentionally omit setProperties from deps.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     let mounted = true;
     const load = async () => {
       try {
-        const remote = await api.getProperties();
-        if (mounted && Array.isArray(remote) && remote.length > 0) {
-          // Normalize remote items to expected shape where necessary
-          const normalized = remote.map(r => ({
-            id: r._id || r.id || Date.now(),
-            title: r.title || r.name || '',
-            description: r.description || '',
-            location: r.address ? `${r.address.city || ''}, ${r.address.state || ''}` : (r.location || ''),
-            rent: r.rent || r.price || r.monthlyRent || 0,
-            bedrooms: r.bedrooms || 0,
-            bathrooms: r.bathrooms || 0,
-            area: r.area || r.size || 0,
-            propertyType: r.propertyType || r.type || 'apartment',
-            status: r.status || (r.available ? 'Available' : 'Occupied') || 'Available',
-            amenities: r.amenities || r.features || [],
-            images: r.images || [],
-            rating: r.rating || 4.5,
-            trend: r.trend || null,
-            createdAt: r.createdAt || new Date().toISOString(),
-            contact: r.contact || {},
-            policies: r.policies || {},
-          }));
+        // First try to get profile (current user)
+        let profile = null;
+        try {
+          profile = await api.getProfile();
+        } catch {
+          // not authenticated or endpoint failed
+          profile = null;
+        }
 
-          setProperties(normalized);
+        if (mounted && profile) {
+          setCurrentUser(profile);
+          const userId = profile._id || profile.id || profile.userId;
+          if (userId) {
+            try {
+              // Try fetching properties that belong only to the current user
+              const remoteByUser = await api.getPropertiesByUser(userId);
+              if (mounted && Array.isArray(remoteByUser)) {
+                const normalized = remoteByUser.map(r => ({
+                  id: r._id || r.id || Date.now(),
+                  title: r.title || r.name || '',
+                  description: r.description || '',
+                  location: r.address ? `${r.address.city || ''}, ${r.address.state || ''}` : (r.location || ''),
+                  rent: r.rent || r.price || r.monthlyRent || 0,
+                  bedrooms: r.bedrooms || 0,
+                  bathrooms: r.bathrooms || 0,
+                  area: r.area || r.size || 0,
+                  propertyType: r.propertyType || r.type || 'apartment',
+                  status: r.status || (r.available ? 'Available' : 'Occupied') || 'Available',
+                  amenities: r.amenities || r.features || [],
+                  images: r.images || [],
+                  rating: r.rating || 4.5,
+                  trend: r.trend || null,
+                  createdAt: r.createdAt || new Date().toISOString(),
+                  contact: r.contact || {},
+                  policies: r.policies || {},
+                  ownerId: r.ownerId || r.userId || r.postedBy || userId,
+                }));
+                setProperties(normalized);
+                return;
+              }
+            } catch (err) {
+              console.warn('Could not load user properties from API, falling back to general properties', err.message || err);
+            }
+          }
+        }
+
+        // Fallback: fetch all properties and then filter locally to those that look like they belong to current user
+        try {
+          const remote = await api.getProperties();
+          if (mounted && Array.isArray(remote) && remote.length > 0) {
+            const normalized = remote.map(r => ({
+              id: r._id || r.id || Date.now(),
+              title: r.title || r.name || '',
+              description: r.description || '',
+              location: r.address ? `${r.address.city || ''}, ${r.address.state || ''}` : (r.location || ''),
+              rent: r.rent || r.price || r.monthlyRent || 0,
+              bedrooms: r.bedrooms || 0,
+              bathrooms: r.bathrooms || 0,
+              area: r.area || r.size || 0,
+              propertyType: r.propertyType || r.type || 'apartment',
+              status: r.status || (r.available ? 'Available' : 'Occupied') || 'Available',
+              amenities: r.amenities || r.features || [],
+              images: r.images || [],
+              rating: r.rating || 4.5,
+              trend: r.trend || null,
+              createdAt: r.createdAt || new Date().toISOString(),
+              contact: r.contact || {},
+              policies: r.policies || {},
+              ownerId: r.ownerId || r.userId || r.postedBy || null,
+            }));
+
+            // If we have a current user, filter to only their properties
+            if (profile) {
+              const userId = profile._id || profile.id || profile.userId;
+              if (userId) {
+                const onlyMine = normalized.filter(p => {
+                  return p.ownerId && String(p.ownerId) === String(userId);
+                });
+                if (onlyMine.length > 0) {
+                  setProperties(onlyMine);
+                  return;
+                }
+              }
+            }
+
+            // otherwise set all remote
+            setProperties(normalized);
+            return;
+          }
+        } catch (err) {
+          console.warn('Could not load properties from API, using local data', err.message || err);
         }
       } catch (err) {
-        // backend not available or failed — keep localStorage copy
         console.warn('Could not load properties from API, using local data', err.message || err);
       }
     };
@@ -691,12 +757,55 @@ const LandlordProperty = () => {
   };
 
   const handleSaveProperty = (propertyData) => {
+    // ensure owner information for server
+    const withOwner = { ...propertyData };
+    if (currentUser) {
+      withOwner.ownerId = withOwner.ownerId || currentUser._id || currentUser.id;
+    }
+
     if (modalMode === 'edit') {
-      setProperties(prev => prev.map(p => p.id === propertyData.id ? propertyData : p));
-      // Try remote update
+      // optimistic local update
+      setProperties(prev => prev.map(p => p.id === propertyData.id ? { ...p, ...withOwner } : p));
+      // Try remote update with normalized payload
       (async () => {
         try {
-          await api.updateProperty(propertyData.id, propertyData);
+          const payload = {
+            title: withOwner.title,
+            description: withOwner.description,
+            price: withOwner.rent || withOwner.price || 0,
+            propertyType: withOwner.propertyType,
+            address: withOwner.address || {},
+            bedrooms: withOwner.bedrooms,
+            bathrooms: withOwner.bathrooms,
+            images: Array.isArray(withOwner.images) ? withOwner.images.filter(i => typeof i === 'string') : [],
+            available: withOwner.status ? (withOwner.status === 'Available') : (withOwner.available ?? true),
+            ownerId: withOwner.ownerId || undefined,
+          };
+          const updated = await api.updateProperty(propertyData.id, payload);
+          if (updated) {
+            // normalize server response
+            const serverItem = {
+              id: updated._id || updated.id,
+              title: updated.title,
+              description: updated.description,
+              location: updated.address ? `${updated.address.city || ''}, ${updated.address.state || ''}` : (updated.location || ''),
+              rent: updated.price || updated.rent || 0,
+              bedrooms: updated.bedrooms || 0,
+              bathrooms: updated.bathrooms || 0,
+              area: updated.area || updated.size || 0,
+              propertyType: updated.propertyType || 'apartment',
+              status: updated.available ? 'Available' : 'Occupied',
+              amenities: updated.amenities || [],
+              images: updated.images || [],
+              rating: updated.rating || 4.5,
+              trend: updated.trend || null,
+              createdAt: updated.createdAt || new Date().toISOString(),
+              contact: updated.contact || {},
+              policies: updated.policies || {},
+              ownerId: updated.postedBy?._id || updated.postedBy || updated.ownerId || null,
+            };
+            setProperties(prev => prev.map(p => p.id === serverItem.id || p.id === propertyData.id ? serverItem : p));
+          }
         } catch (err) {
           console.warn('Failed to update property on server, change kept locally', err.message || err);
         }
@@ -704,14 +813,51 @@ const LandlordProperty = () => {
     } else {
       // create locally with temporary id then try creating on server
       const tempId = propertyData.id || Date.now();
-      const item = { ...propertyData, id: tempId };
+      const item = { ...withOwner, id: tempId };
       setProperties(prev => [...prev, item]);
       (async () => {
         try {
-          const created = await api.createProperty(propertyData);
+          // prepare payload for server - normalize fields to backend schema
+          const payload = {
+            title: withOwner.title,
+            description: withOwner.description,
+            price: withOwner.rent || withOwner.price || 0,
+            propertyType: withOwner.propertyType,
+            address: withOwner.address || {},
+            bedrooms: withOwner.bedrooms,
+            bathrooms: withOwner.bathrooms,
+            images: Array.isArray(withOwner.images) ? withOwner.images.filter(i => typeof i === 'string') : [],
+            available: withOwner.status ? (withOwner.status === 'Available') : (withOwner.available ?? true),
+            // include ownerId if present; backend will prefer authenticated user when token present
+            ownerId: withOwner.ownerId || undefined,
+          };
+
+          const created = await api.createProperty(payload);
           // replace temp item id with server id if provided
           if (created && (created._id || created.id)) {
-            setProperties(prev => prev.map(p => p.id === tempId ? { ...p, id: created._id || created.id } : p));
+            // normalize server response into local shape
+            const serverItem = {
+              id: created._id || created.id,
+              title: created.title,
+              description: created.description,
+              location: created.address ? `${created.address.city || ''}, ${created.address.state || ''}` : (created.location || ''),
+              rent: created.price || created.rent || 0,
+              bedrooms: created.bedrooms || 0,
+              bathrooms: created.bathrooms || 0,
+              area: created.area || created.size || 0,
+              propertyType: created.propertyType || 'apartment',
+              status: created.available ? 'Available' : 'Occupied',
+              amenities: created.amenities || [],
+              images: created.images || [],
+              rating: created.rating || 4.5,
+              trend: created.trend || null,
+              createdAt: created.createdAt || new Date().toISOString(),
+              contact: created.contact || {},
+              policies: created.policies || {},
+              ownerId: created.postedBy?._id || created.postedBy || created.ownerId || null,
+            };
+
+            setProperties(prev => prev.map(p => p.id === tempId ? serverItem : p));
           }
         } catch (err) {
           console.warn('Failed to create property on server, saved locally', err.message || err);
