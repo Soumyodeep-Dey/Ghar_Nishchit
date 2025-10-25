@@ -484,6 +484,30 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
 // PropertyModal component removed - now using standardized AddNewPropertyModal
 
 
+// Helper function to normalize backend property data to frontend format
+const normalizePropertyFromBackend = (backendProperty) => {
+  return {
+    id: backendProperty._id || backendProperty.id,
+    title: backendProperty.title || '',
+    description: backendProperty.description || '',
+    location: backendProperty.address ? `${backendProperty.address.city || ''}, ${backendProperty.address.state || ''}` : (backendProperty.location || ''),
+    rent: backendProperty.price || backendProperty.rent || 0,
+    bedrooms: backendProperty.bedrooms || 0,
+    bathrooms: backendProperty.bathrooms || 0,
+    area: backendProperty.area || backendProperty.size || 0,
+    propertyType: backendProperty.propertyType || 'apartment',
+    status: backendProperty.status || (backendProperty.available ? 'Available' : 'Occupied'),
+    amenities: backendProperty.amenities || [],
+    images: backendProperty.images || [],
+    rating: backendProperty.rating || 4.5,
+    trend: backendProperty.trend || null,
+    createdAt: backendProperty.createdAt || new Date().toISOString(),
+    contact: backendProperty.contact || {},
+    policies: backendProperty.policies || {},
+    ownerId: backendProperty.postedBy?._id || backendProperty.postedBy || backendProperty.ownerId || null,
+  };
+};
+
 // Main Component
 const LandlordProperty = () => {
   const [currentSection] = useState('Properties');
@@ -618,26 +642,7 @@ const LandlordProperty = () => {
               // Try fetching properties that belong only to the current user
               const remoteByUser = await api.getPropertiesByUser(userId);
               if (mounted && Array.isArray(remoteByUser)) {
-                const normalized = remoteByUser.map(r => ({
-                  id: r._id || r.id || Date.now(),
-                  title: r.title || r.name || '',
-                  description: r.description || '',
-                  location: r.address ? `${r.address.city || ''}, ${r.address.state || ''}` : (r.location || ''),
-                  rent: r.rent || r.price || r.monthlyRent || 0,
-                  bedrooms: r.bedrooms || 0,
-                  bathrooms: r.bathrooms || 0,
-                  area: r.area || r.size || 0,
-                  propertyType: r.propertyType || r.type || 'apartment',
-                  status: r.status || (r.available ? 'Available' : 'Occupied') || 'Available',
-                  amenities: r.amenities || r.features || [],
-                  images: r.images || [],
-                  rating: r.rating || 4.5,
-                  trend: r.trend || null,
-                  createdAt: r.createdAt || new Date().toISOString(),
-                  contact: r.contact || {},
-                  policies: r.policies || {},
-                  ownerId: r.ownerId || r.userId || r.postedBy || userId,
-                }));
+                const normalized = remoteByUser.map(normalizePropertyFromBackend);
                 setProperties(normalized);
                 return;
               }
@@ -651,26 +656,7 @@ const LandlordProperty = () => {
         try {
           const remote = await api.getProperties();
           if (mounted && Array.isArray(remote) && remote.length > 0) {
-            const normalized = remote.map(r => ({
-              id: r._id || r.id || Date.now(),
-              title: r.title || r.name || '',
-              description: r.description || '',
-              location: r.address ? `${r.address.city || ''}, ${r.address.state || ''}` : (r.location || ''),
-              rent: r.rent || r.price || r.monthlyRent || 0,
-              bedrooms: r.bedrooms || 0,
-              bathrooms: r.bathrooms || 0,
-              area: r.area || r.size || 0,
-              propertyType: r.propertyType || r.type || 'apartment',
-              status: r.status || (r.available ? 'Available' : 'Occupied') || 'Available',
-              amenities: r.amenities || r.features || [],
-              images: r.images || [],
-              rating: r.rating || 4.5,
-              trend: r.trend || null,
-              createdAt: r.createdAt || new Date().toISOString(),
-              contact: r.contact || {},
-              policies: r.policies || {},
-              ownerId: r.ownerId || r.userId || r.postedBy || null,
-            }));
+            const normalized = remote.map(normalizePropertyFromBackend);
 
             // If we have a current user, filter to only their properties
             if (profile) {
@@ -757,53 +743,16 @@ const LandlordProperty = () => {
   };
 
   const handleSaveProperty = (propertyData) => {
-    // ensure owner information for server
-    const withOwner = { ...propertyData };
-    if (currentUser) {
-      withOwner.ownerId = withOwner.ownerId || currentUser._id || currentUser.id;
-    }
-
     if (modalMode === 'edit') {
       // optimistic local update
-      setProperties(prev => prev.map(p => p.id === propertyData.id ? { ...p, ...withOwner } : p));
-      // Try remote update with normalized payload
+      setProperties(prev => prev.map(p => p.id === propertyData.id ? { ...p, ...propertyData } : p));
+      // Try remote update
       (async () => {
         try {
-          const payload = {
-            title: withOwner.title,
-            description: withOwner.description,
-            price: withOwner.rent || withOwner.price || 0,
-            propertyType: withOwner.propertyType,
-            address: withOwner.address || {},
-            bedrooms: withOwner.bedrooms,
-            bathrooms: withOwner.bathrooms,
-            images: Array.isArray(withOwner.images) ? withOwner.images.filter(i => typeof i === 'string') : [],
-            available: withOwner.status ? (withOwner.status === 'Available') : (withOwner.available ?? true),
-            ownerId: withOwner.ownerId || undefined,
-          };
-          const updated = await api.updateProperty(propertyData.id, payload);
+          const updated = await api.updateProperty(propertyData.id, propertyData);
           if (updated) {
-            // normalize server response
-            const serverItem = {
-              id: updated._id || updated.id,
-              title: updated.title,
-              description: updated.description,
-              location: updated.address ? `${updated.address.city || ''}, ${updated.address.state || ''}` : (updated.location || ''),
-              rent: updated.price || updated.rent || 0,
-              bedrooms: updated.bedrooms || 0,
-              bathrooms: updated.bathrooms || 0,
-              area: updated.area || updated.size || 0,
-              propertyType: updated.propertyType || 'apartment',
-              status: updated.available ? 'Available' : 'Occupied',
-              amenities: updated.amenities || [],
-              images: updated.images || [],
-              rating: updated.rating || 4.5,
-              trend: updated.trend || null,
-              createdAt: updated.createdAt || new Date().toISOString(),
-              contact: updated.contact || {},
-              policies: updated.policies || {},
-              ownerId: updated.postedBy?._id || updated.postedBy || updated.ownerId || null,
-            };
+            // normalize server response to frontend format
+            const serverItem = normalizePropertyFromBackend(updated);
             setProperties(prev => prev.map(p => p.id === serverItem.id || p.id === propertyData.id ? serverItem : p));
           }
         } catch (err) {
@@ -812,51 +761,16 @@ const LandlordProperty = () => {
       })();
     } else {
       // create locally with temporary id then try creating on server
-      const tempId = propertyData.id || Date.now();
-      const item = { ...withOwner, id: tempId };
+      const tempId = Date.now();
+      const item = { ...propertyData, id: tempId };
       setProperties(prev => [...prev, item]);
       (async () => {
         try {
-          // prepare payload for server - normalize fields to backend schema
-          const payload = {
-            title: withOwner.title,
-            description: withOwner.description,
-            price: withOwner.rent || withOwner.price || 0,
-            propertyType: withOwner.propertyType,
-            address: withOwner.address || {},
-            bedrooms: withOwner.bedrooms,
-            bathrooms: withOwner.bathrooms,
-            images: Array.isArray(withOwner.images) ? withOwner.images.filter(i => typeof i === 'string') : [],
-            available: withOwner.status ? (withOwner.status === 'Available') : (withOwner.available ?? true),
-            // include ownerId if present; backend will prefer authenticated user when token present
-            ownerId: withOwner.ownerId || undefined,
-          };
-
-          const created = await api.createProperty(payload);
+          const created = await api.createProperty(propertyData);
           // replace temp item id with server id if provided
           if (created && (created._id || created.id)) {
             // normalize server response into local shape
-            const serverItem = {
-              id: created._id || created.id,
-              title: created.title,
-              description: created.description,
-              location: created.address ? `${created.address.city || ''}, ${created.address.state || ''}` : (created.location || ''),
-              rent: created.price || created.rent || 0,
-              bedrooms: created.bedrooms || 0,
-              bathrooms: created.bathrooms || 0,
-              area: created.area || created.size || 0,
-              propertyType: created.propertyType || 'apartment',
-              status: created.available ? 'Available' : 'Occupied',
-              amenities: created.amenities || [],
-              images: created.images || [],
-              rating: created.rating || 4.5,
-              trend: created.trend || null,
-              createdAt: created.createdAt || new Date().toISOString(),
-              contact: created.contact || {},
-              policies: created.policies || {},
-              ownerId: created.postedBy?._id || created.postedBy || created.ownerId || null,
-            };
-
+            const serverItem = normalizePropertyFromBackend(created);
             setProperties(prev => prev.map(p => p.id === tempId ? serverItem : p));
           }
         } catch (err) {

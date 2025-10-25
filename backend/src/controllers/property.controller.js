@@ -11,8 +11,13 @@ const resolveUserId = (user) => {
 // Create new property
 export const createProperty = async (req, res) => {
   try {
+    console.log('Create Property Request:', req.body);
+    console.log('User:', req.user);
+    
     // Always set postedBy from authenticated user for security
     const authUserId = resolveUserId(req.user);
+    console.log('Auth User ID:', authUserId);
+    
     if (!authUserId) {
       return res.status(401).json({ message: 'Authentication required to create property' });
     }
@@ -22,11 +27,16 @@ export const createProperty = async (req, res) => {
     delete payload.ownerId;
     payload.postedBy = authUserId;
 
+    console.log('Final payload:', payload);
+
     const property = new Property(payload);
     await property.save();
+    console.log('Property saved:', property._id);
+    
     const populated = await Property.findById(property._id).populate('postedBy', 'name email');
     res.status(201).json(populated);
   } catch (error) {
+    console.error('Create Property Error:', error);
     res.status(500).json({ message: error.message });
   }
 };
