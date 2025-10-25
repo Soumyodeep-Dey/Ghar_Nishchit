@@ -11,16 +11,16 @@ const resolveUserId = (user) => {
 // Create new property
 export const createProperty = async (req, res) => {
   try {
-    // Accept owner information from authenticated user or from client-provided ownerId
-    const payload = { ...req.body };
+    // Always set postedBy from authenticated user for security
     const authUserId = resolveUserId(req.user);
-    if (authUserId) {
-      payload.postedBy = authUserId;
-    } else if (payload.ownerId) {
-      // map ownerId -> postedBy for backward compatibility with frontend
-      payload.postedBy = payload.ownerId;
-      delete payload.ownerId;
+    if (!authUserId) {
+      return res.status(401).json({ message: 'Authentication required to create property' });
     }
+
+    const payload = { ...req.body };
+    // Ignore any client-provided ownerId - always use authenticated user
+    delete payload.ownerId;
+    payload.postedBy = authUserId;
 
     const property = new Property(payload);
     await property.save();
@@ -72,21 +72,24 @@ export const getPropertiesByUser = async (req, res) => {
 // Update property
 export const updateProperty = async (req, res) => {
   try {
-    // Prevent accidental owner field mismatch: map ownerId to postedBy
-    const payload = { ...req.body };
     const authUserId = resolveUserId(req.user);
-    if (payload.ownerId) {
-      payload.postedBy = payload.ownerId;
-      delete payload.ownerId;
+    if (!authUserId) {
+      return res.status(401).json({ message: 'Authentication required to update property' });
     }
 
-    // If authenticated, ensure only owner can update OR keep postedBy unchanged
+    // Check ownership before allowing update
     const existing = await Property.findById(req.params.id);
     if (!existing) return res.status(404).json({ message: 'Property not found' });
 
-    if (authUserId && String(existing.postedBy) !== String(authUserId)) {
+    if (String(existing.postedBy) !== String(authUserId)) {
       return res.status(403).json({ message: 'Forbidden: you are not the owner of this property' });
     }
+
+    const payload = { ...req.body };
+    // Ignore client-provided ownerId - don't allow changing owner
+    delete payload.ownerId;
+    delete payload.postedBy;
+    payload.updatedAt = new Date();
 
     const updated = await Property.findByIdAndUpdate(req.params.id, payload, { new: true });
     const populated = await Property.findById(updated._id).populate('postedBy', 'name email');
@@ -99,11 +102,15 @@ export const updateProperty = async (req, res) => {
 // Delete property
 export const deleteProperty = async (req, res) => {
   try {
+    const authUserId = resolveUserId(req.user);
+    if (!authUserId) {
+      return res.status(401).json({ message: 'Authentication required to delete property' });
+    }
+
     const existing = await Property.findById(req.params.id);
     if (!existing) return res.status(404).json({ message: 'Property not found' });
 
-    const authUserId = resolveUserId(req.user);
-    if (authUserId && String(existing.postedBy) !== String(authUserId)) {
+    if (String(existing.postedBy) !== String(authUserId)) {
       return res.status(403).json({ message: 'Forbidden: you are not the owner of this property' });
     }
 
