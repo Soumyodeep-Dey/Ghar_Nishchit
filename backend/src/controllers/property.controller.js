@@ -22,10 +22,25 @@ export const createProperty = async (req, res) => {
       return res.status(401).json({ message: 'Authentication required to create property' });
     }
 
+    // Get user details to populate contact information
+    const User = (await import('../models/user.model.js')).default;
+    const user = await User.findById(authUserId);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
     const payload = { ...req.body };
     // Ignore any client-provided ownerId - always use authenticated user
     delete payload.ownerId;
     payload.postedBy = authUserId;
+
+    // Auto-populate contact information from logged-in user
+    payload.contact = {
+      phone: user.phone || '',
+      email: user.email || '',
+      website: payload.contact?.website || '' // Keep website if provided, otherwise empty
+    };
 
     console.log('Final payload:', payload);
 
@@ -33,7 +48,7 @@ export const createProperty = async (req, res) => {
     await property.save();
     console.log('Property saved:', property._id);
     
-    const populated = await Property.findById(property._id).populate('postedBy', 'name email');
+    const populated = await Property.findById(property._id).populate('postedBy', 'name email phone');
     res.status(201).json(populated);
   } catch (error) {
     console.error('Create Property Error:', error);
@@ -95,14 +110,29 @@ export const updateProperty = async (req, res) => {
       return res.status(403).json({ message: 'Forbidden: you are not the owner of this property' });
     }
 
+    // Get user details to ensure contact information is up-to-date
+    const User = (await import('../models/user.model.js')).default;
+    const user = await User.findById(authUserId);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
     const payload = { ...req.body };
     // Ignore client-provided ownerId - don't allow changing owner
     delete payload.ownerId;
     delete payload.postedBy;
     payload.updatedAt = new Date();
 
+    // Update contact information with current user data
+    payload.contact = {
+      phone: user.phone || '',
+      email: user.email || '',
+      website: payload.contact?.website || existing.contact?.website || '' // Keep existing website or new one
+    };
+
     const updated = await Property.findByIdAndUpdate(req.params.id, payload, { new: true });
-    const populated = await Property.findById(updated._id).populate('postedBy', 'name email');
+    const populated = await Property.findById(updated._id).populate('postedBy', 'name email phone');
     res.status(200).json(populated);
   } catch (error) {
     res.status(500).json({ message: error.message });

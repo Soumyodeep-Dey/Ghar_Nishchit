@@ -75,7 +75,7 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
       status: propertyData.available ? 'Available' : 'Occupied',
       rating: 4.5, // Default rating
       trend: null, // Default trend
-      contact: {}, // Default contact info
+      // Contact info will be auto-populated from logged-in user
       policies: { // Default policies
         petFriendly: false,
         smokingAllowed: false,

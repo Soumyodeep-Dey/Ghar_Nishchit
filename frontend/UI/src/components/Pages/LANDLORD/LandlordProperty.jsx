@@ -78,6 +78,141 @@ const AnimatedCard = ({ children, delay = 0, className = '', ...props }) => {
   );
 };
 
+// Unified Dropdown Menu Component
+const PropertyDropdownMenu = ({ property, onEdit, onDelete, onView, onToggleStatus, showMenu, setShowMenu, darkMode, theme }) => {
+  return (
+    <AnimatePresence>
+      {showMenu && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8, y: -20, rotateX: -15 }}
+          animate={{ opacity: 1, scale: 1, y: 0, rotateX: 0 }}
+          exit={{ opacity: 0, scale: 0.8, y: -20, rotateX: -15 }}
+          transition={{ 
+            type: "spring", 
+            stiffness: 300, 
+            damping: 30,
+            duration: 0.2 
+          }}
+          className={`absolute right-0 top-full mt-3 w-64 backdrop-blur-2xl rounded-2xl shadow-2xl z-[9999] border border-white/20 ${theme.menuBg} overflow-visible`}
+          style={{
+            position: 'absolute',
+            right: '0',
+            top: '100%',
+            marginTop: '12px',
+            zIndex: 9999,
+            background: darkMode 
+              ? 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)'
+              : 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%)',
+            boxShadow: darkMode 
+              ? '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)'
+              : '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05)'
+          }}
+        >
+          {/* Menu Header */}
+          <div className={`px-4 py-3 border-b ${darkMode ? 'border-white/10' : 'border-gray-200'}`}>
+            <h3 className={`text-sm font-semibold ${darkMode ? 'text-white/90' : 'text-gray-700'}`}>
+              Property Actions
+            </h3>
+          </div>
+          
+          {/* Menu Items */}
+          <div className="p-2 space-y-1">
+            <motion.button 
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => { onView(property); setShowMenu(false); }} 
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
+            >
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-600'} group-hover:scale-110 transition-transform`}>
+                <Eye className="w-4 h-4" />
+              </div>
+              <div className="flex-1 text-left">
+                <span className="font-medium">View Details</span>
+                <p className={`text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>See full property information</p>
+              </div>
+            </motion.button>
+
+            <motion.button 
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => { onEdit(property); setShowMenu(false); }} 
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
+            >
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-600'} group-hover:scale-110 transition-transform`}>
+                <Edit className="w-4 h-4" />
+              </div>
+              <div className="flex-1 text-left">
+                <span className="font-medium">Edit Property</span>
+                <p className={`text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>Modify property details</p>
+              </div>
+            </motion.button>
+
+            <motion.button 
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
+            >
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-600'} group-hover:scale-110 transition-transform`}>
+                <Share2 className="w-4 h-4" />
+              </div>
+              <div className="flex-1 text-left">
+                <span className="font-medium">Share Property</span>
+                <p className={`text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>Share with others</p>
+              </div>
+            </motion.button>
+
+            <motion.button 
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
+            >
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600'} group-hover:scale-110 transition-transform`}>
+                <Download className="w-4 h-4" />
+              </div>
+              <div className="flex-1 text-left">
+                <span className="font-medium">Download Report</span>
+                <p className={`text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>Export property data</p>
+              </div>
+            </motion.button>
+
+            <div className={`mx-2 my-2 h-px ${darkMode ? 'bg-white/10' : 'bg-gray-200'}`}></div>
+
+            <motion.button 
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => { onToggleStatus(property.id); setShowMenu(false); }} 
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
+            >
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-orange-500/20 text-orange-400' : 'bg-orange-100 text-orange-600'} group-hover:scale-110 transition-transform`}>
+                <RefreshCw className="w-4 h-4" />
+              </div>
+              <div className="flex-1 text-left">
+                <span className="font-medium">Toggle Status</span>
+                <p className={`text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>Change availability status</p>
+              </div>
+            </motion.button>
+
+            <motion.button 
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => { onDelete(property.id); setShowMenu(false); }} 
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.deleteMenuItem} hover:shadow-lg`}
+            >
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-red-500/20 text-red-400' : 'bg-red-100 text-red-600'} group-hover:scale-110 transition-transform`}>
+                <Trash2 className="w-4 h-4" />
+              </div>
+              <div className="flex-1 text-left">
+                <span className="font-medium">Delete Property</span>
+                <p className={`text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>Remove permanently</p>
+              </div>
+            </motion.button>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
 // Property Card Component
 const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, delay = 0, viewMode = 'grid' }) => {
   // hover state removed — not used
@@ -166,7 +301,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay, duration: 0.4 }}
         whileHover={{ scale: 1.01, boxShadow: "0 10px 30px rgba(0,0,0,0.2)" }}
-        className={`backdrop-blur-xl border rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 group ${theme.listCardBg}`}
+        className={`backdrop-blur-xl border rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 group ${theme.listCardBg} relative overflow-visible`}
       >
         <div className="flex items-center space-x-6">
           <div className="w-24 h-24 rounded-lg overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
@@ -220,35 +355,17 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
                 <MoreVertical className={`w-5 h-5 ${theme.icon}`} />
               </motion.button>
 
-              <AnimatePresence>
-                {showMenu && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                    className={`absolute right-0 top-full mt-2 w-48 backdrop-blur-xl rounded-xl shadow-xl z-50 ${theme.menuBg}`}
-                  >
-                    <div className="p-2">
-                      <button onClick={() => { onView(property); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                        <Eye className="w-4 h-4" />
-                        <span>View Details</span>
-                      </button>
-                      <button onClick={() => { onEdit(property); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                        <Edit className="w-4 h-4" />
-                        <span>Edit Property</span>
-                      </button>
-                      <button onClick={() => { onToggleStatus(property.id); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                        <RefreshCw className="w-4 h-4" />
-                        <span>Toggle Status</span>
-                      </button>
-                      <button onClick={() => { onDelete(property.id); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.deleteMenuItem}`}>
-                        <Trash2 className="w-4 h-4" />
-                        <span>Delete</span>
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <PropertyDropdownMenu
+                property={property}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onView={onView}
+                onToggleStatus={onToggleStatus}
+                showMenu={showMenu}
+                setShowMenu={setShowMenu}
+                darkMode={darkMode}
+                theme={theme}
+              />
             </div>
           </div>
         </div>
@@ -262,7 +379,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
       whileHover={{ scale: 1.02, y: -5 }}
-      className={`relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 group ${theme.cardBg}`}
+      className={`relative overflow-visible rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 group ${theme.cardBg}`}
     >
       {/* Image Carousel */}
       <div className="relative h-64 overflow-hidden rounded-t-2xl">
@@ -375,43 +492,17 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
               <MoreVertical className={`w-5 h-5 ${theme.icon}`} />
             </motion.button>
 
-            <AnimatePresence>
-              {showMenu && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                  className={`absolute right-0 top-full mt-2 w-48 backdrop-blur-xl rounded-xl shadow-xl z-50 ${theme.menuBg}`}
-                >
-                  <div className="p-2">
-                    <button onClick={() => { onView(property); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                      <Eye className="w-4 h-4" />
-                      <span>View Details</span>
-                    </button>
-                    <button onClick={() => { onEdit(property); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                      <Edit className="w-4 h-4" />
-                      <span>Edit Property</span>
-                    </button>
-                    <button className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                      <Share2 className="w-4 h-4" />
-                      <span>Share Property</span>
-                    </button>
-                    <button className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                      <Download className="w-4 h-4" />
-                      <span>Download Report</span>
-                    </button>
-                    <button onClick={() => { onToggleStatus(property.id); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                      <RefreshCw className="w-4 h-4" />
-                      <span>Toggle Status</span>
-                    </button>
-                    <button onClick={() => { onDelete(property.id); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.deleteMenuItem}`}>
-                      <Trash2 className="w-4 h-4" />
-                      <span>Delete</span>
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <PropertyDropdownMenu
+              property={property}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onView={onView}
+              onToggleStatus={onToggleStatus}
+              showMenu={showMenu}
+              setShowMenu={setShowMenu}
+              darkMode={darkMode}
+              theme={theme}
+            />
           </div>
         </div>
 
@@ -1007,8 +1098,8 @@ const LandlordProperty = () => {
               ) : (
                 <div className={
                   viewMode === 'grid'
-                    ? "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8"
-                    : "space-y-4"
+                    ? "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 overflow-visible"
+                    : "space-y-4 overflow-visible"
                 }>
                   {filteredProperties.map((property, index) => (
                     <PropertyCard
