@@ -649,7 +649,7 @@ const LandlordProperty = () => {
   }, [properties, searchTerm, statusFilter, sortBy, sortOrder]);
 
   // Try to fetch properties from backend on mount and update local storage fallback
-  // Fetch properties from API once on mount. We intentionally omit setProperties from deps.
+  // Fetch properties from API once on mount.
   useEffect(() => {
     let mounted = true;
     const load = async () => {
@@ -715,6 +715,7 @@ const LandlordProperty = () => {
 
     load();
     return () => { mounted = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleAddProperty = () => {
