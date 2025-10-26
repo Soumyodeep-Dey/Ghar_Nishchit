@@ -8,20 +8,20 @@ const getAuthHeader = () => {
 };
 
 async function request(path, options = {}) {
-    const headers = { 
-        'Content-Type': 'application/json', 
-        ...(options.headers || {}), 
-        ...getAuthHeader() 
+    const headers = {
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+        ...getAuthHeader()
     };
-    
+
     console.log(`API Request: ${options.method || 'GET'} ${BASE}${path}`);
     console.log('Headers:', headers);
     if (options.body) console.log('Body:', options.body);
-    
+
     const res = await fetch(`${BASE}${path}`, { ...options, headers });
-    
+
     console.log(`API Response: ${res.status} ${res.statusText}`);
-    
+
     if (!res.ok) {
         const text = await res.text().catch(() => '');
         console.error('API Error:', text);
@@ -49,6 +49,11 @@ const api = {
     // Auth/profile
     getProfile: () => request('/auth/profile', { method: 'GET' }),
     updateProfile: (data) => request('/auth/profile', { method: 'PUT', body: JSON.stringify(data) }),
+
+    // Tenants (for landlords)
+    getMyTenants: () => request('/tenants', { method: 'GET' }),
+    getTenantById: (tenantId) => request(`/tenants/${tenantId}`, { method: 'GET' }),
+    getTenantStats: () => request('/tenants/stats', { method: 'GET' }),
 };
 
 export default api;

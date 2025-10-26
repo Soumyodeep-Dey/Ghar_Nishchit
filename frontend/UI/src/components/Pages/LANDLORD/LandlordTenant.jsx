@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import { useDarkMode } from '../../../useDarkMode.js';
+import api from '../../../services/api';
 // Removed SidebarContext usage
 import {
   Users, Search, MoreVertical, Edit, Trash2, Eye, Calendar, User, Clock, CheckCircle, XCircle, AlertCircle, Phone, Mail, MessageCircle, Star, DollarSign, Home, Building2, FileText, Download, Send, ArrowUp, ArrowDown, X, BadgeCheck, Info, Video, UserPlus, Crown
@@ -10,28 +11,6 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Custom Hooks
-const useLocalStorage = (key, initialValue) => {
-  const [storedValue, setStoredValue] = useState(() => {
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch {
-      return initialValue;
-    }
-  });
-
-  const setValue = (value) => {
-    try {
-      setStoredValue(value);
-      window.localStorage.setItem(key, JSON.stringify(value));
-    } catch (error) {
-      console.error('Error saving to localStorage:', error);
-    }
-  };
-
-  return [storedValue, setValue];
-};
-
 const useIntersectionObserver = (options = {}) => {
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [element, setElement] = useState(null);
@@ -1115,151 +1094,10 @@ const LandlordTenant = () => {
   const { darkMode } = useDarkMode();
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
 
-  // Sample tenants data with enhanced information
-  const [tenants, setTenants] = useLocalStorage('landlord_tenants', [
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john.doe@email.com",
-      phone: "+1 (555) 123-4567",
-      property: "Modern Downtown Loft",
-      status: "Active",
-      rentAmount: 2800,
-      moveInDate: "2024-06-01",
-      leaseEndDate: "2025-06-01",
-      nextPaymentDate: "2025-08-15",
-      isOnline: true,
-      isVerified: true,
-      isPremium: false,
-      rating: 4,
-      tags: ["Reliable", "Long-term", "Quiet"],
-      emergencyContact: "Jane Doe - (555) 987-6543",
-      visitRequests: [
-        {
-          requestedDate: "2024-05-15",
-          time: "14:00",
-          property: "Modern Downtown Loft",
-          status: "completed",
-          notes: "Interested in the downtown location"
-        }
-      ],
-      contracts: [
-        {
-          type: "Lease",
-          startDate: "2024-06-01",
-          endDate: "2025-06-01",
-          status: "active"
-        }
-      ]
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane.smith@email.com",
-      phone: "+1 (555) 234-5678",
-      property: "Luxury Penthouse",
-      status: "Active",
-      rentAmount: 4200,
-      moveInDate: "2024-03-15",
-      leaseEndDate: "2025-03-15",
-      nextPaymentDate: "2025-08-15",
-      isOnline: false,
-      isVerified: true,
-      isPremium: true,
-      rating: 5,
-      tags: ["Premium", "Professional", "Referral"],
-      emergencyContact: "Bob Smith - (555) 876-5432",
-      visitRequests: [],
-      contracts: [
-        {
-          type: "Lease",
-          startDate: "2024-03-15",
-          endDate: "2025-03-15",
-          status: "active"
-        }
-      ]
-    },
-    {
-      id: 3,
-      name: "Robert Johnson",
-      email: "robert.johnson@email.com",
-      phone: "+1 (555) 345-6789",
-      property: "Cozy Studio Apartment",
-      status: "Overdue",
-      rentAmount: 1800,
-      moveInDate: "2024-01-10",
-      leaseEndDate: "2024-12-10",
-      nextPaymentDate: "2025-07-15",
-      isOnline: true,
-      isVerified: false,
-      isPremium: false,
-      rating: 3,
-      tags: ["Late Payment", "Student"],
-      emergencyContact: "Not provided",
-      visitRequests: [],
-      contracts: [
-        {
-          type: "Lease",
-          startDate: "2024-01-10",
-          endDate: "2024-12-10",
-          status: "active"
-        }
-      ]
-    },
-    {
-      id: 4,
-      name: "Emily Davis",
-      email: "emily.davis@email.com",
-      phone: "+1 (555) 456-7890",
-      status: "Prospect",
-      isOnline: false,
-      isVerified: false,
-      isPremium: false,
-      rating: 0,
-      tags: ["New Inquiry", "Young Professional"],
-      visitRequests: [
-        {
-          requestedDate: "2025-08-10",
-          time: "15:00",
-          property: "Garden View Apartment",
-          status: "scheduled",
-          notes: "Looking for pet-friendly apartment"
-        },
-        {
-          requestedDate: "2025-08-08",
-          time: "10:00",
-          property: "Modern Downtown Loft",
-          status: "pending",
-          notes: "Prefers downtown location"
-        }
-      ],
-      contracts: []
-    },
-    {
-      id: 5,
-      name: "Michael Brown",
-      email: "michael.brown@email.com",
-      phone: "+1 (555) 567-8901",
-      status: "Prospect",
-      isOnline: true,
-      isVerified: true,
-      isPremium: false,
-      rating: 0,
-      tags: ["Corporate", "Immediate Move-in"],
-      visitRequests: [
-        {
-          requestedDate: "2025-08-12",
-          time: "11:00",
-          property: "Luxury Penthouse",
-          status: "scheduled",
-          notes: "Corporate relocation"
-        }
-      ],
-      contracts: []
-    }
-  ]);
-
-  const [filteredTenants, setFilteredTenants] = useState(tenants);
+  // State for tenants data - now fetched from API
+  const [tenants, setTenants] = useState([]);
+  const [isLoadingTenants, setIsLoadingTenants] = useState(true);
+  const [filteredTenants, setFilteredTenants] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [propertyFilter, setPropertyFilter] = useState('All');
@@ -1269,9 +1107,32 @@ const LandlordTenant = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [showContractModal, setShowContractModal] = useState(false);
-  const [isLoading] = useState(false);
 
   const { notifications, addNotification, removeNotification } = useNotification();
+
+  // Fetch tenants from API on component mount
+  useEffect(() => {
+    const fetchTenants = async () => {
+      try {
+        setIsLoadingTenants(true);
+        const data = await api.getMyTenants();
+        console.log('Fetched tenants:', data);
+        setTenants(data || []);
+      } catch (error) {
+        console.error('Error fetching tenants:', error);
+        addNotification({
+          type: 'error',
+          title: 'Failed to Load Tenants',
+          message: 'Could not fetch your tenants. Please try again later.'
+        });
+        setTenants([]);
+      } finally {
+        setIsLoadingTenants(false);
+      }
+    };
+
+    fetchTenants();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Filter and sort tenants
   useEffect(() => {
@@ -1643,7 +1504,7 @@ const LandlordTenant = () => {
 
             {/* Tenants Grid */}
             <AnimatedCard delay={0.8}>
-              {isLoading ? (
+              {isLoadingTenants ? (
                 <div className="flex items-center justify-center py-20">
                   <motion.div
                     animate={{ rotate: 360 }}
