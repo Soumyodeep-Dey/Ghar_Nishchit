@@ -78,6 +78,141 @@ const AnimatedCard = ({ children, delay = 0, className = '', ...props }) => {
   );
 };
 
+// Unified Dropdown Menu Component
+const PropertyDropdownMenu = ({ property, onEdit, onDelete, onView, onToggleStatus, showMenu, setShowMenu, darkMode, theme }) => {
+  return (
+    <AnimatePresence>
+      {showMenu && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8, y: -20, rotateX: -15 }}
+          animate={{ opacity: 1, scale: 1, y: 0, rotateX: 0 }}
+          exit={{ opacity: 0, scale: 0.8, y: -20, rotateX: -15 }}
+          transition={{ 
+            type: "spring", 
+            stiffness: 300, 
+            damping: 30,
+            duration: 0.2 
+          }}
+          className={`absolute right-0 top-full mt-3 w-64 backdrop-blur-2xl rounded-2xl shadow-2xl z-[9999] border border-white/20 ${theme.menuBg} overflow-visible`}
+          style={{
+            position: 'absolute',
+            right: '0',
+            top: '100%',
+            marginTop: '12px',
+            zIndex: 9999,
+            background: darkMode 
+              ? 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)'
+              : 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%)',
+            boxShadow: darkMode 
+              ? '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)'
+              : '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05)'
+          }}
+        >
+          {/* Menu Header */}
+          <div className={`px-4 py-3 border-b ${darkMode ? 'border-white/10' : 'border-gray-200'}`}>
+            <h3 className={`text-sm font-semibold ${darkMode ? 'text-white/90' : 'text-gray-700'}`}>
+              Property Actions
+            </h3>
+          </div>
+          
+          {/* Menu Items */}
+          <div className="p-2 space-y-1">
+            <motion.button 
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => { onView(property); setShowMenu(false); }} 
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
+            >
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-600'} group-hover:scale-110 transition-transform`}>
+                <Eye className="w-4 h-4" />
+              </div>
+              <div className="flex-1 text-left">
+                <span className="font-medium">View Details</span>
+                <p className={`text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>See full property information</p>
+              </div>
+            </motion.button>
+
+            <motion.button 
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => { onEdit(property); setShowMenu(false); }} 
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
+            >
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-600'} group-hover:scale-110 transition-transform`}>
+                <Edit className="w-4 h-4" />
+              </div>
+              <div className="flex-1 text-left">
+                <span className="font-medium">Edit Property</span>
+                <p className={`text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>Modify property details</p>
+              </div>
+            </motion.button>
+
+            <motion.button 
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
+            >
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-600'} group-hover:scale-110 transition-transform`}>
+                <Share2 className="w-4 h-4" />
+              </div>
+              <div className="flex-1 text-left">
+                <span className="font-medium">Share Property</span>
+                <p className={`text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>Share with others</p>
+              </div>
+            </motion.button>
+
+            <motion.button 
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
+            >
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600'} group-hover:scale-110 transition-transform`}>
+                <Download className="w-4 h-4" />
+              </div>
+              <div className="flex-1 text-left">
+                <span className="font-medium">Download Report</span>
+                <p className={`text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>Export property data</p>
+              </div>
+            </motion.button>
+
+            <div className={`mx-2 my-2 h-px ${darkMode ? 'bg-white/10' : 'bg-gray-200'}`}></div>
+
+            <motion.button 
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => { onToggleStatus(property.id); setShowMenu(false); }} 
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
+            >
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-orange-500/20 text-orange-400' : 'bg-orange-100 text-orange-600'} group-hover:scale-110 transition-transform`}>
+                <RefreshCw className="w-4 h-4" />
+              </div>
+              <div className="flex-1 text-left">
+                <span className="font-medium">Toggle Status</span>
+                <p className={`text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>Change availability status</p>
+              </div>
+            </motion.button>
+
+            <motion.button 
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => { onDelete(property.id); setShowMenu(false); }} 
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.deleteMenuItem} hover:shadow-lg`}
+            >
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-red-500/20 text-red-400' : 'bg-red-100 text-red-600'} group-hover:scale-110 transition-transform`}>
+                <Trash2 className="w-4 h-4" />
+              </div>
+              <div className="flex-1 text-left">
+                <span className="font-medium">Delete Property</span>
+                <p className={`text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>Remove permanently</p>
+              </div>
+            </motion.button>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
 // Property Card Component
 const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, delay = 0, viewMode = 'grid' }) => {
   // hover state removed — not used
@@ -166,7 +301,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay, duration: 0.4 }}
         whileHover={{ scale: 1.01, boxShadow: "0 10px 30px rgba(0,0,0,0.2)" }}
-        className={`backdrop-blur-xl border rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 group ${theme.listCardBg}`}
+        className={`backdrop-blur-xl border rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 group ${theme.listCardBg} relative overflow-visible`}
       >
         <div className="flex items-center space-x-6">
           <div className="w-24 h-24 rounded-lg overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
@@ -220,35 +355,17 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
                 <MoreVertical className={`w-5 h-5 ${theme.icon}`} />
               </motion.button>
 
-              <AnimatePresence>
-                {showMenu && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                    className={`absolute right-0 top-full mt-2 w-48 backdrop-blur-xl rounded-xl shadow-xl z-50 ${theme.menuBg}`}
-                  >
-                    <div className="p-2">
-                      <button onClick={() => { onView(property); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                        <Eye className="w-4 h-4" />
-                        <span>View Details</span>
-                      </button>
-                      <button onClick={() => { onEdit(property); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                        <Edit className="w-4 h-4" />
-                        <span>Edit Property</span>
-                      </button>
-                      <button onClick={() => { onToggleStatus(property.id); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                        <RefreshCw className="w-4 h-4" />
-                        <span>Toggle Status</span>
-                      </button>
-                      <button onClick={() => { onDelete(property.id); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.deleteMenuItem}`}>
-                        <Trash2 className="w-4 h-4" />
-                        <span>Delete</span>
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <PropertyDropdownMenu
+                property={property}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onView={onView}
+                onToggleStatus={onToggleStatus}
+                showMenu={showMenu}
+                setShowMenu={setShowMenu}
+                darkMode={darkMode}
+                theme={theme}
+              />
             </div>
           </div>
         </div>
@@ -262,7 +379,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
       whileHover={{ scale: 1.02, y: -5 }}
-      className={`relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 group ${theme.cardBg}`}
+      className={`relative overflow-visible rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 group ${theme.cardBg}`}
     >
       {/* Image Carousel */}
       <div className="relative h-64 overflow-hidden rounded-t-2xl">
@@ -375,43 +492,17 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
               <MoreVertical className={`w-5 h-5 ${theme.icon}`} />
             </motion.button>
 
-            <AnimatePresence>
-              {showMenu && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                  className={`absolute right-0 top-full mt-2 w-48 backdrop-blur-xl rounded-xl shadow-xl z-50 ${theme.menuBg}`}
-                >
-                  <div className="p-2">
-                    <button onClick={() => { onView(property); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                      <Eye className="w-4 h-4" />
-                      <span>View Details</span>
-                    </button>
-                    <button onClick={() => { onEdit(property); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                      <Edit className="w-4 h-4" />
-                      <span>Edit Property</span>
-                    </button>
-                    <button className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                      <Share2 className="w-4 h-4" />
-                      <span>Share Property</span>
-                    </button>
-                    <button className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                      <Download className="w-4 h-4" />
-                      <span>Download Report</span>
-                    </button>
-                    <button onClick={() => { onToggleStatus(property.id); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                      <RefreshCw className="w-4 h-4" />
-                      <span>Toggle Status</span>
-                    </button>
-                    <button onClick={() => { onDelete(property.id); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.deleteMenuItem}`}>
-                      <Trash2 className="w-4 h-4" />
-                      <span>Delete</span>
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <PropertyDropdownMenu
+              property={property}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onView={onView}
+              onToggleStatus={onToggleStatus}
+              showMenu={showMenu}
+              setShowMenu={setShowMenu}
+              darkMode={darkMode}
+              theme={theme}
+            />
           </div>
         </div>
 
@@ -484,6 +575,30 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
 // PropertyModal component removed - now using standardized AddNewPropertyModal
 
 
+// Helper function to normalize backend property data to frontend format
+const normalizePropertyFromBackend = (backendProperty) => {
+  return {
+    id: backendProperty._id || backendProperty.id,
+    title: backendProperty.title || '',
+    description: backendProperty.description || '',
+    location: backendProperty.address ? `${backendProperty.address.city || ''}, ${backendProperty.address.state || ''}` : (backendProperty.location || ''),
+    rent: backendProperty.price || backendProperty.rent || 0,
+    bedrooms: backendProperty.bedrooms || 0,
+    bathrooms: backendProperty.bathrooms || 0,
+    area: backendProperty.area || backendProperty.size || 0,
+    propertyType: backendProperty.propertyType || 'apartment',
+    status: backendProperty.status || (backendProperty.available ? 'Available' : 'Occupied'),
+    amenities: backendProperty.amenities || [],
+    images: backendProperty.images || [],
+    rating: backendProperty.rating || 4.5,
+    trend: backendProperty.trend || null,
+    createdAt: backendProperty.createdAt || new Date().toISOString(),
+    contact: backendProperty.contact || {},
+    policies: backendProperty.policies || {},
+    ownerId: backendProperty.postedBy?._id || backendProperty.postedBy || backendProperty.ownerId || null,
+  };
+};
+
 // Main Component
 const LandlordProperty = () => {
   const [currentSection] = useState('Properties');
@@ -555,12 +670,14 @@ const LandlordProperty = () => {
   ]);
 
   const [filteredProperties, setFilteredProperties] = useState(properties);
+  const [currentUser, setCurrentUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [sortBy, setSortBy] = useState('title');
   const [sortOrder, setSortOrder] = useState('asc');
   const [viewMode, setViewMode] = useState('grid');
   const [showModal, setShowModal] = useState(false);
+  const [updateSuccess, setUpdateSuccess] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [modalMode, setModalMode] = useState('add');
   // isLoading state removed — not used
@@ -596,38 +713,65 @@ const LandlordProperty = () => {
 
   // Try to fetch properties from backend on mount and update local storage fallback
   // Fetch properties from API once on mount. We intentionally omit setProperties from deps.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     let mounted = true;
     const load = async () => {
       try {
-        const remote = await api.getProperties();
-        if (mounted && Array.isArray(remote) && remote.length > 0) {
-          // Normalize remote items to expected shape where necessary
-          const normalized = remote.map(r => ({
-            id: r._id || r.id || Date.now(),
-            title: r.title || r.name || '',
-            description: r.description || '',
-            location: r.address ? `${r.address.city || ''}, ${r.address.state || ''}` : (r.location || ''),
-            rent: r.rent || r.price || r.monthlyRent || 0,
-            bedrooms: r.bedrooms || 0,
-            bathrooms: r.bathrooms || 0,
-            area: r.area || r.size || 0,
-            propertyType: r.propertyType || r.type || 'apartment',
-            status: r.status || (r.available ? 'Available' : 'Occupied') || 'Available',
-            amenities: r.amenities || r.features || [],
-            images: r.images || [],
-            rating: r.rating || 4.5,
-            trend: r.trend || null,
-            createdAt: r.createdAt || new Date().toISOString(),
-            contact: r.contact || {},
-            policies: r.policies || {},
-          }));
+        // First try to get profile (current user)
+        let profile = null;
+        try {
+          profile = await api.getProfile();
+        } catch {
+          // not authenticated or endpoint failed
+          profile = null;
+        }
 
-          setProperties(normalized);
+        if (mounted && profile) {
+          setCurrentUser(profile);
+          const userId = profile._id || profile.id || profile.userId;
+          if (userId) {
+            try {
+              // Try fetching properties that belong only to the current user
+              const remoteByUser = await api.getPropertiesByUser(userId);
+              if (mounted && Array.isArray(remoteByUser)) {
+                const normalized = remoteByUser.map(normalizePropertyFromBackend);
+                setProperties(normalized);
+                return;
+              }
+            } catch (err) {
+              console.warn('Could not load user properties from API, falling back to general properties', err.message || err);
+            }
+          }
+        }
+
+        // Fallback: fetch all properties and then filter locally to those that look like they belong to current user
+        try {
+          const remote = await api.getProperties();
+          if (mounted && Array.isArray(remote) && remote.length > 0) {
+            const normalized = remote.map(normalizePropertyFromBackend);
+
+            // If we have a current user, filter to only their properties
+            if (profile) {
+              const userId = profile._id || profile.id || profile.userId;
+              if (userId) {
+                const onlyMine = normalized.filter(p => {
+                  return p.ownerId && String(p.ownerId) === String(userId);
+                });
+                if (onlyMine.length > 0) {
+                  setProperties(onlyMine);
+                  return;
+                }
+              }
+            }
+
+            // otherwise set all remote
+            setProperties(normalized);
+            return;
+          }
+        } catch (err) {
+          console.warn('Could not load properties from API, using local data', err.message || err);
         }
       } catch (err) {
-        // backend not available or failed — keep localStorage copy
         console.warn('Could not load properties from API, using local data', err.message || err);
       }
     };
@@ -691,19 +835,42 @@ const LandlordProperty = () => {
   };
 
   const handleSaveProperty = (propertyData) => {
+    console.log('🔄 Saving property:', { modalMode, propertyData });
+    
     if (modalMode === 'edit') {
-      setProperties(prev => prev.map(p => p.id === propertyData.id ? propertyData : p));
+      console.log('✏️ Updating existing property...');
+      // optimistic local update
+      setProperties(prev => prev.map(p => p.id === propertyData.id ? { ...p, ...propertyData } : p));
       // Try remote update
       (async () => {
         try {
-          await api.updateProperty(propertyData.id, propertyData);
+          console.log('📡 Sending update to server...');
+          console.log('🆔 Property ID:', propertyData.id);
+          console.log('📦 Update data:', propertyData);
+          
+          const updated = await api.updateProperty(propertyData.id, propertyData);
+          console.log('✅ Server response:', updated);
+          
+          if (updated) {
+            // normalize server response to frontend format
+            const serverItem = normalizePropertyFromBackend(updated);
+            console.log('🔄 Normalized server item:', serverItem);
+            setProperties(prev => prev.map(p => p.id === serverItem.id || p.id === propertyData.id ? serverItem : p));
+            console.log('✅ Property updated successfully in frontend!');
+            setUpdateSuccess(true);
+            setTimeout(() => setUpdateSuccess(false), 3000); // Hide success message after 3 seconds
+          } else {
+            console.warn('⚠️ Server returned empty response');
+          }
         } catch (err) {
+          console.error('❌ Failed to update property on server:', err.message || err);
+          console.error('❌ Error details:', err);
           console.warn('Failed to update property on server, change kept locally', err.message || err);
         }
       })();
     } else {
       // create locally with temporary id then try creating on server
-      const tempId = propertyData.id || Date.now();
+      const tempId = Date.now();
       const item = { ...propertyData, id: tempId };
       setProperties(prev => [...prev, item]);
       (async () => {
@@ -711,7 +878,9 @@ const LandlordProperty = () => {
           const created = await api.createProperty(propertyData);
           // replace temp item id with server id if provided
           if (created && (created._id || created.id)) {
-            setProperties(prev => prev.map(p => p.id === tempId ? { ...p, id: created._id || created.id } : p));
+            // normalize server response into local shape
+            const serverItem = normalizePropertyFromBackend(created);
+            setProperties(prev => prev.map(p => p.id === tempId ? serverItem : p));
           }
         } catch (err) {
           console.warn('Failed to create property on server, saved locally', err.message || err);
@@ -740,6 +909,18 @@ const LandlordProperty = () => {
 
   return (
     <div className={`min-h-screen flex relative overflow-hidden ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-r from-pink-100 via-purple-100 to-indigo-200'}`}>
+      {/* Success Notification */}
+      {updateSuccess && (
+        <motion.div
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -50 }}
+          className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg"
+        >
+          ✅ Property updated successfully!
+        </motion.div>
+      )}
+      
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
@@ -947,8 +1128,8 @@ const LandlordProperty = () => {
               ) : (
                 <div className={
                   viewMode === 'grid'
-                    ? "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8"
-                    : "space-y-4"
+                    ? "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 overflow-visible"
+                    : "space-y-4 overflow-visible"
                 }>
                   {filteredProperties.map((property, index) => (
                     <PropertyCard

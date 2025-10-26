@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { verifyToken } from '../middlewares/auth.middleware.js';
 
 import {
   createProperty,
@@ -23,13 +24,14 @@ import {
 const router = Router();
 
 // CRUD routes
-router.post('/', createProperty);
+// Protected: create/update/delete require authentication
+router.post('/', verifyToken, createProperty);
 router.get('/search', searchPropertiesByLocation);
 router.get('/nearby', searchPropertiesNearby);
 router.get('/user/:userId', getPropertiesByUser);
 router.get('/', getAllProperties);
 router.get('/:id', getPropertyById);
-router.put('/:id', updateProperty);
-router.delete('/:id', deleteProperty);
+router.put('/:id', verifyToken, updateProperty);
+router.delete('/:id', verifyToken, deleteProperty);
 
 export default router;

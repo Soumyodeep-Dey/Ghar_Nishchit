@@ -59,17 +59,41 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // If parent provided onSave, call it with the transformed property data
-    const out = {
-      ...propertyData,
-      id: property?.id || Date.now(),
-      rent: propertyData.price,
+    console.log('📝 Modal form data:', propertyData);
+    console.log('🎯 Modal mode:', mode);
+    
+    // Transform data to match backend schema
+    const transformedData = {
+      title: propertyData.title,
+      description: propertyData.description,
+      propertyType: propertyData.propertyType,
+      address: propertyData.address,
+      price: parseFloat(propertyData.price) || 0,
+      bedrooms: parseInt(propertyData.bedrooms) || 0,
+      bathrooms: parseInt(propertyData.bathrooms) || 0,
+      area: 0, // Default area - can be added to form later
+      images: propertyData.images.map(img => typeof img === 'string' ? img : URL.createObjectURL(img)), // Convert File objects to URLs
+      amenities: [], // Default empty - can be added to form later
+      available: propertyData.available,
       status: propertyData.available ? 'Available' : 'Occupied',
-      createdAt: property?.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      rating: 4.5, // Default rating
+      trend: null, // Default trend
+      // Contact info will be auto-populated from logged-in user
+      policies: { // Default policies
+        petFriendly: false,
+        smokingAllowed: false,
+        furnished: false
+      }
     };
 
-    if (typeof onSave === 'function') onSave(out);
+    // Include the property ID for updates
+    if (mode === 'edit' && property?.id) {
+      transformedData.id = property.id;
+    }
+
+    console.log('📤 Transformed data being sent:', transformedData);
+
+    if (typeof onSave === 'function') onSave(transformedData);
     onClose();
   };
 

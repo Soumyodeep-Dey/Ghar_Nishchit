@@ -8,10 +8,23 @@ const getAuthHeader = () => {
 };
 
 async function request(path, options = {}) {
-    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}), ...getAuthHeader() };
+    const headers = { 
+        'Content-Type': 'application/json', 
+        ...(options.headers || {}), 
+        ...getAuthHeader() 
+    };
+    
+    console.log(`API Request: ${options.method || 'GET'} ${BASE}${path}`);
+    console.log('Headers:', headers);
+    if (options.body) console.log('Body:', options.body);
+    
     const res = await fetch(`${BASE}${path}`, { ...options, headers });
+    
+    console.log(`API Response: ${res.status} ${res.statusText}`);
+    
     if (!res.ok) {
         const text = await res.text().catch(() => '');
+        console.error('API Error:', text);
         const err = new Error(res.statusText || 'Request failed');
         err.status = res.status;
         err.body = text;
