@@ -6,6 +6,7 @@ import userRoutes from "./routes/user.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import favouritesRoutes from "./routes/favourites.routes.js";
 import tenantRoutes from "./routes/tenant.routes.js";
+import maintenanceRoutes from "./routes/maintenance.routes.js";
 
 dotenv.config(); // Load environment variables
 
@@ -28,6 +29,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/favourites", favouritesRoutes);
 app.use("/api/tenants", tenantRoutes);
+app.use("/api/maintenance", maintenanceRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

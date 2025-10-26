@@ -54,6 +54,36 @@ const api = {
     getMyTenants: () => request('/tenants', { method: 'GET' }),
     getTenantById: (tenantId) => request(`/tenants/${tenantId}`, { method: 'GET' }),
     getTenantStats: () => request('/tenants/stats', { method: 'GET' }),
+
+    // Maintenance Management
+    // Create new maintenance request
+    createMaintenanceRequest: (data) => request('/maintenance', { method: 'POST', body: JSON.stringify(data) }),
+
+    // Get maintenance requests
+    getLandlordMaintenanceRequests: (landlordId, filters = {}) => {
+        const params = new URLSearchParams(filters).toString();
+        return request(`/maintenance/landlord/${landlordId}${params ? '?' + params : ''}`, { method: 'GET' });
+    },
+    getTenantMaintenanceRequests: (tenantId, filters = {}) => {
+        const params = new URLSearchParams(filters).toString();
+        return request(`/maintenance/tenant/${tenantId}${params ? '?' + params : ''}`, { method: 'GET' });
+    },
+    getMaintenanceRequestById: (id) => request(`/maintenance/${id}`, { method: 'GET' }),
+    getMaintenanceByProperty: (propertyId) => request(`/maintenance/property/${propertyId}`, { method: 'GET' }),
+
+    // Update maintenance requests
+    updateMaintenanceRequest: (id, data) => request(`/maintenance/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    updateMaintenanceStatus: (id, status) => request(`/maintenance/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+
+    // Comments and assignments
+    addMaintenanceComment: (id, comment) => request(`/maintenance/${id}/comment`, { method: 'POST', body: JSON.stringify(comment) }),
+    assignTechnician: (id, assignmentData) => request(`/maintenance/${id}/assign`, { method: 'PATCH', body: JSON.stringify(assignmentData) }),
+
+    // Delete maintenance request
+    deleteMaintenanceRequest: (id) => request(`/maintenance/${id}`, { method: 'DELETE' }),
+
+    // Statistics
+    getMaintenanceStats: (landlordId) => request(`/maintenance/stats/${landlordId}`, { method: 'GET' }),
 };
 
 export default api;
