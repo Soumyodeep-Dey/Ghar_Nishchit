@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Building2, Users, Wallet, Settings, MessageSquare, ChevronLeft, Crown, Sparkles, LogOut } from 'lucide-react';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDarkMode } from '../../../useDarkMode.js';
 
 // Constants
 const SIDEBAR_WIDTHS = { collapsed: '4.5rem', expanded: '24rem' };
 const BREAKPOINT = 768;
-const ANIMATION_DURATION = 0.3;
 const USER_STATS = {
   properties: 12,
   tenants: 34,
@@ -70,16 +70,16 @@ const MENU_ITEMS = [
     color: 'from-rose-400 via-pink-400 to-pink-500',
     premium: false
   },
-  {
-    id: 'messages',
-    label: 'Messages',
-    icon: MessageSquare,
-    route: '/landlord/messages',
-    badge: 'messages',
-    description: 'Communication Hub',
-    color: 'from-violet-400 via-purple-400 to-purple-500',
-    premium: false
-  }
+  // {
+  //   id: 'messages',
+  //   label: 'Messages',
+  //   icon: MessageSquare,
+  //   route: '/landlord/messages',
+  //   badge: 'messages',
+  //   description: 'Communication Hub',
+  //   color: 'from-violet-400 via-purple-400 to-purple-500',
+  //   premium: false
+  // }
 ];
 
 const LandlordSideBar = ({ onSectionChange }) => {
