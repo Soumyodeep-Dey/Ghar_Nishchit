@@ -87,11 +87,11 @@ const PropertyDropdownMenu = ({ property, onEdit, onDelete, onView, onToggleStat
           initial={{ opacity: 0, scale: 0.8, y: -20, rotateX: -15 }}
           animate={{ opacity: 1, scale: 1, y: 0, rotateX: 0 }}
           exit={{ opacity: 0, scale: 0.8, y: -20, rotateX: -15 }}
-          transition={{ 
-            type: "spring", 
-            stiffness: 300, 
+          transition={{
+            type: "spring",
+            stiffness: 300,
             damping: 30,
-            duration: 0.2 
+            duration: 0.2
           }}
           className={`absolute right-0 top-full mt-3 w-64 backdrop-blur-2xl rounded-2xl shadow-2xl z-[9999] border border-white/20 ${theme.menuBg} overflow-visible`}
           style={{
@@ -100,10 +100,10 @@ const PropertyDropdownMenu = ({ property, onEdit, onDelete, onView, onToggleStat
             top: '100%',
             marginTop: '12px',
             zIndex: 9999,
-            background: darkMode 
+            background: darkMode
               ? 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)'
               : 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%)',
-            boxShadow: darkMode 
+            boxShadow: darkMode
               ? '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)'
               : '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05)'
           }}
@@ -114,13 +114,13 @@ const PropertyDropdownMenu = ({ property, onEdit, onDelete, onView, onToggleStat
               Property Actions
             </h3>
           </div>
-          
+
           {/* Menu Items */}
           <div className="p-2 space-y-1">
-            <motion.button 
+            <motion.button
               whileHover={{ scale: 1.02, x: 4 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => { onView(property); setShowMenu(false); }} 
+              onClick={() => { onView(property); setShowMenu(false); }}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
             >
               <div className={`p-2 rounded-lg ${darkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-600'} group-hover:scale-110 transition-transform`}>
@@ -132,10 +132,10 @@ const PropertyDropdownMenu = ({ property, onEdit, onDelete, onView, onToggleStat
               </div>
             </motion.button>
 
-            <motion.button 
+            <motion.button
               whileHover={{ scale: 1.02, x: 4 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => { onEdit(property); setShowMenu(false); }} 
+              onClick={() => { onEdit(property); setShowMenu(false); }}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
             >
               <div className={`p-2 rounded-lg ${darkMode ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-600'} group-hover:scale-110 transition-transform`}>
@@ -147,7 +147,7 @@ const PropertyDropdownMenu = ({ property, onEdit, onDelete, onView, onToggleStat
               </div>
             </motion.button>
 
-            <motion.button 
+            <motion.button
               whileHover={{ scale: 1.02, x: 4 }}
               whileTap={{ scale: 0.98 }}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
@@ -161,7 +161,7 @@ const PropertyDropdownMenu = ({ property, onEdit, onDelete, onView, onToggleStat
               </div>
             </motion.button>
 
-            <motion.button 
+            <motion.button
               whileHover={{ scale: 1.02, x: 4 }}
               whileTap={{ scale: 0.98 }}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
@@ -177,10 +177,10 @@ const PropertyDropdownMenu = ({ property, onEdit, onDelete, onView, onToggleStat
 
             <div className={`mx-2 my-2 h-px ${darkMode ? 'bg-white/10' : 'bg-gray-200'}`}></div>
 
-            <motion.button 
+            <motion.button
               whileHover={{ scale: 1.02, x: 4 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => { onToggleStatus(property.id); setShowMenu(false); }} 
+              onClick={() => { onToggleStatus(property.id); setShowMenu(false); }}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
             >
               <div className={`p-2 rounded-lg ${darkMode ? 'bg-orange-500/20 text-orange-400' : 'bg-orange-100 text-orange-600'} group-hover:scale-110 transition-transform`}>
@@ -192,10 +192,10 @@ const PropertyDropdownMenu = ({ property, onEdit, onDelete, onView, onToggleStat
               </div>
             </motion.button>
 
-            <motion.button 
+            <motion.button
               whileHover={{ scale: 1.02, x: 4 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => { onDelete(property.id); setShowMenu(false); }} 
+              onClick={() => { onDelete(property.id); setShowMenu(false); }}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.deleteMenuItem} hover:shadow-lg`}
             >
               <div className={`p-2 rounded-lg ${darkMode ? 'bg-red-500/20 text-red-400' : 'bg-red-100 text-red-600'} group-hover:scale-110 transition-transform`}>
@@ -604,73 +604,10 @@ const LandlordProperty = () => {
   const [currentSection] = useState('Properties');
   const { darkMode } = useDarkMode();
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
-  const [properties, setProperties] = useLocalStorage('landlord_properties', [
-    {
-      id: 1,
-      title: "Modern Downtown Loft",
-      description: "Stunning modern loft in the heart of downtown with panoramic city views",
-      location: "Manhattan, NY",
-      rent: 2800,
-      previousRent: 2600,
-      bedrooms: 2,
-      bathrooms: 2,
-      area: 1200,
-      propertyType: "apartment",
-      status: "Occupied",
-      amenities: ['wifi', 'parking', 'ac', 'tv'],
-      images: [],
-      rating: 4.8,
-      trend: 'up',
-      createdAt: '2024-01-01',
-      contact: { phone: '+1 234 567 8900', email: 'contact@modernloft.com', website: 'https://modernloft.com' },
-      socialMedia: { facebook: '', twitter: '', instagram: '' },
-      policies: { petFriendly: true, smokingAllowed: false, furnished: true }
-    },
-    {
-      id: 2,
-      title: "Luxury Penthouse",
-      description: "Exclusive penthouse with private rooftop terrace and premium amenities",
-      location: "Brooklyn, NY",
-      rent: 4200,
-      bedrooms: 3,
-      bathrooms: 2.5,
-      area: 1800,
-      propertyType: "apartment",
-      status: "Available",
-      amenities: ['wifi', 'parking', 'ac', 'tv', 'gym', 'pool'],
-      images: [],
-      rating: 4.9,
-      trend: 'up',
-      createdAt: '2024-01-02',
-      contact: { phone: '+1 234 567 8901', email: 'luxury@penthouse.com', website: '' },
-      socialMedia: { facebook: '', twitter: '', instagram: '' },
-      policies: { petFriendly: false, smokingAllowed: false, furnished: true }
-    },
-    {
-      id: 3,
-      title: "Cozy Studio Apartment",
-      description: "Perfect studio for young professionals with modern amenities",
-      location: "Queens, NY",
-      rent: 1800,
-      previousRent: 1750,
-      bedrooms: 0,
-      bathrooms: 1,
-      area: 650,
-      propertyType: "studio",
-      status: "Maintenance",
-      amenities: ['wifi', 'ac'],
-      images: [],
-      rating: 4.5,
-      trend: 'down',
-      createdAt: '2024-01-03',
-      contact: { phone: '+1 234 567 8902', email: 'cozy@studio.com', website: '' },
-      socialMedia: { facebook: '', twitter: '', instagram: '' },
-      policies: { petFriendly: true, smokingAllowed: false, furnished: false }
-    }
-  ]);
+  const [properties, setProperties] = useLocalStorage('landlord_properties', []);
 
   const [filteredProperties, setFilteredProperties] = useState(properties);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [_currentUser, setCurrentUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [sortBy, setSortBy] = useState('title');
@@ -836,7 +773,7 @@ const LandlordProperty = () => {
 
   const handleSaveProperty = (propertyData) => {
     console.log('🔄 Saving property:', { modalMode, propertyData });
-    
+
     if (modalMode === 'edit') {
       console.log('✏️ Updating existing property...');
       // optimistic local update
@@ -847,10 +784,10 @@ const LandlordProperty = () => {
           console.log('📡 Sending update to server...');
           console.log('🆔 Property ID:', propertyData.id);
           console.log('📦 Update data:', propertyData);
-          
+
           const updated = await api.updateProperty(propertyData.id, propertyData);
           console.log('✅ Server response:', updated);
-          
+
           if (updated) {
             // normalize server response to frontend format
             const serverItem = normalizePropertyFromBackend(updated);
@@ -920,7 +857,7 @@ const LandlordProperty = () => {
           ✅ Property updated successfully!
         </motion.div>
       )}
-      
+
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
