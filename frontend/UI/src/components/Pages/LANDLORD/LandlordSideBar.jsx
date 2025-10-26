@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Building2, Users, Wallet, Settings, MessageSquare, ChevronLeft, Crown, Sparkles, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -82,7 +82,7 @@ const MENU_ITEMS = [
   }
 ];
 
-const LandlordSideBar = ({ currentSection, onSectionChange }) => {
+const LandlordSideBar = ({ onSectionChange }) => {
   const { darkMode: isDark } = useDarkMode();
   const [isCollapsed, setIsCollapsed] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth < BREAKPOINT : false
@@ -90,9 +90,7 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
   const [sidebarWidth, setSidebarWidth] = useState(() =>
     isCollapsed ? SIDEBAR_WIDTHS.collapsed : SIDEBAR_WIDTHS.expanded
   );
-  const [hoveredItem, setHoveredItem] = useState(null);
   const [showTooltip, setShowTooltip] = useState(null);
-  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user') || '{}'));
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -112,13 +110,7 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
   }));
 
 
-  useEffect(() => {
-    const handleUserUpdate = () => setUser(JSON.parse(localStorage.getItem('user') || '{}'));
-    window.addEventListener('user:updated', handleUserUpdate);
-    return () => window.removeEventListener('user:updated', handleUserUpdate);
-  }, []);
-
-  const handleNavigation = (route, sectionName = null) => {
+  const handleNavigation = useCallback((route, sectionName = null) => {
     try {
       if (navigator.vibrate) navigator.vibrate(50);
       navigate(route);
@@ -127,7 +119,7 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
     } catch {
       window.location.href = route;
     }
-  };
+  }, [navigate, onSectionChange]);
 
   useEffect(() => {
     setSidebarWidth(isCollapsed ? SIDEBAR_WIDTHS.collapsed : SIDEBAR_WIDTHS.expanded);
@@ -163,7 +155,7 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isCollapsed, menuItems]);
+  }, [isCollapsed, menuItems, handleNavigation]);
 
   const handleItemClick = (item) => handleNavigation(item.route, item.label);
   const handleTooltip = (itemId, show) => isCollapsed && setShowTooltip(show ? itemId : null);
@@ -366,8 +358,8 @@ const LandlordSideBar = ({ currentSection, onSectionChange }) => {
                   initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1, duration: 0.5 }}
-                  onMouseEnter={() => { setHoveredItem(item.id); handleTooltip(item.id, true); }}
-                  onMouseLeave={() => { setHoveredItem(null); handleTooltip(item.id, false); }}
+                  onMouseEnter={() => { handleTooltip(item.id, true); }}
+                  onMouseLeave={() => { handleTooltip(item.id, false); }}
                   className="relative"
                 >
                   <motion.button

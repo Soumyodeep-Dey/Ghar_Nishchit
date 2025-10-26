@@ -1,100 +1,41 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
-import { useDarkMode } from '../../../useDarkMode.js';
-// Removed SidebarContext usage
 import {
   MessageSquare,
   Send,
   Paperclip,
   MoreVertical,
   Search,
-  Filter,
   Phone,
-  Video,
-  Info,
   Smile,
-  Image as ImageIcon,
   File,
   Calendar,
-  MapPin,
-  Star,
   Archive,
   Trash2,
   Forward,
   Reply,
   Edit3,
-  Copy,
   Download,
-  ExternalLink,
-  Clock,
   Check,
   CheckCheck,
   AlertCircle,
   Pin,
-  Bookmark,
-  Plus,
   X,
-  ChevronDown,
-  ChevronRight,
-  Users,
-  Hash,
-  Settings,
-  Bell,
-  BellOff,
   Volume2,
   VolumeX,
-  Mic,
-  MicOff,
-  Camera,
-  CameraOff,
-  Share2,
-  Eye,
-  EyeOff,
-  Lock,
-  Unlock,
-  Zap,
   Heart,
   ThumbsUp,
-  ThumbsDown,
   Laugh,
   Angry,
   Frown,
   Meh,
-  ChevronLeft,
-  ChevronUp,
-  Maximize2,
-  Minimize2,
-  RefreshCw,
-  Loader,
-  WifiOff,
-  Wifi,
-  UserPlus,
-  UserMinus,
-  Crown,
-  Shield,
-  Flag,
-  Moon,
-  Sun,
-  Palette,
-  Type,
   Bold,
   Italic,
-  Underline,
-  Link,
-  List,
-  AtSign,
-  Hash as HashTag,
-  DollarSign,
-  Home,
   Wrench,
   CreditCard,
   FileText,
-  Upload,
-  Folder,
-  FolderOpen,
-  Building2,
-  User
+  Building2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -104,7 +45,7 @@ const useLocalStorage = (key, initialValue) => {
     try {
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
+    } catch {
       return initialValue;
     }
   });
@@ -113,34 +54,12 @@ const useLocalStorage = (key, initialValue) => {
     try {
       setStoredValue(value);
       window.localStorage.setItem(key, JSON.stringify(value));
-    } catch (error) {
-      console.error('Error saving to localStorage:', error);
+    } catch {
+      console.error('Error saving to localStorage');
     }
   };
 
   return [storedValue, setValue];
-};
-
-const useSound = () => {
-  const playNotification = () => {
-    // Create a subtle notification sound
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-
-    oscillator.frequency.value = 800;
-    oscillator.type = 'sine';
-    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.3);
-  };
-
-  return { playNotification };
 };
 
 // Animated Components
@@ -196,8 +115,8 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
         <motion.div
           whileHover={{ scale: 1.02 }}
           className={`relative p-4 rounded-2xl shadow-lg ${isOwn
-              ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 dark:from-cyan-500 dark:to-cyan-600 text-white'
-              : 'bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-indigo-200 dark:border-slate-700 text-indigo-700 dark:text-cyan-100'
+            ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 dark:from-cyan-500 dark:to-cyan-600 text-white'
+            : 'bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-indigo-200 dark:border-slate-700 text-indigo-700 dark:text-cyan-100'
             } ${message.isForwarded ? 'border-l-4 border-pink-400 dark:border-pink-500' : ''}`}
         >
           {/* Forwarded indicator */}
@@ -417,8 +336,8 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
       whileHover={{ scale: 1.02, x: 5 }}
       onClick={onClick}
       className={`relative p-4 rounded-xl cursor-pointer transition-all duration-200 group ${isActive
-          ? 'bg-gradient-to-r from-indigo-500/20 to-indigo-600/20 dark:from-cyan-500/20 dark:to-cyan-600/20 border border-indigo-500/30 dark:border-cyan-500/30'
-          : 'hover:bg-indigo-50 dark:hover:bg-slate-800/50 border border-transparent'
+        ? 'bg-gradient-to-r from-indigo-500/20 to-indigo-600/20 dark:from-cyan-500/20 dark:to-cyan-600/20 border border-indigo-500/30 dark:border-cyan-500/30'
+        : 'hover:bg-indigo-50 dark:hover:bg-slate-800/50 border border-transparent'
         }`}
     >
       <div className="flex items-center space-x-3">
@@ -583,8 +502,6 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
   const [attachments, setAttachments] = useState([]);
   const [showEmoji, setShowEmoji] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [showFormatting, setShowFormatting] = useState(false);
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
   const fileInputRef = useRef(null);
@@ -767,7 +684,7 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
 
       {/* Quick actions */}
       <div className="flex flex-wrap gap-2">
-        {quickActions.map((action, index) => (
+        {quickActions.map((action) => (
           <motion.button
             key={action.action}
             whileHover={{ scale: 1.05 }}
@@ -935,8 +852,8 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
             onClick={message.trim() || attachments.length > 0 ? handleSend : undefined}
             disabled={!message.trim() && attachments.length === 0}
             className={`p-3 rounded-xl font-semibold transition-all duration-300 ${message.trim() || attachments.length > 0
-                ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 dark:from-cyan-500 dark:to-cyan-600 text-white hover:from-indigo-600 hover:to-indigo-700 dark:hover:from-cyan-600 dark:hover:to-cyan-700 shadow-lg'
-                : 'bg-indigo-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+              ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 dark:from-cyan-500 dark:to-cyan-600 text-white hover:from-indigo-600 hover:to-indigo-700 dark:hover:from-cyan-600 dark:hover:to-cyan-700 shadow-lg'
+              : 'bg-indigo-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
               }`}
           >
             <Send className="w-5 h-5" />
@@ -949,7 +866,6 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
 
 // Main Component
 const LandlordMessage = () => {
-  const { darkMode, toggleDarkMode } = useDarkMode();
   const [currentSection] = useState('Messages');
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
   const [conversations, setConversations] = useLocalStorage('landlord_conversations', [
@@ -1070,9 +986,7 @@ const LandlordMessage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [replyTo, setReplyTo] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
-  const { playNotification } = useSound();
 
   // Filter conversations
   const filteredConversations = useMemo(() => {
@@ -1259,8 +1173,8 @@ const LandlordMessage = () => {
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setFilterStatus(key)}
                       className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${filterStatus === key
-                          ? 'bg-indigo-500 dark:bg-cyan-500 text-white'
-                          : 'bg-indigo-100 dark:bg-slate-700 text-indigo-700 dark:text-cyan-200 hover:bg-indigo-200 dark:hover:bg-slate-600'
+                        ? 'bg-indigo-500 dark:bg-cyan-500 text-white'
+                        : 'bg-indigo-100 dark:bg-slate-700 text-indigo-700 dark:text-cyan-200 hover:bg-indigo-200 dark:hover:bg-slate-600'
                         }`}
                     >
                       {label}

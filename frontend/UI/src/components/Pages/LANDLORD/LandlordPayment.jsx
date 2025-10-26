@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
-// Removed SidebarContext usage
 import {
   CreditCard,
   DollarSign,
   TrendingUp,
-  TrendingDown,
   Calendar,
   Clock,
   CheckCircle,
@@ -14,91 +12,23 @@ import {
   AlertCircle,
   Download,
   Receipt,
-  Star,
   Crown,
-  Shield,
-  Zap,
   Building2,
   Users,
-  BarChart3,
-  PieChart,
-  Activity,
-  ArrowUp,
-  ArrowDown,
   Plus,
-  Minus,
-  Eye,
-  EyeOff,
-  Settings,
-  Bell,
-  BellOff,
-  RefreshCw,
-  Search,
-  Filter,
-  MoreVertical,
   Edit,
   Trash2,
-  Copy,
-  Share2,
-  ExternalLink,
-  FileText,
-  Image as ImageIcon,
-  Upload,
-  Phone,
-  Mail,
-  MessageCircle,
-  Bookmark,
-  Flag,
-  Archive,
-  Lock,
-  Unlock,
-  Gift,
-  Tag,
-  Percent,
-  Calculator,
   Wallet,
-  Banknote,
-  PiggyBank,
-  Coins,
-  HandCoins,
-  BadgeCheck,
-  Award,
   Trophy,
-  Target,
-  Sparkles,
-  Heart,
-  ThumbsUp,
-  Save,
   X,
   Check,
-  ChevronDown,
-  ChevronUp,
-  ChevronLeft,
-  ChevronRight,
   Info,
-  HelpCircle,
-  Globe,
-  Smartphone,
-  Tablet,
-  Monitor,
-  Laptop,
-  Wifi,
   Database,
-  Server,
-  Cloud,
   ShieldCheck,
-  Key,
-  Fingerprint,
-  Scan,
-  QrCode,
-  Link,
-  Paperclip,
   Loader,
   RotateCcw,
-  PlayCircle,
-  PauseCircle,
-  StopCircle,
-  ArrowRight
+  ArrowRight,
+  Search
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -120,8 +50,8 @@ const useLocalStorage = (key, initialValue) => {
     try {
       setStoredValue(value);
       window.localStorage.setItem(key, JSON.stringify(value));
-    } catch (error) {
-      console.error('Error saving to localStorage:', error);
+    } catch {
+      console.error('Error saving to localStorage');
     }
   };
 
@@ -153,7 +83,6 @@ const useCountUp = (end, duration = 2000, start = 0) => {
     if (end === start) return;
 
     const startTime = Date.now();
-    const endTime = startTime + duration;
 
     const updateCount = () => {
       const now = Date.now();
@@ -194,7 +123,7 @@ const useNotification = () => {
 };
 
 // Animated Components
-const AnimatedCard = ({ children, delay = 0, className = '', darkMode, ...props }) => {
+const AnimatedCard = ({ children, delay = 0, className = '', ...props }) => {
   const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
 
   return (
@@ -247,12 +176,12 @@ const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete, dar
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => onSelect(method.id)}
       className={`relative p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer overflow-hidden ${isSelected
-          ? darkMode
-            ? 'border-cyan-400 bg-cyan-400/10 shadow-lg shadow-cyan-400/20'
-            : 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/20'
-          : darkMode
-            ? 'border-slate-700 bg-slate-800/50 hover:border-slate-600 hover:bg-slate-800/70'
-            : 'border-indigo-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/50'
+        ? darkMode
+          ? 'border-cyan-400 bg-cyan-400/10 shadow-lg shadow-cyan-400/20'
+          : 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/20'
+        : darkMode
+          ? 'border-slate-700 bg-slate-800/50 hover:border-slate-600 hover:bg-slate-800/70'
+          : 'border-indigo-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/50'
         }`}
     >
       {/* Background pattern */}
@@ -351,7 +280,6 @@ const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete, dar
 
 // Subscription Plan Card Component
 const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular = false, darkMode }) => {
-  const [isHovered, setIsHovered] = useState(false);
   const isCurrentPlan = currentPlan?.id === plan.id;
   const canUpgrade = currentPlan && plan.tier > currentPlan.tier;
   const canDowngrade = currentPlan && plan.tier < currentPlan.tier;
@@ -362,14 +290,14 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={`relative p-8 rounded-3xl border-2 transition-all duration-500 overflow-hidden ${popular
-          ? darkMode
-            ? 'border-cyan-400 bg-gradient-to-br from-cyan-400/10 to-blue-500/10'
-            : 'border-pink-500 bg-gradient-to-br from-pink-300/20 via-purple-300/20 to-indigo-400/20'
-          : isCurrentPlan
-            ? 'border-emerald-500 bg-emerald-500/10'
-            : darkMode
-              ? 'border-slate-700 bg-slate-800/50 hover:border-slate-600 hover:bg-slate-800/70'
-              : 'border-indigo-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/50'
+        ? darkMode
+          ? 'border-cyan-400 bg-gradient-to-br from-cyan-400/10 to-blue-500/10'
+          : 'border-pink-500 bg-gradient-to-br from-pink-300/20 via-purple-300/20 to-indigo-400/20'
+        : isCurrentPlan
+          ? 'border-emerald-500 bg-emerald-500/10'
+          : darkMode
+            ? 'border-slate-700 bg-slate-800/50 hover:border-slate-600 hover:bg-slate-800/70'
+            : 'border-indigo-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/50'
         }`}
     >
       {/* Popular badge */}
@@ -378,8 +306,8 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           className={`absolute -top-3 left-1/2 transform -translate-x-1/2 px-6 py-2 ${darkMode
-              ? 'bg-gradient-to-r from-cyan-500 to-blue-500'
-              : 'bg-gradient-to-r from-pink-500 to-purple-500'
+            ? 'bg-gradient-to-r from-cyan-500 to-blue-500'
+            : 'bg-gradient-to-r from-pink-500 to-purple-500'
             } rounded-full`}
         >
           <span className="text-white text-sm font-bold flex items-center space-x-1">
@@ -406,8 +334,8 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
           animate={{ rotate: 360 }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           className={`absolute -top-10 -right-10 w-40 h-40 ${darkMode
-              ? 'bg-gradient-to-br from-cyan-500 to-blue-500'
-              : 'bg-gradient-to-br from-indigo-500 to-purple-500'
+            ? 'bg-gradient-to-br from-cyan-500 to-blue-500'
+            : 'bg-gradient-to-br from-indigo-500 to-purple-500'
             } rounded-full blur-2xl`}
         />
       </div>
@@ -415,15 +343,14 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
       <div className="relative z-10">
         {/* Plan header */}
         <div className="text-center mb-8">
-          <motion.div
-            whileHover={{ scale: 1.1, rotate: 10 }}
+          <div
             className={`w-16 h-16 mx-auto mb-4 rounded-2xl ${darkMode
-                ? 'bg-gradient-to-br from-cyan-500 to-blue-600'
-                : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+              ? 'bg-gradient-to-br from-cyan-500 to-blue-600'
+              : 'bg-gradient-to-br from-indigo-500 to-purple-600'
               } flex items-center justify-center`}
           >
             {plan.icon}
-          </motion.div>
+          </div>
 
           <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-2`}>{plan.name}</h3>
           <p className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>{plan.description}</p>
@@ -499,18 +426,18 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
           }}
           disabled={isCurrentPlan}
           className={`w-full py-4 rounded-xl font-semibold transition-all duration-300 ${isCurrentPlan
-              ? 'bg-gray-500/20 text-gray-400 cursor-not-allowed'
-              : popular
-                ? darkMode
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-600 hover:to-blue-600 shadow-lg shadow-cyan-500/25'
-                  : 'bg-gradient-to-r from-pink-500 to-purple-500 text-white hover:from-pink-600 hover:to-purple-600 shadow-lg shadow-pink-500/25'
-                : canUpgrade
-                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/25'
-                  : canDowngrade
-                    ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 shadow-lg shadow-orange-500/25'
-                    : darkMode
-                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-600 hover:to-blue-700 shadow-lg shadow-cyan-500/25'
-                      : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25'
+            ? 'bg-gray-500/20 text-gray-400 cursor-not-allowed'
+            : popular
+              ? darkMode
+                ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-600 hover:to-blue-600 shadow-lg shadow-cyan-500/25'
+                : 'bg-gradient-to-r from-pink-500 to-purple-500 text-white hover:from-pink-600 hover:to-purple-600 shadow-lg shadow-pink-500/25'
+              : canUpgrade
+                ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/25'
+                : canDowngrade
+                  ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 shadow-lg shadow-orange-500/25'
+                  : darkMode
+                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-600 hover:to-blue-700 shadow-lg shadow-cyan-500/25'
+                    : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25'
             }`}
         >
           {isCurrentPlan
@@ -572,8 +499,8 @@ const PaymentHistoryItem = ({ payment, onDownloadReceipt, onViewDetails, darkMod
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ scale: 1.01, boxShadow: darkMode ? "0 10px 30px rgba(0,0,0,0.4)" : "0 10px 30px rgba(0,0,0,0.1)" }}
       className={`${darkMode
-          ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700 hover:border-slate-600'
-          : 'bg-white/90 backdrop-blur-xl border border-indigo-200 hover:border-indigo-300'
+        ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700 hover:border-slate-600'
+        : 'bg-white/90 backdrop-blur-xl border border-indigo-200 hover:border-indigo-300'
         } rounded-xl p-6 transition-all duration-300`}
     >
       <div className="flex items-center justify-between mb-4">
@@ -581,8 +508,8 @@ const PaymentHistoryItem = ({ payment, onDownloadReceipt, onViewDetails, darkMod
           <motion.div
             whileHover={{ scale: 1.1, rotate: 5 }}
             className={`w-12 h-12 ${darkMode
-                ? 'bg-gradient-to-br from-cyan-500 to-blue-600'
-                : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+              ? 'bg-gradient-to-br from-cyan-500 to-blue-600'
+              : 'bg-gradient-to-br from-indigo-500 to-purple-600'
               } rounded-xl flex items-center justify-center`}
           >
             <Receipt className="w-6 h-6 text-white" />
@@ -619,8 +546,8 @@ const PaymentHistoryItem = ({ payment, onDownloadReceipt, onViewDetails, darkMod
               whileTap={{ scale: 0.95 }}
               onClick={() => onViewDetails(payment)}
               className={`px-3 py-1 ${darkMode
-                  ? 'bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30'
-                  : 'bg-indigo-500/20 text-indigo-600 hover:bg-indigo-500/30'
+                ? 'bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30'
+                : 'bg-indigo-500/20 text-indigo-600 hover:bg-indigo-500/30'
                 } rounded-lg transition-colors text-sm`}
             >
               View Details
@@ -653,12 +580,12 @@ const BillingSummary = ({ summary, onPayNow, darkMode }) => {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       className={`relative overflow-hidden rounded-2xl p-8 ${isOverdue
-          ? 'bg-gradient-to-br from-red-500/20 to-red-600/20 border-2 border-red-500/50'
-          : isDueSoon
-            ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/50'
-            : darkMode
-              ? 'bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-2 border-cyan-500/50'
-              : 'bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border-2 border-indigo-500/50'
+        ? 'bg-gradient-to-br from-red-500/20 to-red-600/20 border-2 border-red-500/50'
+        : isDueSoon
+          ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/50'
+          : darkMode
+            ? 'bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-2 border-cyan-500/50'
+            : 'bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border-2 border-indigo-500/50'
         }`}
     >
       {/* Background animation */}
@@ -674,8 +601,8 @@ const BillingSummary = ({ summary, onPayNow, darkMode }) => {
             ease: "easeInOut"
           }}
           className={`absolute -top-20 -right-20 w-40 h-40 ${darkMode
-              ? 'bg-gradient-to-br from-cyan-400'
-              : 'bg-gradient-to-br from-indigo-400'
+            ? 'bg-gradient-to-br from-cyan-400'
+            : 'bg-gradient-to-br from-indigo-400'
             } to-transparent rounded-full`}
         />
       </div>
@@ -755,12 +682,12 @@ const BillingSummary = ({ summary, onPayNow, darkMode }) => {
           whileTap={{ scale: 0.95 }}
           onClick={onPayNow}
           className={`w-full py-4 rounded-xl font-bold text-white transition-all duration-300 ${isOverdue
-              ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-lg shadow-red-500/25'
-              : isDueSoon
-                ? 'bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 shadow-lg shadow-yellow-500/25'
-                : darkMode
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg shadow-cyan-500/25'
-                  : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25'
+            ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-lg shadow-red-500/25'
+            : isDueSoon
+              ? 'bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 shadow-lg shadow-yellow-500/25'
+              : darkMode
+                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg shadow-cyan-500/25'
+                : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25'
             }`}
         >
           {isOverdue ? 'Pay Overdue Amount' : 'Pay Now'}
@@ -817,8 +744,8 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment, darkMode }) => {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
         className={`${darkMode
-            ? 'bg-slate-800/90 backdrop-blur-xl border border-slate-700'
-            : 'bg-white/90 backdrop-blur-xl border border-indigo-200'
+          ? 'bg-slate-800/90 backdrop-blur-xl border border-slate-700'
+          : 'bg-white/90 backdrop-blur-xl border border-indigo-200'
           } rounded-2xl w-full max-w-md overflow-hidden`}
         onClick={e => e.stopPropagation()}
       >
@@ -858,12 +785,12 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment, darkMode }) => {
               whileHover={{ scale: 1.02 }}
               onClick={() => setSelectedMethod('card')}
               className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedMethod === 'card'
-                  ? darkMode
-                    ? 'border-cyan-400 bg-cyan-400/10'
-                    : 'border-indigo-500 bg-indigo-500/10'
-                  : darkMode
-                    ? 'border-slate-600 hover:border-slate-500'
-                    : 'border-indigo-200 hover:border-indigo-300'
+                ? darkMode
+                  ? 'border-cyan-400 bg-cyan-400/10'
+                  : 'border-indigo-500 bg-indigo-500/10'
+                : darkMode
+                  ? 'border-slate-600 hover:border-slate-500'
+                  : 'border-indigo-200 hover:border-indigo-300'
                 }`}
             >
               <div className="flex items-center space-x-3">
@@ -883,12 +810,12 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment, darkMode }) => {
               whileHover={{ scale: 1.02 }}
               onClick={() => setSelectedMethod('paypal')}
               className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedMethod === 'paypal'
-                  ? darkMode
-                    ? 'border-cyan-400 bg-cyan-400/10'
-                    : 'border-indigo-500 bg-indigo-500/10'
-                  : darkMode
-                    ? 'border-slate-600 hover:border-slate-500'
-                    : 'border-indigo-200 hover:border-indigo-300'
+                ? darkMode
+                  ? 'border-cyan-400 bg-cyan-400/10'
+                  : 'border-indigo-500 bg-indigo-500/10'
+                : darkMode
+                  ? 'border-slate-600 hover:border-slate-500'
+                  : 'border-indigo-200 hover:border-indigo-300'
                 }`}
             >
               <div className="flex items-center space-x-3">
@@ -919,8 +846,8 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment, darkMode }) => {
                   value={cardDetails.number}
                   onChange={(e) => setCardDetails(prev => ({ ...prev, number: e.target.value }))}
                   className={`w-full p-3 ${darkMode
-                      ? 'bg-slate-700/50 border border-slate-600 text-cyan-100 placeholder-blue-300'
-                      : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700 placeholder-gray-500'
+                    ? 'bg-slate-700/50 border border-slate-600 text-cyan-100 placeholder-blue-300'
+                    : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700 placeholder-gray-500'
                     } rounded-lg focus:${darkMode ? 'border-cyan-400' : 'border-indigo-500'} focus:outline-none`}
                 />
               </div>
@@ -934,8 +861,8 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment, darkMode }) => {
                     value={cardDetails.expiry}
                     onChange={(e) => setCardDetails(prev => ({ ...prev, expiry: e.target.value }))}
                     className={`w-full p-3 ${darkMode
-                        ? 'bg-slate-700/50 border border-slate-600 text-cyan-100 placeholder-blue-300'
-                        : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700 placeholder-gray-500'
+                      ? 'bg-slate-700/50 border border-slate-600 text-cyan-100 placeholder-blue-300'
+                      : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700 placeholder-gray-500'
                       } rounded-lg focus:${darkMode ? 'border-cyan-400' : 'border-indigo-500'} focus:outline-none`}
                   />
                 </div>
@@ -948,8 +875,8 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment, darkMode }) => {
                     value={cardDetails.cvv}
                     onChange={(e) => setCardDetails(prev => ({ ...prev, cvv: e.target.value }))}
                     className={`w-full p-3 ${darkMode
-                        ? 'bg-slate-700/50 border border-slate-600 text-cyan-100 placeholder-blue-300'
-                        : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700 placeholder-gray-500'
+                      ? 'bg-slate-700/50 border border-slate-600 text-cyan-100 placeholder-blue-300'
+                      : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700 placeholder-gray-500'
                       } rounded-lg focus:${darkMode ? 'border-cyan-400' : 'border-indigo-500'} focus:outline-none`}
                   />
                 </div>
@@ -963,8 +890,8 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment, darkMode }) => {
                   value={cardDetails.name}
                   onChange={(e) => setCardDetails(prev => ({ ...prev, name: e.target.value }))}
                   className={`w-full p-3 ${darkMode
-                      ? 'bg-slate-700/50 border border-slate-600 text-cyan-100 placeholder-blue-300'
-                      : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700 placeholder-gray-500'
+                    ? 'bg-slate-700/50 border border-slate-600 text-cyan-100 placeholder-blue-300'
+                    : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700 placeholder-gray-500'
                     } rounded-lg focus:${darkMode ? 'border-cyan-400' : 'border-indigo-500'} focus:outline-none`}
                 />
               </div>
@@ -986,8 +913,8 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment, darkMode }) => {
             onClick={handlePayment}
             disabled={!selectedMethod || isProcessing}
             className={`w-full py-4 ${darkMode
-                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg shadow-cyan-500/25'
-                : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25'
+              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg shadow-cyan-500/25'
+              : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25'
               } text-white rounded-xl font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2`}
           >
             {isProcessing ? (
@@ -1020,11 +947,11 @@ const NotificationToast = ({ notifications, onRemove, darkMode }) => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 300 }}
             className={`p-4 rounded-lg shadow-lg backdrop-blur-xl border max-w-sm ${notification.type === 'success' ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' :
-                notification.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-400' :
-                  notification.type === 'warning' ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-400' :
-                    darkMode
-                      ? 'bg-cyan-500/20 border-cyan-500/30 text-cyan-400'
-                      : 'bg-indigo-500/20 border-indigo-500/30 text-indigo-600'
+              notification.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-400' :
+                notification.type === 'warning' ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-400' :
+                  darkMode
+                    ? 'bg-cyan-500/20 border-cyan-500/30 text-cyan-400'
+                    : 'bg-indigo-500/20 border-indigo-500/30 text-indigo-600'
               }`}
           >
             <div className="flex items-start space-x-3">
@@ -1094,8 +1021,8 @@ const AddPaymentMethodModal = ({ isOpen, onClose, onAdd, darkMode }) => {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
         className={`${darkMode
-            ? 'bg-slate-800/90 backdrop-blur-xl border border-slate-700'
-            : 'bg-white/90 backdrop-blur-xl border border-indigo-200'
+          ? 'bg-slate-800/90 backdrop-blur-xl border border-slate-700'
+          : 'bg-white/90 backdrop-blur-xl border border-indigo-200'
           } rounded-2xl w-full max-w-md overflow-hidden`}
         onClick={e => e.stopPropagation()}
       >
@@ -1118,8 +1045,8 @@ const AddPaymentMethodModal = ({ isOpen, onClose, onAdd, darkMode }) => {
             <button
               onClick={() => setPaymentType('card')}
               className={`flex-1 py-2 text-center font-semibold rounded-l-lg transition-all ${paymentType === 'card'
-                  ? darkMode ? 'bg-cyan-500 text-white' : 'bg-indigo-500 text-white'
-                  : darkMode ? 'bg-slate-700 text-blue-200' : 'bg-gray-200 text-gray-600'
+                ? darkMode ? 'bg-cyan-500 text-white' : 'bg-indigo-500 text-white'
+                : darkMode ? 'bg-slate-700 text-blue-200' : 'bg-gray-200 text-gray-600'
                 }`}
             >
               Card
@@ -1127,8 +1054,8 @@ const AddPaymentMethodModal = ({ isOpen, onClose, onAdd, darkMode }) => {
             <button
               onClick={() => setPaymentType('upi')}
               className={`flex-1 py-2 text-center font-semibold rounded-r-lg transition-all ${paymentType === 'upi'
-                  ? darkMode ? 'bg-cyan-500 text-white' : 'bg-indigo-500 text-white'
-                  : darkMode ? 'bg-slate-700 text-blue-200' : 'bg-gray-200 text-gray-600'
+                ? darkMode ? 'bg-cyan-500 text-white' : 'bg-indigo-500 text-white'
+                : darkMode ? 'bg-slate-700 text-blue-200' : 'bg-gray-200 text-gray-600'
                 }`}
             >
               UPI
@@ -1183,8 +1110,8 @@ const AddPaymentMethodModal = ({ isOpen, onClose, onAdd, darkMode }) => {
             whileTap={{ scale: 0.95 }}
             onClick={handleAdd}
             className={`w-full py-3 ${darkMode
-                ? 'bg-gradient-to-r from-cyan-500 to-blue-600'
-                : 'bg-gradient-to-r from-indigo-500 to-purple-600'
+              ? 'bg-gradient-to-r from-cyan-500 to-blue-600'
+              : 'bg-gradient-to-r from-indigo-500 to-purple-600'
               } text-white rounded-xl font-bold`}
           >
             Save Payment Method
@@ -1204,7 +1131,7 @@ const LandlordPayment = () => {
   const [showAddPaymentModal, setShowAddPaymentModal] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState(0);
 
-  const { darkMode, toggleDarkMode } = useDarkMode();
+  const { darkMode } = useDarkMode();
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
   const { notifications, addNotification, removeNotification } = useNotification();
 
@@ -1375,7 +1302,6 @@ const LandlordPayment = () => {
   };
 
   const handleUpgradePlan = (plan) => {
-    const currentTier = currentPlan?.tier || 0;
     const upgradeCost = plan.monthlyPrice - (currentPlan?.monthlyPrice || 0);
 
     addNotification({
@@ -1441,8 +1367,8 @@ const LandlordPayment = () => {
 
   return (
     <div className={`min-h-screen ${darkMode
-        ? 'bg-gradient-to-br from-gray-900 via-slate-900 to-blue-950'
-        : 'bg-gradient-to-br from-white via-indigo-50 to-purple-100'
+      ? 'bg-gradient-to-br from-gray-900 via-slate-900 to-blue-950'
+      : 'bg-gradient-to-br from-white via-indigo-50 to-purple-100'
       } flex relative overflow-hidden`}>
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
@@ -1450,16 +1376,16 @@ const LandlordPayment = () => {
           animate={{ rotate: 360, scale: [1, 1.1, 1] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           className={`absolute -top-40 -right-40 w-80 h-80 ${darkMode
-              ? 'bg-gradient-to-r from-cyan-500/10 to-blue-500/10'
-              : 'bg-gradient-to-r from-indigo-300/20 to-purple-300/20'
+            ? 'bg-gradient-to-r from-cyan-500/10 to-blue-500/10'
+            : 'bg-gradient-to-r from-indigo-300/20 to-purple-300/20'
             } rounded-full blur-3xl`}
         />
         <motion.div
           animate={{ rotate: -360, scale: [1.1, 1, 1.1] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
           className={`absolute -bottom-40 -left-40 w-80 h-80 ${darkMode
-              ? 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10'
-              : 'bg-gradient-to-r from-purple-300/20 to-pink-300/20'
+            ? 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10'
+            : 'bg-gradient-to-r from-purple-300/20 to-pink-300/20'
             } rounded-full blur-3xl`}
         />
       </div>
@@ -1480,8 +1406,8 @@ const LandlordPayment = () => {
             >
               <motion.h1
                 className={`text-5xl font-bold mb-4 ${darkMode
-                    ? 'bg-gradient-to-r from-cyan-300 via-blue-300 to-cyan-300 bg-clip-text text-transparent'
-                    : 'bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent'
+                  ? 'bg-gradient-to-r from-cyan-300 via-blue-300 to-cyan-300 bg-clip-text text-transparent'
+                  : 'bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent'
                   }`}
               >
                 Payment & Billing
@@ -1501,15 +1427,15 @@ const LandlordPayment = () => {
               <AnimatedCard
                 darkMode={darkMode}
                 className={`${darkMode
-                    ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700'
-                    : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
+                  ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700'
+                  : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
                   } rounded-2xl p-6 text-center`}
               >
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className={`w-12 h-12 mx-auto mb-4 rounded-xl ${darkMode
-                      ? 'bg-gradient-to-br from-cyan-500 to-blue-600'
-                      : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+                    ? 'bg-gradient-to-br from-cyan-500 to-blue-600'
+                    : 'bg-gradient-to-br from-indigo-500 to-purple-600'
                     } flex items-center justify-center`}
                 >
                   <DollarSign className="w-6 h-6 text-white" />
@@ -1524,8 +1450,8 @@ const LandlordPayment = () => {
                 delay={0.1}
                 darkMode={darkMode}
                 className={`${darkMode
-                    ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700'
-                    : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
+                  ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700'
+                  : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
                   } rounded-2xl p-6 text-center`}
               >
                 <motion.div
@@ -1544,15 +1470,15 @@ const LandlordPayment = () => {
                 delay={0.2}
                 darkMode={darkMode}
                 className={`${darkMode
-                    ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700'
-                    : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
+                  ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700'
+                  : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
                   } rounded-2xl p-6 text-center`}
               >
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className={`w-12 h-12 mx-auto mb-4 rounded-xl ${darkMode
-                      ? 'bg-gradient-to-br from-blue-500 to-purple-600'
-                      : 'bg-gradient-to-br from-purple-500 to-pink-600'
+                    ? 'bg-gradient-to-br from-blue-500 to-purple-600'
+                    : 'bg-gradient-to-br from-purple-500 to-pink-600'
                     } flex items-center justify-center`}
                 >
                   <Crown className="w-6 h-6 text-white" />
@@ -1565,8 +1491,8 @@ const LandlordPayment = () => {
                 delay={0.3}
                 darkMode={darkMode}
                 className={`${darkMode
-                    ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700'
-                    : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
+                  ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700'
+                  : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
                   } rounded-2xl p-6 text-center`}
               >
                 <motion.div
@@ -1583,15 +1509,15 @@ const LandlordPayment = () => {
                 delay={0.4}
                 darkMode={darkMode}
                 className={`${darkMode
-                    ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700'
-                    : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
+                  ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700'
+                  : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
                   } rounded-2xl p-6 text-center`}
               >
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className={`w-12 h-12 mx-auto mb-4 rounded-xl ${darkMode
-                      ? 'bg-gradient-to-br from-cyan-500 to-blue-600'
-                      : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+                    ? 'bg-gradient-to-br from-cyan-500 to-blue-600'
+                    : 'bg-gradient-to-br from-indigo-500 to-purple-600'
                     } flex items-center justify-center`}
                 >
                   <CreditCard className="w-6 h-6 text-white" />
@@ -1607,8 +1533,8 @@ const LandlordPayment = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
               className={`flex space-x-1 mb-8 ${darkMode
-                  ? 'bg-slate-800/50 border border-slate-700'
-                  : 'bg-white/50 border border-indigo-200'
+                ? 'bg-slate-800/50 border border-slate-700'
+                : 'bg-white/50 border border-indigo-200'
                 } p-1 rounded-2xl backdrop-blur-xl`}
             >
               {[
@@ -1616,22 +1542,22 @@ const LandlordPayment = () => {
                 { key: 'plans', label: 'Subscription Plans', icon: Crown },
                 { key: 'methods', label: 'Payment Methods', icon: CreditCard },
                 { key: 'history', label: 'Payment History', icon: Clock }
-              ].map(({ key, label, icon: Icon }) => (
+              ].map(({ key, label, icon }) => (
                 <motion.button
                   key={key}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setActiveTab(key)}
                   className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${activeTab === key
-                      ? darkMode
-                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
-                        : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
-                      : darkMode
-                        ? 'text-blue-200 hover:text-cyan-100 hover:bg-slate-700/50'
-                        : 'text-gray-600 hover:text-indigo-700 hover:bg-indigo-100/50'
+                    ? darkMode
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
+                      : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
+                    : darkMode
+                      ? 'text-blue-200 hover:text-cyan-100 hover:bg-slate-700/50'
+                      : 'text-gray-600 hover:text-indigo-700 hover:bg-indigo-100/50'
                     }`}
                 >
-                  <Icon className="w-5 h-5" />
+                  {React.createElement(icon, { className: "w-5 h-5" })}
                   <span>{label}</span>
                 </motion.button>
               ))}
@@ -1661,8 +1587,8 @@ const LandlordPayment = () => {
                     delay={0.2}
                     darkMode={darkMode}
                     className={`${darkMode
-                        ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700'
-                        : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
+                      ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700'
+                      : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
                       } rounded-2xl p-8`}
                   >
                     <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-6`}>Usage This Month</h3>
@@ -1785,8 +1711,8 @@ const LandlordPayment = () => {
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setShowAddPaymentModal(true)}
                         className={`px-6 py-3 ${darkMode
-                            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700'
-                            : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700'
+                          ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700'
+                          : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700'
                           } text-white rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2`}
                       >
                         <Plus className="w-5 h-5" />
@@ -1795,7 +1721,7 @@ const LandlordPayment = () => {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {paymentMethods.map((method, index) => (
+                      {paymentMethods.map((method) => (
                         <PaymentMethodCard
                           key={method.id}
                           method={method}
@@ -1846,8 +1772,8 @@ const LandlordPayment = () => {
                             type="text"
                             placeholder="Search payments..."
                             className={`pl-10 pr-4 py-2 ${darkMode
-                                ? 'bg-slate-700/50 border border-slate-600 text-cyan-100 placeholder-blue-300'
-                                : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700 placeholder-gray-500'
+                              ? 'bg-slate-700/50 border border-slate-600 text-cyan-100 placeholder-blue-300'
+                              : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700 placeholder-gray-500'
                               } rounded-lg focus:${darkMode ? 'border-cyan-400' : 'border-indigo-500'} focus:outline-none`}
                           />
                         </div>

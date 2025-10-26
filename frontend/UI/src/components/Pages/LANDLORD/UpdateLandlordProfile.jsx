@@ -222,7 +222,7 @@ export default function UpdateLandlordProfile() {
     };
 
     loadUserData();
-  }, [navigate]);
+  }, [navigate, serverStatus]);
 
   // Validation functions
   const validateEmail = (email) => {
@@ -231,8 +231,8 @@ export default function UpdateLandlordProfile() {
   };
 
   const validatePhone = (phone) => {
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
+    const phoneRegex = /^[+]?[1-9][\d]{0,15}$/;
+    return phoneRegex.test(phone.replace(/[\s\-()]/g, ''));
   };
 
   const validatePassword = (password) => {
@@ -562,8 +562,8 @@ export default function UpdateLandlordProfile() {
 
             {message && (
               <div className={`mb-4 p-3 rounded-lg text-sm text-center font-medium flex items-center justify-center gap-2 ${message.includes('successfully')
-                  ? 'text-green-700 bg-green-100 border border-green-300'
-                  : 'text-red-700 bg-red-100 border border-red-300'
+                ? 'text-green-700 bg-green-100 border border-green-300'
+                : 'text-red-700 bg-red-100 border border-red-300'
                 }`}>
                 {message.includes('successfully') ? (
                   <CheckCircle className="w-4 h-4" />
@@ -587,8 +587,8 @@ export default function UpdateLandlordProfile() {
                   value={formData.name}
                   onChange={handleChange}
                   className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${errors.name
-                      ? 'border-red-500 focus:ring-red-400'
-                      : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
+                    ? 'border-red-500 focus:ring-red-400'
+                    : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
                     } ${themeClasses.inputText} ${themeClasses.inputPlaceholder}`}
                   placeholder="Your full name"
                   required
@@ -613,8 +613,8 @@ export default function UpdateLandlordProfile() {
                   value={formData.email}
                   onChange={handleChange}
                   className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${errors.email
-                      ? 'border-red-500 focus:ring-red-400'
-                      : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
+                    ? 'border-red-500 focus:ring-red-400'
+                    : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
                     } ${themeClasses.inputText} ${themeClasses.inputPlaceholder}`}
                   placeholder="you@example.com"
                   required
@@ -639,8 +639,8 @@ export default function UpdateLandlordProfile() {
                   value={formData.phone}
                   onChange={handleChange}
                   className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${errors.phone
-                      ? 'border-red-500 focus:ring-red-400'
-                      : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
+                    ? 'border-red-500 focus:ring-red-400'
+                    : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
                     } ${themeClasses.inputText} ${themeClasses.inputPlaceholder}`}
                   placeholder="Your phone number"
                   required
@@ -666,8 +666,8 @@ export default function UpdateLandlordProfile() {
                     value={formData.password}
                     onChange={handleChange}
                     className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${errors.password
-                        ? 'border-red-500 focus:ring-red-400'
-                        : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
+                      ? 'border-red-500 focus:ring-red-400'
+                      : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
                       } ${themeClasses.inputText} ${themeClasses.inputPlaceholder}`}
                     placeholder="Leave blank to keep current password"
                   />
@@ -712,8 +712,8 @@ export default function UpdateLandlordProfile() {
                 type="submit"
                 disabled={isLoading}
                 className={`w-full py-3 sm:py-4 rounded-lg font-bold text-center transition-all duration-300 hover:shadow-xl hover:scale-105 text-sm sm:text-base transform active:scale-95 ${isLoading
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : `${themeClasses.buttonPrimaryBg} ${themeClasses.buttonPrimaryText} ${themeClasses.buttonPrimaryHover}`
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : `${themeClasses.buttonPrimaryBg} ${themeClasses.buttonPrimaryText} ${themeClasses.buttonPrimaryHover}`
                   }`}
               >
                 {isLoading ? (

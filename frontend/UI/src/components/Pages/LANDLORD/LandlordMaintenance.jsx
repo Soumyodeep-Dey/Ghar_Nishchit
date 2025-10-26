@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import { useDarkMode } from '../../../useDarkMode.js';
-// Removed SidebarContext usage
 import {
   Wrench,
   Plus,
@@ -12,7 +11,6 @@ import {
   Edit,
   Trash2,
   Eye,
-  Upload,
   Calendar,
   MapPin,
   User,
@@ -20,105 +18,34 @@ import {
   AlertCircle,
   CheckCircle,
   XCircle,
-  Pause,
   Play,
+  Pause,
   FileText,
-  Image as ImageIcon,
-  Camera,
+  ImageIcon,
   Download,
-  Share2,
-  Copy,
   Phone,
   Mail,
   MessageCircle,
   Star,
   Flag,
-  Bookmark,
   Archive,
   RefreshCw,
-  Bell,
-  BellOff,
-  Settings,
   TrendingUp,
   TrendingDown,
   BarChart3,
-  PieChart,
-  Activity,
   DollarSign,
   Home,
   Building2,
   Users,
   Zap,
-  Hammer,
-  Paintbrush,
   Droplets,
-  Thermometer,
   Shield,
-  Lock,
-  Key,
-  Lightbulb,
-  Wifi,
-  Tv,
   AirVent,
-  Wind,
-  Snowflake,
-  Sun,
-  Moon,
-  Battery,
-  Plug,
-  Router,
   Monitor,
-  Smartphone,
-  Tablet,
-  Laptop,
-  HardDrive,
-  Cpu,
-  MemoryStick,
-  Database,
-  Server,
-  Globe,
-  Link,
-  ExternalLink,
-  Send,
-  Reply,
-  Forward,
-  Paperclip,
-  Smile,
-  Heart,
-  ThumbsUp,
-  MessageSquare,
   ChevronDown,
-  ChevronUp,
-  ChevronLeft,
-  ChevronRight,
-  ArrowUp,
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
   X,
   Check,
-  Loader,
-  Save,
-  Undo,
-  Redo,
-  Volume2,
-  VolumeX,
-  Mic,
-  MicOff,
-  Video,
-  VideoOff,
-  Navigation,
-  Compass,
-  Map,
-  Route,
-  Car,
-  Truck,
-  Bus,
-  Train,
-  Plane,
-  Ship,
-  Bike,
-  // Removed 'Scooter' and 'Skateboard' as they don't exist in Lucide
+  Loader
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -129,7 +56,7 @@ const useLocalStorage = (key, initialValue) => {
     try {
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
+    } catch {
       return initialValue;
     }
   });
@@ -138,8 +65,8 @@ const useLocalStorage = (key, initialValue) => {
     try {
       setStoredValue(value);
       window.localStorage.setItem(key, JSON.stringify(value));
-    } catch (error) {
-      console.error('Error saving to localStorage:', error);
+    } catch {
+      console.error('Error saving to localStorage');
     }
   };
 
@@ -357,9 +284,8 @@ const PriorityIndicator = ({ priority }) => {
 };
 
 // Request Card Component
-const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusChange, onAssign, delay = 0 }) => {
+const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusChange, delay = 0 }) => {
   const [showMenu, setShowMenu] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   const menuRef = useRef(null);
   const { darkMode } = useDarkMode();
 
@@ -407,8 +333,6 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
       whileHover={{ scale: 1.02, y: -5 }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       className={`${darkMode ? 'bg-white/10' : 'bg-white/80'} 
                   backdrop-blur-xl 
                   border 
@@ -614,8 +538,8 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
             whileTap={{ scale: 0.95 }}
             onClick={() => onView(request)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${darkMode
-                ? 'bg-sky-500/20 text-sky-300 hover:bg-sky-500/30'
-                : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
+              ? 'bg-sky-500/20 text-sky-300 hover:bg-sky-500/30'
+              : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
               }`}
           >
             View Details
@@ -627,8 +551,8 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
               whileTap={{ scale: 0.95 }}
               onClick={() => onStatusChange(request.id, 'In Progress')}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${darkMode
-                  ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'
-                  : 'bg-green-100 text-green-600 hover:bg-green-200'
+                ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'
+                : 'bg-green-100 text-green-600 hover:bg-green-200'
                 }`}
             >
               Start Work
@@ -655,7 +579,7 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
 };
 
 // Detailed Request Modal Component
-const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, onUpdateStatus }) => {
+const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateStatus }) => {
   const [newComment, setNewComment] = useState('');
   const [newStatus, setNewStatus] = useState(request?.status || '');
   const [attachments, setAttachments] = useState([]);
@@ -752,21 +676,21 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
               { key: 'overview', label: 'Overview', icon: Eye },
               { key: 'comments', label: 'Comments', icon: MessageCircle },
               { key: 'history', label: 'History', icon: Clock },
-              { key: 'attachments', label: 'Attachments', icon: Paperclip }
-            ].map(({ key, label, icon: Icon }) => (
+              { key: 'attachments', label: 'Attachments', icon: FileText }
+            ].map(({ key, label, icon }) => (
               <motion.button
                 key={key}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveTab(key)}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${activeTab === key
-                    ? 'bg-blue-500 text-white shadow-lg'
-                    : darkMode
-                      ? 'text-white/70 hover:text-white hover:bg-white/10'
-                      : 'text-indigo-700 hover:text-indigo-900 hover:bg-indigo-200/70'
+                  ? 'bg-blue-500 text-white shadow-lg'
+                  : darkMode
+                    ? 'text-white/70 hover:text-white hover:bg-white/10'
+                    : 'text-indigo-700 hover:text-indigo-900 hover:bg-indigo-200/70'
                   }`}
               >
-                <Icon className="w-4 h-4" />
+                {React.createElement(icon, { className: "w-4 h-4" })}
                 <span>{label}</span>
               </motion.button>
             ))}
@@ -1124,9 +1048,9 @@ const RequestDetailModal = ({ isOpen, onClose, request, onUpdate, onAddComment, 
                   className={`flex items-start space-x-4 p-4 ${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-lg border`}
                 >
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${event.type === 'status' ? 'bg-blue-500/20' :
-                      event.type === 'assignment' ? 'bg-purple-500/20' :
-                        event.type === 'comment' ? 'bg-green-500/20' :
-                          'bg-gray-500/20'
+                    event.type === 'assignment' ? 'bg-purple-500/20' :
+                      event.type === 'comment' ? 'bg-green-500/20' :
+                        'bg-gray-500/20'
                     }`}>
                     {event.type === 'status' && <RefreshCw className="w-4 h-4 text-blue-400" />}
                     {event.type === 'assignment' && <Users className="w-4 h-4 text-purple-400" />}
@@ -1232,9 +1156,9 @@ const NotificationToast = ({ notifications, onRemove }) => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 300 }}
             className={`p-4 rounded-lg shadow-lg backdrop-blur-xl border max-w-sm ${notification.type === 'success' ? 'bg-green-500/20 border-green-500/30 text-green-300' :
-                notification.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-300' :
-                  notification.type === 'warning' ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-300' :
-                    'bg-blue-500/20 border-blue-500/30 text-blue-300'
+              notification.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-300' :
+                notification.type === 'warning' ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-300' :
+                  'bg-blue-500/20 border-blue-500/30 text-blue-300'
               }`}
           >
             <div className="flex items-start space-x-3">
@@ -1496,7 +1420,7 @@ const LandlordMaintenance = () => {
   const [sortOrder, setSortOrder] = useState('desc');
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
 
   const { notifications, addNotification, removeNotification } = useNotification();
 
