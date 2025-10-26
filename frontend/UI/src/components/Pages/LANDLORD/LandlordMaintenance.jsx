@@ -2,35 +2,15 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import { useDarkMode } from '../../../useDarkMode.js';
-import { Wrench, Plus, Search, MoreVertical, Edit, Trash2, Eye, Calendar, User, Clock, AlertCircle, CheckCircle, XCircle, Play, Pause, FileText, ImageIcon, Download, Phone, MessageCircle, Flag, RefreshCw, TrendingUp, Activity, DollarSign, Home, Building2, Users, Zap, Droplets, Shield, AirVent, Monitor, ArrowUp, ArrowDown, X,
+import api from '../../../services/api';
+import {
+  Wrench, Plus, Search, MoreVertical, Edit, Trash2, Eye, Calendar, User, Clock, AlertCircle, CheckCircle, XCircle, Play, Pause, FileText, ImageIcon, Download, Phone, MessageCircle, Flag, RefreshCw, TrendingUp, Activity, DollarSign, Home, Building2, Users, Zap, Droplets, Shield, AirVent, Monitor, ArrowUp, ArrowDown, X,
 } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 
 
 // Custom Hooks
-const useLocalStorage = (key, initialValue) => {
-  const [storedValue, setStoredValue] = useState(() => {
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch {
-      return initialValue;
-    }
-  });
-
-  const setValue = (value) => {
-    try {
-      setStoredValue(value);
-      window.localStorage.setItem(key, JSON.stringify(value));
-    } catch {
-      console.error('Error saving to localStorage');
-    }
-  };
-
-  return [storedValue, setValue];
-};
-
 const useIntersectionObserver = (options = {}) => {
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [element, setElement] = useState(null);
@@ -1091,220 +1071,12 @@ const LandlordMaintenance = () => {
   const { darkMode } = useDarkMode();
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
 
-  // Sample maintenance requests data
-  const [maintenanceRequests, setMaintenanceRequests] = useLocalStorage('landlord_maintenance_requests', [
-    {
-      id: 1,
-      title: "Kitchen Faucet Leak",
-      description: "The kitchen faucet has been dripping constantly, causing water waste and potential damage to the cabinet below.",
-      property: "Modern Downtown Loft #101",
-      tenant: "John Doe",
-      createdAt: "2025-08-01T10:30:00Z",
-      updatedAt: "2025-08-02T14:20:00Z",
-      status: "In Progress",
-      priority: "High",
-      progress: 65,
-      category: "plumbing",
-      assignedTo: "AquaFix Plumbing Services",
-      estimatedCost: 150,
-      isEmergency: false,
-      isUrgent: true,
-      attachments: [
-        {
-          id: 1,
-          name: "faucet_leak.jpg",
-          type: "image",
-          size: "2.3 MB",
-          url: "/api/placeholder/400/300"
-        }
-      ],
-      comments: [
-        {
-          author: "Landlord",
-          text: "I've contacted AquaFix Plumbing and they'll be there tomorrow morning.",
-          timestamp: "2025-08-01T15:30:00Z",
-          attachments: []
-        }
-      ],
-      history: [
-        {
-          type: "created",
-          description: "Request created by John Doe",
-          timestamp: "2025-08-01T10:30:00Z"
-        },
-        {
-          type: "assignment",
-          description: "Assigned to AquaFix Plumbing Services",
-          timestamp: "2025-08-01T15:00:00Z"
-        },
-        {
-          type: "status",
-          description: "Status changed to In Progress",
-          timestamp: "2025-08-02T09:00:00Z"
-        }
-      ]
-    },
-    {
-      id: 2,
-      title: "Heating System Malfunction",
-      description: "The heating system is not working properly. Rooms are not getting warm enough despite thermostat being set correctly.",
-      property: "Luxury Penthouse #505",
-      tenant: "Jane Smith",
-      createdAt: "2025-07-28T09:15:00Z",
-      updatedAt: "2025-08-05T10:00:00Z",
-      status: "In Progress",
-      priority: "Medium",
-      progress: 50,
-      category: "hvac",
-      assignedTo: "HVAC Solutions Inc.",
-      estimatedCost: 300,
-      isEmergency: false,
-      isUrgent: false,
-      attachments: [
-        {
-          id: 1,
-          name: "thermostat_reading.jpg",
-          type: "image",
-          size: "1.5 MB",
-          url: "/api/placeholder/400/300"
-        }
-      ],
-      comments: [
-        {
-          author: "Landlord",
-          text: "HVAC Solutions Inc. has been contacted and will inspect the system tomorrow.",
-          timestamp: "2025-07-29T11:00:00Z",
-          attachments: []
-        }
-      ],
-      history: [
-        {
-          type: "created",
-          description: "Request created by Jane Smith",
-          timestamp: "2025-07-28T09:15:00Z"
-        },
-        {
-          type: "assignment",
-          description: "Assigned to HVAC Solutions Inc.",
-          timestamp: "2025-07-29T10:30:00Z"
-        },
-        {
-          type: "status",
-          description: "Status changed to In Progress",
-          timestamp: "2025-08-05T10:00:00Z"
-        }
-      ]
-    },
-    {
-      id: 3,
-      title: "Electrical Outlet Not Working",
-      description: "The main electrical outlet in the living room has stopped working completely. Need urgent repair as it affects multiple devices.",
-      property: "Cozy Studio Apartment",
-      tenant: "Robert Johnson",
-      createdAt: "2025-08-02T16:45:00Z",
-      updatedAt: "2025-08-03T11:30:00Z",
-      status: "Completed",
-      priority: "High",
-      progress: 100,
-      category: "electrical",
-      assignedTo: "ElectroFix Solutions",
-      estimatedCost: 120,
-      isEmergency: true,
-      isUrgent: false,
-      attachments: [
-        {
-          id: 1,
-          name: "outlet_before.jpg",
-          type: "image",
-          size: "1.8 MB",
-          url: "/api/placeholder/400/300"
-        },
-        {
-          id: 2,
-          name: "outlet_after.jpg",
-          type: "image",
-          size: "2.1 MB",
-          url: "/api/placeholder/400/300"
-        }
-      ],
-      comments: [
-        {
-          author: "ElectroFix Solutions",
-          text: "Replaced the faulty outlet and checked all connections. Everything is working properly now.",
-          timestamp: "2025-08-03T11:30:00Z",
-          attachments: []
-        }
-      ],
-      history: [
-        {
-          type: "created",
-          description: "Emergency request created by Robert Johnson",
-          timestamp: "2025-08-02T16:45:00Z"
-        },
-        {
-          type: "assignment",
-          description: "Assigned to ElectroFix Solutions",
-          timestamp: "2025-08-02T17:00:00Z"
-        },
-        {
-          type: "status",
-          description: "Status changed to In Progress",
-          timestamp: "2025-08-03T08:00:00Z"
-        },
-        {
-          type: "status",
-          description: "Status changed to Completed",
-          timestamp: "2025-08-03T11:30:00Z"
-        }
-      ]
-    },
-    {
-      id: 4,
-      title: "Window Lock Repair",
-      description: "The lock on the bedroom window is broken and won't secure properly. This is a security concern that needs attention.",
-      property: "Garden View Apartment",
-      tenant: "Emily Davis",
-      createdAt: "2025-07-30T14:20:00Z",
-      updatedAt: "2025-08-01T10:15:00Z",
-      status: "On Hold",
-      priority: "Low",
-      progress: 25,
-      category: "security",
-      assignedTo: "SecureHome Repairs",
-      estimatedCost: 80,
-      isEmergency: false,
-      isUrgent: false,
-      attachments: [],
-      comments: [
-        {
-          author: "Landlord",
-          text: "Waiting for parts to arrive. Should be completed by end of week.",
-          timestamp: "2025-08-01T10:15:00Z",
-          attachments: []
-        }
-      ],
-      history: [
-        {
-          type: "created",
-          description: "Request created by Emily Davis",
-          timestamp: "2025-07-30T14:20:00Z"
-        },
-        {
-          type: "assignment",
-          description: "Assigned to SecureHome Repairs",
-          timestamp: "2025-07-30T15:30:00Z"
-        },
-        {
-          type: "status",
-          description: "Status changed to On Hold",
-          timestamp: "2025-08-01T10:15:00Z",
-          details: "Waiting for parts"
-        }
-      ]
-    }
-  ]);
+  // Get landlord ID from localStorage (adjust based on your auth implementation)
+  const landlordId = localStorage.getItem('userId') || localStorage.getItem('landlordId');
 
-  const [filteredRequests, setFilteredRequests] = useState(maintenanceRequests);
+  // State management
+  const [maintenanceRequests, setMaintenanceRequests] = useState([]);
+  const [filteredRequests, setFilteredRequests] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [priorityFilter, setPriorityFilter] = useState('All');
@@ -1313,11 +1085,100 @@ const LandlordMaintenance = () => {
   const [sortOrder, setSortOrder] = useState('desc');
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState({
+    total: 0,
+    completed: 0,
+    pending: 0,
+    inProgress: 0,
+    highPriority: 0,
+    avgResponseTime: 0,
+    totalCost: 0,
+    completionRate: 0
+  });
 
   const { notifications, addNotification, removeNotification } = useNotification();
 
-  // Filter and sort requests
+  // Fetch maintenance requests from API
+  const fetchMaintenanceRequests = async () => {
+    try {
+      setIsLoading(true);
+      const filters = {
+        status: statusFilter !== 'All' ? statusFilter : undefined,
+        priority: priorityFilter !== 'All' ? priorityFilter : undefined,
+        property: propertyFilter !== 'All' ? propertyFilter : undefined,
+        sortBy,
+        sortOrder
+      };
+
+      // Remove undefined values
+      Object.keys(filters).forEach(key => filters[key] === undefined && delete filters[key]);
+
+      const response = await api.getLandlordMaintenanceRequests(landlordId, filters);
+
+      if (response.success) {
+        // Transform API data to match component structure
+        const transformedData = response.data.map(req => ({
+          id: req._id,
+          title: req.title,
+          description: req.description,
+          property: req.propertyName,
+          propertyId: req.property?._id || req.property,
+          tenant: req.tenantName,
+          tenantId: req.tenant?._id || req.tenant,
+          createdAt: req.createdAt,
+          updatedAt: req.updatedAt,
+          status: req.status,
+          priority: req.priority,
+          progress: req.progress,
+          category: req.category,
+          assignedTo: req.assignedTo,
+          estimatedCost: req.estimatedCost,
+          actualCost: req.actualCost,
+          isEmergency: req.isEmergency,
+          isUrgent: req.isUrgent,
+          attachments: req.attachments || [],
+          comments: req.comments || [],
+          history: req.history || [],
+          scheduledDate: req.scheduledDate,
+          completedDate: req.completedDate
+        }));
+
+        setMaintenanceRequests(transformedData);
+      }
+    } catch (error) {
+      console.error('Error fetching maintenance requests:', error);
+      addNotification({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to load maintenance requests'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const response = await api.getMaintenanceStats(landlordId);
+
+      if (response.success) {
+        setStats(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (landlordId) {
+      fetchMaintenanceRequests();
+      fetchStats();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [landlordId]);
+
+  // Filter and sort requests locally for search
   useEffect(() => {
     let filtered = maintenanceRequests.filter(request => {
       const matchesSearch = request.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -1325,57 +1186,19 @@ const LandlordMaintenance = () => {
         request.tenant.toLowerCase().includes(searchTerm.toLowerCase()) ||
         request.property.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesStatus = statusFilter === 'All' || request.status === statusFilter;
-      const matchesPriority = priorityFilter === 'All' || request.priority === priorityFilter;
-      const matchesProperty = propertyFilter === 'All' || request.property === propertyFilter;
-
-      return matchesSearch && matchesStatus && matchesPriority && matchesProperty;
-    });
-
-    // Sort requests
-    filtered.sort((a, b) => {
-      let aValue = a[sortBy];
-      let bValue = b[sortBy];
-
-      if (sortBy === 'createdAt' || sortBy === 'updatedAt') {
-        aValue = new Date(aValue);
-        bValue = new Date(bValue);
-      } else if (typeof aValue === 'string') {
-        aValue = aValue.toLowerCase();
-        bValue = bValue.toLowerCase();
-      }
-
-      if (sortOrder === 'asc') {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
-      }
+      return matchesSearch;
     });
 
     setFilteredRequests(filtered);
-  }, [maintenanceRequests, searchTerm, statusFilter, priorityFilter, propertyFilter, sortBy, sortOrder]);
+  }, [maintenanceRequests, searchTerm]);
 
-  // Calculate statistics
-  const stats = useMemo(() => {
-    const total = maintenanceRequests.length;
-    const completed = maintenanceRequests.filter(r => r.status === 'Completed').length;
-    const pending = maintenanceRequests.filter(r => r.status === 'Pending').length;
-    const inProgress = maintenanceRequests.filter(r => r.status === 'In Progress').length;
-    const highPriority = maintenanceRequests.filter(r => r.priority === 'High').length;
-    const avgResponseTime = 2.4; // hours - could be calculated from actual data
-    const totalCost = maintenanceRequests.reduce((sum, r) => sum + (r.estimatedCost || 0), 0);
-
-    return {
-      total,
-      completed,
-      pending,
-      inProgress,
-      highPriority,
-      avgResponseTime,
-      totalCost,
-      completionRate: total > 0 ? Math.round((completed / total) * 100) : 0
-    };
-  }, [maintenanceRequests]);
+  // Trigger refetch when filters change
+  useEffect(() => {
+    if (landlordId) {
+      fetchMaintenanceRequests();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter, priorityFilter, propertyFilter, sortBy, sortOrder]);
 
   // Get unique properties for filter
   const properties = useMemo(() => {
@@ -1393,68 +1216,85 @@ const LandlordMaintenance = () => {
     console.log('Edit request:', request);
   };
 
-  const handleDeleteRequest = (requestId) => {
+  const handleDeleteRequest = async (requestId) => {
     if (window.confirm('Are you sure you want to delete this maintenance request?')) {
-      setMaintenanceRequests(prev => prev.filter(r => r.id !== requestId));
+      try {
+        const response = await api.deleteMaintenanceRequest(requestId);
+
+        if (response.success) {
+          // Refresh the list
+          fetchMaintenanceRequests();
+          fetchStats();
+
+          addNotification({
+            type: 'success',
+            title: 'Request Deleted',
+            message: 'Maintenance request has been successfully deleted.'
+          });
+        }
+      } catch (error) {
+        console.error('Error deleting request:', error);
+        addNotification({
+          type: 'error',
+          title: 'Error',
+          message: 'Failed to delete maintenance request'
+        });
+      }
+    }
+  };
+
+  const handleStatusChange = async (requestId, newStatus) => {
+    try {
+      const response = await api.updateMaintenanceStatus(requestId, newStatus);
+
+      if (response.success) {
+        // Refresh the list
+        fetchMaintenanceRequests();
+        fetchStats();
+
+        addNotification({
+          type: 'success',
+          title: 'Status Updated',
+          message: `Request status changed to ${newStatus}`
+        });
+      }
+    } catch (error) {
+      console.error('Error updating status:', error);
       addNotification({
-        type: 'success',
-        title: 'Request Deleted',
-        message: 'Maintenance request has been successfully deleted.'
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to update status'
       });
     }
   };
 
-  const handleStatusChange = (requestId, newStatus) => {
-    setMaintenanceRequests(prev => prev.map(r =>
-      r.id === requestId
-        ? {
-          ...r,
-          status: newStatus,
-          updatedAt: new Date().toISOString(),
-          progress: newStatus === 'Completed' ? 100 : newStatus === 'In Progress' ? 50 : 0,
-          history: [
-            ...(r.history || []),
-            {
-              type: 'status',
-              description: `Status changed to ${newStatus}`,
-              timestamp: new Date().toISOString()
-            }
-          ]
-        }
-        : r
-    ));
+  const handleAddComment = async (requestId, commentData) => {
+    try {
+      const response = await api.addMaintenanceComment(requestId, {
+        author: 'Landlord', // Get from auth context if available
+        authorId: landlordId,
+        text: commentData.text,
+        attachments: commentData.attachments || []
+      });
 
-    addNotification({
-      type: 'success',
-      title: 'Status Updated',
-      message: `Request status changed to ${newStatus}`
-    });
-  };
+      if (response.success) {
+        // Refresh the list
+        fetchMaintenanceRequests();
 
-  const handleAddComment = (requestId, comment) => {
-    setMaintenanceRequests(prev => prev.map(r =>
-      r.id === requestId
-        ? {
-          ...r,
-          comments: [...(r.comments || []), comment],
-          updatedAt: new Date().toISOString(),
-          history: [
-            ...(r.history || []),
-            {
-              type: 'comment',
-              description: `Comment added by ${comment.author}`,
-              timestamp: comment.timestamp
-            }
-          ]
-        }
-        : r
-    ));
-
-    addNotification({
-      type: 'success',
-      title: 'Comment Added',
-      message: 'Your comment has been added to the request.'
-    });
+        addNotification({
+          type: 'success',
+          title: 'Comment Added',
+          message: 'Your comment has been added to the request.'
+        });
+      }
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      addNotification({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to add comment'
+      });
+    }
   };
 
   return (

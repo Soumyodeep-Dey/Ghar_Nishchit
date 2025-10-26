@@ -1,6 +1,6 @@
 // Minimal API service for frontend to call backend endpoints
 // Resolve base URL in browser-safe way. If app provides window.__env.REACT_APP_API_BASE use it.
-const BASE = (typeof window !== 'undefined' && window.__env && window.__env.REACT_APP_API_BASE) || 'http://localhost:3000/api';
+const BASE = (typeof window !== 'undefined' && window.__env && window.__env.REACT_APP_API_BASE) || 'http://localhost:8000/api';
 
 const getAuthHeader = () => {
     const token = localStorage.getItem('authToken') || localStorage.getItem('token');
