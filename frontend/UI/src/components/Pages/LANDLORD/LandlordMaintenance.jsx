@@ -33,6 +33,7 @@ import {
   TrendingUp,
   TrendingDown,
   BarChart3,
+  Activity,
   DollarSign,
   Home,
   Building2,
@@ -43,6 +44,8 @@ import {
   AirVent,
   Monitor,
   ChevronDown,
+  ArrowUp,
+  ArrowDown,
   X,
   Check,
   Loader
