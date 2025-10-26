@@ -2,54 +2,9 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import { useDarkMode } from '../../../useDarkMode.js';
-import {
-  Wrench,
-  Plus,
-  Search,
-  Filter,
-  MoreVertical,
-  Edit,
-  Trash2,
-  Eye,
-  Calendar,
-  MapPin,
-  User,
-  Clock,
-  AlertCircle,
-  CheckCircle,
-  XCircle,
-  Play,
-  Pause,
-  FileText,
-  ImageIcon,
-  Download,
-  Phone,
-  Mail,
-  MessageCircle,
-  Star,
-  Flag,
-  Archive,
-  RefreshCw,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  Activity,
-  DollarSign,
-  Home,
-  Building2,
-  Users,
-  Zap,
-  Droplets,
-  Shield,
-  AirVent,
-  Monitor,
-  ChevronDown,
-  ArrowUp,
-  ArrowDown,
-  X,
-  Check,
-  Loader
+import { Wrench, Plus, Search, MoreVertical, Edit, Trash2, Eye, Calendar, User, Clock, AlertCircle, CheckCircle, XCircle, Play, Pause, FileText, ImageIcon, Download, Phone, MessageCircle, Flag, RefreshCw, TrendingUp, Activity, DollarSign, Home, Building2, Users, Zap, Droplets, Shield, AirVent, Monitor, ArrowUp, ArrowDown, X,
 } from 'lucide-react';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 
 
@@ -585,9 +540,7 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
 const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateStatus }) => {
   const [newComment, setNewComment] = useState('');
   const [newStatus, setNewStatus] = useState(request?.status || '');
-  const [attachments, setAttachments] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
-  const fileInputRef = useRef(null);
   const { darkMode } = useDarkMode();
 
   useEffect(() => {
@@ -602,10 +555,9 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
         text: newComment,
         author: 'Landlord',
         timestamp: new Date().toISOString(),
-        attachments: attachments
+        attachments: []
       });
       setNewComment('');
-      setAttachments([]);
     }
   };
 
@@ -613,19 +565,6 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
     if (newStatus !== request.status) {
       onUpdateStatus(request.id, newStatus);
     }
-  };
-
-  const handleFileUpload = (e) => {
-    const files = Array.from(e.target.files);
-    const newAttachments = files.map(file => ({
-      id: Date.now() + Math.random(),
-      name: file.name,
-      size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
-      type: file.type.startsWith('image/') ? 'image' : 'file',
-      url: URL.createObjectURL(file),
-      file
-    }));
-    setAttachments(prev => [...prev, ...newAttachments]);
   };
 
   return (
@@ -890,7 +829,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                       whileTap={{ scale: 0.98 }}
                       className={`flex items-center justify-center space-x-2 p-3 ${darkMode ? 'bg-purple-500/20 hover:bg-purple-500/30' : 'bg-purple-100 hover:bg-purple-200'} rounded-lg transition-colors`}
                     >
-                      <Share2 className={`w-4 h-4 ${darkMode ? 'text-purple-300' : 'text-purple-600'}`} />
+                      <MessageCircle className={`w-4 h-4 ${darkMode ? 'text-purple-300' : 'text-purple-600'}`} />
                       <span className={`${darkMode ? 'text-purple-300' : 'text-purple-600'} text-sm`}>Share Report</span>
                     </motion.button>
 
@@ -975,56 +914,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                     rows={3}
                   />
 
-                  {/* Attachment Preview */}
-                  {attachments.length > 0 && (
-                    <div className="flex space-x-2">
-                      {attachments.map((attachment, index) => (
-                        <div key={index} className="relative group">
-                          <div className={`w-16 h-16 rounded-lg ${darkMode ? 'bg-white/10' : 'bg-indigo-100'} flex items-center justify-center`}>
-                            {attachment.type === 'image' ? (
-                              <img
-                                src={attachment.url}
-                                alt="Attachment"
-                                className="w-full h-full object-cover rounded-lg"
-                              />
-                            ) : (
-                              <FileText className={`w-6 h-6 ${darkMode ? 'text-white/60' : 'text-indigo-600/60'}`} />
-                            )}
-                          </div>
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => setAttachments(prev => prev.filter((_, i) => i !== index))}
-                            className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X className="w-3 h-3" />
-                          </motion.button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        multiple
-                        onChange={handleFileUpload}
-                        className="hidden"
-                        accept="image/*,.pdf,.doc,.docx,.txt"
-                      />
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => fileInputRef.current?.click()}
-                        className={`flex items-center space-x-1 px-3 py-2 ${darkMode ? 'bg-white/10 hover:bg-white/20' : 'bg-indigo-100/50 hover:bg-indigo-200/50'} rounded-lg transition-colors`}
-                      >
-                        <Paperclip className={`w-4 h-4 ${darkMode ? 'text-white/70' : 'text-indigo-600/70'}`} />
-                        <span className={`text-sm ${darkMode ? 'text-white/70' : 'text-indigo-600/70'}`}>Attach</span>
-                      </motion.button>
-                    </div>
-
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -1567,32 +1457,6 @@ const LandlordMaintenance = () => {
     });
   };
 
-  const handleAssignTechnician = (requestId, technician) => {
-    setMaintenanceRequests(prev => prev.map(r =>
-      r.id === requestId
-        ? {
-          ...r,
-          assignedTo: technician,
-          updatedAt: new Date().toISOString(),
-          history: [
-            ...(r.history || []),
-            {
-              type: 'assignment',
-              description: `Assigned to ${technician}`,
-              timestamp: new Date().toISOString()
-            }
-          ]
-        }
-        : r
-    ));
-
-    addNotification({
-      type: 'success',
-      title: 'Technician Assigned',
-      message: `Request has been assigned to ${technician}`
-    });
-  };
-
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'} flex relative overflow-hidden`}>
       {/* Background elements */}
@@ -1848,7 +1712,6 @@ const LandlordMaintenance = () => {
                       onView={handleViewRequest}
                       onDelete={handleDeleteRequest}
                       onStatusChange={handleStatusChange}
-                      onAssign={handleAssignTechnician}
                       delay={index * 0.1}
                     />
                   ))}
