@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import p1 from '../../assets/p1.jpg';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useDarkMode } from '../../useDarkMode.js';
 import { signInWithGoogle, handleGoogleRedirectResult } from '../../firebase.js';
 
@@ -124,6 +124,19 @@ export default function Login() {
           <p className="mb-2 text-sm sm:mb-4 sm:text-base">Trusted by 10,000+ users</p>
           <img src={p1} alt="Login" className="rounded-xl shadow-lg w-40 h-28 sm:w-48 sm:h-32 object-cover mt-2 sm:mt-4" />
         </div>
+
+        {/* Back to Landing Page Button */}
+        <Link
+          to="/"
+          className={`absolute top-4 left-4 z-40 flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full font-semibold shadow transition-all duration-300 hover:scale-105 ${darkMode
+            ? 'bg-slate-800 text-cyan-400 hover:bg-slate-700'
+            : 'bg-white text-indigo-600 hover:bg-indigo-50'
+            }`}
+          aria-label="Back to Landing Page"
+        >
+          <ArrowLeft size={18} />
+          <span className="hidden sm:inline">Back</span>
+        </Link>
 
         {/* Dark Mode Toggle */}
         <button
