@@ -3,7 +3,7 @@ import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar.jsx';
 import TenantNavBar from './TenantNavBar.jsx';
 import {
-  DollarSign, Users, Wrench, BarChart3, TrendingUp, TrendingDown, Plus, Calendar, Building2, Heart, Bell, MessageSquare, CreditCard, Settings, Home, Star, Clock, FileText, CheckCircle, AlertTriangle, X
+  Wrench, BarChart3, TrendingUp, TrendingDown, Building2, Heart, Bell, CreditCard, Star, X
 } from 'lucide-react';
 
 // Constants
@@ -110,7 +110,7 @@ const StatCard = React.memo(({ icon: Icon, title, value, change, trend, color, p
 });
 
 // Simplified Property Card
-const PropertyCard = React.memo(({ property, onView, onRemove, removeConfirmId, onConfirmRemove, onCancelRemove, index }) => {
+const PropertyCard = React.memo(({ property, onRemove, removeConfirmId, onConfirmRemove, onCancelRemove }) => {
   const { darkMode } = useDarkMode();
 
   return (
@@ -180,7 +180,7 @@ const PropertyCard = React.memo(({ property, onView, onRemove, removeConfirmId, 
 });
 
 // Simplified Notification Item
-const NotificationItem = React.memo(({ notification, onMarkAsRead, onDelete, index }) => {
+const NotificationItem = React.memo(({ notification, onMarkAsRead, onDelete }) => {
   const { darkMode } = useDarkMode();
 
   const notificationTypeIcon = {
@@ -194,7 +194,7 @@ const NotificationItem = React.memo(({ notification, onMarkAsRead, onDelete, ind
       className={`relative p-4 rounded-xl border-l-4 cursor-pointer transition-all duration-300 shadow-md hover:shadow-xl ${darkMode ? 'bg-slate-800' : 'bg-white'} ${notification.read
         ? (darkMode ? 'border-slate-600' : 'border-gray-300')
         : (darkMode ? 'border-blue-400' : 'border-blue-500')
-      } hover:scale-105 group`}
+        } hover:scale-105 group`}
       onClick={() => onMarkAsRead(notification.id)}
     >
       <div className="flex items-start">
@@ -388,85 +388,21 @@ const TenantDashboard = () => {
   ];
 
   // State management with localStorage
-  const [favouriteProperties, setFavouriteProperties] = useLocalStorage('favouriteProperties', INITIAL_PROPERTIES);
-  const [notifications, setNotifications] = useLocalStorage('notifications', INITIAL_NOTIFICATIONS);
-  const [maintenanceRequests, setMaintenanceRequests] = useLocalStorage('maintenanceRequests', INITIAL_MAINTENANCE);
-  const [paymentHistory, setPaymentHistory] = useLocalStorage('paymentHistory', INITIAL_PAYMENTS);
+  const [favouriteProperties] = useLocalStorage('favouriteProperties', INITIAL_PROPERTIES);
+  const [notifications] = useLocalStorage('notifications', INITIAL_NOTIFICATIONS);
+  const [maintenanceRequests] = useLocalStorage('maintenanceRequests', INITIAL_MAINTENANCE);
+  const [paymentHistory] = useLocalStorage('paymentHistory', INITIAL_PAYMENTS);
 
   // UI state
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortKey, setSortKey] = useState(null);
-  const [sortAsc, setSortAsc] = useState(true);
-  const [removeConfirmId, setRemoveConfirmId] = useState(null);
-  const [selectedProperty, setSelectedProperty] = useState(null);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editingRequestId, setEditingRequestId] = useState(null);
-
-  // Form state
-  const [maintenanceForm, setMaintenanceForm] = useState({
-    issueType: '',
-    priority: '',
-    description: '',
-    photos: []
-  });
-  const [newMaintenanceRequest, setNewMaintenanceRequest] = useState({
-    title: '',
-    description: '',
-    priority: 'Medium'
-  });
-  const [editRequestData, setEditRequestData] = useState({
-    title: '',
-    description: '',
-    priority: 'Medium'
-  });
-  const [newProperty, setNewProperty] = useState({
-    title: '',
-    location: '',
-    price: '',
-    image: '/api/placeholder/300/200',
-    bedrooms: 0,
-    bathrooms: 0,
-  });
+  const [searchTerm] = useState('');
+  const [sortKey] = useState(null);
+  const [sortAsc] = useState(true);
 
   // Simulate initial loading
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 800);
     return () => clearTimeout(timer);
   }, []);
-
-  // Utility functions
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
-  };
-
-  const extractNumericValue = (priceString) => {
-    return Number(priceString.replace(/[^0-9.-]+/g, ""));
-  };
-
-  const getStatusColor = (status) => {
-    const colors = {
-      'Completed': 'from-green-500 to-emerald-600 text-white',
-      'In Progress': 'from-blue-500 to-indigo-600 text-white',
-      'Pending': 'from-yellow-500 to-orange-600 text-white',
-      'Paid': 'from-green-500 to-emerald-600 text-white',
-      'default': 'from-gray-500 to-gray-600 text-white'
-    };
-    return colors[status] || colors.default;
-  };
-
-  const getPriorityColor = (priority) => {
-    const colors = {
-      'Emergency': 'from-purple-600 to-indigo-700 text-white',
-      'High': 'from-red-500 to-pink-600 text-white',
-      'Medium': 'from-yellow-500 to-orange-600 text-white',
-      'Low': 'from-green-500 to-emerald-600 text-white',
-      'default': 'from-gray-500 to-gray-600 text-white'
-    };
-    return colors[priority] || colors.default;
-  };
 
   // Memoized filtered and sorted properties
   const filteredAndSortedProperties = useMemo(() => {
@@ -481,8 +417,8 @@ const TenantDashboard = () => {
         let bValue = b[sortKey];
 
         if (sortKey === 'price') {
-          aValue = extractNumericValue(aValue);
-          bValue = extractNumericValue(bValue);
+          aValue = Number(aValue.replace(/[^0-9.-]+/g, ""));
+          bValue = Number(bValue.replace(/[^0-9.-]+/g, ""));
         }
 
         if (aValue < bValue) return sortAsc ? -1 : 1;
@@ -495,12 +431,7 @@ const TenantDashboard = () => {
   }, [favouriteProperties, searchTerm, sortKey, sortAsc]);
 
   // Pagination for properties
-  const {
-    currentPage,
-    totalPages,
-    paginatedItems: paginatedProperties,
-    setCurrentPage
-  } = usePagination(filteredAndSortedProperties);
+  usePagination(filteredAndSortedProperties);
 
   // Stats for dashboard
   const stats = useMemo(() => [
@@ -537,172 +468,6 @@ const TenantDashboard = () => {
       color: darkMode ? 'from-pink-500 to-rose-600' : 'from-rose-400 to-pink-500'
     }
   ], [darkMode, favouriteProperties, notifications, maintenanceRequests, paymentHistory]);
-
-  // Event handlers (keeping all the original handlers)
-  const toggleSort = useCallback((key) => {
-    if (sortKey === key) {
-      setSortAsc(!sortAsc);
-    } else {
-      setSortKey(key);
-      setSortAsc(true);
-    }
-  }, [sortKey, sortAsc]);
-
-  const confirmRemoveFavourite = useCallback((id) => {
-    setRemoveConfirmId(id);
-  }, []);
-
-  const cancelRemoveFavourite = useCallback(() => {
-    setRemoveConfirmId(null);
-  }, []);
-
-  const removeFavourite = useCallback((id) => {
-    setFavouriteProperties(prev => prev.filter(prop => prop.id !== id));
-    setRemoveConfirmId(null);
-  }, [setFavouriteProperties]);
-
-  const markNotificationAsRead = useCallback((id) => {
-    setNotifications(prev =>
-      prev.map(notif =>
-        notif.id === id ? { ...notif, read: true } : notif
-      )
-    );
-  }, [setNotifications]);
-
-  const deleteNotification = useCallback((id) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  }, [setNotifications]);
-
-  // State for form submission feedback
-  const [formSubmitStatus, setFormSubmitStatus] = useState({
-    isSubmitting: false,
-    isSuccess: false,
-    isError: false,
-    message: ''
-  });
-
-  const handleMaintenanceSubmit = useCallback(() => {
-    // Validate form
-    if (!maintenanceForm.issueType || !maintenanceForm.priority || !maintenanceForm.description) {
-      setFormSubmitStatus({
-        isSubmitting: false,
-        isSuccess: false,
-        isError: true,
-        message: 'Please fill in all required fields'
-      });
-
-      // Clear error message after 3 seconds
-      setTimeout(() => {
-        setFormSubmitStatus(prev => ({ ...prev, isError: false, message: '' }));
-      }, 3000);
-
-      return;
-    }
-
-    // Set submitting state
-    setFormSubmitStatus({
-      isSubmitting: true,
-      isSuccess: false,
-      isError: false,
-      message: 'Submitting request...'
-    });
-
-    // Simulate API call with timeout
-    setTimeout(() => {
-      try {
-        const request = {
-          id: Date.now(),
-          title: maintenanceForm.issueType,
-          description: maintenanceForm.description,
-          priority: maintenanceForm.priority,
-          status: "Pending",
-          date: new Date().toISOString().split('T')[0],
-          photos: maintenanceForm.photos
-        };
-
-        setMaintenanceRequests(prev => [...prev, request]);
-
-        // Reset form
-        setMaintenanceForm({
-          issueType: '',
-          priority: '',
-          description: '',
-          photos: []
-        });
-
-        // Show success message
-        setFormSubmitStatus({
-          isSubmitting: false,
-          isSuccess: true,
-          isError: false,
-          message: 'Maintenance request submitted successfully!'
-        });
-
-        // Clear success message after 3 seconds
-        setTimeout(() => {
-          setFormSubmitStatus(prev => ({ ...prev, isSuccess: false, message: '' }));
-        }, 3000);
-
-      } catch (error) {
-        // Show error message
-        setFormSubmitStatus({
-          isSubmitting: false,
-          isSuccess: false,
-          isError: true,
-          message: 'Failed to submit request. Please try again.'
-        });
-
-        // Clear error message after 3 seconds
-        setTimeout(() => {
-          setFormSubmitStatus(prev => ({ ...prev, isError: false, message: '' }));
-        }, 3000);
-      }
-    }, 1000); // Simulate network delay
-  }, [maintenanceForm, setMaintenanceRequests]);
-
-  const submitMaintenanceRequest = useCallback(() => {
-    if (newMaintenanceRequest.title && newMaintenanceRequest.description) {
-      const request = {
-        id: Date.now(),
-        ...newMaintenanceRequest,
-        status: "Pending",
-        date: new Date().toISOString().split('T')[0]
-      };
-      setMaintenanceRequests(prev => [...prev, request]);
-      setNewMaintenanceRequest({ title: '', description: '', priority: 'Medium' });
-    }
-  }, [newMaintenanceRequest, setMaintenanceRequests]);
-
-  const sendMessage = useCallback(() => {
-    if (newMessage.trim() || attachments.length) {
-      const newMsg = {
-        id: Date.now(),
-        sender: "You",
-        message: newMessage,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isOwn: true,
-        attachments: attachments.length ? attachments.map(file => file.name) : []
-      };
-      setMessages(prev => [...prev, newMsg]);
-      setNewMessage('');
-      setAttachments([]);
-    }
-  }, [newMessage, attachments, setMessages]);
-
-  const handleAddProperty = useCallback(() => {
-    if (newProperty.title && newProperty.location && newProperty.price) {
-      setFavouriteProperties(prev => [...prev, { ...newProperty, id: Date.now() }]);
-      setNewProperty({
-        title: '',
-        location: '',
-        price: '',
-        image: '/api/placeholder/300/200',
-        bedrooms: 0,
-        bathrooms: 0,
-      });
-      setIsAddModalOpen(false);
-    }
-  }, [newProperty, setFavouriteProperties]);
 
   const themeConfig = darkMode
     ? {
@@ -781,7 +546,7 @@ const TenantDashboard = () => {
   return (
     <div className={`min-h-screen bg-gradient-to-br ${themeConfig.mainBg} flex relative`}>
       <TenantSideBar setCurrentSection={setCurrentSection} />
-      
+
       <div className="flex-1 flex flex-col relative z-10 transition-all duration-700">
         <TenantNavBar currentSection={currentSection} />
 
@@ -817,7 +582,7 @@ const TenantDashboard = () => {
                 { key: 'overview', label: 'Overview', icon: BarChart3, action: 'tab' },
                 { key: 'properties', label: 'Properties', icon: Building2, action: 'navigate', route: '/tenant/properties' },
                 { key: 'maintenance', label: 'Maintenance', icon: Wrench, action: 'navigate', route: '/tenant/maintenance' }
-              ].map(({ key, label, icon: Icon, action, route }) => (
+              ].map(({ key, label, icon: Icon, action }) => (
                 <button
                   key={key}
                   onClick={() => {

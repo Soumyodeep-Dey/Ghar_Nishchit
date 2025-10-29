@@ -3,18 +3,7 @@ import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
 import {
-  BuildingOfficeIcon,
-  HeartIcon,
-  EyeIcon,
-  MapPinIcon,
-  CurrencyDollarIcon,
-  XMarkIcon,
-  FunnelIcon,
-  MagnifyingGlassIcon,
-  StarIcon,
-  CalendarIcon,
-  HomeIcon,
-  SparklesIcon
+  BuildingOfficeIcon, HeartIcon, EyeIcon, MapPinIcon, CurrencyDollarIcon, XMarkIcon, MagnifyingGlassIcon, CalendarIcon, HomeIcon, SparklesIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon, StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 
@@ -109,8 +98,8 @@ const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, in
     <div
       ref={setRef}
       className={`transform transition-all duration-700 ease-out ${isVisible
-          ? 'translate-y-0 opacity-100'
-          : 'translate-y-8 opacity-0'
+        ? 'translate-y-0 opacity-100'
+        : 'translate-y-8 opacity-0'
         }`}
       style={{ transitionDelay: `${index * 100}ms` }}
     >
@@ -217,6 +206,14 @@ const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, in
 const PropertyModal = ({ property, isOpen, onClose, onToggleFavorite }) => {
   const [isClosing, setIsClosing] = useState(false);
 
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 300);
+  }, [onClose]);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -237,15 +234,7 @@ const PropertyModal = ({ property, isOpen, onClose, onToggleFavorite }) => {
       document.addEventListener('keydown', handleEscape);
       return () => document.removeEventListener('keydown', handleEscape);
     }
-  }, [isOpen]);
-
-  const handleClose = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      setIsClosing(false);
-      onClose();
-    }, 300);
-  };
+  }, [isOpen, handleClose]);
 
   if (!isOpen && !isClosing) return null;
 
@@ -577,8 +566,8 @@ const TenantProperty = () => {
                 <button
                   onClick={() => setFilter('all')}
                   className={`px-6 py-3 rounded-xl transition-all duration-300 ${filter === 'all'
-                      ? `${darkMode ? 'bg-cyan-600' : 'bg-blue-600'} text-white shadow-lg scale-105`
-                      : darkMode ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:scale-105' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105'
+                    ? `${darkMode ? 'bg-cyan-600' : 'bg-blue-600'} text-white shadow-lg scale-105`
+                    : darkMode ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:scale-105' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105'
                     }`}
                 >
                   All Properties
@@ -586,8 +575,8 @@ const TenantProperty = () => {
                 <button
                   onClick={() => setFilter('favorite')}
                   className={`px-6 py-3 rounded-xl flex items-center transition-all duration-300 ${filter === 'favorite'
-                      ? 'bg-red-600 text-white shadow-lg scale-105'
-                      : darkMode ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:scale-105' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105'
+                    ? 'bg-red-600 text-white shadow-lg scale-105'
+                    : darkMode ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:scale-105' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105'
                     }`}
                 >
                   <HeartSolidIcon className="h-5 w-5 mr-2" />

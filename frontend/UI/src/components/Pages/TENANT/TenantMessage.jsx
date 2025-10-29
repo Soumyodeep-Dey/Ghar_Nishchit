@@ -2,20 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
-import {
-  ChatBubbleLeftRightIcon,
-  PaperAirplaneIcon,
-  PaperClipIcon,
-  EllipsisVerticalIcon,
-  PhotoIcon,
-  DocumentIcon,
-  XMarkIcon,
-  CheckIcon,
-  FaceSmileIcon,
-  MagnifyingGlassIcon,
-  PhoneIcon,
-  VideoCameraIcon,
-  InformationCircleIcon
+import { ChatBubbleLeftRightIcon, PaperAirplaneIcon, PaperClipIcon, PhotoIcon, DocumentIcon, XMarkIcon, CheckIcon, FaceSmileIcon, MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 
 // Custom hooks
@@ -62,7 +49,7 @@ const useIntersectionObserver = (options = {}) => {
 };
 
 // Animated Components
-const AnimatedMessage = ({ children, isOwn, index }) => {
+const AnimatedMessage = ({ children, index }) => {
   const [setRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });
 
   return (
@@ -139,7 +126,6 @@ const ConversationItem = ({ conversation, isActive, onClick, index, darkMode }) 
 
 const MessageBubble = ({ message, index }) => {
   const { darkMode } = useDarkMode();
-  const [imageError, setImageError] = useState(false);
 
   const getFileIcon = (fileName) => {
     const extension = fileName.split('.').pop().toLowerCase();
@@ -159,10 +145,10 @@ const MessageBubble = ({ message, index }) => {
         )}
         <div
           className={`max-w-xs md:max-w-md px-4 py-3 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 ${message.isOwn
-              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-br-md'
-              : darkMode
-                ? 'bg-gray-800 text-gray-100 rounded-bl-md border border-gray-700'
-                : 'bg-white text-gray-800 rounded-bl-md border border-gray-200'
+            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-br-md'
+            : darkMode
+              ? 'bg-gray-800 text-gray-100 rounded-bl-md border border-gray-700'
+              : 'bg-white text-gray-800 rounded-bl-md border border-gray-200'
             }`}
         >
           <p className="leading-relaxed">{message.message}</p>
@@ -173,10 +159,10 @@ const MessageBubble = ({ message, index }) => {
                 <div
                   key={idx}
                   className={`text-xs rounded-lg px-3 py-2 flex items-center transition-all duration-200 hover:scale-105 ${message.isOwn
-                      ? 'bg-white/20 text-blue-100'
-                      : darkMode
-                        ? 'bg-gray-700 text-gray-300'
-                        : 'bg-gray-100 text-gray-700'
+                    ? 'bg-white/20 text-blue-100'
+                    : darkMode
+                      ? 'bg-gray-700 text-gray-300'
+                      : 'bg-gray-100 text-gray-700'
                     }`}
                 >
                   {getFileIcon(file.name)}
@@ -607,8 +593,8 @@ const TenantMessage = () => {
 
                     <button
                       className={`p-4 rounded-2xl transition-all duration-300 hover:scale-110 ${newMessage.trim() || attachments.length
-                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl'
-                          : darkMode ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl'
+                        : darkMode ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                         }`}
                       onClick={sendMessage}
                       disabled={!newMessage.trim() && attachments.length === 0}
@@ -622,16 +608,9 @@ const TenantMessage = () => {
               <div className={`flex-1 flex flex-col items-center justify-center ${darkMode ? 'bg-gradient-to-b from-gray-900 to-gray-800' : 'bg-gradient-to-b from-gray-50 to-white'}`}>
                 <ChatBubbleLeftRightIcon className={`h-24 w-24 ${darkMode ? 'text-gray-700' : 'text-gray-300'} mb-6`} />
                 <h2 className={`text-2xl font-bold ${darkMode ? 'text-gray-200' : 'text-gray-700'} mb-2`}>No conversation selected</h2>
-                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-center max-w-md mb-8`}>
-                  Select a conversation from the list or start a new one to begin messaging.
+                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-center max-w-md`}>
+                  Select a conversation from the list to begin messaging.
                 </p>
-                <button
-                  onClick={startNewConversation}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center"
-                >
-                  <PlusCircleIcon className="h-5 w-5 mr-2" />
-                  New Conversation
-                </button>
               </div>
             )}
           </div>

@@ -1,24 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import {
-  MessageSquare,
-  Bell,
-  LogOut,
-  ChevronDown,
-  Search,
-  User,
-  Shield,
-  Moon,
-  Sun,
-  Menu,
-  X,
-  Sparkles,
-  LayoutDashboard,
-  Building2,
-  BarChart3,
-  Heart,
-  Wrench,
-  CreditCard,
-  FileText
+import { MessageSquare, Bell, LogOut, ChevronDown, Search, User, Shield, Moon, Sun, Menu, X, Sparkles, LayoutDashboard, Building2, BarChart3, Heart, Wrench, CreditCard, FileText
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../../../useDarkMode.js';
@@ -138,7 +119,7 @@ const IconButton = ({ icon: Icon, onClick, badge = 0, className = '', ariaLabel,
   );
 };
 
-const ProfileDropdown = ({ user, showDropdown, onToggle, onLogout, isDark }) => {
+const ProfileDropdown = ({ user, showDropdown, onToggle, onLogout }) => {
   const dropdownRef = useRef(null);
 
   useClickOutside(dropdownRef, () => showDropdown && onToggle());
@@ -302,7 +283,9 @@ const TenantNavBar = ({ currentSection }) => {
     const onUserUpdated = (e) => {
       try {
         setUser(e.detail || JSON.parse(localStorage.getItem('user')) || {});
-      } catch { }
+      } catch (error) {
+        console.error('Error parsing user data on update:', error);
+      }
     };
     window.addEventListener('user:updated', onUserUpdated);
     return () => window.removeEventListener('user:updated', onUserUpdated);
@@ -447,8 +430,8 @@ const TenantNavBar = ({ currentSection }) => {
                       <div
                         key={notification.id}
                         className={`p-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer border-l-4 ${notification.isRead
-                            ? 'border-transparent'
-                            : 'border-primary-500 bg-primary-50/30 dark:bg-primary-900/10'
+                          ? 'border-transparent'
+                          : 'border-primary-500 bg-primary-50/30 dark:bg-primary-900/10'
                           }`}
                         onClick={() => markAsRead(notification.id)}
                       >
@@ -512,7 +495,6 @@ const TenantNavBar = ({ currentSection }) => {
           showDropdown={showDropdown}
           onToggle={() => setShowDropdown(!showDropdown)}
           onLogout={handleLogout}
-          isDark={isDarkMode}
         />
       </div>
 

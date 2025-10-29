@@ -3,20 +3,7 @@ import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
 import {
-  CreditCard,
-  Banknote,
-  Download,
-  Calendar,
-  CheckCircle,
-  Clock,
-  AlertTriangle,
-  DollarSign,
-  FileText,
-  ShieldCheck,
-  Star,
-  Trophy,
-  BarChart3,
-  X
+  CreditCard, Banknote, Download, Calendar, CheckCircle, Clock, AlertTriangle, DollarSign, FileText, ShieldCheck, Star, Trophy, BarChart3, X
 } from 'lucide-react';
 
 // Custom hooks
@@ -124,9 +111,7 @@ const UpcomingPaymentCard = ({ payment, onPayNow }) => {
   );
 };
 
-const PaymentHistoryRow = ({ payment, index, onDownloadReceipt }) => {
-  const [setRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });
-
+const PaymentHistoryRow = ({ payment, onDownloadReceipt }) => {
   const getStatusColor = (status) => {
     const colors = {
       'Paid': 'bg-green-100 text-green-700',
@@ -201,8 +186,8 @@ const PaymentMethodCard = ({ method, icon, isSelected, onSelect }) => {
   return (
     <div
       className={`border rounded-2xl p-6 cursor-pointer transition-colors ${isSelected
-          ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
-          : 'border-gray-200 hover:border-blue-300'
+        ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
+        : 'border-gray-200 hover:border-blue-300'
         }`}
       onClick={onSelect}
     >
@@ -233,6 +218,8 @@ const PaymentMethodCard = ({ method, icon, isSelected, onSelect }) => {
 
 // Main Component
 const TenantPayment = () => {
+  const { darkMode } = useDarkMode();
+
   const [paymentHistory, setPaymentHistory] = useLocalStorage('paymentHistory', [
     {
       id: 1,
@@ -373,7 +360,6 @@ const TenantPayment = () => {
 
   // Loading screen
   if (isLoading) {
-    const { darkMode } = useDarkMode();
     return (
       <div className="flex h-screen">
         <TenantSideBar />
@@ -395,8 +381,6 @@ const TenantPayment = () => {
       </div>
     );
   }
-
-  const { darkMode } = useDarkMode();
 
   return (
     <div className={`flex h-screen ${darkMode
@@ -448,7 +432,7 @@ const TenantPayment = () => {
           <div className={`${darkMode ? 'bg-slate-800/80' : 'bg-white/80'} backdrop-blur-sm rounded-3xl shadow-2xl p-8 mb-8 border ${darkMode ? 'border-gray-700/50' : 'border-white/50'}`}>
             <div className="flex items-center mb-8">
               <div className="p-3 bg-gradient-to-r from-green-500 to-blue-600 rounded-2xl mr-4">
-                <CreditCardIcon className="h-8 w-8 text-white" />
+                <CreditCard className="h-8 w-8 text-white" />
               </div>
               <div>
                 <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Make Payment</h2>
@@ -547,11 +531,10 @@ const TenantPayment = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {paymentHistory.map((payment, index) => (
+                  {paymentHistory.map((payment) => (
                     <PaymentHistoryRow
                       key={payment.id}
                       payment={payment}
-                      index={index}
                       onDownloadReceipt={downloadReceipt}
                     />
                   ))}
