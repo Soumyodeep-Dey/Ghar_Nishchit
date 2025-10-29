@@ -317,78 +317,92 @@ export default function Landing() {
     >
       {/* Navbar */}
       <nav
-        className={`sticky top-0 z-50 backdrop-blur-md bg-opacity-80 shadow-md ${darkMode ? 'bg-gradient-to-r from-blue-950 via-slate-900 to-gray-900 text-slate-100' : 'bg-white'
+        className={`sticky top-0 z-50 backdrop-blur-md bg-opacity-90 shadow-md ${darkMode ? 'bg-gradient-to-r from-blue-950 via-slate-900 to-gray-900 text-slate-100' : 'bg-white'
           }`}
         role="navigation"
         aria-label="Main navigation"
       >
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div
-            className="text-2xl font-bold cursor-pointer flex items-center space-x-2"
-            style={{
-              color: darkMode ? '#38bdf8' : '#1e293b'
-            }}
-          >
-            <Home size={28} aria-hidden="true" />
-            <span>Ghar_Nishchit</span>
-          </div>
+        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-2 sm:gap-4">
+            {/* Logo */}
+            <div
+              className="text-lg sm:text-xl md:text-2xl font-bold cursor-pointer flex items-center space-x-1 sm:space-x-2 flex-shrink-0"
+              style={{
+                color: darkMode ? '#38bdf8' : '#1e293b'
+              }}
+            >
+              <Home size={24} className="sm:w-7 sm:h-7" aria-hidden="true" />
+              <span className="whitespace-nowrap">Ghar_Nishchit</span>
+            </div>
 
-          {/* Desktop Menu */}
-          <ul className="hidden md:flex space-x-8" role="menubar">
-            {/* eslint-disable-next-line no-unused-vars */}
-            {menu.map(({ href, label, icon: IconComponent }) => (
-              <li role="none" key={href}>
-                <a
-                  href={href}
-                  role="menuitem"
-                  tabIndex={0}
-                  className={`flex items-center space-x-1
+            {/* Desktop Menu */}
+            <ul className="hidden lg:flex items-center space-x-4 xl:space-x-6" role="menubar">
+              {/* eslint-disable-next-line no-unused-vars */}
+              {menu.map(({ href, label, icon: IconComponent }) => (
+                <li role="none" key={href}>
+                  <a
+                    href={href}
+                    role="menuitem"
+                    tabIndex={0}
+                    className={`flex items-center space-x-1 text-sm xl:text-base whitespace-nowrap
           ${darkMode
-                      ? 'text-cyan-200 hover:text-cyan-400'
-                      : 'text-indigo-700 hover:text-indigo-900'}
-          cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded transition-transform transform hover:scale-110`}
-                >
-                  <IconComponent size={18} aria-hidden="true" />
-                  <span>{label}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            onKeyDown={handleKeyDownMenuToggle}
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={menuOpen}
-            aria-controls="mobile-menu"
-            className="md:hidden p-2 rounded-md text-indigo-600 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
-          >
-            {menuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+                        ? 'text-cyan-200 hover:text-cyan-400'
+                        : 'text-indigo-700 hover:text-indigo-900'}
+          cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded px-2 py-1 transition-transform transform hover:scale-110`}
+                  >
+                    <IconComponent size={16} className="xl:w-[18px] xl:h-[18px]" aria-hidden="true" />
+                    <span>{label}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
 
-          {/* SignUp Button */}
-          <Link
-            to="/signup"
-            className="hidden md:inline-block bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-transform hover:scale-105"
-          >
-            SignUp
-          </Link>
+            {/* Right Side Actions */}
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              {/* SignUp Button - Hidden on mobile and small tablets */}
+              <Link
+                to="/signup"
+                className={`hidden lg:inline-block px-3 xl:px-4 py-2 text-sm xl:text-base rounded whitespace-nowrap transition-transform hover:scale-105 ${darkMode ? 'bg-cyan-500 hover:bg-cyan-400 text-blue-950' : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                  }`}
+              >
+                SignUp
+              </Link>
 
-          {/* Dark Mode Toggle Button */}
-          <button
-            onClick={toggleDarkMode}
-            className="ml-4 p-2 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition"
-            aria-label="Toggle dark mode"
-          >
-            {darkMode ? '🌙' : '☀️'}
-          </button>
+              {/* Dark Mode Toggle Button */}
+              <button
+                onClick={toggleDarkMode}
+                className={`p-2 rounded-full transition flex-shrink-0 ${darkMode
+                  ? 'bg-slate-800 text-cyan-400 hover:bg-slate-700'
+                  : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
+                  }`}
+                aria-label="Toggle dark mode"
+              >
+                <span className="text-lg sm:text-xl">{darkMode ? '🌙' : '☀️'}</span>
+              </button>
+
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                onKeyDown={handleKeyDownMenuToggle}
+                aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={menuOpen}
+                aria-controls="mobile-menu"
+                className={`lg:hidden p-2 rounded-md transition focus:outline-none focus:ring-2 focus:ring-indigo-500 flex-shrink-0 ${darkMode
+                  ? 'text-cyan-400 hover:bg-slate-800'
+                  : 'text-indigo-600 hover:bg-indigo-100'
+                  }`}
+              >
+                {menuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Mobile Menu */}
         {menuOpen && (
           <ul
             id="mobile-menu"
-            className="md:hidden bg-white shadow-md"
+            className={`lg:hidden shadow-md ${darkMode ? 'bg-slate-900' : 'bg-white'}`}
             role="menu"
             aria-label="Mobile menu"
           >
@@ -399,10 +413,13 @@ export default function Landing() {
                   href={href}
                   role="menuitem"
                   tabIndex={0}
-                  className="flex items-center space-x-3 px-6 py-3 text-gray-700 hover:bg-indigo-100 focus:outline-none focus:bg-indigo-200 transition-colors text-lg"
+                  className={`flex items-center space-x-3 px-6 py-3 focus:outline-none transition-colors text-base sm:text-lg ${darkMode
+                    ? 'text-cyan-200 hover:bg-slate-800 focus:bg-slate-700'
+                    : 'text-gray-700 hover:bg-indigo-100 focus:bg-indigo-200'
+                    }`}
                   onClick={() => setMenuOpen(false)}
                 >
-                  <IconComponent size={20} className="text-indigo-600" aria-hidden="true" />
+                  <IconComponent size={20} className={darkMode ? 'text-cyan-400' : 'text-indigo-600'} aria-hidden="true" />
                   <span>{label}</span>
                 </a>
               </li>
@@ -410,7 +427,10 @@ export default function Landing() {
             <li role="none" className="px-6 py-3">
               <Link
                 to="/signup"
-                className="block bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition text-center font-semibold"
+                className={`block px-4 py-2 rounded text-center font-semibold transition ${darkMode
+                  ? 'bg-cyan-500 text-blue-950 hover:bg-cyan-400'
+                  : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                  }`}
                 onClick={() => setMenuOpen(false)}
               >
                 SignUp
