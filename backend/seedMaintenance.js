@@ -4,6 +4,7 @@
 import mongoose from 'mongoose';
 import Maintenance from './src/models/maintenance.model.js';
 import dotenv from 'dotenv';
+import { getCurrentYear } from './src/utils/dateUtils.js';
 
 dotenv.config();
 
@@ -34,28 +35,28 @@ const sampleMaintenanceRequests = [
             {
                 author: "Landlord",
                 text: "I've contacted AquaFix Plumbing and they'll be there tomorrow morning.",
-                timestamp: new Date("2025-08-01T15:30:00Z")
+                timestamp: new Date(`${getCurrentYear()}-08-01T15:30:00Z`)
             }
         ],
         history: [
             {
                 type: "created",
                 description: "Request created by John Doe",
-                timestamp: new Date("2025-08-01T10:30:00Z")
+                timestamp: new Date(`${getCurrentYear()}-08-01T10:30:00Z`)
             },
             {
                 type: "assignment",
                 description: "Assigned to AquaFix Plumbing Services",
-                timestamp: new Date("2025-08-01T15:00:00Z")
+                timestamp: new Date(`${getCurrentYear()}-08-01T15:00:00Z`)
             },
             {
                 type: "status",
                 description: "Status changed to In Progress",
-                timestamp: new Date("2025-08-02T09:00:00Z")
+                timestamp: new Date(`${getCurrentYear()}-08-02T09:00:00Z`)
             }
         ],
-        createdAt: new Date("2025-08-01T10:30:00Z"),
-        updatedAt: new Date("2025-08-02T14:20:00Z")
+        createdAt: new Date(`${getCurrentYear()}-08-01T10:30:00Z`),
+        updatedAt: new Date(`${getCurrentYear()}-08-02T14:20:00Z`)
     },
     {
         title: "Heating System Malfunction",
@@ -83,28 +84,28 @@ const sampleMaintenanceRequests = [
             {
                 author: "Landlord",
                 text: "HVAC Solutions Inc. has been contacted and will inspect the system tomorrow.",
-                timestamp: new Date("2025-07-29T11:00:00Z")
+                timestamp: new Date(`${getCurrentYear()}-07-29T11:00:00Z`)
             }
         ],
         history: [
             {
                 type: "created",
                 description: "Request created by Jane Smith",
-                timestamp: new Date("2025-07-28T09:15:00Z")
+                timestamp: new Date(`${getCurrentYear()}-07-28T09:15:00Z`)
             },
             {
                 type: "assignment",
                 description: "Assigned to HVAC Solutions Inc.",
-                timestamp: new Date("2025-07-29T10:30:00Z")
+                timestamp: new Date(`${getCurrentYear()}-07-29T10:30:00Z`)
             },
             {
                 type: "status",
                 description: "Status changed to In Progress",
-                timestamp: new Date("2025-08-05T10:00:00Z")
+                timestamp: new Date(`${getCurrentYear()}-08-05T10:00:00Z`)
             }
         ],
-        createdAt: new Date("2025-07-28T09:15:00Z"),
-        updatedAt: new Date("2025-08-05T10:00:00Z")
+        createdAt: new Date(`${getCurrentYear()}-07-28T09:15:00Z`),
+        updatedAt: new Date(`${getCurrentYear()}-08-05T10:00:00Z`)
     },
     {
         title: "Electrical Outlet Not Working",
@@ -140,34 +141,34 @@ const sampleMaintenanceRequests = [
             {
                 author: "ElectroFix Solutions",
                 text: "Replaced the faulty outlet and checked all connections. Everything is working properly now.",
-                timestamp: new Date("2025-08-03T11:30:00Z")
+                timestamp: new Date(`${getCurrentYear()}-08-03T11:30:00Z`)
             }
         ],
         history: [
             {
                 type: "created",
                 description: "Emergency request created by Robert Johnson",
-                timestamp: new Date("2025-08-02T16:45:00Z")
+                timestamp: new Date(`${getCurrentYear()}-08-02T16:45:00Z`)
             },
             {
                 type: "assignment",
                 description: "Assigned to ElectroFix Solutions",
-                timestamp: new Date("2025-08-02T17:00:00Z")
+                timestamp: new Date(`${getCurrentYear()}-08-02T17:00:00Z`)
             },
             {
                 type: "status",
                 description: "Status changed to In Progress",
-                timestamp: new Date("2025-08-03T08:00:00Z")
+                timestamp: new Date(`${getCurrentYear()}-08-03T08:00:00Z`)
             },
             {
                 type: "status",
                 description: "Status changed to Completed",
-                timestamp: new Date("2025-08-03T11:30:00Z")
+                timestamp: new Date(`${getCurrentYear()}-08-03T11:30:00Z`)
             }
         ],
-        createdAt: new Date("2025-08-02T16:45:00Z"),
-        updatedAt: new Date("2025-08-03T11:30:00Z"),
-        completedDate: new Date("2025-08-03T11:30:00Z")
+        createdAt: new Date(`${getCurrentYear()}-08-02T16:45:00Z`),
+        updatedAt: new Date(`${getCurrentYear()}-08-03T11:30:00Z`),
+        completedDate: new Date(`${getCurrentYear()}-08-03T11:30:00Z`)
     },
     {
         title: "Window Lock Repair",
@@ -187,29 +188,29 @@ const sampleMaintenanceRequests = [
             {
                 author: "Landlord",
                 text: "Waiting for parts to arrive. Should be completed by end of week.",
-                timestamp: new Date("2025-08-01T10:15:00Z")
+                timestamp: new Date(`${getCurrentYear()}-08-01T10:15:00Z`)
             }
         ],
         history: [
             {
                 type: "created",
                 description: "Request created by Emily Davis",
-                timestamp: new Date("2025-07-30T14:20:00Z")
+                timestamp: new Date(`${getCurrentYear()}-07-30T14:20:00Z`)
             },
             {
                 type: "assignment",
                 description: "Assigned to SecureHome Repairs",
-                timestamp: new Date("2025-07-30T15:30:00Z")
+                timestamp: new Date(`${getCurrentYear()}-07-30T15:30:00Z`)
             },
             {
                 type: "status",
                 description: "Status changed to On Hold",
-                timestamp: new Date("2025-08-01T10:15:00Z"),
+                timestamp: new Date(`${getCurrentYear()}-08-01T10:15:00Z`),
                 details: "Waiting for parts"
             }
         ],
-        createdAt: new Date("2025-07-30T14:20:00Z"),
-        updatedAt: new Date("2025-08-01T10:15:00Z")
+        createdAt: new Date(`${getCurrentYear()}-07-30T14:20:00Z`),
+        updatedAt: new Date(`${getCurrentYear()}-08-01T10:15:00Z`)
     },
     {
         title: "Refrigerator Not Cooling",
@@ -229,11 +230,11 @@ const sampleMaintenanceRequests = [
             {
                 type: "created",
                 description: "Request created by Michael Brown",
-                timestamp: new Date("2025-10-25T08:00:00Z")
+                timestamp: new Date(`${getCurrentYear()}-10-25T08:00:00Z`)
             }
         ],
-        createdAt: new Date("2025-10-25T08:00:00Z"),
-        updatedAt: new Date("2025-10-25T08:00:00Z")
+        createdAt: new Date(`${getCurrentYear()}-10-25T08:00:00Z`),
+        updatedAt: new Date(`${getCurrentYear()}-10-25T08:00:00Z`)
     }
 ];
 

@@ -5,6 +5,7 @@ import TenantNavBar from './TenantNavBar.jsx';
 import {
   Wrench, BarChart3, TrendingUp, TrendingDown, Building2, Heart, Bell, CreditCard, Star, X
 } from 'lucide-react';
+import { getCurrentYear } from '../../../utils/dateUtils.js';
 
 // Constants
 const ITEMS_PER_PAGE = 4;
@@ -347,7 +348,7 @@ const TenantDashboard = () => {
       title: "Leaky Faucet",
       description: "Kitchen faucet is dripping constantly",
       status: "In Progress",
-      date: "2024-01-15",
+      date: `${getCurrentYear()}-01-15`,
       priority: "Medium"
     },
     {
@@ -355,7 +356,7 @@ const TenantDashboard = () => {
       title: "Broken Light Fixture",
       description: "Living room ceiling light not working",
       status: "Completed",
-      date: "2024-01-10",
+      date: `${getCurrentYear()}-01-10`,
       priority: "Low"
     }
   ];
@@ -365,7 +366,7 @@ const TenantDashboard = () => {
       id: 1,
       amount: "$1,200",
       type: "Rent",
-      date: "2024-01-01",
+      date: `${getCurrentYear()}-01-01`,
       status: "Paid",
       method: "Bank Transfer"
     },
@@ -373,7 +374,7 @@ const TenantDashboard = () => {
       id: 2,
       amount: "$50",
       type: "Utilities",
-      date: "2024-01-01",
+      date: `${getCurrentYear()}-01-01`,
       status: "Paid",
       method: "Credit Card"
     },
@@ -381,7 +382,7 @@ const TenantDashboard = () => {
       id: 3,
       amount: "$1,200",
       type: "Rent",
-      date: "2024-02-01",
+      date: `${getCurrentYear()}-02-01`,
       status: "Pending",
       method: "Bank Transfer"
     }

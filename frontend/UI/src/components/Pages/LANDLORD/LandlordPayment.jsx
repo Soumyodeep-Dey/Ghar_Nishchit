@@ -1,34 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
+import { getCurrentYear } from '../../../utils/dateUtils.js';
 import {
-  CreditCard,
-  DollarSign,
-  TrendingUp,
-  Calendar,
-  Clock,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Download,
-  Receipt,
-  Crown,
-  Building2,
-  Users,
-  Plus,
-  Edit,
-  Trash2,
-  Wallet,
-  Trophy,
-  X,
-  Check,
-  Info,
-  Database,
-  ShieldCheck,
-  Loader,
-  RotateCcw,
-  ArrowRight,
-  Search
+  CreditCard, DollarSign, TrendingUp, Calendar, Clock, CheckCircle, XCircle, AlertCircle, Download, Receipt, Crown, Building2, Users, Plus, Edit, Trash2, Wallet, Trophy, X, Check, Info, Database, ShieldCheck, Loader, RotateCcw, ArrowRight, Search
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -1240,28 +1215,28 @@ const LandlordPayment = () => {
       id: 1,
       description: 'Professional Plan - Monthly',
       amount: 59.00,
-      date: '2025-07-15',
+      date: `${getCurrentYear()}-07-15`,
       status: 'completed',
       method: 'Visa •••• 4242',
-      invoiceId: 'INV-2025-001'
+      invoiceId: `INV-${getCurrentYear()}-001`
     },
     {
       id: 2,
       description: 'Professional Plan - Monthly',
       amount: 59.00,
-      date: '2025-06-15',
+      date: `${getCurrentYear()}-06-15`,
       status: 'completed',
       method: 'Visa •••• 4242',
-      invoiceId: 'INV-2025-002'
+      invoiceId: `INV-${getCurrentYear()}-002`
     },
     {
       id: 3,
       description: 'Starter Plan - Monthly',
       amount: 29.00,
-      date: '2025-05-15',
+      date: `${getCurrentYear()}-05-15`,
       status: 'completed',
       method: 'Visa •••• 4242',
-      invoiceId: 'INV-2025-003'
+      invoiceId: `INV-${getCurrentYear()}-003`
     }
   ]);
 
@@ -1273,7 +1248,7 @@ const LandlordPayment = () => {
     discount: 0,
     tax: 5.31,
     totalAmount: 64.31,
-    dueDate: '2025-08-15'
+    dueDate: `${getCurrentYear()}-08-15`
   });
 
   // Calculate stats

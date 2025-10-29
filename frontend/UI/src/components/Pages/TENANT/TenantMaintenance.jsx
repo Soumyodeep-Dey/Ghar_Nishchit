@@ -2,8 +2,10 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
-import { WrenchScrewdriverIcon, PlusIcon, TrashIcon, PencilIcon, CheckCircleIcon, ClockIcon, ExclamationTriangleIcon, DocumentTextIcon, CalendarIcon, MagnifyingGlassIcon, ChartBarIcon
+import {
+  WrenchScrewdriverIcon, PlusIcon, TrashIcon, PencilIcon, CheckCircleIcon, ClockIcon, ExclamationTriangleIcon, DocumentTextIcon, CalendarIcon, MagnifyingGlassIcon, ChartBarIcon
 } from '@heroicons/react/24/outline';
+import { getCurrentYear } from '../../../utils/dateUtils.js';
 
 // Custom hooks
 const useLocalStorage = (key, initialValue) => {
@@ -311,7 +313,7 @@ const TenantMaintenance = () => {
       title: "Leaky Faucet",
       description: "Kitchen faucet is dripping constantly, causing water waste and noise",
       status: "In Progress",
-      date: "2024-01-15",
+      date: `${getCurrentYear()}-01-15`,
       priority: "Medium"
     },
     {
@@ -319,7 +321,7 @@ const TenantMaintenance = () => {
       title: "Broken Light Fixture",
       description: "Living room ceiling light not working, needs electrical inspection",
       status: "Completed",
-      date: "2024-01-10",
+      date: `${getCurrentYear()}-01-10`,
       priority: "Low"
     },
     {
@@ -327,7 +329,7 @@ const TenantMaintenance = () => {
       title: "AC Unit Malfunction",
       description: "Air conditioning unit making loud noises and not cooling properly",
       status: "Pending",
-      date: "2024-01-20",
+      date: `${getCurrentYear()}-01-20`,
       priority: "High"
     }
   ]);

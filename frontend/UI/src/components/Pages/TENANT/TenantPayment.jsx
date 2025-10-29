@@ -6,6 +6,7 @@ import {
   CreditCard, Banknote, Download, Calendar, CheckCircle, Clock, AlertTriangle, DollarSign, FileText, ShieldCheck, Star, Trophy, BarChart3, X
 } from 'lucide-react';
 import { showInfoToast } from '../../../utils/toast.jsx';
+import { getCurrentYear } from '../../../utils/dateUtils.js';
 
 // Custom hooks
 const useLocalStorage = (key, initialValue) => {
@@ -224,7 +225,7 @@ const TenantPayment = () => {
   const [paymentHistory, setPaymentHistory] = useLocalStorage('paymentHistory', [
     {
       id: 1,
-      date: "2024-01-01",
+      date: `${getCurrentYear()}-01-01`,
       type: "Rent",
       amount: "$1,200.00",
       method: "Bank Transfer",
@@ -233,7 +234,7 @@ const TenantPayment = () => {
     },
     {
       id: 2,
-      date: "2024-01-01",
+      date: `${getCurrentYear()}-01-01`,
       type: "Utilities",
       amount: "$50.00",
       method: "Credit Card",
@@ -242,7 +243,7 @@ const TenantPayment = () => {
     },
     {
       id: 3,
-      date: "2024-02-01",
+      date: `${getCurrentYear()}-02-01`,
       type: "Rent",
       amount: "$1,200.00",
       method: "Bank Transfer",
@@ -272,21 +273,21 @@ const TenantPayment = () => {
   const [upcomingPayments, setUpcomingPayments] = useLocalStorage('upcomingPayments', [
     {
       id: 1,
-      date: "2024-02-01",
+      date: `${getCurrentYear()}-02-01`,
       type: "Rent",
       amount: "$1,200.00",
       status: "Pending"
     },
     {
       id: 2,
-      date: "2024-02-05",
+      date: `${getCurrentYear()}-02-05`,
       type: "Utilities",
       amount: "$50.00",
       status: "Pending"
     },
     {
       id: 3,
-      date: "2024-02-15",
+      date: `${getCurrentYear()}-02-15`,
       type: "Parking",
       amount: "$75.00",
       status: "Pending"

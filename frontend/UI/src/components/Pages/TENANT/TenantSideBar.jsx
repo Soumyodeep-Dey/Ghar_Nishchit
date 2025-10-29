@@ -307,7 +307,7 @@ const TenantSideBar = ({ setCurrentSection }) => {
             {!isCollapsed ? (
               <div className="text-center">
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                  © 2024 Ghar_Nishchit
+                  © {new Date().getFullYear()} Ghar_Nishchit
                 </p>
                 <div className="flex items-center justify-center space-x-1">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
