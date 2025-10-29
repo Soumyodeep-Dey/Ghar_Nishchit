@@ -16,6 +16,7 @@ import LandlordPayment from './components/Pages/LANDLORD/LandlordPayment';
 import LandlordTenant from './components/Pages/LANDLORD/LandlordTenant';
 import UpdateLandlordProfile from './components/Pages/LANDLORD/UpdateLandlordProfile';
 import ProtectedRoute from './components/ProtectedRoute';
+import ForgotPassword from './components/ForgotPassword';
 
 
 export default function App() {
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route
             path="/tenant"
             element={
