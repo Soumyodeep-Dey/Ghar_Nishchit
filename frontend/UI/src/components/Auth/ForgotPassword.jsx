@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import { useDarkMode } from '../useDarkMode.js';
+import api from '../../services/api.js';
+import { useDarkMode } from '../../useDarkMode.js';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');

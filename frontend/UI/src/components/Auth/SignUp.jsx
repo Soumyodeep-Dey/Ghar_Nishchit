@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { User, Mail, Lock, Phone, Eye, EyeOff } from 'lucide-react';
-import { useDarkMode } from '../useDarkMode.js';
-import p1 from '../assets/p1.jpg';
-import { signInWithGoogle, handleGoogleRedirectResult } from '../firebase';
+import { useDarkMode } from '../../useDarkMode.js';
+import p1 from '../../assets/p1.jpg';
+import { signInWithGoogle, handleGoogleRedirectResult } from '../../firebase.js';
 import { useNavigate } from 'react-router-dom';
 
 // Update the GoogleIcon to add a white background and rounded style for visibility

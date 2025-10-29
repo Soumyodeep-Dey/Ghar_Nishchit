@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import p1 from '../assets/p1.jpg';
+import p1 from '../../assets/p1.jpg';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { useDarkMode } from '../useDarkMode.js';
-import { signInWithGoogle, handleGoogleRedirectResult } from '../firebase';
+import { useDarkMode } from '../../useDarkMode.js';
+import { signInWithGoogle, handleGoogleRedirectResult } from '../../firebase.js';
 
 const GoogleIcon = () => (
   <span

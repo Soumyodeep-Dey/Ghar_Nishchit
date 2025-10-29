@@ -1,7 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
-import Landing from './components/Landing';
-import Login from './components/Login';
-import SignUp from './components/SignUp';
+import Landing from './components/landing';
+import Login from './components/Auth/Login';
+import SignUp from './components/Auth/SignUp';
 import DarkModeProvider from './DarkModeContext.jsx';
 import TenantDashboard from './components/Pages/TENANT/TenantDashboard';
 import TenantProperty from './components/Pages/TENANT/TenantProperty';
@@ -16,7 +16,7 @@ import LandlordPayment from './components/Pages/LANDLORD/LandlordPayment';
 import LandlordTenant from './components/Pages/LANDLORD/LandlordTenant';
 import UpdateLandlordProfile from './components/Pages/LANDLORD/UpdateLandlordProfile';
 import ProtectedRoute from './components/ProtectedRoute';
-import ForgotPassword from './components/ForgotPassword';
+import ForgotPassword from './components/Auth/ForgotPassword';
 
 
 export default function App() {
