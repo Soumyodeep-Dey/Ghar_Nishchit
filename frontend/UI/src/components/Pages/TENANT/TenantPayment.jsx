@@ -5,6 +5,7 @@ import TenantNavBar from './TenantNavBar';
 import {
   CreditCard, Banknote, Download, Calendar, CheckCircle, Clock, AlertTriangle, DollarSign, FileText, ShieldCheck, Star, Trophy, BarChart3, X
 } from 'lucide-react';
+import { showInfoToast } from '../../../utils/toast.jsx';
 
 // Custom hooks
 const useLocalStorage = (key, initialValue) => {
@@ -329,7 +330,7 @@ const TenantPayment = () => {
       setSelectedPayment(payment);
       setShowPaymentModal(true);
     } else {
-      alert('Redirecting to payment gateway...');
+      showInfoToast('Redirecting to payment gateway...');
     }
   }, []);
 

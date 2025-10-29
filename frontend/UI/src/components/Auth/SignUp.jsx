@@ -5,6 +5,7 @@ import { useDarkMode } from '../../useDarkMode.js';
 import p1 from '../../assets/p1.jpg';
 import { signInWithGoogle, handleGoogleRedirectResult } from '../../firebase.js';
 import { useNavigate } from 'react-router-dom';
+import { showSuccessToast, showErrorToast } from '../../utils/toast.jsx';
 
 // Update the GoogleIcon to add a white background and rounded style for visibility
 
@@ -55,7 +56,7 @@ export default function SignUp() {
     (async () => {
       const user = await handleGoogleRedirectResult();
       if (user) {
-        alert(`Welcome, ${user.displayName || user.email}!`);
+        showSuccessToast(`Welcome, ${user.displayName || user.email}!`);
         // Check user role and redirect accordingly
         const userRole = (user && (user.role || (user.roles && user.roles[0]))) || '';
         if (userRole.toLowerCase() === 'tenant') {
@@ -136,7 +137,7 @@ export default function SignUp() {
     const { name, email, password, phone, role } = formData;
 
     if (!name || !email || !password || !phone || !role) {
-      alert("Please fill in all fields.");
+      showErrorToast("Please fill in all fields.");
       return;
     }
 
@@ -160,7 +161,7 @@ export default function SignUp() {
         console.log('Signup response user:', user);
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(user));
-        alert("Registered successfully!");
+        showSuccessToast("Registered successfully!");
         const userRole = user.role || (user.roles && user.roles[0]) || '';
         setTimeout(() => {
           if (userRole.toLowerCase() === 'tenant') {
@@ -174,7 +175,7 @@ export default function SignUp() {
       })
       .catch((err) => {
         console.error(err);
-        alert("Error during registration.");
+        showErrorToast("Error during registration.");
       });
   };
 

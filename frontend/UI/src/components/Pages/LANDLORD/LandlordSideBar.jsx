@@ -4,6 +4,7 @@ import { Home, Building2, Users, Wallet, Settings, MessageSquare, ChevronLeft, C
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDarkMode } from '../../../useDarkMode.js';
+import { showConfirmToast } from '../../../utils/toast.jsx';
 
 // Constants
 const SIDEBAR_WIDTHS = { collapsed: '4.5rem', expanded: '24rem' };
@@ -165,12 +166,15 @@ const LandlordSideBar = ({ onSectionChange }) => {
       (pathname.startsWith(item.route + '/') && item.route !== '/landlord');
   };
   const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('userData');
-      // Redirect to home page
-      navigate('/');
-    }
+    showConfirmToast(
+      'Are you sure you want to logout?',
+      () => {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userData');
+        // Redirect to home page
+        navigate('/');
+      }
+    );
   };
 
   // Sub-components

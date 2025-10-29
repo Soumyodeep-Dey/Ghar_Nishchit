@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useDarkMode } from '../../useDarkMode.js';
 import { signInWithGoogle, handleGoogleRedirectResult } from '../../firebase.js';
+import { showSuccessToast, showErrorToast } from '../../utils/toast.jsx';
 
 const GoogleIcon = () => (
   <span
@@ -26,7 +27,6 @@ export default function Login() {
   const { darkMode, toggleDarkMode } = useDarkMode();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [message, setMessage] = useState('');
 
   // Welcome overlay animation state
   const [welcomeOut, setWelcomeOut] = useState(false);
@@ -40,7 +40,7 @@ export default function Login() {
     (async () => {
       const user = await handleGoogleRedirectResult();
       if (user) {
-        alert(`Welcome back, ${user.displayName || user.email}!`);
+        showSuccessToast(`Welcome back, ${user.displayName || user.email}!`);
         // Check user role and redirect accordingly
         const userRole = (user && (user.role || (user.roles && user.roles[0]))) || '';
         if (userRole.toLowerCase() === 'tenant') {
@@ -63,7 +63,7 @@ export default function Login() {
     e.preventDefault();
     const { email, password } = formData;
     if (!email || !password) {
-      setMessage('Please fill in all fields.');
+      showErrorToast('Please fill in all fields.');
       return;
     }
     try {
@@ -78,7 +78,7 @@ export default function Login() {
       console.log('Login response user:', user);
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
-      setMessage('Login successful! Redirecting...');
+      showSuccessToast('Login successful! Redirecting...');
       const userRole = (user && (user.role || (user.roles && user.roles[0]))) || '';
       setTimeout(() => {
         if (userRole.toLowerCase() === 'tenant') {
@@ -91,7 +91,7 @@ export default function Login() {
       }, 1000);
     } catch (err) {
       console.error(err);
-      setMessage('Invalid credentials.');
+      showErrorToast('Invalid credentials.');
     }
   };
 
@@ -191,13 +191,6 @@ export default function Login() {
           >
             Access your dashboard and manage your rentals.
           </p>
-
-          {message && (
-            <div className={`mb-4 text-sm text-center font-medium ${message.includes('successful') ? 'text-green-500' : 'text-red-500'
-              }`}>
-              {message}
-            </div>
-          )}
 
           {/* Social Login */}
           <button

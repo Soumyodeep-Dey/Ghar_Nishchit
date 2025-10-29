@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
+import { showConfirmToast } from '../../../utils/toast.jsx';
 
 // Custom Hooks
 const useIntersectionObserver = (options = {}) => {
@@ -1253,14 +1254,17 @@ const LandlordTenant = () => {
   };
 
   const handleDeleteTenant = (tenantId) => {
-    if (window.confirm('Are you sure you want to remove this tenant?')) {
-      setTenants(prev => prev.filter(t => t.id !== tenantId));
-      addNotification({
-        type: 'success',
-        title: 'Tenant Removed',
-        message: 'Tenant has been successfully removed from your list.'
-      });
-    }
+    showConfirmToast(
+      'Are you sure you want to remove this tenant?',
+      () => {
+        setTenants(prev => prev.filter(t => t.id !== tenantId));
+        addNotification({
+          type: 'success',
+          title: 'Tenant Removed',
+          message: 'Tenant has been successfully removed from your list.'
+        });
+      }
+    );
   };
 
   const handleMessageTenant = (tenant) => {

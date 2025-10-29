@@ -3,6 +3,7 @@ import { useDarkMode } from '../useDarkMode.js';
 import { Link } from 'react-router-dom';
 import { Home, Building, Info, DollarSign, Users, HelpCircle, Menu, X, BookOpen } from 'lucide-react';
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
+import { showInfoToast, showSuccessToast } from '../utils/toast.jsx';
 
 
 import p1 from '../assets/p1.jpg';
@@ -668,7 +669,7 @@ export default function Landing() {
             <button
               className={`mt-6 px-6 py-3 rounded transition-transform hover:scale-105 ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700 transition-transform hover:scale-105'
                 }`}
-              onClick={() => alert('Please login first')}
+              onClick={() => showInfoToast('Please login first')}
             >
               Learn More
             </button>
@@ -703,7 +704,7 @@ export default function Landing() {
               "Basic analytics"
             ]}
             buttonClass={`px-4 py-2 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
-            onClick={() => alert('Please login first to choose a plan')}
+            onClick={() => showInfoToast('Please login first to choose a plan')}
             darkMode={darkMode}
           />
           <PricingCard
@@ -715,7 +716,7 @@ export default function Landing() {
               "Advanced analytics"
             ]}
             buttonClass={`px-4 py-2 rounded transition ${darkMode ? 'bg-white text-cyan-700 hover:bg-gray-100' : 'bg-white text-emerald-600 hover:bg-gray-100'}`}
-            onClick={() => alert('Please login first to choose a plan')}
+            onClick={() => showInfoToast('Please login first to choose a plan')}
             highlight
             darkMode={darkMode}
           />
@@ -728,7 +729,7 @@ export default function Landing() {
               "Custom analytics"
             ]}
             buttonClass={`px-4 py-2 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
-            onClick={() => alert('Please login first to choose a plan')}
+            onClick={() => showInfoToast('Please login first to choose a plan')}
             darkMode={darkMode}
           />
         </div>
@@ -992,7 +993,7 @@ export default function Landing() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  alert('Thank you for subscribing!');
+                  showSuccessToast('Thank you for subscribing!');
                 }}
                 className="space-y-3"
               >

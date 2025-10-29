@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
+import { showConfirmToast } from '../../../utils/toast.jsx';
 
 
 // Custom Hooks
@@ -1217,30 +1218,32 @@ const LandlordMaintenance = () => {
   };
 
   const handleDeleteRequest = async (requestId) => {
-    if (window.confirm('Are you sure you want to delete this maintenance request?')) {
-      try {
-        const response = await api.deleteMaintenanceRequest(requestId);
+    showConfirmToast(
+      'Are you sure you want to delete this maintenance request?',
+      async () => {
+        try {
+          const response = await api.deleteMaintenanceRequest(requestId);
 
-        if (response.success) {
-          // Refresh the list
-          fetchMaintenanceRequests();
-          fetchStats();
+          if (response.success) {
+            // Refresh the list
+            fetchMaintenanceRequests();
+            fetchStats();
 
+            addNotification({
+              type: 'success',
+              title: 'Request Deleted',
+              message: 'Maintenance request has been successfully deleted.'
+            });
+          }
+        } catch (error) {
+          console.error('Error deleting request:', error);
           addNotification({
-            type: 'success',
-            title: 'Request Deleted',
-            message: 'Maintenance request has been successfully deleted.'
+            type: 'error',
+            title: 'Error',
+            message: 'Failed to delete maintenance request'
           });
         }
-      } catch (error) {
-        console.error('Error deleting request:', error);
-        addNotification({
-          type: 'error',
-          title: 'Error',
-          message: 'Failed to delete maintenance request'
-        });
-      }
-    }
+      });
   };
 
   const handleStatusChange = async (requestId, newStatus) => {

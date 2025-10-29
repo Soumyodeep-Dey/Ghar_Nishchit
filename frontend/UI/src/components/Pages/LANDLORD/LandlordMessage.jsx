@@ -1,41 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
+import { showConfirmToast } from '../../../utils/toast.jsx';
 import {
-  MessageSquare,
-  Send,
-  Paperclip,
-  MoreVertical,
-  Search,
-  Phone,
-  Smile,
-  File,
-  Calendar,
-  Archive,
-  Trash2,
-  Forward,
-  Reply,
-  Edit3,
-  Download,
-  Check,
-  CheckCheck,
-  AlertCircle,
-  Pin,
-  X,
-  Volume2,
-  VolumeX,
-  Heart,
-  ThumbsUp,
-  Laugh,
-  Angry,
-  Frown,
-  Meh,
-  Bold,
-  Italic,
-  Wrench,
-  CreditCard,
-  FileText,
-  Building2
+  MessageSquare, Send, Paperclip, MoreVertical, Search, Phone, Smile, File, Calendar, Archive, Trash2, Forward, Reply, Edit3, Download, Check, CheckCheck, AlertCircle, Pin, X, Volume2, VolumeX, Heart, ThumbsUp, Laugh, Angry, Frown, Meh, Bold, Italic, Wrench, CreditCard, FileText, Building2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -1103,13 +1071,16 @@ const LandlordMessage = () => {
 
   // Handle delete conversation
   const handleDeleteConversation = (conversationId) => {
-    if (window.confirm('Are you sure you want to delete this conversation?')) {
-      setConversations(prev => prev.filter(conv => conv.id !== conversationId));
-      setMessages(prev => prev.filter(msg => msg.conversationId !== conversationId));
-      if (activeConversation?.id === conversationId) {
-        setActiveConversation(conversations[0]);
+    showConfirmToast(
+      'Are you sure you want to delete this conversation?',
+      () => {
+        setConversations(prev => prev.filter(conv => conv.id !== conversationId));
+        setMessages(prev => prev.filter(msg => msg.conversationId !== conversationId));
+        if (activeConversation?.id === conversationId) {
+          setActiveConversation(conversations[0]);
+        }
       }
-    }
+    );
   };
 
   return (
