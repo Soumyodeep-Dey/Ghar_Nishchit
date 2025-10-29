@@ -1097,6 +1097,7 @@ const LandlordTenant = () => {
   // State for tenants data - now fetched from API
   const [tenants, setTenants] = useState([]);
   const [isLoadingTenants, setIsLoadingTenants] = useState(true);
+  const [hasLoadError, setHasLoadError] = useState(false);
   const [filteredTenants, setFilteredTenants] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -1115,15 +1116,54 @@ const LandlordTenant = () => {
     const fetchTenants = async () => {
       try {
         setIsLoadingTenants(true);
+        setHasLoadError(false);
+
+        // Check if user is authenticated
+        const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+        console.log('Auth token exists:', !!token);
+
+        if (!token) {
+          throw new Error('No authentication token found. Please log in again.');
+        }
+
         const data = await api.getMyTenants();
         console.log('Fetched tenants:', data);
-        setTenants(data || []);
+
+        if (Array.isArray(data)) {
+          setTenants(data);
+          // Don't show notification for empty list - let the UI handle it
+        } else {
+          console.error('Unexpected data format:', data);
+          setTenants([]);
+        }
       } catch (error) {
         console.error('Error fetching tenants:', error);
+        setHasLoadError(true);
+
+        let errorMessage = 'There was a problem loading your tenant list. Please try again later.';
+        let errorTitle = 'Backend Error';
+
+        if (error.status === 401 || error.status === 403) {
+          errorTitle = 'Authentication Required';
+          errorMessage = 'Your session has expired. Please log in again.';
+        } else if (error.status === 500) {
+          errorTitle = 'Server Error';
+          errorMessage = 'The backend server encountered an error. Please try again later.';
+        } else if (error.message && error.message.includes('authentication')) {
+          errorTitle = 'Authentication Required';
+          errorMessage = error.message;
+        } else if (!navigator.onLine) {
+          errorTitle = 'No Internet Connection';
+          errorMessage = 'Please check your internet connection and try again.';
+        } else if (error.message && error.message.includes('Network error')) {
+          errorTitle = 'Connection Failed';
+          errorMessage = 'Unable to connect to the server. Please ensure the backend is running.';
+        }
+
         addNotification({
           type: 'error',
-          title: 'Failed to Load Tenants',
-          message: 'Could not fetch your tenants. Please try again later.'
+          title: errorTitle,
+          message: errorMessage
         });
         setTenants([]);
       } finally {
@@ -1520,14 +1560,34 @@ const LandlordTenant = () => {
                     transition={{ duration: 0.5 }}
                   >
                     <Users className="w-20 h-20 mx-auto text-white/30 mb-6" />
-                    <h3 className="text-2xl font-bold text-white mb-4">No Tenants Found</h3>
-                    <p className="text-white/60 mb-8">
-                      {searchTerm || statusFilter !== 'All' || propertyFilter !== 'All'
-                        ? 'Try adjusting your search criteria or filters'
-                        : 'Start by adding your first tenant or prospect'
-                      }
-                    </p>
-
+                    {hasLoadError ? (
+                      <>
+                        <h3 className="text-2xl font-bold text-white mb-4">Backend Error</h3>
+                        <p className="text-white/60 mb-8">
+                          There was a problem connecting to the server.
+                          <br />
+                          Please check the error notification above and try again.
+                        </p>
+                      </>
+                    ) : tenants.length === 0 ? (
+                      <>
+                        <h3 className="text-2xl font-bold text-white mb-4">No Tenants Yet</h3>
+                        <p className="text-white/60 mb-8">
+                          You don't have any tenant inquiries yet.
+                          <br />
+                          Tenants will appear here when they inquire about your properties.
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <h3 className="text-2xl font-bold text-white mb-4">No Matching Tenants</h3>
+                        <p className="text-white/60 mb-8">
+                          No tenants match your current filters.
+                          <br />
+                          Try adjusting your search criteria or filters to see results.
+                        </p>
+                      </>
+                    )}
                   </motion.div>
                 </div>
               ) : (

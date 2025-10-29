@@ -15,19 +15,28 @@ const resolveUserId = (user) => {
  */
 export const getMyTenants = async (req, res) => {
     try {
+        console.log('=== getMyTenants called ===');
+        console.log('req.user:', req.user);
+
         const authUserId = resolveUserId(req.user);
+        console.log('Resolved authUserId:', authUserId);
+
         if (!authUserId) {
+            console.log('No authUserId found');
             return res.status(401).json({ message: 'Authentication required' });
         }
 
         // Find all properties posted by this landlord
         const myProperties = await Property.find({ postedBy: authUserId }).select('_id title');
+        console.log('Found properties:', myProperties.length);
 
         if (myProperties.length === 0) {
+            console.log('No properties found for landlord, returning empty array');
             return res.status(200).json([]);
         }
 
         const propertyIds = myProperties.map(p => p._id);
+        console.log('Property IDs:', propertyIds);
 
         // Find all inquiries for these properties
         const inquiries = await Inquiry.find({
@@ -37,10 +46,15 @@ export const getMyTenants = async (req, res) => {
             .populate('property', 'title price address')
             .sort({ contactTime: -1 });
 
+        console.log('Found inquiries:', inquiries.length);
+
         // Transform inquiries into tenant data
         const tenants = inquiries.map(inquiry => {
             const seeker = inquiry.seeker;
-            if (!seeker) return null;
+            if (!seeker) {
+                console.log('Inquiry missing seeker:', inquiry._id);
+                return null;
+            }
 
             return {
                 id: seeker._id,
@@ -80,10 +94,12 @@ export const getMyTenants = async (req, res) => {
             }
         }
 
+        console.log('Returning unique tenants:', uniqueTenants.length);
         res.status(200).json(uniqueTenants);
     } catch (error) {
         console.error('Error fetching tenants:', error);
-        res.status(500).json({ message: error.message });
+        console.error('Error stack:', error.stack);
+        res.status(500).json({ message: error.message, error: error.toString() });
     }
 };
 

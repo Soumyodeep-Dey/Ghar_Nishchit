@@ -18,23 +18,56 @@ async function request(path, options = {}) {
     console.log('Headers:', headers);
     if (options.body) console.log('Body:', options.body);
 
-    const res = await fetch(`${BASE}${path}`, { ...options, headers });
+    try {
+        const res = await fetch(`${BASE}${path}`, { ...options, headers });
 
-    console.log(`API Response: ${res.status} ${res.statusText}`);
+        console.log(`API Response: ${res.status} ${res.statusText}`);
 
-    if (!res.ok) {
-        const text = await res.text().catch(() => '');
-        console.error('API Error:', text);
-        const err = new Error(res.statusText || 'Request failed');
-        err.status = res.status;
-        err.body = text;
-        throw err;
+        if (!res.ok) {
+            let errorData = null;
+            const contentType = res.headers.get('content-type') || '';
+
+            try {
+                if (contentType.includes('application/json')) {
+                    errorData = await res.json();
+                } else {
+                    errorData = await res.text();
+                }
+            } catch (parseError) {
+                console.error('Error parsing error response:', parseError);
+            }
+
+            console.error('API Error Response:', errorData);
+
+            const err = new Error(
+                errorData?.message ||
+                errorData?.error ||
+                (typeof errorData === 'string' ? errorData : res.statusText) ||
+                'Request failed'
+            );
+            err.status = res.status;
+            err.body = errorData;
+            throw err;
+        }
+
+        // No content
+        if (res.status === 204) return null;
+
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+            const data = await res.json();
+            console.log('API Success Response:', data);
+            return data;
+        }
+        return res.text();
+    } catch (error) {
+        // Network error or fetch failed
+        if (!error.status) {
+            console.error('Network error:', error);
+            error.message = 'Network error: Unable to connect to server';
+        }
+        throw error;
     }
-    // No content
-    if (res.status === 204) return null;
-    const contentType = res.headers.get('content-type') || '';
-    if (contentType.includes('application/json')) return res.json();
-    return res.text();
 }
 
 const api = {
