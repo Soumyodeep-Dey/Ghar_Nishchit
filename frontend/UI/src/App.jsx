@@ -1,13 +1,26 @@
+// routes are routes
 import { Route, Routes } from 'react-router-dom';
+
+// landing page
 import Landing from './components/landing';
+
+// auth components
 import Login from './components/Auth/Login';
 import SignUp from './components/Auth/SignUp';
+import ProtectedRoute from './components/ProtectedRoute';
+import ForgotPassword from './components/Auth/ForgotPassword';
+
+// dark mode context
 import DarkModeProvider from './DarkModeContext.jsx';
+
+// tenant components
 import TenantDashboard from './components/Pages/TENANT/TenantDashboard';
 import TenantProperty from './components/Pages/TENANT/TenantProperty';
 import TenantMessage from './components/Pages/TENANT/TenantMessage';
 import TenantMaintenance from './components/Pages/TENANT/TenantMaintenance';
 import TenantPayment from './components/Pages/TENANT/TenantPayment';
+
+// landlord components
 import LandlordDashboard from './components/Pages/LANDLORD/LandlordDashboard';
 import LandlordProperty from './components/Pages/LANDLORD/LandlordProperty';
 import LandlordMessage from './components/Pages/LANDLORD/LandlordMessage';
@@ -15,8 +28,8 @@ import LandlordMaintenance from './components/Pages/LANDLORD/LandlordMaintenance
 import LandlordPayment from './components/Pages/LANDLORD/LandlordPayment';
 import LandlordTenant from './components/Pages/LANDLORD/LandlordTenant';
 import UpdateLandlordProfile from './components/Pages/LANDLORD/UpdateLandlordProfile';
-import ProtectedRoute from './components/ProtectedRoute';
-import ForgotPassword from './components/Auth/ForgotPassword';
+
+// toast notifications
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
