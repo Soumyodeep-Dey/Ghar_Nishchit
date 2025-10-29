@@ -1120,14 +1120,12 @@ const LandlordTenant = () => {
 
         // Check if user is authenticated
         const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-        console.log('Auth token exists:', !!token);
 
         if (!token) {
           throw new Error('No authentication token found. Please log in again.');
         }
 
         const data = await api.getMyTenants();
-        console.log('Fetched tenants:', data);
 
         if (Array.isArray(data)) {
           setTenants(data);

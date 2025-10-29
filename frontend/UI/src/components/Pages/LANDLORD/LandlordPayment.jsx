@@ -123,7 +123,7 @@ const useNotification = () => {
 };
 
 // Animated Components
-const AnimatedCard = ({ children, delay = 0, className = '', ...props }) => {
+const AnimatedCard = ({ children, delay = 0, className = '', darkMode, ...props }) => {
   const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
 
   return (
