@@ -2,169 +2,15 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import { useDarkMode } from '../../../useDarkMode.js';
+import api from '../../../services/api';
 // Removed SidebarContext usage
 import {
-  Users,
-  Plus,
-  Search,
-  Filter,
-  MoreVertical,
-  Edit,
-  Trash2,
-  Eye,
-  Calendar,
-  MapPin,
-  User,
-  Clock,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Phone,
-  Mail,
-  MessageCircle,
-  Star,
-  Flag,
-  Bookmark,
-  Archive,
-  RefreshCw,
-  Bell,
-  BellOff,
-  Settings,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  PieChart,
-  Activity,
-  DollarSign,
-  Home,
-  Building2,
-  CreditCard,
-  FileText,
-  Download,
-  Upload,
-  Share2,
-  Copy,
-  ExternalLink,
-  Send,
-  Reply,
-  Forward,
-  Paperclip,
-  Smile,
-  Heart,
-  ThumbsUp,
-  MessageSquare,
-  ChevronDown,
-  ChevronUp,
-  ChevronLeft,
-  ChevronRight,
-  ArrowUp,
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  X,
-  Check,
-  Loader,
-  Save,
-  Undo,
-  Redo,
-  Shield,
-  Lock,
-  Unlock,
-  Key,
-  Gift,
-  Tag,
-  Percent,
-  Calculator,
-  Wallet,
-  Banknote,
-  PiggyBank,
-  Coins,
-  HandCoins,
-  BadgeCheck,
-  Award,
-  Trophy,
-  Target,
-  Sparkles,
-  Info,
-  HelpCircle,
-  Globe,
-  Smartphone,
-  Tablet,
-  Monitor,
-  Laptop,
-  Wifi,
-  Database,
-  Server,
-  Cloud,
-  ShieldCheck,
-  Fingerprint,
-  Scan,
-  QrCode,
-  Link,
-  Image as ImageIcon,
-  Video,
-  PlayCircle,
-  PauseCircle,
-  StopCircle,
-  VolumeX,
-  Volume2,
-  Mic,
-  Camera,
-  Navigation,
-  Compass,
-  Map,
-  Route,
-  Car,
-  Truck,
-  Bus,
-  Train,
-  Plane,
-  Ship,
-  Bike,
-  UserPlus,
-  UserMinus,
-  UserCheck,
-  UserX,
-  Crown,
-  Zap,
-  Flame,
-  Droplets,
-  Sun,
-  Moon,
-  CloudRain,
-  Thermometer,
-  Wind,
-  Snowflake,
-  Umbrella,
-  TreePine,
-  Flower,
-  Leaf
+  Users, Search, MoreVertical, Edit, Trash2, Eye, Calendar, User, Clock, CheckCircle, XCircle, AlertCircle, Phone, Mail, MessageCircle, Star, DollarSign, Home, Building2, FileText, Download, Send, ArrowUp, ArrowDown, X, BadgeCheck, Info, Video, UserPlus, Crown
 } from 'lucide-react';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Custom Hooks
-const useLocalStorage = (key, initialValue) => {
-  const [storedValue, setStoredValue] = useState(() => {
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      return initialValue;
-    }
-  });
-
-  const setValue = (value) => {
-    try {
-      setStoredValue(value);
-      window.localStorage.setItem(key, JSON.stringify(value));
-    } catch (error) {
-      console.error('Error saving to localStorage:', error);
-    }
-  };
-
-  return [storedValue, setValue];
-};
-
 const useIntersectionObserver = (options = {}) => {
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [element, setElement] = useState(null);
@@ -230,7 +76,6 @@ const AnimatedCard = ({ children, delay = 0, className = '', ...props }) => {
 const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVisit, onSendContract, delay = 0 }) => {
   const { darkMode } = useDarkMode();
   const [showMenu, setShowMenu] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -293,8 +138,6 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
       whileHover={{ scale: 1.02, y: -5 }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       className={`relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 group ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}
     >
       {/* Background gradient effect */}
@@ -622,8 +465,8 @@ const VisitRequestModal = ({ isOpen, onClose, tenant, onSchedule }) => {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setVisitType('in-person')}
                 className={`p-3 rounded-lg border-2 transition-all ${visitType === 'in-person'
-                    ? 'border-blue-500 bg-blue-500/10 text-blue-300'
-                    : 'border-white/20 text-white/70 hover:border-white/40'
+                  ? 'border-blue-500 bg-blue-500/10 text-blue-300'
+                  : 'border-white/20 text-white/70 hover:border-white/40'
                   }`}
               >
                 <Home className="w-5 h-5 mx-auto mb-1" />
@@ -635,8 +478,8 @@ const VisitRequestModal = ({ isOpen, onClose, tenant, onSchedule }) => {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setVisitType('virtual')}
                 className={`p-3 rounded-lg border-2 transition-all ${visitType === 'virtual'
-                    ? 'border-blue-500 bg-blue-500/10 text-blue-300'
-                    : 'border-white/20 text-white/70 hover:border-white/40'
+                  ? 'border-blue-500 bg-blue-500/10 text-blue-300'
+                  : 'border-white/20 text-white/70 hover:border-white/40'
                   }`}
               >
                 <Video className="w-5 h-5 mx-auto mb-1" />
@@ -684,8 +527,8 @@ const VisitRequestModal = ({ isOpen, onClose, tenant, onSchedule }) => {
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setSelectedTime(time)}
                   className={`p-2 rounded-lg text-sm font-medium transition-all ${selectedTime === time
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-white/10 text-white/70 hover:bg-white/20'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-white/10 text-white/70 hover:bg-white/20'
                     }`}
                 >
                   {time}
@@ -811,18 +654,19 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
                 { key: 'lease', label: 'Lease Agreement', icon: FileText },
                 { key: 'rental', label: 'Rental Contract', icon: Home },
                 { key: 'sublease', label: 'Sublease', icon: Users }
-              ].map(({ key, label, icon: Icon }) => (
+                // eslint-disable-next-line no-unused-vars
+              ].map(({ key, label, icon: IconComponent }) => (
                 <motion.button
                   key={key}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setContractType(key)}
                   className={`p-3 rounded-lg border-2 transition-all ${contractType === key
-                      ? 'border-blue-500 bg-blue-500/10 text-blue-300'
-                      : 'border-white/20 text-white/70 hover:border-white/40'
+                    ? 'border-blue-500 bg-blue-500/10 text-blue-300'
+                    : 'border-white/20 text-white/70 hover:border-white/40'
                     }`}
                 >
-                  <Icon className="w-5 h-5 mx-auto mb-1" />
+                  <IconComponent className="w-5 h-5 mx-auto mb-1" />
                   <div className="text-sm font-medium">{label}</div>
                 </motion.button>
               ))}
@@ -963,7 +807,7 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
 };
 
 // Tenant Detail Modal Component
-const TenantDetailModal = ({ isOpen, onClose, tenant, onUpdate }) => {
+const TenantDetailModal = ({ isOpen, onClose, tenant }) => {
   const [activeTab, setActiveTab] = useState('profile');
 
   if (!isOpen || !tenant) return null;
@@ -1012,18 +856,19 @@ const TenantDetailModal = ({ isOpen, onClose, tenant, onUpdate }) => {
               { key: 'visits', label: 'Visits', icon: Calendar },
               { key: 'contracts', label: 'Contracts', icon: FileText },
               { key: 'communication', label: 'Messages', icon: MessageCircle }
-            ].map(({ key, label, icon: Icon }) => (
+              // eslint-disable-next-line no-unused-vars
+            ].map(({ key, label, icon: IconComponent }) => (
               <motion.button
                 key={key}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveTab(key)}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${activeTab === key
-                    ? 'bg-blue-500 text-white shadow-lg'
-                    : 'text-white/70 hover:text-white hover:bg-white/10'
+                  ? 'bg-blue-500 text-white shadow-lg'
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
                   }`}
               >
-                <Icon className="w-4 h-4" />
+                <IconComponent className="w-4 h-4" />
                 <span>{label}</span>
               </motion.button>
             ))}
@@ -1102,8 +947,8 @@ const TenantDetailModal = ({ isOpen, onClose, tenant, onUpdate }) => {
                         <div className="text-white/60 text-sm">{visit.property}</div>
                       </div>
                       <span className={`px-2 py-1 rounded-full text-xs ${visit.status === 'completed' ? 'bg-green-500/20 text-green-300' :
-                          visit.status === 'scheduled' ? 'bg-blue-500/20 text-blue-300' :
-                            'bg-yellow-500/20 text-yellow-300'
+                        visit.status === 'scheduled' ? 'bg-blue-500/20 text-blue-300' :
+                          'bg-yellow-500/20 text-yellow-300'
                         }`}>
                         {visit.status}
                       </span>
@@ -1136,8 +981,8 @@ const TenantDetailModal = ({ isOpen, onClose, tenant, onUpdate }) => {
                       </div>
                       <div className="flex items-center space-x-2">
                         <span className={`px-2 py-1 rounded-full text-xs ${contract.status === 'active' ? 'bg-green-500/20 text-green-300' :
-                            contract.status === 'pending' ? 'bg-yellow-500/20 text-yellow-300' :
-                              'bg-gray-500/20 text-gray-300'
+                          contract.status === 'pending' ? 'bg-yellow-500/20 text-yellow-300' :
+                            'bg-gray-500/20 text-gray-300'
                           }`}>
                           {contract.status}
                         </span>
@@ -1167,8 +1012,8 @@ const TenantDetailModal = ({ isOpen, onClose, tenant, onUpdate }) => {
                 ].map((msg, index) => (
                   <div key={index} className={`flex ${msg.sender === 'You' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-xs p-3 rounded-lg ${msg.sender === 'You'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-white/10 text-white'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-white/10 text-white'
                       }`}>
                       <div className="text-sm">{msg.message}</div>
                       <div className="text-xs opacity-70 mt-1">{msg.time}</div>
@@ -1208,9 +1053,9 @@ const NotificationToast = ({ notifications, onRemove }) => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 300 }}
             className={`p-4 rounded-lg shadow-lg backdrop-blur-xl border max-w-sm ${notification.type === 'success' ? 'bg-green-500/20 border-green-500/30 text-green-300' :
-                notification.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-300' :
-                  notification.type === 'warning' ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-300' :
-                    'bg-blue-500/20 border-blue-500/30 text-blue-300'
+              notification.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-300' :
+                notification.type === 'warning' ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-300' :
+                  'bg-blue-500/20 border-blue-500/30 text-blue-300'
               }`}
           >
             <div className="flex items-start space-x-3">
@@ -1246,155 +1091,14 @@ const NotificationToast = ({ notifications, onRemove }) => {
 
 // Main Component
 const LandlordTenant = () => {
-  const [currentSection] = useState('Tenants');
   const { darkMode } = useDarkMode();
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
 
-  // Sample tenants data with enhanced information
-  const [tenants, setTenants] = useLocalStorage('landlord_tenants', [
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john.doe@email.com",
-      phone: "+1 (555) 123-4567",
-      property: "Modern Downtown Loft",
-      status: "Active",
-      rentAmount: 2800,
-      moveInDate: "2024-06-01",
-      leaseEndDate: "2025-06-01",
-      nextPaymentDate: "2025-08-15",
-      isOnline: true,
-      isVerified: true,
-      isPremium: false,
-      rating: 4,
-      tags: ["Reliable", "Long-term", "Quiet"],
-      emergencyContact: "Jane Doe - (555) 987-6543",
-      visitRequests: [
-        {
-          requestedDate: "2024-05-15",
-          time: "14:00",
-          property: "Modern Downtown Loft",
-          status: "completed",
-          notes: "Interested in the downtown location"
-        }
-      ],
-      contracts: [
-        {
-          type: "Lease",
-          startDate: "2024-06-01",
-          endDate: "2025-06-01",
-          status: "active"
-        }
-      ]
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane.smith@email.com",
-      phone: "+1 (555) 234-5678",
-      property: "Luxury Penthouse",
-      status: "Active",
-      rentAmount: 4200,
-      moveInDate: "2024-03-15",
-      leaseEndDate: "2025-03-15",
-      nextPaymentDate: "2025-08-15",
-      isOnline: false,
-      isVerified: true,
-      isPremium: true,
-      rating: 5,
-      tags: ["Premium", "Professional", "Referral"],
-      emergencyContact: "Bob Smith - (555) 876-5432",
-      visitRequests: [],
-      contracts: [
-        {
-          type: "Lease",
-          startDate: "2024-03-15",
-          endDate: "2025-03-15",
-          status: "active"
-        }
-      ]
-    },
-    {
-      id: 3,
-      name: "Robert Johnson",
-      email: "robert.johnson@email.com",
-      phone: "+1 (555) 345-6789",
-      property: "Cozy Studio Apartment",
-      status: "Overdue",
-      rentAmount: 1800,
-      moveInDate: "2024-01-10",
-      leaseEndDate: "2024-12-10",
-      nextPaymentDate: "2025-07-15",
-      isOnline: true,
-      isVerified: false,
-      isPremium: false,
-      rating: 3,
-      tags: ["Late Payment", "Student"],
-      emergencyContact: "Not provided",
-      visitRequests: [],
-      contracts: [
-        {
-          type: "Lease",
-          startDate: "2024-01-10",
-          endDate: "2024-12-10",
-          status: "active"
-        }
-      ]
-    },
-    {
-      id: 4,
-      name: "Emily Davis",
-      email: "emily.davis@email.com",
-      phone: "+1 (555) 456-7890",
-      status: "Prospect",
-      isOnline: false,
-      isVerified: false,
-      isPremium: false,
-      rating: 0,
-      tags: ["New Inquiry", "Young Professional"],
-      visitRequests: [
-        {
-          requestedDate: "2025-08-10",
-          time: "15:00",
-          property: "Garden View Apartment",
-          status: "scheduled",
-          notes: "Looking for pet-friendly apartment"
-        },
-        {
-          requestedDate: "2025-08-08",
-          time: "10:00",
-          property: "Modern Downtown Loft",
-          status: "pending",
-          notes: "Prefers downtown location"
-        }
-      ],
-      contracts: []
-    },
-    {
-      id: 5,
-      name: "Michael Brown",
-      email: "michael.brown@email.com",
-      phone: "+1 (555) 567-8901",
-      status: "Prospect",
-      isOnline: true,
-      isVerified: true,
-      isPremium: false,
-      rating: 0,
-      tags: ["Corporate", "Immediate Move-in"],
-      visitRequests: [
-        {
-          requestedDate: "2025-08-12",
-          time: "11:00",
-          property: "Luxury Penthouse",
-          status: "scheduled",
-          notes: "Corporate relocation"
-        }
-      ],
-      contracts: []
-    }
-  ]);
-
-  const [filteredTenants, setFilteredTenants] = useState(tenants);
+  // State for tenants data - now fetched from API
+  const [tenants, setTenants] = useState([]);
+  const [isLoadingTenants, setIsLoadingTenants] = useState(true);
+  const [hasLoadError, setHasLoadError] = useState(false);
+  const [filteredTenants, setFilteredTenants] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [propertyFilter, setPropertyFilter] = useState('All');
@@ -1404,9 +1108,71 @@ const LandlordTenant = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [showContractModal, setShowContractModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const { notifications, addNotification, removeNotification } = useNotification();
+
+  // Fetch tenants from API on component mount
+  useEffect(() => {
+    const fetchTenants = async () => {
+      try {
+        setIsLoadingTenants(true);
+        setHasLoadError(false);
+
+        // Check if user is authenticated
+        const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+        console.log('Auth token exists:', !!token);
+
+        if (!token) {
+          throw new Error('No authentication token found. Please log in again.');
+        }
+
+        const data = await api.getMyTenants();
+        console.log('Fetched tenants:', data);
+
+        if (Array.isArray(data)) {
+          setTenants(data);
+          // Don't show notification for empty list - let the UI handle it
+        } else {
+          console.error('Unexpected data format:', data);
+          setTenants([]);
+        }
+      } catch (error) {
+        console.error('Error fetching tenants:', error);
+        setHasLoadError(true);
+
+        let errorMessage = 'There was a problem loading your tenant list. Please try again later.';
+        let errorTitle = 'Backend Error';
+
+        if (error.status === 401 || error.status === 403) {
+          errorTitle = 'Authentication Required';
+          errorMessage = 'Your session has expired. Please log in again.';
+        } else if (error.status === 500) {
+          errorTitle = 'Server Error';
+          errorMessage = 'The backend server encountered an error. Please try again later.';
+        } else if (error.message && error.message.includes('authentication')) {
+          errorTitle = 'Authentication Required';
+          errorMessage = error.message;
+        } else if (!navigator.onLine) {
+          errorTitle = 'No Internet Connection';
+          errorMessage = 'Please check your internet connection and try again.';
+        } else if (error.message && error.message.includes('Network error')) {
+          errorTitle = 'Connection Failed';
+          errorMessage = 'Unable to connect to the server. Please ensure the backend is running.';
+        }
+
+        addNotification({
+          type: 'error',
+          title: errorTitle,
+          message: errorMessage
+        });
+        setTenants([]);
+      } finally {
+        setIsLoadingTenants(false);
+      }
+    };
+
+    fetchTenants();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Filter and sort tenants
   useEffect(() => {
@@ -1592,10 +1358,10 @@ const LandlordTenant = () => {
         />
       </div>
 
-      <LandlordSideBar currentSection={currentSection} />
+      <LandlordSideBar currentSection="Tenants" />
 
       <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
-        <LandlordNavBar currentSection={currentSection} />
+        <LandlordNavBar currentSection="Tenants" />
 
         <main className="flex-1 overflow-y-auto">
           <div className="p-8 space-y-8">
@@ -1778,7 +1544,7 @@ const LandlordTenant = () => {
 
             {/* Tenants Grid */}
             <AnimatedCard delay={0.8}>
-              {isLoading ? (
+              {isLoadingTenants ? (
                 <div className="flex items-center justify-center py-20">
                   <motion.div
                     animate={{ rotate: 360 }}
@@ -1794,14 +1560,34 @@ const LandlordTenant = () => {
                     transition={{ duration: 0.5 }}
                   >
                     <Users className="w-20 h-20 mx-auto text-white/30 mb-6" />
-                    <h3 className="text-2xl font-bold text-white mb-4">No Tenants Found</h3>
-                    <p className="text-white/60 mb-8">
-                      {searchTerm || statusFilter !== 'All' || propertyFilter !== 'All'
-                        ? 'Try adjusting your search criteria or filters'
-                        : 'Start by adding your first tenant or prospect'
-                      }
-                    </p>
-
+                    {hasLoadError ? (
+                      <>
+                        <h3 className="text-2xl font-bold text-white mb-4">Backend Error</h3>
+                        <p className="text-white/60 mb-8">
+                          There was a problem connecting to the server.
+                          <br />
+                          Please check the error notification above and try again.
+                        </p>
+                      </>
+                    ) : tenants.length === 0 ? (
+                      <>
+                        <h3 className="text-2xl font-bold text-white mb-4">No Tenants Yet</h3>
+                        <p className="text-white/60 mb-8">
+                          You don't have any tenant inquiries yet.
+                          <br />
+                          Tenants will appear here when they inquire about your properties.
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <h3 className="text-2xl font-bold text-white mb-4">No Matching Tenants</h3>
+                        <p className="text-white/60 mb-8">
+                          No tenants match your current filters.
+                          <br />
+                          Try adjusting your search criteria or filters to see results.
+                        </p>
+                      </>
+                    )}
                   </motion.div>
                 </div>
               ) : (

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { X, Download } from 'lucide-react';
 
 const GenerateReportModal = ({ isOpen, onClose, isDark }) => {
@@ -24,33 +24,33 @@ const GenerateReportModal = ({ isOpen, onClose, isDark }) => {
 
   const modalTheme = isDark
     ? {
-        bg: 'bg-slate-800/90',
-        border: 'border-slate-700/50',
-        text: 'text-white',
-        inputBg: 'bg-slate-700/50',
-        inputBorder: 'border-slate-600/50',
-        inputPlaceholder: 'placeholder-slate-400',
-        focusBorder: 'focus:border-cyan-500',
-        buttonPrimaryBg: 'bg-gradient-to-r from-cyan-500 to-indigo-600',
-        buttonPrimaryText: 'text-white',
-        buttonSecondaryBg: 'bg-slate-700/50',
-        buttonSecondaryText: 'text-slate-300',
-        buttonHover: 'hover:brightness-110',
-      }
+      bg: 'bg-slate-800/90',
+      border: 'border-slate-700/50',
+      text: 'text-white',
+      inputBg: 'bg-slate-700/50',
+      inputBorder: 'border-slate-600/50',
+      inputPlaceholder: 'placeholder-slate-400',
+      focusBorder: 'focus:border-cyan-500',
+      buttonPrimaryBg: 'bg-gradient-to-r from-cyan-500 to-indigo-600',
+      buttonPrimaryText: 'text-white',
+      buttonSecondaryBg: 'bg-slate-700/50',
+      buttonSecondaryText: 'text-slate-300',
+      buttonHover: 'hover:brightness-110',
+    }
     : {
-        bg: 'bg-white/90',
-        border: 'border-indigo-200/50',
-        text: 'text-gray-900',
-        inputBg: 'bg-white/70',
-        inputBorder: 'border-indigo-300/50',
-        inputPlaceholder: 'placeholder-indigo-400',
-        focusBorder: 'focus:border-indigo-500',
-        buttonPrimaryBg: 'bg-gradient-to-r from-indigo-600 to-purple-600',
-        buttonPrimaryText: 'text-white',
-        buttonSecondaryBg: 'bg-indigo-100/60',
-        buttonSecondaryText: 'text-indigo-700',
-        buttonHover: 'hover:brightness-105',
-      };
+      bg: 'bg-white/90',
+      border: 'border-indigo-200/50',
+      text: 'text-gray-900',
+      inputBg: 'bg-white/70',
+      inputBorder: 'border-indigo-300/50',
+      inputPlaceholder: 'placeholder-indigo-400',
+      focusBorder: 'focus:border-indigo-500',
+      buttonPrimaryBg: 'bg-gradient-to-r from-indigo-600 to-purple-600',
+      buttonPrimaryText: 'text-white',
+      buttonSecondaryBg: 'bg-indigo-100/60',
+      buttonSecondaryText: 'text-indigo-700',
+      buttonHover: 'hover:brightness-105',
+    };
 
   return (
     <motion.div
