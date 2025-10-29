@@ -21,6 +21,7 @@ import {
   FileText
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useDarkMode } from '../../../useDarkMode.js';
 
 // Custom hooks
 const useClickOutside = (ref, callback) => {
@@ -36,38 +37,7 @@ const useClickOutside = (ref, callback) => {
   }, [ref, callback]);
 };
 
-const useTheme = () => {
-  const [isDark, setIsDark] = useState(() => {
-    return localStorage.getItem('theme') === 'dark';
-  });
-
-  // Initialize dark mode class on mount
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, []);
-
-  const toggleTheme = useCallback(() => {
-    setIsDark(prev => {
-      const newTheme = !prev;
-      localStorage.setItem('theme', newTheme ? 'dark' : 'light');
-
-      // Update document class for Tailwind dark mode
-      if (newTheme) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-
-      return newTheme;
-    });
-  }, []);
-
-  return { isDark, toggleTheme };
-};
+// dark mode is handled via shared context hook
 
 // Animated Components
 const NotificationBadge = ({ count, className = '' }) => {
@@ -280,7 +250,7 @@ const TenantNavBar = ({ currentSection }) => {
   const [activePage, setActivePage] = useState(currentSection);
 
   const navigate = useNavigate();
-  const { isDark, toggleTheme } = useTheme();
+  const { darkMode: isDarkMode, toggleDarkMode } = useDarkMode();
   const notificationsRef = useRef(null);
 
   const [notifications, setNotifications] = useState([
@@ -338,13 +308,7 @@ const TenantNavBar = ({ currentSection }) => {
     return () => window.removeEventListener('user:updated', onUserUpdated);
   }, []);
 
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDark]);
+  // Dark mode DOM updates are managed by DarkMode context
 
   useEffect(() => {
     setActivePage(currentSection);
@@ -359,7 +323,6 @@ const TenantNavBar = ({ currentSection }) => {
 
   const handleSearch = useCallback((query) => {
     setSearchTerm(query);
-    console.log('Searching for:', query);
   }, []);
 
   const handleNavigation = useCallback((page, path) => {
@@ -523,8 +486,8 @@ const TenantNavBar = ({ currentSection }) => {
           </div>
 
           <IconButton
-            icon={isDark ? Sun : Moon}
-            onClick={toggleTheme}
+            icon={isDarkMode ? Sun : Moon}
+            onClick={toggleDarkMode}
             className="theme-toggle"
             ariaLabel="Toggle Theme"
           />
@@ -533,8 +496,8 @@ const TenantNavBar = ({ currentSection }) => {
 
         <div className="sm:hidden">
           <IconButton
-            icon={isDark ? Sun : Moon}
-            onClick={toggleTheme}
+            icon={isDarkMode ? Sun : Moon}
+            onClick={toggleDarkMode}
             className="theme-toggle mr-1"
             ariaLabel="Toggle Theme"
           />
@@ -549,7 +512,7 @@ const TenantNavBar = ({ currentSection }) => {
           showDropdown={showDropdown}
           onToggle={() => setShowDropdown(!showDropdown)}
           onLogout={handleLogout}
-          isDark={isDark}
+          isDark={isDarkMode}
         />
       </div>
 

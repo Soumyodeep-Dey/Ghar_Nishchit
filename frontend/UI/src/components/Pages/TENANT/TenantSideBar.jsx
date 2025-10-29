@@ -15,6 +15,7 @@ import {
   User,
   Settings
 } from 'lucide-react';
+import { useDarkMode } from '../../../useDarkMode.js';
 
 // Custom hooks
 const useLocalStorage = (key, initialValue) => {
@@ -244,18 +245,7 @@ const TenantSideBar = ({ setCurrentSection }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useLocalStorage('sidebarCollapsed', false);
-  const [isDark, setIsDark] = useState(() => {
-    return localStorage.getItem('theme') === 'dark';
-  });
-
-  // Apply dark mode class
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDark]);
+  const { darkMode: isDark } = useDarkMode();
 
   const handleNavigation = useCallback((path, sectionName) => {
     navigate(path);
