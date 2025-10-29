@@ -359,7 +359,7 @@ export default function Landing() {
             </ul>
 
             {/* Right Side Actions */}
-            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <div className="flex items-center gap-4 sm:gap-8 flex-shrink-0">
               {/* SignUp Button - Hidden on mobile and small tablets */}
               <Link
                 to="/signup"
