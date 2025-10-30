@@ -60,7 +60,7 @@ export const loginUser = async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: "7d" });
-    
+
     // Return user data without password
     const userData = {
       _id: user._id,
@@ -69,7 +69,7 @@ export const loginUser = async (req, res) => {
       phone: user.phone,
       role: user.role
     };
-    
+
     res.status(200).json({
       message: "Login successful",
       token,
@@ -164,4 +164,34 @@ export const updateProfile = async (req, res) => {
     console.error("Error updating user profile:", error);
     res.status(500).json({ error: "Failed to update profile" });
   }
-}; 
+};
+
+// Change password using email and old password (no auth token required)
+export const changePassword = async (req, res) => {
+  try {
+    const { email, oldPassword, newPassword } = req.body;
+
+    if (!email || !oldPassword || !newPassword) {
+      return res.status(400).json({ error: "email, oldPassword and newPassword are required" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const matches = await bcrypt.compare(oldPassword, user.password);
+    if (!matches) {
+      return res.status(400).json({ error: "Old password is incorrect" });
+    }
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    user.password = hashed;
+    await user.save();
+
+    return res.status(200).json({ message: "Password changed successfully" });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    return res.status(500).json({ error: "Failed to change password" });
+  }
+};

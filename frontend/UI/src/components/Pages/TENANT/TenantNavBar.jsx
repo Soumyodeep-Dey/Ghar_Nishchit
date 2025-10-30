@@ -1,26 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import {
-  MessageSquare,
-  Bell,
-  LogOut,
-  ChevronDown,
-  Search,
-  User,
-  Shield,
-  Moon,
-  Sun,
-  Menu,
-  X,
-  Sparkles,
-  LayoutDashboard,
-  Building2,
-  BarChart3,
-  Heart,
-  Wrench,
-  CreditCard,
-  FileText
+import { MessageSquare, Bell, LogOut, ChevronDown, Search, User, Shield, Moon, Sun, Menu, X, Sparkles, LayoutDashboard, Building2, BarChart3, Heart, Wrench, CreditCard, FileText
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useDarkMode } from '../../../useDarkMode.js';
 
 // Custom hooks
 const useClickOutside = (ref, callback) => {
@@ -36,38 +18,7 @@ const useClickOutside = (ref, callback) => {
   }, [ref, callback]);
 };
 
-const useTheme = () => {
-  const [isDark, setIsDark] = useState(() => {
-    return localStorage.getItem('theme') === 'dark';
-  });
-
-  // Initialize dark mode class on mount
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, []);
-
-  const toggleTheme = useCallback(() => {
-    setIsDark(prev => {
-      const newTheme = !prev;
-      localStorage.setItem('theme', newTheme ? 'dark' : 'light');
-
-      // Update document class for Tailwind dark mode
-      if (newTheme) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-
-      return newTheme;
-    });
-  }, []);
-
-  return { isDark, toggleTheme };
-};
+// dark mode is handled via shared context hook
 
 // Animated Components
 const NotificationBadge = ({ count, className = '' }) => {
@@ -168,7 +119,7 @@ const IconButton = ({ icon: Icon, onClick, badge = 0, className = '', ariaLabel,
   );
 };
 
-const ProfileDropdown = ({ user, showDropdown, onToggle, onLogout, isDark }) => {
+const ProfileDropdown = ({ user, showDropdown, onToggle, onLogout }) => {
   const dropdownRef = useRef(null);
 
   useClickOutside(dropdownRef, () => showDropdown && onToggle());
@@ -280,7 +231,7 @@ const TenantNavBar = ({ currentSection }) => {
   const [activePage, setActivePage] = useState(currentSection);
 
   const navigate = useNavigate();
-  const { isDark, toggleTheme } = useTheme();
+  const { darkMode: isDarkMode, toggleDarkMode } = useDarkMode();
   const notificationsRef = useRef(null);
 
   const [notifications, setNotifications] = useState([
@@ -332,19 +283,15 @@ const TenantNavBar = ({ currentSection }) => {
     const onUserUpdated = (e) => {
       try {
         setUser(e.detail || JSON.parse(localStorage.getItem('user')) || {});
-      } catch { }
+      } catch (error) {
+        console.error('Error parsing user data on update:', error);
+      }
     };
     window.addEventListener('user:updated', onUserUpdated);
     return () => window.removeEventListener('user:updated', onUserUpdated);
   }, []);
 
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDark]);
+  // Dark mode DOM updates are managed by DarkMode context
 
   useEffect(() => {
     setActivePage(currentSection);
@@ -359,7 +306,6 @@ const TenantNavBar = ({ currentSection }) => {
 
   const handleSearch = useCallback((query) => {
     setSearchTerm(query);
-    console.log('Searching for:', query);
   }, []);
 
   const handleNavigation = useCallback((page, path) => {
@@ -484,8 +430,8 @@ const TenantNavBar = ({ currentSection }) => {
                       <div
                         key={notification.id}
                         className={`p-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer border-l-4 ${notification.isRead
-                            ? 'border-transparent'
-                            : 'border-primary-500 bg-primary-50/30 dark:bg-primary-900/10'
+                          ? 'border-transparent'
+                          : 'border-primary-500 bg-primary-50/30 dark:bg-primary-900/10'
                           }`}
                         onClick={() => markAsRead(notification.id)}
                       >
@@ -523,8 +469,8 @@ const TenantNavBar = ({ currentSection }) => {
           </div>
 
           <IconButton
-            icon={isDark ? Sun : Moon}
-            onClick={toggleTheme}
+            icon={isDarkMode ? Sun : Moon}
+            onClick={toggleDarkMode}
             className="theme-toggle"
             ariaLabel="Toggle Theme"
           />
@@ -533,8 +479,8 @@ const TenantNavBar = ({ currentSection }) => {
 
         <div className="sm:hidden">
           <IconButton
-            icon={isDark ? Sun : Moon}
-            onClick={toggleTheme}
+            icon={isDarkMode ? Sun : Moon}
+            onClick={toggleDarkMode}
             className="theme-toggle mr-1"
             ariaLabel="Toggle Theme"
           />
@@ -549,7 +495,6 @@ const TenantNavBar = ({ currentSection }) => {
           showDropdown={showDropdown}
           onToggle={() => setShowDropdown(!showDropdown)}
           onLogout={handleLogout}
-          isDark={isDark}
         />
       </div>
 

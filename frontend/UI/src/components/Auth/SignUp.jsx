@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { User, Mail, Lock, Phone, Eye, EyeOff } from 'lucide-react';
-import { useDarkMode } from '../useDarkMode.js';
-import p1 from '../assets/p1.jpg';
-import { signInWithGoogle, handleGoogleRedirectResult } from '../firebase';
+import { User, Mail, Lock, Phone, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { useDarkMode } from '../../useDarkMode.js';
+import p1 from '../../assets/p1.jpg';
+import { signInWithGoogle, handleGoogleRedirectResult } from '../../firebase.js';
 import { useNavigate } from 'react-router-dom';
+import { showSuccessToast, showErrorToast } from '../../utils/toast.jsx';
 
 // Update the GoogleIcon to add a white background and rounded style for visibility
 
@@ -55,7 +56,7 @@ export default function SignUp() {
     (async () => {
       const user = await handleGoogleRedirectResult();
       if (user) {
-        alert(`Welcome, ${user.displayName || user.email}!`);
+        showSuccessToast(`Welcome, ${user.displayName || user.email}!`);
         // Check user role and redirect accordingly
         const userRole = (user && (user.role || (user.roles && user.roles[0]))) || '';
         if (userRole.toLowerCase() === 'tenant') {
@@ -82,7 +83,7 @@ export default function SignUp() {
     setPasswordStrength(checkStrength(pwd));
   };
 
-  // Animation effects
+  // Animation effect
   useEffect(() => {
     const initialDelay = setTimeout(() => {
       setAnimationState((prev) => ({ ...prev, containerVisible: true }));
@@ -136,7 +137,7 @@ export default function SignUp() {
     const { name, email, password, phone, role } = formData;
 
     if (!name || !email || !password || !phone || !role) {
-      alert("Please fill in all fields.");
+      showErrorToast("Please fill in all fields.");
       return;
     }
 
@@ -160,7 +161,7 @@ export default function SignUp() {
         console.log('Signup response user:', user);
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(user));
-        alert("Registered successfully!");
+        showSuccessToast("Registered successfully!");
         const userRole = user.role || (user.roles && user.roles[0]) || '';
         setTimeout(() => {
           if (userRole.toLowerCase() === 'tenant') {
@@ -174,7 +175,7 @@ export default function SignUp() {
       })
       .catch((err) => {
         console.error(err);
-        alert("Error during registration.");
+        showErrorToast("Error during registration.");
       });
   };
 
@@ -227,6 +228,29 @@ export default function SignUp() {
             />
           </div>
         </div>
+
+        {/* Back to Landing Page Button */}
+        <Link
+          to="/"
+          className={`absolute top-4 left-4 z-50 flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full font-semibold shadow transition-all duration-300 hover:scale-105 ${darkMode
+            ? 'bg-slate-800 text-cyan-400 hover:bg-slate-700'
+            : 'bg-white text-indigo-600 hover:bg-indigo-50'
+            }`}
+          aria-label="Back to Landing Page"
+        >
+          <ArrowLeft size={18} />
+          <span className="hidden sm:inline">Back</span>
+        </Link>
+
+        {/* Dark Mode Toggle */}
+        <button
+          onClick={toggleDarkMode}
+          className={`absolute top-4 right-4 z-50 px-4 py-2 rounded-full ${darkMode ? 'bg-cyan-400 text-blue-950' : 'bg-white text-indigo-600'
+            } shadow transition-colors duration-300`}
+          aria-label="Toggle dark mode"
+        >
+          {darkMode ? '🌙' : '☀️'}
+        </button>
         <div className="relative w-full flex flex-col md:flex-row">
           {/* MOBILE WELCOME (above form), DESKTOP LEFT PANEL */}
           <div
@@ -292,16 +316,6 @@ export default function SignUp() {
 
           {/* SIGNUP FORM */}
           <div className={`w-full md:w-1/2 p-6 sm:p-8 ${darkMode ? 'text-cyan-100' : ''} relative`}>
-            <button
-              onClick={toggleDarkMode}
-              className={`absolute top-4 right-4 z-30 px-4 py-2 rounded-full font-semibold shadow transition-colors duration-300 ${darkMode
-                ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300'
-                : 'bg-white text-indigo-600 hover:bg-indigo-100'
-                }`}
-              aria-label="Toggle dark mode"
-            >
-              {darkMode ? '🌙' : '☀️'}
-            </button>
             <h2 className={`text-xl sm:text-2xl font-bold mb-2 ${darkMode ? 'text-cyan-300' : 'text-indigo-700'}`}>
               Create Your Account
             </h2>

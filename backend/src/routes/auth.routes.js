@@ -1,5 +1,5 @@
 import express from "express";
-import { registerUser, loginUser, getUserDetails, getProfile, updateProfile } from "../controllers/auth.controller.js";
+import { registerUser, loginUser, getUserDetails, getProfile, updateProfile, changePassword } from "../controllers/auth.controller.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
@@ -18,5 +18,8 @@ router.get("/profile", verifyToken, getProfile);
 
 // Update User Profile (protected)
 router.put("/profile", verifyToken, updateProfile);
+
+// Change Password (email + old password + new password)
+router.post("/change-password", changePassword);
 
 export default router;  

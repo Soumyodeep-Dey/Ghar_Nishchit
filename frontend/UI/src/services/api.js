@@ -1,9 +1,18 @@
 // Minimal API service for frontend to call backend endpoints
-// Resolve base URL in browser-safe way. If app provides window.__env.REACT_APP_API_BASE use it.
-const BASE = (typeof window !== 'undefined' && window.__env && window.__env.REACT_APP_API_BASE) || 'http://localhost:8000/api';
+// Resolve base URL in browser-safe way. Priority: window.__env.REACT_APP_API_BASE -> VITE_API_BASE -> localhost:3000/api
+const RAW_BASE = (typeof window !== 'undefined' && window.__env && window.__env.REACT_APP_API_BASE)
+    || (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE)
+    || 'http://localhost:3000/api';
+
+// Normalize base to always include /api at the end, and no trailing slash
+const BASE = (() => {
+    const trimmed = (RAW_BASE || '').replace(/\/+$/, '');
+    return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+})();
 
 const getAuthHeader = () => {
-    const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+    // Prefer 'token' (set by Login.jsx), fall back to 'authToken' if present
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
     return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
@@ -14,14 +23,12 @@ async function request(path, options = {}) {
         ...getAuthHeader()
     };
 
-    console.log(`API Request: ${options.method || 'GET'} ${BASE}${path}`);
-    console.log('Headers:', headers);
-    if (options.body) console.log('Body:', options.body);
+    // Quiet logs in production; remove verbose request logging
 
     try {
         const res = await fetch(`${BASE}${path}`, { ...options, headers });
 
-        console.log(`API Response: ${res.status} ${res.statusText}`);
+        // Quiet logs in production; avoid noisy response logging
 
         if (!res.ok) {
             let errorData = null;
@@ -37,7 +44,8 @@ async function request(path, options = {}) {
                 console.error('Error parsing error response:', parseError);
             }
 
-            console.error('API Error Response:', errorData);
+            // Keep a concise error log for debugging
+            console.error('API error', res.status, errorData);
 
             const err = new Error(
                 errorData?.message ||
@@ -56,7 +64,6 @@ async function request(path, options = {}) {
         const contentType = res.headers.get('content-type') || '';
         if (contentType.includes('application/json')) {
             const data = await res.json();
-            console.log('API Success Response:', data);
             return data;
         }
         return res.text();
@@ -82,6 +89,8 @@ const api = {
     // Auth/profile
     getProfile: () => request('/auth/profile', { method: 'GET' }),
     updateProfile: (data) => request('/auth/profile', { method: 'PUT', body: JSON.stringify(data) }),
+    changePassword: ({ email, oldPassword, newPassword }) =>
+        request('/auth/change-password', { method: 'POST', body: JSON.stringify({ email, oldPassword, newPassword }) }),
 
     // Tenants (for landlords)
     getMyTenants: () => request('/tenants', { method: 'GET' }),

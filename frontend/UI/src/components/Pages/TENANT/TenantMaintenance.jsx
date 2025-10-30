@@ -3,22 +3,9 @@ import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
 import {
-  WrenchScrewdriverIcon,
-  PlusIcon,
-  TrashIcon,
-  PencilIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  ExclamationTriangleIcon,
-  DocumentTextIcon,
-  CalendarIcon,
-  PhotoIcon,
-  XMarkIcon,
-  MagnifyingGlassIcon,
-  FunnelIcon,
-  ChartBarIcon,
-  FireIcon
+  WrenchScrewdriverIcon, PlusIcon, TrashIcon, PencilIcon, CheckCircleIcon, ClockIcon, ExclamationTriangleIcon, DocumentTextIcon, CalendarIcon, MagnifyingGlassIcon, ChartBarIcon
 } from '@heroicons/react/24/outline';
+import { getCurrentYear } from '../../../utils/dateUtils.js';
 
 // Custom hooks
 const useLocalStorage = (key, initialValue) => {
@@ -112,10 +99,10 @@ const GlowingButton = ({ children, onClick, className = '', glowColor = 'blue', 
       className={`relative overflow-hidden transform transition-all duration-300 hover:scale-105 disabled:hover:scale-100 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
       <div className={`absolute inset-0 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity ${glowColor === 'blue' ? 'bg-gradient-to-r from-blue-500 to-purple-600' :
-          glowColor === 'red' ? 'bg-gradient-to-r from-red-500 to-pink-600' :
-            glowColor === 'green' ? 'bg-gradient-to-r from-green-500 to-emerald-600' :
-              glowColor === 'orange' ? 'bg-gradient-to-r from-orange-500 to-yellow-600' :
-                'bg-gradient-to-r from-blue-500 to-purple-600'
+        glowColor === 'red' ? 'bg-gradient-to-r from-red-500 to-pink-600' :
+          glowColor === 'green' ? 'bg-gradient-to-r from-green-500 to-emerald-600' :
+            glowColor === 'orange' ? 'bg-gradient-to-r from-orange-500 to-yellow-600' :
+              'bg-gradient-to-r from-blue-500 to-purple-600'
         }`}></div>
       <div className="relative z-10">
         {children}
@@ -244,10 +231,10 @@ const RequestCard = React.memo(({ request, onEdit, onDelete, isEditing, editData
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className={`h-2 rounded-full transition-all duration-1000 ${request.status === "Completed"
-                        ? "bg-gradient-to-r from-green-500 to-emerald-600 w-full"
-                        : request.status === "In Progress"
-                          ? "bg-gradient-to-r from-blue-500 to-indigo-600 w-2/3"
-                          : "bg-gradient-to-r from-yellow-500 to-orange-600 w-1/3"
+                      ? "bg-gradient-to-r from-green-500 to-emerald-600 w-full"
+                      : request.status === "In Progress"
+                        ? "bg-gradient-to-r from-blue-500 to-indigo-600 w-2/3"
+                        : "bg-gradient-to-r from-yellow-500 to-orange-600 w-1/3"
                       }`}
                   ></div>
                 </div>
@@ -318,13 +305,15 @@ const StatsCard = ({ title, value, icon, gradient, delay = 0 }) => {
 
 // Main Component
 const TenantMaintenance = () => {
+  const { darkMode } = useDarkMode();
+
   const [requests, setRequests] = useLocalStorage('maintenanceRequests', [
     {
       id: 1,
       title: "Leaky Faucet",
       description: "Kitchen faucet is dripping constantly, causing water waste and noise",
       status: "In Progress",
-      date: "2024-01-15",
+      date: `${getCurrentYear()}-01-15`,
       priority: "Medium"
     },
     {
@@ -332,7 +321,7 @@ const TenantMaintenance = () => {
       title: "Broken Light Fixture",
       description: "Living room ceiling light not working, needs electrical inspection",
       status: "Completed",
-      date: "2024-01-10",
+      date: `${getCurrentYear()}-01-10`,
       priority: "Low"
     },
     {
@@ -340,7 +329,7 @@ const TenantMaintenance = () => {
       title: "AC Unit Malfunction",
       description: "Air conditioning unit making loud noises and not cooling properly",
       status: "Pending",
-      date: "2024-01-20",
+      date: `${getCurrentYear()}-01-20`,
       priority: "High"
     }
   ]);
@@ -434,7 +423,6 @@ const TenantMaintenance = () => {
 
   // Loading screen
   if (isLoading) {
-    const { darkMode } = useDarkMode();
     return (
       <div className="flex h-screen">
         <TenantSideBar />
@@ -456,8 +444,6 @@ const TenantMaintenance = () => {
       </div>
     );
   }
-
-  const { darkMode } = useDarkMode();
 
   return (
     <div className={`flex h-screen ${darkMode

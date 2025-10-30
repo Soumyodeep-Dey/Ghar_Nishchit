@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../services/api.js';
+import { showConfirmToast } from '../../../utils/toast.jsx';
 
 // Ensure 'motion' symbol is referenced to satisfy some linters that may report it as unused
 void motion;
@@ -736,18 +737,21 @@ const LandlordProperty = () => {
   };
 
   const handleDeleteProperty = (propertyId) => {
-    if (window.confirm('Are you sure you want to delete this property?')) {
-      // Optimistic local update
-      setProperties(prev => prev.filter(p => p.id !== propertyId));
-      // Try backend delete
-      (async () => {
-        try {
-          await api.deleteProperty(propertyId);
-        } catch (err) {
-          console.warn('Failed to delete property on server, changes remain local', err.message || err);
-        }
-      })();
-    }
+    showConfirmToast(
+      'Are you sure you want to delete this property?',
+      () => {
+        // Optimistic local update
+        setProperties(prev => prev.filter(p => p.id !== propertyId));
+        // Try backend delete
+        (async () => {
+          try {
+            await api.deleteProperty(propertyId);
+          } catch (err) {
+            console.warn('Failed to delete property on server, changes remain local', err.message || err);
+          }
+        })();
+      }
+    );
   };
 
   const handleToggleStatus = (propertyId) => {
