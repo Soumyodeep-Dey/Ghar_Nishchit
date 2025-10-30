@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar.jsx';
 import TenantNavBar from './TenantNavBar.jsx';
+import api from '../../../services/api.js';
+import { showErrorToast } from '../../../utils/toast.jsx';
 import {
   Wrench, BarChart3, TrendingUp, TrendingDown, Building2, Heart, Bell, CreditCard, Star, X
 } from 'lucide-react';
@@ -283,10 +285,10 @@ const TenantDashboard = () => {
   const [currentSection, setCurrentSection] = useState('Dashboard');
   const [isLoading, setIsLoading] = useState(true);
 
-  // State management - data will be fetched from API
+  // State management - data from API
   const [favouriteProperties] = useLocalStorage('favouriteProperties', []);
   const [notifications] = useLocalStorage('notifications', []);
-  const [maintenanceRequests] = useLocalStorage('maintenanceRequests', []);
+  const [maintenanceRequests, setMaintenanceRequests] = useState([]);
   const [paymentHistory] = useLocalStorage('paymentHistory', []);
 
   // UI state
@@ -294,10 +296,34 @@ const TenantDashboard = () => {
   const [sortKey] = useState(null);
   const [sortAsc] = useState(true);
 
-  // Simulate initial loading
+  // Fetch data from backend
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
+    const fetchDashboardData = async () => {
+      try {
+        setIsLoading(true);
+
+        // Fetch user profile
+        const profile = await api.getProfile();
+
+        // Fetch maintenance requests for tenant
+        if (profile && profile.id) {
+          try {
+            const maintenance = await api.getTenantMaintenanceRequests(profile.id);
+            setMaintenanceRequests(Array.isArray(maintenance) ? maintenance : []);
+          } catch (error) {
+            console.error('Error fetching maintenance requests:', error);
+            setMaintenanceRequests([]);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        showErrorToast('Failed to load dashboard data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDashboardData();
   }, []);
 
   // Memoized filtered and sorted properties

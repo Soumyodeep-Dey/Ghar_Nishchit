@@ -2,10 +2,10 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
+import { showInfoToast, showSuccessToast } from '../../../utils/toast.jsx';
 import {
   CreditCard, Banknote, Download, Calendar, CheckCircle, Clock, AlertTriangle, DollarSign, FileText, ShieldCheck, Star, Trophy, BarChart3, X
 } from 'lucide-react';
-import { showInfoToast } from '../../../utils/toast.jsx';
 
 // Custom hooks
 const useLocalStorage = (key, initialValue) => {
@@ -31,8 +31,6 @@ const useLocalStorage = (key, initialValue) => {
 
   return [storedValue, setValue];
 };
-
-// Removed custom animation hooks and components
 
 // Enhanced Components
 const PaymentSummaryCard = ({ title, value, icon, subtitle = '' }) => {
@@ -281,15 +279,36 @@ const TenantPayment = () => {
       setUpcomingPayments(prev => prev.filter(p => p.id !== selectedPayment.id));
       setShowPaymentModal(false);
       setSelectedPayment(null);
+      showSuccessToast('Payment completed successfully!');
     }
   }, [selectedPayment, selectedPaymentMethod, setPaymentHistory, setUpcomingPayments]);
 
   const downloadReceipt = useCallback((payment) => {
     // Simulate receipt download
+    const receiptContent = `
+      ============================================
+                    PAYMENT RECEIPT
+      ============================================
+      
+      Receipt Number: ${payment.receipt}
+      Date: ${payment.date}
+      
+      Payment Details:
+      ----------------
+      Type: ${payment.type}
+      Amount: ${payment.amount}
+      Method: ${payment.method}
+      Status: ${payment.status}
+      
+      Thank you for your payment!
+      ============================================
+    `;
+
     const link = document.createElement('a');
-    link.href = `data:text/plain;charset=utf-8,Receipt ${payment.receipt}\nAmount: ${payment.amount}\nDate: ${payment.date}\nType: ${payment.type}`;
+    link.href = `data:text/plain;charset=utf-8,${encodeURIComponent(receiptContent)}`;
     link.download = `receipt-${payment.receipt}.txt`;
     link.click();
+    showSuccessToast('Receipt downloaded successfully');
   }, []);
 
   // Loading screen

@@ -2,35 +2,13 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
+import api from '../../../services/api.js';
+import { showErrorToast, showSuccessToast, showInfoToast } from '../../../utils/toast.jsx';
 import {
   WrenchScrewdriverIcon, PlusIcon, TrashIcon, PencilIcon, CheckCircleIcon, ClockIcon, ExclamationTriangleIcon, DocumentTextIcon, CalendarIcon, MagnifyingGlassIcon, ChartBarIcon
 } from '@heroicons/react/24/outline';
 
 // Custom hooks
-const useLocalStorage = (key, initialValue) => {
-  const [storedValue, setStoredValue] = useState(() => {
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      console.error(`Error reading localStorage key "${key}":`, error);
-      return initialValue;
-    }
-  });
-
-  const setValue = useCallback((value) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.error(`Error setting localStorage key "${key}":`, error);
-    }
-  }, [key, storedValue]);
-
-  return [storedValue, setValue];
-};
-
 const useIntersectionObserver = (options = {}) => {
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [element, setElement] = useState(null);
@@ -306,8 +284,8 @@ const StatsCard = ({ title, value, icon, gradient, delay = 0 }) => {
 const TenantMaintenance = () => {
   const { darkMode } = useDarkMode();
 
-  // State - data will be fetched from API
-  const [requests, setRequests] = useLocalStorage('maintenanceRequests', []);
+  // State - data from API
+  const [requests, setRequests] = useState([]);
 
   const [newRequest, setNewRequest] = useState({
     title: '',
@@ -328,10 +306,41 @@ const TenantMaintenance = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showNewRequestForm, setShowNewRequestForm] = useState(false);
 
-  // Simulate initial loading
+  // Fetch data from backend
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1500);
-    return () => clearTimeout(timer);
+    const fetchMaintenanceData = async () => {
+      try {
+        setIsLoading(true);
+
+        // Fetch user profile
+        const profile = await api.getProfile();
+
+        // Fetch maintenance requests for tenant
+        if (profile && profile.id) {
+          const maintenanceData = await api.getTenantMaintenanceRequests(profile.id);
+
+          // Transform backend data to match frontend format
+          const transformedRequests = Array.isArray(maintenanceData) ? maintenanceData.map(req => ({
+            id: req._id || req.id,
+            title: req.title || req.issueType || 'Maintenance Request',
+            description: req.description || 'No description',
+            priority: req.priority || 'Medium',
+            status: req.status || 'Pending',
+            date: req.createdAt || req.reportedDate || new Date().toISOString()
+          })) : [];
+
+          setRequests(transformedRequests);
+        }
+      } catch (error) {
+        console.error('Error fetching maintenance data:', error);
+        showErrorToast('Failed to load maintenance requests');
+        setRequests([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMaintenanceData();
   }, []);
 
   // Memoized filtered requests
@@ -358,17 +367,46 @@ const TenantMaintenance = () => {
 
   const submitNewRequest = useCallback(() => {
     if (newRequest.title && newRequest.description) {
-      const request = {
-        id: Date.now(),
-        ...newRequest,
-        status: "Pending",
-        date: new Date().toISOString().split('T')[0]
+      const createRequest = async () => {
+        try {
+          const profile = await api.getProfile();
+
+          const requestData = {
+            title: newRequest.title,
+            description: newRequest.description,
+            priority: newRequest.priority,
+            issueType: newRequest.title,
+            reportedBy: profile.id,
+            status: 'Pending'
+          };
+
+          const createdRequest = await api.createMaintenanceRequest(requestData);
+
+          // Transform to frontend format
+          const newReq = {
+            id: createdRequest._id || createdRequest.id,
+            title: createdRequest.title || createdRequest.issueType,
+            description: createdRequest.description,
+            priority: createdRequest.priority || 'Medium',
+            status: createdRequest.status || 'Pending',
+            date: createdRequest.createdAt || new Date().toISOString()
+          };
+
+          setRequests(prev => [newReq, ...prev]);
+          setNewRequest({ title: '', description: '', priority: 'Medium' });
+          setShowNewRequestForm(false);
+          showSuccessToast('Maintenance request submitted successfully');
+        } catch (error) {
+          console.error('Error creating maintenance request:', error);
+          showErrorToast('Failed to submit request');
+        }
       };
-      setRequests(prev => [...prev, request]);
-      setNewRequest({ title: '', description: '', priority: 'Medium' });
-      setShowNewRequestForm(false);
+
+      createRequest();
+    } else {
+      showInfoToast('Please fill in all required fields');
     }
-  }, [newRequest, setRequests]);
+  }, [newRequest]);
 
   const handleEditRequest = useCallback((request) => {
     setEditingRequestId(request.id);
@@ -380,21 +418,50 @@ const TenantMaintenance = () => {
   }, []);
 
   const saveEditRequest = useCallback((id) => {
-    setRequests(prev =>
-      prev.map(req =>
-        req.id === id ? { ...req, ...editRequestData } : req
-      )
-    );
-    setEditingRequestId(null);
-  }, [editRequestData, setRequests]);
+    const updateRequest = async () => {
+      try {
+        const updateData = {
+          title: editRequestData.title,
+          description: editRequestData.description,
+          priority: editRequestData.priority
+        };
+
+        await api.updateMaintenanceRequest(id, updateData);
+
+        setRequests(prev =>
+          prev.map(req =>
+            req.id === id ? { ...req, ...editRequestData } : req
+          )
+        );
+        setEditingRequestId(null);
+        showSuccessToast('Request updated successfully');
+      } catch (error) {
+        console.error('Error updating maintenance request:', error);
+        showErrorToast('Failed to update request');
+      }
+    };
+
+    updateRequest();
+  }, [editRequestData]);
 
   const cancelEditRequest = useCallback(() => {
     setEditingRequestId(null);
   }, []);
 
   const deleteRequest = useCallback((id) => {
-    setRequests(prev => prev.filter(req => req.id !== id));
-  }, [setRequests]);
+    const performDelete = async () => {
+      try {
+        await api.deleteMaintenanceRequest(id);
+        setRequests(prev => prev.filter(req => req.id !== id));
+        showSuccessToast('Request deleted successfully');
+      } catch (error) {
+        console.error('Error deleting maintenance request:', error);
+        showErrorToast('Failed to delete request');
+      }
+    };
+
+    performDelete();
+  }, []);
 
   // Loading screen
   if (isLoading) {

@@ -2,35 +2,12 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
+import api from '../../../services/api.js';
+import { showErrorToast, showSuccessToast } from '../../../utils/toast.jsx';
 import {
   BuildingOfficeIcon, HeartIcon, EyeIcon, MapPinIcon, CurrencyDollarIcon, XMarkIcon, MagnifyingGlassIcon, CalendarIcon, HomeIcon, SparklesIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon, StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
-
-// Custom hook for localStorage persistence
-const useLocalStorage = (key, initialValue) => {
-  const [storedValue, setStoredValue] = useState(() => {
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      console.error(`Error reading localStorage key "${key}":`, error);
-      return initialValue;
-    }
-  });
-
-  const setValue = useCallback((value) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.error(`Error setting localStorage key "${key}":`, error);
-    }
-  }, [key, storedValue]);
-
-  return [storedValue, setValue];
-};
 
 // Custom hook for intersection observer (for scroll animations)
 const useIntersectionObserver = (options = {}) => {
@@ -365,9 +342,8 @@ const PropertyModal = ({ property, isOpen, onClose, onToggleFavorite }) => {
 const TenantProperty = () => {
   const { darkMode } = useDarkMode();
 
-  // State - data will be fetched from API
-  const [properties, setProperties] = useLocalStorage('properties', []);
-
+  // State - data from API
+  const [properties, setProperties] = useState([]);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all');
@@ -375,10 +351,51 @@ const TenantProperty = () => {
   const [sortBy, setSortBy] = useState('title');
   const [priceRange, setPriceRange] = useState([0, 5000]);
 
-  // Simulate loading
+  // Fetch properties from backend
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1500);
-    return () => clearTimeout(timer);
+    const fetchProperties = async () => {
+      try {
+        setIsLoading(true);
+        const response = await api.getProperties();
+
+        // Transform backend data to match frontend format
+        const transformedProperties = response.map(prop => {
+          // Handle address object from backend
+          let locationString = 'Location not specified';
+          if (prop.address) {
+            if (typeof prop.address === 'string') {
+              locationString = prop.address;
+            } else if (typeof prop.address === 'object') {
+              // Format address object as string
+              const { street, city, state, zip } = prop.address;
+              const parts = [street, city, state, zip].filter(Boolean);
+              locationString = parts.join(', ') || 'Location not specified';
+            }
+          }
+
+          return {
+            id: prop._id || prop.id,
+            title: prop.title || 'Untitled Property',
+            price: `$${prop.price || 0}/month`,
+            location: locationString,
+            description: prop.description || 'No description available',
+            image: prop.images && prop.images.length > 0 ? prop.images[0] : 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect width="400" height="300" fill="%23e5e7eb"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="24" fill="%239ca3af"%3ENo Image%3C/text%3E%3C/svg%3E',
+            bedrooms: prop.bedrooms || 0,
+            bathrooms: prop.bathrooms || 0,
+            favorite: false // Will be managed locally or fetched from favorites API
+          };
+        });
+
+        setProperties(transformedProperties);
+      } catch (error) {
+        console.error('Error fetching properties:', error);
+        showErrorToast('Failed to load properties');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProperties();
   }, []);
 
   const toggleFavorite = useCallback((id) => {
@@ -389,7 +406,9 @@ const TenantProperty = () => {
           : property
       )
     );
-  }, [setProperties]);
+    // TODO: Call API to save favorite
+    showSuccessToast('Favorite updated');
+  }, []);
 
   const extractPrice = (priceString) => {
     return parseInt(priceString.replace(/[^0-9]/g, ''));
@@ -608,7 +627,7 @@ const TenantProperty = () => {
       </div>
 
       {/* Custom Styles */}
-      <style jsx>{`
+      <style>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-10px); }

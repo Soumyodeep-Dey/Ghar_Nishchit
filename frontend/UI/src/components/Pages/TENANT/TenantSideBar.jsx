@@ -241,7 +241,7 @@ const TenantSideBar = ({ setCurrentSection }) => {
       <div className={`fixed inset-0 bg-black/20 backdrop-blur-sm lg:hidden transition-opacity duration-300 ${!isCollapsed ? 'opacity-100 z-40' : 'opacity-0 pointer-events-none'
         }`} onClick={toggleCollapse}></div>
 
-      <aside className={`relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm h-full flex flex-col transition-all duration-500 ease-in-out border-r border-gray-200 dark:border-gray-700 shadow-2xl ${isCollapsed ? 'w-20' : 'w-80'
+      <aside className={`relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm min-h-screen h-full flex flex-col transition-all duration-500 ease-in-out border-r border-gray-200 dark:border-gray-700 shadow-2xl ${isCollapsed ? 'w-20' : 'w-80'
         }`}>
         {/* Gradient border */}
         <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 via-purple-500 to-pink-500"></div>
@@ -277,7 +277,7 @@ const TenantSideBar = ({ setCurrentSection }) => {
           )}
 
           {/* Navigation */}
-          <nav className={`flex flex-col flex-1 ${isCollapsed ? 'space-y-2' : 'space-y-3'}`}>
+          <nav className={`flex flex-col flex-1 overflow-y-auto ${isCollapsed ? 'space-y-2' : 'space-y-3'}`}>
             <div className={`${!isCollapsed ? 'mb-4' : ''}`}>
               {!isCollapsed && (
                 <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center">
@@ -302,8 +302,8 @@ const TenantSideBar = ({ setCurrentSection }) => {
             </div>
           </nav>
 
-          {/* Footer */}
-          <div className={`border-t border-gray-200 dark:border-gray-700 pt-4 mt-4 ${isCollapsed ? 'text-center' : ''}`}>
+          {/* Footer - Fixed at bottom */}
+          <div className={`border-t border-gray-200 dark:border-gray-700 pt-4 mt-auto ${isCollapsed ? 'text-center' : ''}`}>
             {!isCollapsed ? (
               <div className="text-center">
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
