@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { MessageSquare, Bell, LogOut, ChevronDown, Search, User, Shield, Moon, Sun, Menu, X, Sparkles, LayoutDashboard, Building2, BarChart3, Heart, Wrench, CreditCard, FileText
+import {
+  MessageSquare, Bell, LogOut, ChevronDown, Search, User, Shield, Moon, Sun, Menu, X, Sparkles, LayoutDashboard, Building2, BarChart3, Heart, Wrench, CreditCard, FileText
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../../../useDarkMode.js';
@@ -234,38 +235,8 @@ const TenantNavBar = ({ currentSection }) => {
   const { darkMode: isDarkMode, toggleDarkMode } = useDarkMode();
   const notificationsRef = useRef(null);
 
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: 'payment',
-      icon: CreditCard,
-      title: 'Rent Due Soon',
-      message: 'Your next rent payment of ₹15,000 is due in 3 days.',
-      time: '2 days ago',
-      isRead: false,
-      color: 'warning'
-    },
-    {
-      id: 2,
-      type: 'maintenance',
-      icon: Wrench,
-      title: 'Maintenance Scheduled',
-      message: 'Your AC repair is scheduled for tomorrow at 2 PM.',
-      time: '1 day ago',
-      isRead: false,
-      color: 'primary'
-    },
-    {
-      id: 3,
-      type: 'message',
-      icon: MessageSquare,
-      title: 'Message from Landlord',
-      message: 'John Smith: "Hi, just a reminder about the inspection."',
-      time: '5 hours ago',
-      isRead: true,
-      color: 'primary'
-    }
-  ]);
+  // State - notifications will be fetched from API
+  const [notifications, setNotifications] = useState([]);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 

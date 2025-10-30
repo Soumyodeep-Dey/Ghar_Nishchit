@@ -5,7 +5,6 @@ import TenantNavBar from './TenantNavBar';
 import {
   WrenchScrewdriverIcon, PlusIcon, TrashIcon, PencilIcon, CheckCircleIcon, ClockIcon, ExclamationTriangleIcon, DocumentTextIcon, CalendarIcon, MagnifyingGlassIcon, ChartBarIcon
 } from '@heroicons/react/24/outline';
-import { getCurrentYear } from '../../../utils/dateUtils.js';
 
 // Custom hooks
 const useLocalStorage = (key, initialValue) => {
@@ -307,32 +306,8 @@ const StatsCard = ({ title, value, icon, gradient, delay = 0 }) => {
 const TenantMaintenance = () => {
   const { darkMode } = useDarkMode();
 
-  const [requests, setRequests] = useLocalStorage('maintenanceRequests', [
-    {
-      id: 1,
-      title: "Leaky Faucet",
-      description: "Kitchen faucet is dripping constantly, causing water waste and noise",
-      status: "In Progress",
-      date: `${getCurrentYear()}-01-15`,
-      priority: "Medium"
-    },
-    {
-      id: 2,
-      title: "Broken Light Fixture",
-      description: "Living room ceiling light not working, needs electrical inspection",
-      status: "Completed",
-      date: `${getCurrentYear()}-01-10`,
-      priority: "Low"
-    },
-    {
-      id: 3,
-      title: "AC Unit Malfunction",
-      description: "Air conditioning unit making loud noises and not cooling properly",
-      status: "Pending",
-      date: `${getCurrentYear()}-01-20`,
-      priority: "High"
-    }
-  ]);
+  // State - data will be fetched from API
+  const [requests, setRequests] = useLocalStorage('maintenanceRequests', []);
 
   const [newRequest, setNewRequest] = useState({
     title: '',

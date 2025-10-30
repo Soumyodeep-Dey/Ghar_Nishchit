@@ -364,74 +364,9 @@ const PropertyModal = ({ property, isOpen, onClose, onToggleFavorite }) => {
 // Main Component
 const TenantProperty = () => {
   const { darkMode } = useDarkMode();
-  const [properties, setProperties] = useLocalStorage('properties', [
-    {
-      id: 1,
-      title: "Modern Apartment in Downtown",
-      location: "123 Main St, City Center",
-      price: "$1,200/month",
-      image: "/api/placeholder/300/200",
-      bedrooms: 2,
-      bathrooms: 1,
-      favorite: true,
-      description: "Beautiful modern apartment with city views. Recently renovated kitchen and bathroom. Features include hardwood floors, stainless steel appliances, and in-unit laundry."
-    },
-    {
-      id: 2,
-      title: "Cozy Studio Near Park",
-      location: "456 Oak Ave, Green District",
-      price: "$800/month",
-      image: "/api/placeholder/300/200",
-      bedrooms: 1,
-      bathrooms: 1,
-      favorite: false,
-      description: "Charming studio apartment just steps from the park. Perfect for singles or couples. Includes utilities and features a murphy bed to maximize space."
-    },
-    {
-      id: 3,
-      title: "Spacious Family Home",
-      location: "789 Family Blvd, Suburbs",
-      price: "$2,500/month",
-      image: "/api/placeholder/300/200",
-      bedrooms: 4,
-      bathrooms: 3,
-      favorite: true,
-      description: "Large family home with backyard and garage. Close to schools and shopping centers. Features include a finished basement, deck, and two-car garage."
-    },
-    {
-      id: 4,
-      title: "Luxury Penthouse Suite",
-      location: "101 Skyline Dr, Downtown",
-      price: "$4,500/month",
-      image: "/api/placeholder/300/200",
-      bedrooms: 3,
-      bathrooms: 2,
-      favorite: false,
-      description: "Stunning penthouse with panoramic city views. High-end finishes throughout including marble countertops, floor-to-ceiling windows, and private rooftop access."
-    },
-    {
-      id: 5,
-      title: "Charming Cottage",
-      location: "321 Garden Lane, Riverside",
-      price: "$1,800/month",
-      image: "/api/placeholder/300/200",
-      bedrooms: 2,
-      bathrooms: 2,
-      favorite: false,
-      description: "Quaint cottage with garden views and riverside location. Features original hardwood floors, fireplace, and private patio perfect for morning coffee."
-    },
-    {
-      id: 6,
-      title: "Urban Loft",
-      location: "555 Art District, Creative Quarter",
-      price: "$1,600/month",
-      image: "/api/placeholder/300/200",
-      bedrooms: 1,
-      bathrooms: 1,
-      favorite: false,
-      description: "Industrial loft in the heart of the art district. Exposed brick walls, high ceilings, and large windows create an inspiring living space for artists and creatives."
-    }
-  ]);
+
+  // State - data will be fetched from API
+  const [properties, setProperties] = useLocalStorage('properties', []);
 
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');

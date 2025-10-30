@@ -61,7 +61,7 @@ const sections = [
     path: '/tenant/maintenance',
     gradient: 'from-orange-500 to-red-600',
     description: 'Requests & Issues',
-    badge: 1
+    badge: null
   },
   {
     name: 'Payments',
@@ -262,14 +262,14 @@ const TenantSideBar = ({ setCurrentSection }) => {
               <StatsCard
                 icon={TrendingUp}
                 label="Active Requests"
-                value="4"
+                value="0"
                 gradient="from-green-500 to-emerald-600"
                 isCollapsed={isCollapsed}
               />
               <StatsCard
                 icon={Shield}
                 label="Account Status"
-                value="Verified"
+                value="Active"
                 gradient="from-blue-500 to-indigo-600"
                 isCollapsed={isCollapsed}
               />
