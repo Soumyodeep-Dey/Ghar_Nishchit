@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../../../useDarkMode.js';
+import UpdateTenantProfile from './UpdateTenantProfile.jsx';
 
 // Custom hooks
 const useClickOutside = (ref, callback) => {
@@ -120,7 +121,7 @@ const IconButton = ({ icon: Icon, onClick, badge = 0, className = '', ariaLabel,
   );
 };
 
-const ProfileDropdown = ({ user, showDropdown, onToggle, onLogout }) => {
+const ProfileDropdown = ({ user, showDropdown, onToggle, onLogout, navigate }) => {
   const dropdownRef = useRef(null);
 
   useClickOutside(dropdownRef, () => showDropdown && onToggle());
@@ -191,7 +192,7 @@ const ProfileDropdown = ({ user, showDropdown, onToggle, onLogout }) => {
           </div>
 
           <div className="py-2">
-            <button className="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 flex items-center space-x-3 group">
+            <button onClick={() => navigate('/tenant/profile')} className="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 flex items-center space-x-3 group">
               <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900 group-hover:bg-blue-200 dark:group-hover:bg-blue-800 transition-colors duration-200">
                 <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               </div>
@@ -466,6 +467,7 @@ const TenantNavBar = ({ currentSection }) => {
           showDropdown={showDropdown}
           onToggle={() => setShowDropdown(!showDropdown)}
           onLogout={handleLogout}
+          navigate={navigate}
         />
       </div>
 
