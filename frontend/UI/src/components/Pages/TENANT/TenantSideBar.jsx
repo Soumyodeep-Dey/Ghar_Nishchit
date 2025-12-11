@@ -1,420 +1,496 @@
-import { useState, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  Home, LayoutDashboard, Building2, MessageSquare, Wrench, CreditCard, ChevronLeft, ChevronRight, Sparkles, Shield, TrendingUp,
-} from 'lucide-react';
+import { Home, Building2, Wallet, Settings, ChevronLeft, Crown, Sparkles, LogOut } from 'lucide-react';
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion';
+import { useDarkMode } from '../../../useDarkMode.js';
+import { showConfirmToast } from '../../../utils/toast.jsx';
 
-// Custom hooks
-const useLocalStorage = (key, initialValue) => {
-  const [storedValue, setStoredValue] = useState(() => {
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      console.error(`Error reading localStorage key "${key}":`, error);
-      return initialValue;
-    }
-  });
-
-  const setValue = useCallback((value) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.error(`Error setting localStorage key "${key}":`, error);
-    }
-  }, [key, storedValue]);
-
-  return [storedValue, setValue];
+// Constants
+const SIDEBAR_WIDTHS = { collapsed: '4.5rem', expanded: '24rem' };
+const BREAKPOINT = 768;
+const USER_STATS = {
+    properties: 1,
+    maintenance: 2,
+    payments: 0,
+    messages: 0
 };
 
-// Enhanced sections with additional metadata
-const sections = [
-  {
-    name: 'Dashboard',
-    icon: LayoutDashboard,
-    path: '/tenant',
-    gradient: 'from-blue-500 to-indigo-600',
-    description: 'Overview & Analytics',
-    badge: null
-  },
-  {
-    name: 'Properties',
-    icon: Building2,
-    path: '/tenant/properties',
-    gradient: 'from-purple-500 to-pink-600',
-    description: 'Browse & Manage',
-    badge: 'new'
-  },
-  // {
-  //   name: 'Messages',
-  //   icon: MessageSquare,
-  //   path: '/tenant/messages',
-  //   gradient: 'from-green-500 to-emerald-600',
-  //   description: 'Chat & Communication',
-  //   badge: 3
-  // },
-  {
-    name: 'Maintenance',
-    icon: Wrench,
-    path: '/tenant/maintenance',
-    gradient: 'from-orange-500 to-red-600',
-    description: 'Requests & Issues',
-    badge: 1
-  },
-  {
-    name: 'Payments',
-    icon: CreditCard,
-    path: '/tenant/payment',
-    gradient: 'from-cyan-500 to-blue-600',
-    description: 'Bills & Transactions',
-    badge: null
-  },
+// Menu configuration - Static list for better performance
+const MENU_ITEMS = [
+    {
+        id: 'dashboard',
+        label: 'Dashboard',
+        icon: Home,
+        route: '/tenant',
+        badge: null,
+        description: 'Analytics & Overview',
+        color: 'from-sky-400 via-sky-500 to-blue-500',
+        premium: true
+    },
+    {
+        id: 'properties',
+        label: 'Properties',
+        icon: Building2,
+        route: '/tenant/properties',
+        badge: null,
+        description: 'Browse Properties',
+        color: 'from-emerald-400 via-emerald-500 to-green-500',
+        premium: true
+    },
+    {
+        id: 'maintenance',
+        label: 'Maintenance',
+        icon: Settings,
+        route: '/tenant/maintenance',
+        badge: 'maintenance',
+        description: 'Service Requests',
+        color: 'from-rose-400 via-pink-400 to-pink-500',
+        premium: false
+    },
+    {
+        id: 'payments',
+        label: 'Payments',
+        icon: Wallet,
+        route: '/tenant/payment',
+        badge: null,
+        description: 'Bills & Transactions',
+        color: 'from-indigo-400 via-indigo-500 to-purple-500',
+        premium: true
+    },
+    // {
+    //   id: 'messages',
+    //   label: 'Messages',
+    //   icon: MessageSquare,
+    //   route: '/tenant/messages',
+    //   badge: 'messages',
+    //   description: 'Communication Hub',
+    //   color: 'from-violet-400 via-purple-400 to-purple-500',
+    //   premium: false
+    // }
 ];
 
-// Animated Components
-const NavButton = ({ section, isActive, isCollapsed, onClick, index }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const IconComponent = section.icon;
+const TenantSideBar = ({ onSectionChange }) => {
+    const { darkMode: isDark } = useDarkMode();
+    const [isCollapsed, setIsCollapsed] = useState(() =>
+        typeof window !== 'undefined' ? window.innerWidth < BREAKPOINT : false
+    );
+    const [sidebarWidth, setSidebarWidth] = useState(() =>
+        isCollapsed ? SIDEBAR_WIDTHS.collapsed : SIDEBAR_WIDTHS.expanded
+    );
+    const [showTooltip, setShowTooltip] = useState(null);
 
-  return (
-    <div
-      className={`relative transform transition-all duration-500 ease-out ${isActive ? 'translate-x-2' : 'translate-x-0'
-        }`}
-      style={{ transitionDelay: `${index * 50}ms` }}
-    >
-      <button
-        onClick={onClick}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        className={`group relative w-full flex items-center text-left focus:outline-none transition-all duration-300 overflow-hidden ${isCollapsed ? 'p-3 justify-center' : 'p-4 space-x-4'
-          } ${isActive
-            ? `bg-gradient-to-r ${section.gradient} text-white shadow-xl scale-105 rounded-2xl`
-            : 'text-gray-700 dark:text-gray-300 hover:text-white rounded-xl hover:scale-105'
-          }`}
-      >
-        {/* Background gradient on hover */}
-        {!isActive && (
-          <div className={`absolute inset-0 bg-gradient-to-r ${section.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl`}></div>
-        )}
+    const navigate = useNavigate();
+    const location = useLocation();
+    const sidebarRef = useRef(null);
 
-        {/* Glow effect */}
-        {(isActive || isHovered) && (
-          <div className={`absolute inset-0 bg-gradient-to-r ${section.gradient} blur opacity-20 rounded-2xl`}></div>
-        )}
+    // Helper function to get badge value
+    const getBadgeValue = (badgeKey) => {
+        if (!badgeKey) return null;
+        return USER_STATS[badgeKey] || null;
+    };
 
-        <div className="relative z-10 flex items-center w-full">
-          {/* Icon container */}
-          <div className={`relative ${isCollapsed ? '' : 'mr-4'}`}>
-            <IconComponent className={`transition-all duration-300 ${isActive ? 'w-6 h-6 animate-pulse' : 'w-6 h-6 group-hover:scale-110'
-              }`} />
+    // Process menu items with dynamic badge values
+    const menuItems = MENU_ITEMS.map(item => ({
+        ...item,
+        badge: getBadgeValue(item.badge),
+        glowColor: isDark ? 'shadow-slate-400/20' : 'shadow-slate-500/15'
+    }));
 
-            {/* Badge */}
-            {section.badge && (
-              <div className={`absolute -top-2 -right-2 flex items-center justify-center transition-all duration-300 ${typeof section.badge === 'number'
-                ? 'bg-red-500 text-white text-xs rounded-full h-5 w-5 animate-bounce'
-                : 'bg-green-500 text-white text-xs rounded-full px-2 py-1'
-                }`}>
-                {section.badge}
-              </div>
-            )}
-          </div>
 
-          {/* Text content */}
-          {!isCollapsed && (
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-lg truncate">{section.name}</span>
-              </div>
-              <p className={`text-sm transition-opacity duration-300 ${isActive ? 'text-white/80' : 'text-gray-500 dark:text-gray-400 group-hover:text-white/80'
-                }`}>
-                {section.description}
-              </p>
+    const handleNavigation = useCallback((route, sectionName = null) => {
+        try {
+            if (navigator.vibrate) navigator.vibrate(50);
+            navigate(route);
+            if (sectionName && onSectionChange) onSectionChange(sectionName);
+            if (window.innerWidth < BREAKPOINT) setTimeout(() => setIsCollapsed(true), 300);
+        } catch {
+            window.location.href = route;
+        }
+    }, [navigate, onSectionChange]);
+
+    useEffect(() => {
+        setSidebarWidth(isCollapsed ? SIDEBAR_WIDTHS.collapsed : SIDEBAR_WIDTHS.expanded);
+        if (typeof document !== 'undefined') {
+            document.documentElement.style.setProperty('--sidebar-width', isCollapsed ? SIDEBAR_WIDTHS.collapsed : SIDEBAR_WIDTHS.expanded);
+        }
+    }, [isCollapsed]);
+
+    useEffect(() => {
+        const handleResize = () => setIsCollapsed(window.innerWidth < BREAKPOINT);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+                setShowTooltip(null);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.altKey && event.key >= '1' && event.key <= '9') {
+                event.preventDefault();
+                const index = parseInt(event.key) - 1;
+                if (menuItems[index]) handleNavigation(menuItems[index].route, menuItems[index].label);
+            }
+            if (event.key === 'Escape') setIsCollapsed(!isCollapsed);
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [isCollapsed, menuItems, handleNavigation]);
+
+    const handleItemClick = (item) => handleNavigation(item.route, item.label);
+    const handleTooltip = (itemId, show) => isCollapsed && setShowTooltip(show ? itemId : null);
+    const isItemActive = (item) => {
+        const pathname = location.pathname;
+        return pathname === item.route || (item.route === '/tenant' && pathname === '/tenant') ||
+            (pathname.startsWith(item.route + '/') && item.route !== '/tenant');
+    };
+    const handleLogout = () => {
+        showConfirmToast(
+            'Are you sure you want to logout?',
+            () => {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                // Redirect to home page
+                navigate('/');
+            }
+        );
+    };
+
+    // Sub-components
+    const SidebarHeader = () => (
+        <div className={`relative z-20 p-6 border-b ${themeClasses.border} flex-shrink-0`}>
+            <div className="flex items-center justify-between">
+                <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleNavigation('/tenant', 'Dashboard')}
+                    className="flex items-center space-x-4 cursor-pointer group"
+                >
+                    <motion.div
+                        whileHover={{
+                            rotate: [0, -2, 2, 0],
+                            scale: 1.05,
+                            boxShadow: "0 10px 20px rgba(59, 130, 246, 0.2)"
+                        }}
+                        transition={{ duration: 0.4 }}
+                        className="relative"
+                    >
+                        <div className="w-14 h-14 rounded-3xl bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-500 flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:shadow-blue-500/20 transition-all duration-300">
+                            <Building2 className="w-8 h-8 text-white group-hover:scale-105 transition-transform duration-300" />
+                        </div>
+                        <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-500 opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300 -z-10" />
+                    </motion.div>
+                    {!isCollapsed && (
+                        <div className="flex flex-col">
+                            <h1
+                                className={`text-2xl font-bold ${isDark ? 'text-slate-200' : 'text-slate-700'} transition-colors duration-300`}
+                            >
+                                Ghar Nishchit
+                            </h1>
+                            <div className="flex items-center space-x-2">
+                                <Crown className="w-3 h-3 text-amber-500" />
+                                <span className={`text-sm ${themeClasses.textSecondary} font-medium transition-colors duration-300`}>Tenant Portal</span>
+                            </div>
+                        </div>
+                    )}
+                </motion.div>
+                <motion.button
+                    whileHover={{
+                        scale: 1.1,
+                        rotate: 3,
+                        boxShadow: isDark ? "0 10px 25px rgba(148, 163, 184, 0.2)" : "0 10px 25px rgba(148, 163, 184, 0.3)"
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    className={`p-3 rounded-2xl ${themeClasses.buttonIdle} border ${themeClasses.border} transition-all duration-500 shadow-sm group overflow-hidden hover:shadow-lg hover:shadow-slate-500/10 ${isCollapsed ? 'absolute -right-3 top-6 z-50' : 'relative'} hover:scale-105 hover:-translate-y-1`}
+                    title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                >
+                    <motion.div
+                        animate={{ rotate: isCollapsed ? 180 : 0 }}
+                        transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
+                        className="group-hover:scale-110 transition-transform duration-300"
+                    >
+                        <ChevronLeft className={`w-5 h-5 ${themeClasses.textSecondary} group-hover:text-blue-500 transition-colors duration-300`} />
+                    </motion.div>
+                </motion.button>
             </div>
-          )}
         </div>
+    );
 
-        {/* Active indicator */}
-        {isActive && (
-          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-white rounded-l-full animate-pulse"></div>
-        )}
+    const themeClasses = isDark ? {
+        shellBg: 'from-gray-900/95 via-slate-900/95 to-gray-900/95',
+        border: 'border-slate-800/60',
+        overlay: 'bg-slate-900/40',
+        sectionCard: 'from-gray-800/70 to-slate-800/70',
+        textPrimary: 'text-slate-100',
+        textSecondary: 'text-slate-300',
+        textMuted: 'text-slate-400',
+        buttonIdle: 'bg-slate-800/70 hover:bg-slate-700/60',
+        menuIdle: 'hover:bg-slate-800/70 hover:border-slate-700/60',
+        tooltipBg: 'bg-slate-900/95',
+        tooltipBorder: 'border-slate-700/60',
+        footerText: 'text-slate-400',
+    } : {
+        shellBg: 'from-slate-50/95 via-indigo-50/95 to-slate-50/95',
+        border: 'border-slate-200/60',
+        overlay: 'bg-slate-900/30',
+        sectionCard: 'from-white/60 to-slate-50/60',
+        textPrimary: 'text-slate-700',
+        textSecondary: 'text-slate-600',
+        textMuted: 'text-slate-500',
+        buttonIdle: 'bg-slate-100/80 hover:bg-slate-200/80',
+        menuIdle: 'hover:bg-slate-100/80 hover:border-slate-200/60',
+        tooltipBg: 'bg-white/95',
+        tooltipBorder: 'border-slate-200/60',
+        footerText: 'text-slate-400',
+    };
 
-        {/* Ripple effect */}
-        <div className="absolute inset-0 rounded-xl overflow-hidden">
-          <div className={`absolute inset-0 bg-white opacity-0 group-active:opacity-20 transition-opacity duration-150 ${isActive ? 'animate-ping' : ''
-            }`}></div>
-        </div>
-      </button>
+    return (
+        <>
+            <style>{`
+        .sidebar-scrollable::-webkit-scrollbar { width: 6px; }
+        .sidebar-scrollable::-webkit-scrollbar-track { background: rgba(148,163,184,0.1); border-radius: 3px; }
+        .sidebar-scrollable::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(148,163,184,0.6) 0%, rgba(148,163,184,0.3) 100%); border-radius: 3px; border: 1px solid rgba(148,163,184,0.2); transition: all 0.3s ease; }
+        .sidebar-scrollable::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, rgba(148,163,184,0.8) 0%, rgba(148,163,184,0.5) 100%); box-shadow: 0 0 8px rgba(148,163,184,0.3); }
+        .sidebar-scrollable { scrollbar-width: thin; scrollbar-color: rgba(148,163,184,0.6) rgba(148,163,184,0.1); scroll-behavior: smooth; }
+        
+        /* Enhanced hover effects */
+        .group:hover .group-hover\\:animate-pulse {
+          animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        .group:hover .group-hover\\:scale-110 {
+          transform: scale(1.1);
+        }
+        
+        .group:hover .group-hover\\:scale-125 {
+          transform: scale(1.25);
+        }
+        
+        .group:hover .group-hover\\:rotate-3 {
+          transform: rotate(3deg);
+        }
+        
+        .group:hover .group-hover\\:rotate-12 {
+          transform: rotate(12deg);
+        }
+        
+        .group:hover .group-hover\\:translate-x-1 {
+          transform: translateX(0.25rem);
+        }
+        
+        .group:hover .group-hover\\:-translate-y-1 {
+          transform: translateY(-0.25rem);
+        }
+        
+        /* Smooth transitions for all hover effects */
+        * {
+          transition-property: transform, color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, filter, backdrop-filter;
+          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+          transition-duration: 300ms;
+        }
+      `}</style>
 
-      {/* Tooltip for collapsed state */}
-      {isCollapsed && isHovered && (
-        <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-3 py-2 rounded-lg text-sm font-medium shadow-lg z-50 animate-slideIn">
-          {section.name}
-          <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 w-2 h-2 bg-gray-900 dark:bg-gray-100 rotate-45"></div>
-        </div>
-      )}
-    </div>
-  );
-};
+            <AnimatePresence>
+                {!isCollapsed && window.innerWidth < 768 && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className={`fixed inset-0 ${themeClasses.overlay} backdrop-blur-sm z-30 md:hidden`}
+                        onClick={() => setIsCollapsed(true)}
+                    />
+                )}
+            </AnimatePresence>
 
-const Logo = ({ isCollapsed, onClick }) => {
-  return (
-    <div
-      className={`flex items-center cursor-pointer group transition-all duration-500 ${isCollapsed ? 'justify-center mb-8' : 'space-x-3 mb-12'
-        }`}
-      onClick={onClick}
-    >
-      {/* Logo icon */}
-      <div className="relative">
-        <div className="p-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
-          <Home className="w-8 h-8 text-white animate-pulse" />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
-      </div>
-
-      {/* Logo text */}
-      {!isCollapsed && (
-        <div className="overflow-hidden">
-          <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent group-hover:from-purple-600 group-hover:to-pink-600 transition-all duration-300">
-            Ghar_Nishchit
-          </div>
-          <div className="text-sm text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">
-            Tenant Portal
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const CollapseToggle = ({ isCollapsed, onToggle }) => {
-  return (
-    <button
-      onClick={onToggle}
-      className="absolute -right-3 top-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full p-2 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 group z-10"
-    >
-      {isCollapsed ? (
-        <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-400 group-hover:text-blue-600" />
-      ) : (
-        <ChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-400 group-hover:text-blue-600" />
-      )}
-    </button>
-  );
-};
-
-const StatsCard = ({ label, value, gradient, isCollapsed }) => {
-  if (isCollapsed) return null;
-
-  return (
-    <div className={`bg-gradient-to-r ${gradient} rounded-xl p-4 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-white/80 text-sm">{label}</p>
-          <p className="text-2xl font-bold">{value}</p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Main Component
-const TenantSideBar = ({ setCurrentSection }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [isCollapsed, setIsCollapsed] = useLocalStorage('sidebarCollapsed', false);
-
-  const handleNavigation = useCallback((path, sectionName) => {
-    navigate(path);
-    if (setCurrentSection) {
-      setCurrentSection(sectionName);
-    }
-  }, [navigate, setCurrentSection]);
-
-  const toggleCollapse = useCallback(() => {
-    setIsCollapsed(prev => !prev);
-  }, [setIsCollapsed]);
-
-  return (
-    <>
-      {/* Backdrop for mobile */}
-      <div className={`fixed inset-0 bg-black/20 backdrop-blur-sm lg:hidden transition-opacity duration-300 ${!isCollapsed ? 'opacity-100 z-40' : 'opacity-0 pointer-events-none'
-        }`} onClick={toggleCollapse}></div>
-
-      <aside className={`relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm h-full flex flex-col transition-all duration-500 ease-in-out border-r border-gray-200 dark:border-gray-700 shadow-2xl ${isCollapsed ? 'w-20' : 'w-80'
-        }`}>
-        {/* Gradient border */}
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 via-purple-500 to-pink-500"></div>
-
-        {/* Collapse Toggle */}
-        <CollapseToggle isCollapsed={isCollapsed} onToggle={toggleCollapse} />
-
-        <div className={`flex flex-col h-full ${isCollapsed ? 'p-4' : 'p-6'}`}>
-          {/* Logo */}
-          <Logo
-            isCollapsed={isCollapsed}
-            onClick={() => handleNavigation('/tenant', 'Dashboard')}
-          />
-
-          {/* Stats Cards */}
-          {!isCollapsed && (
-            <div className="grid grid-cols-1 gap-3 mb-8">
-              <StatsCard
-                icon={TrendingUp}
-                label="Active Requests"
-                value="4"
-                gradient="from-green-500 to-emerald-600"
-                isCollapsed={isCollapsed}
-              />
-              <StatsCard
-                icon={Shield}
-                label="Account Status"
-                value="Verified"
-                gradient="from-blue-500 to-indigo-600"
-                isCollapsed={isCollapsed}
-              />
-            </div>
-          )}
-
-          {/* Navigation */}
-          <nav className={`flex flex-col flex-1 ${isCollapsed ? 'space-y-2' : 'space-y-3'}`}>
-            <div className={`${!isCollapsed ? 'mb-4' : ''}`}>
-              {!isCollapsed && (
-                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center">
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Navigation
-                </h3>
-              )}
-
-              {sections.map((section, index) => {
-                const isActive = location.pathname === section.path;
-                return (
-                  <NavButton
-                    key={section.name}
-                    section={section}
-                    isActive={isActive}
-                    isCollapsed={isCollapsed}
-                    onClick={() => handleNavigation(section.path, section.name)}
-                    index={index}
-                  />
-                );
-              })}
-            </div>
-          </nav>
-
-          {/* Footer */}
-          <div className={`border-t border-gray-200 dark:border-gray-700 pt-4 mt-4 ${isCollapsed ? 'text-center' : ''}`}>
-            {!isCollapsed ? (
-              <div className="text-center">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                  © {new Date().getFullYear()} Ghar_Nishchit
-                </p>
-                <div className="flex items-center justify-center space-x-1">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-xs text-gray-600 dark:text-gray-300">System Online</span>
+            <motion.div
+                ref={sidebarRef}
+                initial={{ x: -400, opacity: 0 }}
+                animate={{
+                    x: 0,
+                    opacity: 1,
+                    width: sidebarWidth
+                }}
+                transition={{ duration: 0.7, type: "spring", stiffness: 120, damping: 20 }}
+                className={`fixed left-0 top-0 h-screen bg-gradient-to-br ${themeClasses.shellBg} backdrop-blur-3xl border-r ${themeClasses.border} shadow-2xl z-40 flex flex-col transition-all duration-700`}
+                style={{ width: sidebarWidth, height: '100vh', maxHeight: '100vh', overflow: 'hidden', '--sidebar-width': sidebarWidth }}
+            >
+                {/* Soft background particles */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <motion.div
+                        animate={{ scale: [1, 1.2, 1], rotate: [0, 360], x: [-30, 30, -30], y: [-30, 30, -30] }}
+                        transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+                        className={`absolute -top-32 -left-32 w-64 h-64 ${isDark ? 'bg-gradient-radial from-blue-500/10 via-cyan-400/5 to-transparent' : 'bg-gradient-radial from-blue-200/20 via-cyan-200/10 to-transparent'} rounded-full blur-2xl`}
+                    />
+                    <motion.div
+                        animate={{ scale: [1.2, 1, 1.2], rotate: [360, 0], x: [30, -30, 30], y: [30, -30, 30] }}
+                        transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
+                        className={`absolute -bottom-32 -right-32 w-64 h-64 ${isDark ? 'bg-gradient-radial from-emerald-500/10 via-green-400/5 to-transparent' : 'bg-gradient-radial from-emerald-200/20 via-green-200/10 to-transparent'} rounded-full blur-2xl`}
+                    />
                 </div>
-              </div>
-            ) : (
-              <div className="flex justify-center">
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-              </div>
-            )}
-          </div>
-        </div>
 
-        {/* Custom Styles */}
-        <style>{`
-          @keyframes slideIn {
-            from {
-              opacity: 0;
-              transform: translateX(-10px);
-            }
-            to {
-              opacity: 1;
-              transform: translateX(0);
-            }
-          }
-          
-          @keyframes pulse {
-            0%, 100% {
-              opacity: 1;
-            }
-            50% {
-              opacity: 0.5;
-            }
-          }
-          
-          @keyframes bounce {
-            0%, 20%, 53%, 80%, 100% {
-              animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-              transform: translate3d(0, 0, 0);
-            }
-            40%, 43% {
-              animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
-              transform: translate3d(0, -5px, 0);
-            }
-            70% {
-              animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
-              transform: translate3d(0, -2px, 0);
-            }
-            90% {
-              transform: translate3d(0, -1px, 0);
-            }
-          }
-          
-          @keyframes ping {
-            75%, 100% {
-              transform: scale(2);
-              opacity: 0;
-            }
-          }
-          
-          .animate-slideIn {
-            animation: slideIn 0.3s ease-out;
-          }
-          
-          .animate-pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-          }
-          
-          .animate-bounce {
-            animation: bounce 1s infinite;
-          }
-          
-          .animate-ping {
-            animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
-          }
-          
-          /* Custom scrollbar */
-          ::-webkit-scrollbar {
-            width: 6px;
-          }
-          
-          ::-webkit-scrollbar-track {
-            background: transparent;
-          }
-          
-          ::-webkit-scrollbar-thumb {
-            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
-            border-radius: 10px;
-          }
-          
-          ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(45deg, #2563eb, #7c3aed);
-          }
-          
-          /* Dark mode scrollbar */
-          .dark ::-webkit-scrollbar-track {
-            background: transparent;
-          }
-          
-          .dark ::-webkit-scrollbar-thumb {
-            background: linear-gradient(45deg, #6366f1, #a855f7);
-          }
-        `}</style>
-      </aside>
-    </>
-  );
+                <SidebarHeader />
+
+                {/* Menu */}
+                <div className="flex-1 relative min-h-0">
+                    <div className="absolute inset-0 sidebar-scrollable" style={{ overflowY: 'auto', overflowX: 'hidden', padding: '24px 12px' }}>
+                        <div className="space-y-3">
+                            {menuItems.map((item, index) => (
+                                <motion.div
+                                    key={item.id}
+                                    initial={{ opacity: 0, x: -30 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: index * 0.1, duration: 0.5 }}
+                                    onMouseEnter={() => { handleTooltip(item.id, true); }}
+                                    onMouseLeave={() => { handleTooltip(item.id, false); }}
+                                    className="relative"
+                                >
+                                    <motion.button
+                                        whileHover={{
+                                            x: isCollapsed ? 2 : 5,
+                                            scale: 1.02,
+                                            y: -2,
+                                            boxShadow: isItemActive(item)
+                                                ? "0 15px 35px rgba(0, 0, 0, 0.2)"
+                                                : isDark
+                                                    ? "0 10px 25px rgba(148, 163, 184, 0.15)"
+                                                    : "0 10px 25px rgba(148, 163, 184, 0.2)"
+                                        }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => handleItemClick(item)}
+                                        className={`w-full flex items-center p-4 rounded-2xl transition-all duration-300 group relative overflow-hidden ${isItemActive(item)
+                                            ? `bg-gradient-to-r ${item.color} text-white shadow-lg hover:shadow-xl`
+                                            : `${themeClasses.menuIdle} hover:shadow-md hover:shadow-slate-500/10 hover:-translate-y-1`
+                                            }`}
+                                    >
+                                        {isItemActive(item) && (
+                                            <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1.5 h-10 bg-white rounded-full shadow-md" />
+                                        )}
+
+                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 ${isItemActive(item) ? 'bg-white/20 group-hover:bg-white/30' : 'bg-slate-100/80 group-hover:bg-slate-200/90'}`}>
+                                            <item.icon className={`w-6 h-6 transition-all duration-300 group-hover:scale-110 ${isItemActive(item) ? 'text-white group-hover:text-white/90' : `${themeClasses.textPrimary} group-hover:text-blue-500`}`} />
+                                            {item.premium && (
+                                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full flex items-center justify-center group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">
+                                                    <Sparkles className="w-2 h-2 text-white group-hover:animate-pulse" />
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <AnimatePresence>
+                                            {!isCollapsed && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, x: -15 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    exit={{ opacity: 0, x: -15 }}
+                                                    transition={{ duration: 0.3 }}
+                                                    className="flex-1 ml-4 text-left"
+                                                >
+                                                    <div className={`font-bold text-lg transition-all duration-300 group-hover:translate-x-1 ${isItemActive(item) ? 'text-white group-hover:text-white/90' : `${themeClasses.textPrimary} group-hover:text-blue-500`}`}>
+                                                        {item.label}
+                                                    </div>
+                                                    <div className={`text-sm transition-all duration-300 group-hover:translate-x-1 ${isItemActive(item) ? 'text-white/80 group-hover:text-white/70' : `${themeClasses.textMuted} group-hover:text-slate-600`}`}>
+                                                        {item.description}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+
+                                        {item.badge && (
+                                            <div className="relative">
+                                                {!isCollapsed ? (
+                                                    <div className="px-3 py-1.5 bg-gradient-to-r from-rose-400 to-red-500 rounded-full text-white text-sm font-bold group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-lg group-hover:shadow-rose-500/30 transition-all duration-300">
+                                                        {item.badge}
+                                                    </div>
+                                                ) : (
+                                                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-rose-400 to-red-500 rounded-full flex items-center justify-center group-hover:scale-125 group-hover:rotate-12 group-hover:shadow-lg group-hover:shadow-rose-500/40 transition-all duration-300">
+                                                        <span className="text-white text-xs font-bold group-hover:animate-pulse">
+                                                            {item.badge > 9 ? '9+' : item.badge}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </motion.button>
+
+                                    {isCollapsed && showTooltip === item.id && (
+                                        <motion.div
+                                            initial={{ opacity: 0, x: -15, scale: 0.9 }}
+                                            animate={{ opacity: 1, x: 0, scale: 1 }}
+                                            exit={{ opacity: 0, x: -15, scale: 0.9 }}
+                                            className={`absolute left-full top-1/2 transform -translate-y-1/2 ml-4 px-4 py-3 ${themeClasses.tooltipBg} backdrop-blur-2xl text-sm rounded-2xl shadow-xl border ${themeClasses.tooltipBorder} whitespace-nowrap z-50 min-w-[200px]`}
+                                        >
+                                            <div className="flex items-center space-x-3">
+                                                <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${item.color} flex items-center justify-center`}>
+                                                    <item.icon className="w-4 h-4 text-white" />
+                                                </div>
+                                                <div>
+                                                    <div className="font-bold text-base">{item.label}</div>
+                                                    <div className="text-xs opacity-70">{item.description}</div>
+                                                    {item.badge && (
+                                                        <div className="text-xs text-rose-500 font-bold mt-1">
+                                                            {item.badge} notifications
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Bottom Section */}
+                <div className={`relative z-20 p-4 border-t ${themeClasses.border} flex-shrink-0`}>
+                    <motion.button
+                        whileHover={{
+                            x: isCollapsed ? 2 : 5,
+                            scale: 1.02,
+                            y: -2,
+                            boxShadow: "0 15px 35px rgba(239, 68, 68, 0.3)"
+                        }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleLogout}
+                        className={`w-full flex items-center p-4 rounded-2xl ${isDark ? 'hover:bg-rose-500/10' : 'hover:bg-rose-50/80'} transition-all duration-300 group hover:shadow-lg hover:shadow-rose-500/20 hover:-translate-y-1`}
+                        title="Logout"
+                    >
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-rose-400 to-red-500 flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-xl group-hover:shadow-rose-500/30 transition-all duration-300">
+                            <LogOut className="w-6 h-6 text-white group-hover:scale-110 group-hover:rotate-3 transition-all duration-300" />
+                        </div>
+                        <AnimatePresence>
+                            {!isCollapsed && (
+                                <motion.div
+                                    initial={{ opacity: 0, x: -15 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -15 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="flex-1 ml-4 text-left"
+                                >
+                                    <div className={`${isDark ? 'text-rose-300 group-hover:text-rose-200' : 'text-rose-600 group-hover:text-rose-700'} font-bold text-lg transition-all duration-300 group-hover:translate-x-1`}>
+                                        Logout
+                                    </div>
+                                    <div className={`${isDark ? 'text-rose-400/80 group-hover:text-rose-300/90' : 'text-rose-500/80 group-hover:text-rose-600/90'} text-sm transition-all duration-300 group-hover:translate-x-1`}>
+                                        Sign out of your account
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </motion.button>
+
+                </div>
+            </motion.div>
+        </>
+    );
 };
 
 export default TenantSideBar;

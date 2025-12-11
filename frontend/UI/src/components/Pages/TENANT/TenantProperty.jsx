@@ -2,35 +2,12 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
+import api from '../../../services/api.js';
+import { showErrorToast, showSuccessToast } from '../../../utils/toast.jsx';
 import {
   BuildingOfficeIcon, HeartIcon, EyeIcon, MapPinIcon, CurrencyDollarIcon, XMarkIcon, MagnifyingGlassIcon, CalendarIcon, HomeIcon, SparklesIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon, StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
-
-// Custom hook for localStorage persistence
-const useLocalStorage = (key, initialValue) => {
-  const [storedValue, setStoredValue] = useState(() => {
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      console.error(`Error reading localStorage key "${key}":`, error);
-      return initialValue;
-    }
-  });
-
-  const setValue = useCallback((value) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.error(`Error setting localStorage key "${key}":`, error);
-    }
-  }, [key, storedValue]);
-
-  return [storedValue, setValue];
-};
 
 // Custom hook for intersection observer (for scroll animations)
 const useIntersectionObserver = (options = {}) => {
@@ -364,75 +341,9 @@ const PropertyModal = ({ property, isOpen, onClose, onToggleFavorite }) => {
 // Main Component
 const TenantProperty = () => {
   const { darkMode } = useDarkMode();
-  const [properties, setProperties] = useLocalStorage('properties', [
-    {
-      id: 1,
-      title: "Modern Apartment in Downtown",
-      location: "123 Main St, City Center",
-      price: "$1,200/month",
-      image: "/api/placeholder/300/200",
-      bedrooms: 2,
-      bathrooms: 1,
-      favorite: true,
-      description: "Beautiful modern apartment with city views. Recently renovated kitchen and bathroom. Features include hardwood floors, stainless steel appliances, and in-unit laundry."
-    },
-    {
-      id: 2,
-      title: "Cozy Studio Near Park",
-      location: "456 Oak Ave, Green District",
-      price: "$800/month",
-      image: "/api/placeholder/300/200",
-      bedrooms: 1,
-      bathrooms: 1,
-      favorite: false,
-      description: "Charming studio apartment just steps from the park. Perfect for singles or couples. Includes utilities and features a murphy bed to maximize space."
-    },
-    {
-      id: 3,
-      title: "Spacious Family Home",
-      location: "789 Family Blvd, Suburbs",
-      price: "$2,500/month",
-      image: "/api/placeholder/300/200",
-      bedrooms: 4,
-      bathrooms: 3,
-      favorite: true,
-      description: "Large family home with backyard and garage. Close to schools and shopping centers. Features include a finished basement, deck, and two-car garage."
-    },
-    {
-      id: 4,
-      title: "Luxury Penthouse Suite",
-      location: "101 Skyline Dr, Downtown",
-      price: "$4,500/month",
-      image: "/api/placeholder/300/200",
-      bedrooms: 3,
-      bathrooms: 2,
-      favorite: false,
-      description: "Stunning penthouse with panoramic city views. High-end finishes throughout including marble countertops, floor-to-ceiling windows, and private rooftop access."
-    },
-    {
-      id: 5,
-      title: "Charming Cottage",
-      location: "321 Garden Lane, Riverside",
-      price: "$1,800/month",
-      image: "/api/placeholder/300/200",
-      bedrooms: 2,
-      bathrooms: 2,
-      favorite: false,
-      description: "Quaint cottage with garden views and riverside location. Features original hardwood floors, fireplace, and private patio perfect for morning coffee."
-    },
-    {
-      id: 6,
-      title: "Urban Loft",
-      location: "555 Art District, Creative Quarter",
-      price: "$1,600/month",
-      image: "/api/placeholder/300/200",
-      bedrooms: 1,
-      bathrooms: 1,
-      favorite: false,
-      description: "Industrial loft in the heart of the art district. Exposed brick walls, high ceilings, and large windows create an inspiring living space for artists and creatives."
-    }
-  ]);
 
+  // State - data from API
+  const [properties, setProperties] = useState([]);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all');
@@ -440,10 +351,51 @@ const TenantProperty = () => {
   const [sortBy, setSortBy] = useState('title');
   const [priceRange, setPriceRange] = useState([0, 5000]);
 
-  // Simulate loading
+  // Fetch properties from backend
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1500);
-    return () => clearTimeout(timer);
+    const fetchProperties = async () => {
+      try {
+        setIsLoading(true);
+        const response = await api.getProperties();
+
+        // Transform backend data to match frontend format
+        const transformedProperties = response.map(prop => {
+          // Handle address object from backend
+          let locationString = 'Location not specified';
+          if (prop.address) {
+            if (typeof prop.address === 'string') {
+              locationString = prop.address;
+            } else if (typeof prop.address === 'object') {
+              // Format address object as string
+              const { street, city, state, zip } = prop.address;
+              const parts = [street, city, state, zip].filter(Boolean);
+              locationString = parts.join(', ') || 'Location not specified';
+            }
+          }
+
+          return {
+            id: prop._id || prop.id,
+            title: prop.title || 'Untitled Property',
+            price: `$${prop.price || 0}/month`,
+            location: locationString,
+            description: prop.description || 'No description available',
+            image: prop.images && prop.images.length > 0 ? prop.images[0] : 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect width="400" height="300" fill="%23e5e7eb"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="24" fill="%239ca3af"%3ENo Image%3C/text%3E%3C/svg%3E',
+            bedrooms: prop.bedrooms || 0,
+            bathrooms: prop.bathrooms || 0,
+            favorite: false // Will be managed locally or fetched from favorites API
+          };
+        });
+
+        setProperties(transformedProperties);
+      } catch (error) {
+        console.error('Error fetching properties:', error);
+        showErrorToast('Failed to load properties');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProperties();
   }, []);
 
   const toggleFavorite = useCallback((id) => {
@@ -454,7 +406,9 @@ const TenantProperty = () => {
           : property
       )
     );
-  }, [setProperties]);
+    // TODO: Call API to save favorite
+    showSuccessToast('Favorite updated');
+  }, []);
 
   const extractPrice = (priceString) => {
     return parseInt(priceString.replace(/[^0-9]/g, ''));
@@ -494,7 +448,7 @@ const TenantProperty = () => {
     return (
       <div className="flex h-screen">
         <TenantSideBar />
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
           <TenantNavBar currentSection="Properties" />
           <main className={`flex-1 p-6 overflow-y-auto ${darkMode
             ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100'
@@ -514,7 +468,7 @@ const TenantProperty = () => {
   return (
     <div className="flex h-screen">
       <TenantSideBar />
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <TenantNavBar currentSection="Properties" />
         <main className={`flex-1 p-6 overflow-y-auto ${darkMode
           ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100'
@@ -673,7 +627,7 @@ const TenantProperty = () => {
       </div>
 
       {/* Custom Styles */}
-      <style jsx>{`
+      <style>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-10px); }

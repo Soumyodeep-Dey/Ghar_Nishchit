@@ -19,6 +19,7 @@ import TenantProperty from './components/Pages/TENANT/TenantProperty';
 import TenantMessage from './components/Pages/TENANT/TenantMessage';
 import TenantMaintenance from './components/Pages/TENANT/TenantMaintenance';
 import TenantPayment from './components/Pages/TENANT/TenantPayment';
+import UpdateTenantProfile from './components/Pages/TENANT/UpdateTenantProfile';
 
 // landlord components
 import LandlordDashboard from './components/Pages/LANDLORD/LandlordDashboard';
@@ -92,6 +93,14 @@ export default function App() {
             element={
               <ProtectedRoute requiredRole="tenant">
                 <TenantPayment />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tenant/profile"
+            element={
+              <ProtectedRoute requiredRole="tenant">
+                <UpdateTenantProfile />
               </ProtectedRoute>
             }
           />

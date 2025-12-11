@@ -2,11 +2,10 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
+import { showInfoToast, showSuccessToast } from '../../../utils/toast.jsx';
 import {
   CreditCard, Banknote, Download, Calendar, CheckCircle, Clock, AlertTriangle, DollarSign, FileText, ShieldCheck, Star, Trophy, BarChart3, X
 } from 'lucide-react';
-import { showInfoToast } from '../../../utils/toast.jsx';
-import { getCurrentYear } from '../../../utils/dateUtils.js';
 
 // Custom hooks
 const useLocalStorage = (key, initialValue) => {
@@ -32,8 +31,6 @@ const useLocalStorage = (key, initialValue) => {
 
   return [storedValue, setValue];
 };
-
-// Removed custom animation hooks and components
 
 // Enhanced Components
 const PaymentSummaryCard = ({ title, value, icon, subtitle = '' }) => {
@@ -222,77 +219,10 @@ const PaymentMethodCard = ({ method, icon, isSelected, onSelect }) => {
 const TenantPayment = () => {
   const { darkMode } = useDarkMode();
 
-  const [paymentHistory, setPaymentHistory] = useLocalStorage('paymentHistory', [
-    {
-      id: 1,
-      date: `${getCurrentYear()}-01-01`,
-      type: "Rent",
-      amount: "$1,200.00",
-      method: "Bank Transfer",
-      status: "Paid",
-      receipt: "#REC-001"
-    },
-    {
-      id: 2,
-      date: `${getCurrentYear()}-01-01`,
-      type: "Utilities",
-      amount: "$50.00",
-      method: "Credit Card",
-      status: "Paid",
-      receipt: "#REC-002"
-    },
-    {
-      id: 3,
-      date: `${getCurrentYear()}-02-01`,
-      type: "Rent",
-      amount: "$1,200.00",
-      method: "Bank Transfer",
-      status: "Pending",
-      receipt: "#REC-003"
-    },
-    {
-      id: 4,
-      date: "2023-12-01",
-      type: "Rent",
-      amount: "$1,200.00",
-      method: "Bank Transfer",
-      status: "Paid",
-      receipt: "#REC-004"
-    },
-    {
-      id: 5,
-      date: "2023-11-01",
-      type: "Utilities",
-      amount: "$45.00",
-      method: "Credit Card",
-      status: "Paid",
-      receipt: "#REC-005"
-    }
-  ]);
+  // State - data will be fetched from API
+  const [paymentHistory, setPaymentHistory] = useLocalStorage('paymentHistory', []);
 
-  const [upcomingPayments, setUpcomingPayments] = useLocalStorage('upcomingPayments', [
-    {
-      id: 1,
-      date: `${getCurrentYear()}-02-01`,
-      type: "Rent",
-      amount: "$1,200.00",
-      status: "Pending"
-    },
-    {
-      id: 2,
-      date: `${getCurrentYear()}-02-05`,
-      type: "Utilities",
-      amount: "$50.00",
-      status: "Pending"
-    },
-    {
-      id: 3,
-      date: `${getCurrentYear()}-02-15`,
-      type: "Parking",
-      amount: "$75.00",
-      status: "Pending"
-    }
-  ]);
+  const [upcomingPayments, setUpcomingPayments] = useLocalStorage('upcomingPayments', []);
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('bank');
   const [isLoading, setIsLoading] = useState(true);
@@ -349,15 +279,36 @@ const TenantPayment = () => {
       setUpcomingPayments(prev => prev.filter(p => p.id !== selectedPayment.id));
       setShowPaymentModal(false);
       setSelectedPayment(null);
+      showSuccessToast('Payment completed successfully!');
     }
   }, [selectedPayment, selectedPaymentMethod, setPaymentHistory, setUpcomingPayments]);
 
   const downloadReceipt = useCallback((payment) => {
     // Simulate receipt download
+    const receiptContent = `
+      ============================================
+                    PAYMENT RECEIPT
+      ============================================
+      
+      Receipt Number: ${payment.receipt}
+      Date: ${payment.date}
+      
+      Payment Details:
+      ----------------
+      Type: ${payment.type}
+      Amount: ${payment.amount}
+      Method: ${payment.method}
+      Status: ${payment.status}
+      
+      Thank you for your payment!
+      ============================================
+    `;
+
     const link = document.createElement('a');
-    link.href = `data:text/plain;charset=utf-8,Receipt ${payment.receipt}\nAmount: ${payment.amount}\nDate: ${payment.date}\nType: ${payment.type}`;
+    link.href = `data:text/plain;charset=utf-8,${encodeURIComponent(receiptContent)}`;
     link.download = `receipt-${payment.receipt}.txt`;
     link.click();
+    showSuccessToast('Receipt downloaded successfully');
   }, []);
 
   // Loading screen
@@ -365,7 +316,7 @@ const TenantPayment = () => {
     return (
       <div className="flex h-screen">
         <TenantSideBar />
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
           <TenantNavBar currentSection="Payments" />
           <main className={`flex-1 flex items-center justify-center ${darkMode
             ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950'
@@ -389,7 +340,7 @@ const TenantPayment = () => {
       ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950'
       : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'}`}>
       <TenantSideBar />
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <TenantNavBar currentSection="Payments" />
         <main className="flex-1 p-6 overflow-y-auto custom-scrollbar">
           {/* Header */}

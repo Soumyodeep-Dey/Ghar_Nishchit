@@ -2,10 +2,11 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar.jsx';
 import TenantNavBar from './TenantNavBar.jsx';
+import api from '../../../services/api.js';
+import { showErrorToast } from '../../../utils/toast.jsx';
 import {
   Wrench, BarChart3, TrendingUp, TrendingDown, Building2, Heart, Bell, CreditCard, Star, X
 } from 'lucide-react';
-import { getCurrentYear } from '../../../utils/dateUtils.js';
 
 // Constants
 const ITEMS_PER_PAGE = 4;
@@ -284,125 +285,45 @@ const TenantDashboard = () => {
   const [currentSection, setCurrentSection] = useState('Dashboard');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initial data
-  const INITIAL_PROPERTIES = [
-    {
-      id: 1,
-      title: "Modern Apartment in Downtown",
-      location: "123 Main St, City Center",
-      price: "$1,200/month",
-      image: "/api/placeholder/300/200",
-      bedrooms: 2,
-      bathrooms: 1
-    },
-    {
-      id: 2,
-      title: "Cozy Studio Near Park",
-      location: "456 Oak Ave, Green District",
-      price: "$800/month",
-      image: "/api/placeholder/300/200",
-      bedrooms: 1,
-      bathrooms: 1
-    },
-    {
-      id: 3,
-      title: "Luxury Penthouse",
-      location: "789 Sky Tower, Downtown",
-      price: "$3,500/month",
-      image: "/api/placeholder/300/200",
-      bedrooms: 3,
-      bathrooms: 2
-    }
-  ];
-
-  const INITIAL_NOTIFICATIONS = [
-    {
-      id: 1,
-      type: "maintenance",
-      title: "Maintenance Scheduled",
-      message: "Your AC repair is scheduled for tomorrow at 2 PM",
-      time: "2 hours ago",
-      read: false
-    },
-    {
-      id: 2,
-      type: "payment",
-      title: "Payment Reminder",
-      message: "Your rent payment is due in 3 days",
-      time: "1 day ago",
-      read: false
-    },
-    {
-      id: 3,
-      type: "general",
-      title: "Building Notice",
-      message: "Water will be shut off for maintenance on Sunday 9-11 AM",
-      time: "3 days ago",
-      read: true
-    }
-  ];
-
-  const INITIAL_MAINTENANCE = [
-    {
-      id: 1,
-      title: "Leaky Faucet",
-      description: "Kitchen faucet is dripping constantly",
-      status: "In Progress",
-      date: `${getCurrentYear()}-01-15`,
-      priority: "Medium"
-    },
-    {
-      id: 2,
-      title: "Broken Light Fixture",
-      description: "Living room ceiling light not working",
-      status: "Completed",
-      date: `${getCurrentYear()}-01-10`,
-      priority: "Low"
-    }
-  ];
-
-  const INITIAL_PAYMENTS = [
-    {
-      id: 1,
-      amount: "$1,200",
-      type: "Rent",
-      date: `${getCurrentYear()}-01-01`,
-      status: "Paid",
-      method: "Bank Transfer"
-    },
-    {
-      id: 2,
-      amount: "$50",
-      type: "Utilities",
-      date: `${getCurrentYear()}-01-01`,
-      status: "Paid",
-      method: "Credit Card"
-    },
-    {
-      id: 3,
-      amount: "$1,200",
-      type: "Rent",
-      date: `${getCurrentYear()}-02-01`,
-      status: "Pending",
-      method: "Bank Transfer"
-    }
-  ];
-
-  // State management with localStorage
-  const [favouriteProperties] = useLocalStorage('favouriteProperties', INITIAL_PROPERTIES);
-  const [notifications] = useLocalStorage('notifications', INITIAL_NOTIFICATIONS);
-  const [maintenanceRequests] = useLocalStorage('maintenanceRequests', INITIAL_MAINTENANCE);
-  const [paymentHistory] = useLocalStorage('paymentHistory', INITIAL_PAYMENTS);
+  // State management - data from API
+  const [favouriteProperties] = useLocalStorage('favouriteProperties', []);
+  const [notifications] = useLocalStorage('notifications', []);
+  const [maintenanceRequests, setMaintenanceRequests] = useState([]);
+  const [paymentHistory] = useLocalStorage('paymentHistory', []);
 
   // UI state
   const [searchTerm] = useState('');
   const [sortKey] = useState(null);
   const [sortAsc] = useState(true);
 
-  // Simulate initial loading
+  // Fetch data from backend
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
+    const fetchDashboardData = async () => {
+      try {
+        setIsLoading(true);
+
+        // Fetch user profile
+        const profile = await api.getProfile();
+
+        // Fetch maintenance requests for tenant
+        if (profile && profile.id) {
+          try {
+            const maintenance = await api.getTenantMaintenanceRequests(profile.id);
+            setMaintenanceRequests(Array.isArray(maintenance) ? maintenance : []);
+          } catch (error) {
+            console.error('Error fetching maintenance requests:', error);
+            setMaintenanceRequests([]);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        showErrorToast('Failed to load dashboard data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDashboardData();
   }, []);
 
   // Memoized filtered and sorted properties
@@ -548,7 +469,10 @@ const TenantDashboard = () => {
     <div className={`min-h-screen bg-gradient-to-br ${themeConfig.mainBg} flex relative`}>
       <TenantSideBar setCurrentSection={setCurrentSection} />
 
-      <div className="flex-1 flex flex-col relative z-10 transition-all duration-700">
+      <div
+        className="flex-1 flex flex-col relative z-10 transition-all duration-700"
+        style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}
+      >
         <TenantNavBar currentSection={currentSection} />
 
         <main className="flex-1 overflow-y-auto">

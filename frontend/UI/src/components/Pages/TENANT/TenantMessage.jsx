@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
-import { ChatBubbleLeftRightIcon, PaperAirplaneIcon, PaperClipIcon, PhotoIcon, DocumentIcon, XMarkIcon, CheckIcon, FaceSmileIcon, MagnifyingGlassIcon
+import {
+  ChatBubbleLeftRightIcon, PaperAirplaneIcon, PaperClipIcon, PhotoIcon, DocumentIcon, XMarkIcon, CheckIcon, FaceSmileIcon, MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 
 // Custom hooks
@@ -191,126 +192,12 @@ const MessageBubble = ({ message, index }) => {
 
 const TenantMessage = () => {
   const { darkMode } = useDarkMode();
-  const [conversations, setConversations] = useLocalStorage('conversations', [
-    {
-      id: 1,
-      name: "John Smith (Landlord)",
-      lastMessage: "Hi! Just checking if everything is okay with the apartment.",
-      time: "10:30 AM",
-      unread: false,
-      avatar: "JS",
-      online: true
-    },
-    {
-      id: 2,
-      name: "Property Management",
-      lastMessage: "Your maintenance request has been scheduled for tomorrow.",
-      time: "Yesterday",
-      unread: true,
-      avatar: "PM",
-      online: false
-    },
-    {
-      id: 3,
-      name: "Sarah Johnson (Neighbor)",
-      lastMessage: "Thanks for letting me know about the party!",
-      time: "Wed",
-      unread: false,
-      avatar: "SJ",
-      online: true
-    },
-    {
-      id: 4,
-      name: "Mike Wilson (Maintenance)",
-      lastMessage: "I'll be there at 2 PM sharp!",
-      time: "2 days ago",
-      unread: false,
-      avatar: "MW",
-      online: false
-    }
-  ]);
 
-  const [activeConversation, setActiveConversation] = useState(conversations[0]);
-  const [messages, setMessages] = useLocalStorage('messages', {
-    1: [
-      {
-        id: 1,
-        sender: "John Smith",
-        message: "Hi! Just checking if everything is okay with the apartment.",
-        time: "10:30 AM",
-        isOwn: false
-      },
-      {
-        id: 2,
-        sender: "You",
-        message: "Yes, everything is great! Thank you for checking.",
-        time: "10:45 AM",
-        isOwn: true
-      },
-      {
-        id: 3,
-        sender: "John Smith",
-        message: "Great to hear! Let me know if you need anything.",
-        time: "10:50 AM",
-        isOwn: false
-      }
-    ],
-    2: [
-      {
-        id: 1,
-        sender: "Property Management",
-        message: "Your maintenance request for the leaky faucet has been scheduled for tomorrow between 2-4 PM.",
-        time: "9:15 AM",
-        isOwn: false
-      }
-    ],
-    3: [
-      {
-        id: 1,
-        sender: "Sarah Johnson",
-        message: "Hey, just wanted to confirm about the party on Saturday. Will there be music?",
-        time: "2 days ago",
-        isOwn: false
-      },
-      {
-        id: 2,
-        sender: "You",
-        message: "Hi Sarah, yes there will be some music but we'll keep it at a reasonable volume.",
-        time: "2 days ago",
-        isOwn: true
-      },
-      {
-        id: 3,
-        sender: "Sarah Johnson",
-        message: "Thanks for letting me know!",
-        time: "2 days ago",
-        isOwn: false
-      }
-    ],
-    4: [
-      {
-        id: 1,
-        sender: "Mike Wilson",
-        message: "Hi! I'll be coming to fix your bathroom sink tomorrow.",
-        time: "3 days ago",
-        isOwn: false
-      },
-      {
-        id: 2,
-        sender: "You",
-        message: "Perfect! What time should I expect you?",
-        time: "3 days ago",
-        isOwn: true
-      },
-      {
-        id: 3,
-        sender: "Mike Wilson",
-        message: "I'll be there at 2 PM sharp!",
-        time: "2 days ago",
-        isOwn: false
-      }
-    ]
-  });
+  // State - data will be fetched from API
+  const [conversations, setConversations] = useLocalStorage('conversations', []);
+
+  const [activeConversation, setActiveConversation] = useState(null);
+  const [messages, setMessages] = useLocalStorage('messages', {});
 
   const [newMessage, setNewMessage] = useState('');
   const [attachments, setAttachments] = useState([]);
@@ -354,7 +241,7 @@ const TenantMessage = () => {
   }, []);
 
   const sendMessage = useCallback(() => {
-    if (newMessage.trim() || attachments.length) {
+    if ((newMessage.trim() || attachments.length) && activeConversation) {
       // Ensure we have a valid array for the current conversation
       const currentMessages = Array.isArray(messages[activeConversation.id])
         ? messages[activeConversation.id]
@@ -385,7 +272,7 @@ const TenantMessage = () => {
       setAttachments([]);
       setShowEmojiPicker(false);
     }
-  }, [newMessage, attachments, activeConversation.id, messages, setMessages, setConversations]);
+  }, [newMessage, attachments, activeConversation, messages, setMessages, setConversations]);
 
   const filteredConversations = conversations.filter(conv =>
     conv.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -398,7 +285,7 @@ const TenantMessage = () => {
     return (
       <div className="flex h-screen">
         <TenantSideBar />
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
           <TenantNavBar currentSection="Messages" />
           <main className={`flex-1 flex items-center justify-center ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-br from-blue-50 to-purple-50'}`}>
             <div className="text-center">
@@ -418,7 +305,7 @@ const TenantMessage = () => {
   return (
     <div className={`flex h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-br from-gray-50 to-blue-50'}`}>
       <TenantSideBar />
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <TenantNavBar currentSection="Messages" />
         <main className="flex-1 flex h-full overflow-hidden">
           {/* Conversations List */}
