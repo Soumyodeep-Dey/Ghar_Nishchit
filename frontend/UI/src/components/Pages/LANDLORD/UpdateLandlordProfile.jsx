@@ -8,7 +8,7 @@ import { showConfirmToast, showSuccessToast } from '../../../utils/toast.jsx';
 
 export default function UpdateLandlordProfile() {
   const navigate = useNavigate();
-  const { darkMode, toggleDarkMode } = useDarkMode();
+  const { darkMode } = useDarkMode();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [serverStatus, setServerStatus] = useState('checking'); // 'online', 'offline', 'checking'
@@ -494,9 +494,9 @@ export default function UpdateLandlordProfile() {
     buttonDangerBg: 'bg-red-600',
     buttonDangerHover: 'hover:bg-red-700',
     buttonDangerText: 'text-white',
-    toggleButtonBg: darkMode ? 'bg-cyan-400' : 'bg-white',
-    toggleButtonText: darkMode ? 'text-blue-950' : 'text-indigo-600',
-    toggleButtonHover: darkMode ? 'hover:bg-cyan-300' : 'hover:bg-indigo-100',
+    backButtonBg: darkMode ? 'bg-cyan-400' : 'bg-white',
+    backButtonText: darkMode ? 'text-blue-950' : 'text-indigo-600',
+    backButtonHover: darkMode ? 'hover:bg-cyan-300' : 'hover:bg-indigo-100',
   };
 
   return (
@@ -541,13 +541,6 @@ export default function UpdateLandlordProfile() {
         )}
         <div className={`relative flex flex-col rounded-2xl shadow-2xl overflow-hidden max-w-lg sm:max-w-xl w-full transition-colors duration-300 ${themeClasses.cardBg}`}>
           <div className="w-full p-6 sm:p-8 relative">
-            <button
-              onClick={toggleDarkMode}
-              className={`absolute top-4 right-4 z-10 px-4 py-2 rounded-full font-semibold shadow transition-colors duration-300 ${themeClasses.toggleButtonBg} ${themeClasses.toggleButtonText} ${themeClasses.toggleButtonHover}`}
-              aria-label="Toggle dark mode"
-            >
-              {darkMode ? '🌙' : '☀️'}
-            </button>
             <h2 className={`text-xl sm:text-2xl font-bold mb-2 ${themeClasses.textAccent}`}>
               Update Your Profile
             </h2>
@@ -557,7 +550,7 @@ export default function UpdateLandlordProfile() {
             <div className="mb-6 flex justify-start">
               <button
                 onClick={() => navigate(-1)}
-                className={`px-4 py-2 rounded-full font-semibold transition-colors duration-300 ${themeClasses.toggleButtonBg} ${themeClasses.toggleButtonText} ${themeClasses.toggleButtonHover}`}
+                className={`px-4 py-2 rounded-full font-semibold transition-colors duration-300 ${themeClasses.backButtonBg} ${themeClasses.backButtonText} ${themeClasses.backButtonHover}`}
                 aria-label="Go back"
               >
                 ← Back
