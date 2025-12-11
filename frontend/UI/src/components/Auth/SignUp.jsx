@@ -28,7 +28,7 @@ const GoogleIcon = () => (
 
 export default function SignUp() {
   const navigate = useNavigate();
-  const { darkMode, toggleDarkMode } = useDarkMode();
+  const { darkMode } = useDarkMode();
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [passwordStrength, setPasswordStrength] = useState('');
@@ -241,16 +241,6 @@ export default function SignUp() {
           <ArrowLeft size={18} />
           <span className="hidden sm:inline">Back</span>
         </Link>
-
-        {/* Dark Mode Toggle */}
-        <button
-          onClick={toggleDarkMode}
-          className={`absolute top-4 right-4 z-50 px-4 py-2 rounded-full ${darkMode ? 'bg-cyan-400 text-blue-950' : 'bg-white text-indigo-600'
-            } shadow transition-colors duration-300`}
-          aria-label="Toggle dark mode"
-        >
-          {darkMode ? '🌙' : '☀️'}
-        </button>
         <div className="relative w-full flex flex-col md:flex-row">
           {/* MOBILE WELCOME (above form), DESKTOP LEFT PANEL */}
           <div
