@@ -469,7 +469,10 @@ const TenantDashboard = () => {
     <div className={`min-h-screen bg-gradient-to-br ${themeConfig.mainBg} flex relative`}>
       <TenantSideBar setCurrentSection={setCurrentSection} />
 
-      <div className="flex-1 flex flex-col relative z-10 transition-all duration-700">
+      <div
+        className="flex-1 flex flex-col relative z-10 transition-all duration-700"
+        style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}
+      >
         <TenantNavBar currentSection={currentSection} />
 
         <main className="flex-1 overflow-y-auto">

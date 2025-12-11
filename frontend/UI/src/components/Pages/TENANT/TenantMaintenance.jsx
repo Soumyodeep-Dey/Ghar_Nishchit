@@ -468,7 +468,7 @@ const TenantMaintenance = () => {
     return (
       <div className="flex h-screen">
         <TenantSideBar />
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
           <TenantNavBar currentSection="Maintenance" />
           <main className={`flex-1 flex items-center justify-center ${darkMode
             ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950'
@@ -492,7 +492,7 @@ const TenantMaintenance = () => {
       ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950'
       : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'}`}>
       <TenantSideBar />
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <TenantNavBar currentSection="Maintenance" />
         <main className="flex-1 p-6 overflow-y-auto custom-scrollbar">
           {/* Hero Section */}

@@ -285,7 +285,7 @@ const TenantMessage = () => {
     return (
       <div className="flex h-screen">
         <TenantSideBar />
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
           <TenantNavBar currentSection="Messages" />
           <main className={`flex-1 flex items-center justify-center ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-br from-blue-50 to-purple-50'}`}>
             <div className="text-center">
@@ -305,7 +305,7 @@ const TenantMessage = () => {
   return (
     <div className={`flex h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-br from-gray-50 to-blue-50'}`}>
       <TenantSideBar />
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <TenantNavBar currentSection="Messages" />
         <main className="flex-1 flex h-full overflow-hidden">
           {/* Conversations List */}

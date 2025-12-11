@@ -448,7 +448,7 @@ const TenantProperty = () => {
     return (
       <div className="flex h-screen">
         <TenantSideBar />
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
           <TenantNavBar currentSection="Properties" />
           <main className={`flex-1 p-6 overflow-y-auto ${darkMode
             ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100'
@@ -468,7 +468,7 @@ const TenantProperty = () => {
   return (
     <div className="flex h-screen">
       <TenantSideBar />
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <TenantNavBar currentSection="Properties" />
         <main className={`flex-1 p-6 overflow-y-auto ${darkMode
           ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100'
