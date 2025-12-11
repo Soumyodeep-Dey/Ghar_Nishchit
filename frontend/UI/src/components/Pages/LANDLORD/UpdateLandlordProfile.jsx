@@ -695,7 +695,7 @@ export default function UpdateLandlordProfile() {
 
               <div>
                 <label htmlFor="profilePicture" className={`flex items-center gap-1 font-semibold mb-1 ${themeClasses.textPrimary}`}>
-                  <ImageIcon size={18} /> Profile Picture
+                  <ImageIcon size={18} /> Profile Picture (not operational yet)
                 </label>
                 <input
                   type="file"
