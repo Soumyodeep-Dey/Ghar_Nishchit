@@ -349,7 +349,7 @@ const TenantProperty = () => {
   const [filter, setFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState('title');
-  const [priceRange, setPriceRange] = useState([0, 5000]);
+  const [priceRange, setPriceRange] = useState([0, 500000]);
 
   // Fetch properties from backend
   useEffect(() => {
