@@ -693,27 +693,28 @@ export default function Landing() {
           Pricing
         </h2>
 
-        {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* For Landlords */}
+        <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-cyan-200' : 'text-indigo-600'}`}>For Landlords</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           <PricingCard
-            title="Basic"
-            price="₹ 2,900/month"
+            title="Standard Listing"
+            price="₹ 499/listing"
             features={[
-              "Manage up to 5 properties",
-              "Email support",
-              "Basic analytics"
+              "One-time fee per property",
+              "30-day listing validity",
+              "Basic property analytics"
             ]}
             buttonClass={`px-4 py-2 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
             onClick={() => showInfoToast('Please login first to choose a plan')}
             darkMode={darkMode}
           />
           <PricingCard
-            title="Pro"
-            price="₹ 6,900/month"
+            title="Featured Listing"
+            price="₹ 999/listing"
             features={[
-              "Manage up to 20 properties",
-              "Priority email support",
-              "Advanced analytics"
+              "Boosted visibility in search",
+              "60-day listing validity",
+              "Priority placement"
             ]}
             buttonClass={`px-4 py-2 rounded transition ${darkMode ? 'bg-white text-cyan-700 hover:bg-gray-100' : 'bg-white text-emerald-600 hover:bg-gray-100'}`}
             onClick={() => showInfoToast('Please login first to choose a plan')}
@@ -721,12 +722,54 @@ export default function Landing() {
             darkMode={darkMode}
           />
           <PricingCard
-            title="Enterprise"
-            price="₹ 15,900/month"
+            title="Verified Badge"
+            price="₹ 1,499"
             features={[
-              "Unlimited properties",
-              "Dedicated support",
-              "Custom analytics"
+              "Trust verification badge",
+              "Enhanced credibility",
+              "One-time verification"
+            ]}
+            buttonClass={`px-4 py-2 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+            onClick={() => showInfoToast('Please login first to choose a plan')}
+            darkMode={darkMode}
+          />
+        </div>
+
+        {/* For Tenants */}
+        <h3 className={`text-xl font-semibold mb-4 ${darkMode ? 'text-cyan-200' : 'text-indigo-600'}`}>For Tenants</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <PricingCard
+            title="Free"
+            price="₹ 0/month"
+            features={[
+              "Browse all listings",
+              "Save favorites",
+              "Limited contact reveals"
+            ]}
+            buttonClass={`px-4 py-2 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+            onClick={() => showInfoToast('Please login first to choose a plan')}
+            darkMode={darkMode}
+          />
+          <PricingCard
+            title="Basic"
+            price="₹ 199/month"
+            features={[
+              "Unlimited property views",
+              "Direct landlord contact",
+              "Priority support"
+            ]}
+            buttonClass={`px-4 py-2 rounded transition ${darkMode ? 'bg-white text-cyan-700 hover:bg-gray-100' : 'bg-white text-emerald-600 hover:bg-gray-100'}`}
+            onClick={() => showInfoToast('Please login first to choose a plan')}
+            highlight
+            darkMode={darkMode}
+          />
+          <PricingCard
+            title="Premium"
+            price="₹ 499/month"
+            features={[
+              "All Basic features",
+              "Early access to listings",
+              "Advanced filters & document storage"
             ]}
             buttonClass={`px-4 py-2 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
             onClick={() => showInfoToast('Please login first to choose a plan')}
