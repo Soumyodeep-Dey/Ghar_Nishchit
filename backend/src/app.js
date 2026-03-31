@@ -24,6 +24,11 @@ app.use(
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 
+// Root route for API status
+app.get("/", (req, res) => {
+  res.status(200).json({ status: "success", message: "API is running" });
+});
+
 app.use("/api/properties", propertyRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
