@@ -3,19 +3,7 @@ import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
 import {
-  ChatBubbleLeftRightIcon,
-  PaperAirplaneIcon,
-  PaperClipIcon,
-  EllipsisVerticalIcon,
-  PhotoIcon,
-  DocumentIcon,
-  XMarkIcon,
-  CheckIcon,
-  FaceSmileIcon,
-  MagnifyingGlassIcon,
-  PhoneIcon,
-  VideoCameraIcon,
-  InformationCircleIcon
+  ChatBubbleLeftRightIcon, PaperAirplaneIcon, PaperClipIcon, PhotoIcon, DocumentIcon, XMarkIcon, CheckIcon, FaceSmileIcon, MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 
 // Custom hooks
@@ -62,7 +50,7 @@ const useIntersectionObserver = (options = {}) => {
 };
 
 // Animated Components
-const AnimatedMessage = ({ children, isOwn, index }) => {
+const AnimatedMessage = ({ children, index }) => {
   const [setRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });
 
   return (
@@ -139,7 +127,6 @@ const ConversationItem = ({ conversation, isActive, onClick, index, darkMode }) 
 
 const MessageBubble = ({ message, index }) => {
   const { darkMode } = useDarkMode();
-  const [imageError, setImageError] = useState(false);
 
   const getFileIcon = (fileName) => {
     const extension = fileName.split('.').pop().toLowerCase();
@@ -159,10 +146,10 @@ const MessageBubble = ({ message, index }) => {
         )}
         <div
           className={`max-w-xs md:max-w-md px-4 py-3 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 ${message.isOwn
-              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-br-md'
-              : darkMode
-                ? 'bg-gray-800 text-gray-100 rounded-bl-md border border-gray-700'
-                : 'bg-white text-gray-800 rounded-bl-md border border-gray-200'
+            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-br-md'
+            : darkMode
+              ? 'bg-gray-800 text-gray-100 rounded-bl-md border border-gray-700'
+              : 'bg-white text-gray-800 rounded-bl-md border border-gray-200'
             }`}
         >
           <p className="leading-relaxed">{message.message}</p>
@@ -173,10 +160,10 @@ const MessageBubble = ({ message, index }) => {
                 <div
                   key={idx}
                   className={`text-xs rounded-lg px-3 py-2 flex items-center transition-all duration-200 hover:scale-105 ${message.isOwn
-                      ? 'bg-white/20 text-blue-100'
-                      : darkMode
-                        ? 'bg-gray-700 text-gray-300'
-                        : 'bg-gray-100 text-gray-700'
+                    ? 'bg-white/20 text-blue-100'
+                    : darkMode
+                      ? 'bg-gray-700 text-gray-300'
+                      : 'bg-gray-100 text-gray-700'
                     }`}
                 >
                   {getFileIcon(file.name)}
@@ -205,126 +192,12 @@ const MessageBubble = ({ message, index }) => {
 
 const TenantMessage = () => {
   const { darkMode } = useDarkMode();
-  const [conversations, setConversations] = useLocalStorage('conversations', [
-    {
-      id: 1,
-      name: "John Smith (Landlord)",
-      lastMessage: "Hi! Just checking if everything is okay with the apartment.",
-      time: "10:30 AM",
-      unread: false,
-      avatar: "JS",
-      online: true
-    },
-    {
-      id: 2,
-      name: "Property Management",
-      lastMessage: "Your maintenance request has been scheduled for tomorrow.",
-      time: "Yesterday",
-      unread: true,
-      avatar: "PM",
-      online: false
-    },
-    {
-      id: 3,
-      name: "Sarah Johnson (Neighbor)",
-      lastMessage: "Thanks for letting me know about the party!",
-      time: "Wed",
-      unread: false,
-      avatar: "SJ",
-      online: true
-    },
-    {
-      id: 4,
-      name: "Mike Wilson (Maintenance)",
-      lastMessage: "I'll be there at 2 PM sharp!",
-      time: "2 days ago",
-      unread: false,
-      avatar: "MW",
-      online: false
-    }
-  ]);
 
-  const [activeConversation, setActiveConversation] = useState(conversations[0]);
-  const [messages, setMessages] = useLocalStorage('messages', {
-    1: [
-      {
-        id: 1,
-        sender: "John Smith",
-        message: "Hi! Just checking if everything is okay with the apartment.",
-        time: "10:30 AM",
-        isOwn: false
-      },
-      {
-        id: 2,
-        sender: "You",
-        message: "Yes, everything is great! Thank you for checking.",
-        time: "10:45 AM",
-        isOwn: true
-      },
-      {
-        id: 3,
-        sender: "John Smith",
-        message: "Great to hear! Let me know if you need anything.",
-        time: "10:50 AM",
-        isOwn: false
-      }
-    ],
-    2: [
-      {
-        id: 1,
-        sender: "Property Management",
-        message: "Your maintenance request for the leaky faucet has been scheduled for tomorrow between 2-4 PM.",
-        time: "9:15 AM",
-        isOwn: false
-      }
-    ],
-    3: [
-      {
-        id: 1,
-        sender: "Sarah Johnson",
-        message: "Hey, just wanted to confirm about the party on Saturday. Will there be music?",
-        time: "2 days ago",
-        isOwn: false
-      },
-      {
-        id: 2,
-        sender: "You",
-        message: "Hi Sarah, yes there will be some music but we'll keep it at a reasonable volume.",
-        time: "2 days ago",
-        isOwn: true
-      },
-      {
-        id: 3,
-        sender: "Sarah Johnson",
-        message: "Thanks for letting me know!",
-        time: "2 days ago",
-        isOwn: false
-      }
-    ],
-    4: [
-      {
-        id: 1,
-        sender: "Mike Wilson",
-        message: "Hi! I'll be coming to fix your bathroom sink tomorrow.",
-        time: "3 days ago",
-        isOwn: false
-      },
-      {
-        id: 2,
-        sender: "You",
-        message: "Perfect! What time should I expect you?",
-        time: "3 days ago",
-        isOwn: true
-      },
-      {
-        id: 3,
-        sender: "Mike Wilson",
-        message: "I'll be there at 2 PM sharp!",
-        time: "2 days ago",
-        isOwn: false
-      }
-    ]
-  });
+  // State - data will be fetched from API
+  const [conversations, setConversations] = useLocalStorage('conversations', []);
+
+  const [activeConversation, setActiveConversation] = useState(null);
+  const [messages, setMessages] = useLocalStorage('messages', {});
 
   const [newMessage, setNewMessage] = useState('');
   const [attachments, setAttachments] = useState([]);
@@ -368,7 +241,7 @@ const TenantMessage = () => {
   }, []);
 
   const sendMessage = useCallback(() => {
-    if (newMessage.trim() || attachments.length) {
+    if ((newMessage.trim() || attachments.length) && activeConversation) {
       // Ensure we have a valid array for the current conversation
       const currentMessages = Array.isArray(messages[activeConversation.id])
         ? messages[activeConversation.id]
@@ -399,7 +272,7 @@ const TenantMessage = () => {
       setAttachments([]);
       setShowEmojiPicker(false);
     }
-  }, [newMessage, attachments, activeConversation.id, messages, setMessages, setConversations]);
+  }, [newMessage, attachments, activeConversation, messages, setMessages, setConversations]);
 
   const filteredConversations = conversations.filter(conv =>
     conv.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -412,7 +285,7 @@ const TenantMessage = () => {
     return (
       <div className="flex h-screen">
         <TenantSideBar />
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
           <TenantNavBar currentSection="Messages" />
           <main className={`flex-1 flex items-center justify-center ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-br from-blue-50 to-purple-50'}`}>
             <div className="text-center">
@@ -432,7 +305,7 @@ const TenantMessage = () => {
   return (
     <div className={`flex h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-br from-gray-50 to-blue-50'}`}>
       <TenantSideBar />
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <TenantNavBar currentSection="Messages" />
         <main className="flex-1 flex h-full overflow-hidden">
           {/* Conversations List */}
@@ -607,8 +480,8 @@ const TenantMessage = () => {
 
                     <button
                       className={`p-4 rounded-2xl transition-all duration-300 hover:scale-110 ${newMessage.trim() || attachments.length
-                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl'
-                          : darkMode ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl'
+                        : darkMode ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                         }`}
                       onClick={sendMessage}
                       disabled={!newMessage.trim() && attachments.length === 0}
@@ -622,16 +495,9 @@ const TenantMessage = () => {
               <div className={`flex-1 flex flex-col items-center justify-center ${darkMode ? 'bg-gradient-to-b from-gray-900 to-gray-800' : 'bg-gradient-to-b from-gray-50 to-white'}`}>
                 <ChatBubbleLeftRightIcon className={`h-24 w-24 ${darkMode ? 'text-gray-700' : 'text-gray-300'} mb-6`} />
                 <h2 className={`text-2xl font-bold ${darkMode ? 'text-gray-200' : 'text-gray-700'} mb-2`}>No conversation selected</h2>
-                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-center max-w-md mb-8`}>
-                  Select a conversation from the list or start a new one to begin messaging.
+                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-center max-w-md`}>
+                  Select a conversation from the list to begin messaging.
                 </p>
-                <button
-                  onClick={startNewConversation}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center"
-                >
-                  <PlusCircleIcon className="h-5 w-5 mr-2" />
-                  New Conversation
-                </button>
               </div>
             )}
           </div>

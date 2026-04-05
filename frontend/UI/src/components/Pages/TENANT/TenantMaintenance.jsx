@@ -2,49 +2,13 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
+import api from '../../../services/api.js';
+import { showErrorToast, showSuccessToast, showInfoToast } from '../../../utils/toast.jsx';
 import {
-  WrenchScrewdriverIcon,
-  PlusIcon,
-  TrashIcon,
-  PencilIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  ExclamationTriangleIcon,
-  DocumentTextIcon,
-  CalendarIcon,
-  PhotoIcon,
-  XMarkIcon,
-  MagnifyingGlassIcon,
-  FunnelIcon,
-  ChartBarIcon,
-  FireIcon
+  WrenchScrewdriverIcon, PlusIcon, TrashIcon, PencilIcon, CheckCircleIcon, ClockIcon, ExclamationTriangleIcon, DocumentTextIcon, CalendarIcon, MagnifyingGlassIcon, ChartBarIcon
 } from '@heroicons/react/24/outline';
 
 // Custom hooks
-const useLocalStorage = (key, initialValue) => {
-  const [storedValue, setStoredValue] = useState(() => {
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      console.error(`Error reading localStorage key "${key}":`, error);
-      return initialValue;
-    }
-  });
-
-  const setValue = useCallback((value) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.error(`Error setting localStorage key "${key}":`, error);
-    }
-  }, [key, storedValue]);
-
-  return [storedValue, setValue];
-};
-
 const useIntersectionObserver = (options = {}) => {
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [element, setElement] = useState(null);
@@ -112,10 +76,10 @@ const GlowingButton = ({ children, onClick, className = '', glowColor = 'blue', 
       className={`relative overflow-hidden transform transition-all duration-300 hover:scale-105 disabled:hover:scale-100 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
       <div className={`absolute inset-0 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity ${glowColor === 'blue' ? 'bg-gradient-to-r from-blue-500 to-purple-600' :
-          glowColor === 'red' ? 'bg-gradient-to-r from-red-500 to-pink-600' :
-            glowColor === 'green' ? 'bg-gradient-to-r from-green-500 to-emerald-600' :
-              glowColor === 'orange' ? 'bg-gradient-to-r from-orange-500 to-yellow-600' :
-                'bg-gradient-to-r from-blue-500 to-purple-600'
+        glowColor === 'red' ? 'bg-gradient-to-r from-red-500 to-pink-600' :
+          glowColor === 'green' ? 'bg-gradient-to-r from-green-500 to-emerald-600' :
+            glowColor === 'orange' ? 'bg-gradient-to-r from-orange-500 to-yellow-600' :
+              'bg-gradient-to-r from-blue-500 to-purple-600'
         }`}></div>
       <div className="relative z-10">
         {children}
@@ -244,10 +208,10 @@ const RequestCard = React.memo(({ request, onEdit, onDelete, isEditing, editData
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className={`h-2 rounded-full transition-all duration-1000 ${request.status === "Completed"
-                        ? "bg-gradient-to-r from-green-500 to-emerald-600 w-full"
-                        : request.status === "In Progress"
-                          ? "bg-gradient-to-r from-blue-500 to-indigo-600 w-2/3"
-                          : "bg-gradient-to-r from-yellow-500 to-orange-600 w-1/3"
+                      ? "bg-gradient-to-r from-green-500 to-emerald-600 w-full"
+                      : request.status === "In Progress"
+                        ? "bg-gradient-to-r from-blue-500 to-indigo-600 w-2/3"
+                        : "bg-gradient-to-r from-yellow-500 to-orange-600 w-1/3"
                       }`}
                   ></div>
                 </div>
@@ -318,32 +282,10 @@ const StatsCard = ({ title, value, icon, gradient, delay = 0 }) => {
 
 // Main Component
 const TenantMaintenance = () => {
-  const [requests, setRequests] = useLocalStorage('maintenanceRequests', [
-    {
-      id: 1,
-      title: "Leaky Faucet",
-      description: "Kitchen faucet is dripping constantly, causing water waste and noise",
-      status: "In Progress",
-      date: "2024-01-15",
-      priority: "Medium"
-    },
-    {
-      id: 2,
-      title: "Broken Light Fixture",
-      description: "Living room ceiling light not working, needs electrical inspection",
-      status: "Completed",
-      date: "2024-01-10",
-      priority: "Low"
-    },
-    {
-      id: 3,
-      title: "AC Unit Malfunction",
-      description: "Air conditioning unit making loud noises and not cooling properly",
-      status: "Pending",
-      date: "2024-01-20",
-      priority: "High"
-    }
-  ]);
+  const { darkMode } = useDarkMode();
+
+  // State - data from API
+  const [requests, setRequests] = useState([]);
 
   const [newRequest, setNewRequest] = useState({
     title: '',
@@ -364,10 +306,41 @@ const TenantMaintenance = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showNewRequestForm, setShowNewRequestForm] = useState(false);
 
-  // Simulate initial loading
+  // Fetch data from backend
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1500);
-    return () => clearTimeout(timer);
+    const fetchMaintenanceData = async () => {
+      try {
+        setIsLoading(true);
+
+        // Fetch user profile
+        const profile = await api.getProfile();
+
+        // Fetch maintenance requests for tenant
+        if (profile && profile.id) {
+          const maintenanceData = await api.getTenantMaintenanceRequests(profile.id);
+
+          // Transform backend data to match frontend format
+          const transformedRequests = Array.isArray(maintenanceData) ? maintenanceData.map(req => ({
+            id: req._id || req.id,
+            title: req.title || req.issueType || 'Maintenance Request',
+            description: req.description || 'No description',
+            priority: req.priority || 'Medium',
+            status: req.status || 'Pending',
+            date: req.createdAt || req.reportedDate || new Date().toISOString()
+          })) : [];
+
+          setRequests(transformedRequests);
+        }
+      } catch (error) {
+        console.error('Error fetching maintenance data:', error);
+        showErrorToast('Failed to load maintenance requests');
+        setRequests([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMaintenanceData();
   }, []);
 
   // Memoized filtered requests
@@ -394,17 +367,46 @@ const TenantMaintenance = () => {
 
   const submitNewRequest = useCallback(() => {
     if (newRequest.title && newRequest.description) {
-      const request = {
-        id: Date.now(),
-        ...newRequest,
-        status: "Pending",
-        date: new Date().toISOString().split('T')[0]
+      const createRequest = async () => {
+        try {
+          const profile = await api.getProfile();
+
+          const requestData = {
+            title: newRequest.title,
+            description: newRequest.description,
+            priority: newRequest.priority,
+            issueType: newRequest.title,
+            reportedBy: profile.id,
+            status: 'Pending'
+          };
+
+          const createdRequest = await api.createMaintenanceRequest(requestData);
+
+          // Transform to frontend format
+          const newReq = {
+            id: createdRequest._id || createdRequest.id,
+            title: createdRequest.title || createdRequest.issueType,
+            description: createdRequest.description,
+            priority: createdRequest.priority || 'Medium',
+            status: createdRequest.status || 'Pending',
+            date: createdRequest.createdAt || new Date().toISOString()
+          };
+
+          setRequests(prev => [newReq, ...prev]);
+          setNewRequest({ title: '', description: '', priority: 'Medium' });
+          setShowNewRequestForm(false);
+          showSuccessToast('Maintenance request submitted successfully');
+        } catch (error) {
+          console.error('Error creating maintenance request:', error);
+          showErrorToast('Failed to submit request');
+        }
       };
-      setRequests(prev => [...prev, request]);
-      setNewRequest({ title: '', description: '', priority: 'Medium' });
-      setShowNewRequestForm(false);
+
+      createRequest();
+    } else {
+      showInfoToast('Please fill in all required fields');
     }
-  }, [newRequest, setRequests]);
+  }, [newRequest]);
 
   const handleEditRequest = useCallback((request) => {
     setEditingRequestId(request.id);
@@ -416,29 +418,57 @@ const TenantMaintenance = () => {
   }, []);
 
   const saveEditRequest = useCallback((id) => {
-    setRequests(prev =>
-      prev.map(req =>
-        req.id === id ? { ...req, ...editRequestData } : req
-      )
-    );
-    setEditingRequestId(null);
-  }, [editRequestData, setRequests]);
+    const updateRequest = async () => {
+      try {
+        const updateData = {
+          title: editRequestData.title,
+          description: editRequestData.description,
+          priority: editRequestData.priority
+        };
+
+        await api.updateMaintenanceRequest(id, updateData);
+
+        setRequests(prev =>
+          prev.map(req =>
+            req.id === id ? { ...req, ...editRequestData } : req
+          )
+        );
+        setEditingRequestId(null);
+        showSuccessToast('Request updated successfully');
+      } catch (error) {
+        console.error('Error updating maintenance request:', error);
+        showErrorToast('Failed to update request');
+      }
+    };
+
+    updateRequest();
+  }, [editRequestData]);
 
   const cancelEditRequest = useCallback(() => {
     setEditingRequestId(null);
   }, []);
 
   const deleteRequest = useCallback((id) => {
-    setRequests(prev => prev.filter(req => req.id !== id));
-  }, [setRequests]);
+    const performDelete = async () => {
+      try {
+        await api.deleteMaintenanceRequest(id);
+        setRequests(prev => prev.filter(req => req.id !== id));
+        showSuccessToast('Request deleted successfully');
+      } catch (error) {
+        console.error('Error deleting maintenance request:', error);
+        showErrorToast('Failed to delete request');
+      }
+    };
+
+    performDelete();
+  }, []);
 
   // Loading screen
   if (isLoading) {
-    const { darkMode } = useDarkMode();
     return (
       <div className="flex h-screen">
         <TenantSideBar />
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
           <TenantNavBar currentSection="Maintenance" />
           <main className={`flex-1 flex items-center justify-center ${darkMode
             ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950'
@@ -457,14 +487,12 @@ const TenantMaintenance = () => {
     );
   }
 
-  const { darkMode } = useDarkMode();
-
   return (
     <div className={`flex h-screen ${darkMode
       ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950'
       : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'}`}>
       <TenantSideBar />
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <TenantNavBar currentSection="Maintenance" />
         <main className="flex-1 p-6 overflow-y-auto custom-scrollbar">
           {/* Hero Section */}

@@ -3,11 +3,12 @@ import { User, Mail, Lock, Phone, Eye, EyeOff, Image as ImageIcon, AlertTriangle
 import { useDarkMode } from '../../../useDarkMode.js';
 import { useNavigate } from 'react-router-dom';
 // Removed SidebarContext usage
+import { showConfirmToast, showSuccessToast } from '../../../utils/toast.jsx';
 
 
 export default function UpdateLandlordProfile() {
   const navigate = useNavigate();
-  const { darkMode, toggleDarkMode } = useDarkMode();
+  const { darkMode } = useDarkMode();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [serverStatus, setServerStatus] = useState('checking'); // 'online', 'offline', 'checking'
@@ -222,7 +223,7 @@ export default function UpdateLandlordProfile() {
     };
 
     loadUserData();
-  }, [navigate]);
+  }, [navigate, serverStatus]);
 
   // Validation functions
   const validateEmail = (email) => {
@@ -231,8 +232,8 @@ export default function UpdateLandlordProfile() {
   };
 
   const validatePhone = (phone) => {
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-    return phoneRegex.test(phone.replace(/[\s\-\(\)]/g, ''));
+    const phoneRegex = /^[+]?[1-9][\d]{0,15}$/;
+    return phoneRegex.test(phone.replace(/[\s\-()]/g, ''));
   };
 
   const validatePassword = (password) => {
@@ -457,20 +458,23 @@ export default function UpdateLandlordProfile() {
   };
 
   const handleDeleteAccount = async () => {
-    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-      setMessage('');
-      try {
-        // Simulate API call for account deletion
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        alert('Account deleted successfully.');
-        navigate('/signup'); // Redirect to signup or home page after deletion
-      } catch (error) {
-        console.error('Account deletion failed:', error);
-        setMessage('Failed to delete account.');
+    showConfirmToast(
+      'Are you sure you want to delete your account? This action cannot be undone.',
+      async () => {
+        setMessage('');
+        try {
+          // Simulate API call for account deletion
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          localStorage.removeItem('user');
+          localStorage.removeItem('token');
+          showSuccessToast('Account deleted successfully.');
+          navigate('/signup'); // Redirect to signup or home page after deletion
+        } catch (error) {
+          console.error('Account deletion failed:', error);
+          setMessage('Failed to delete account.');
+        }
       }
-    }
+    );
   };
 
   const themeClasses = {
@@ -490,9 +494,9 @@ export default function UpdateLandlordProfile() {
     buttonDangerBg: 'bg-red-600',
     buttonDangerHover: 'hover:bg-red-700',
     buttonDangerText: 'text-white',
-    toggleButtonBg: darkMode ? 'bg-cyan-400' : 'bg-white',
-    toggleButtonText: darkMode ? 'text-blue-950' : 'text-indigo-600',
-    toggleButtonHover: darkMode ? 'hover:bg-cyan-300' : 'hover:bg-indigo-100',
+    backButtonBg: darkMode ? 'bg-cyan-400' : 'bg-white',
+    backButtonText: darkMode ? 'text-blue-950' : 'text-indigo-600',
+    backButtonHover: darkMode ? 'hover:bg-cyan-300' : 'hover:bg-indigo-100',
   };
 
   return (
@@ -537,13 +541,6 @@ export default function UpdateLandlordProfile() {
         )}
         <div className={`relative flex flex-col rounded-2xl shadow-2xl overflow-hidden max-w-lg sm:max-w-xl w-full transition-colors duration-300 ${themeClasses.cardBg}`}>
           <div className="w-full p-6 sm:p-8 relative">
-            <button
-              onClick={toggleDarkMode}
-              className={`absolute top-4 right-4 z-10 px-4 py-2 rounded-full font-semibold shadow transition-colors duration-300 ${themeClasses.toggleButtonBg} ${themeClasses.toggleButtonText} ${themeClasses.toggleButtonHover}`}
-              aria-label="Toggle dark mode"
-            >
-              {darkMode ? '🌙' : '☀️'}
-            </button>
             <h2 className={`text-xl sm:text-2xl font-bold mb-2 ${themeClasses.textAccent}`}>
               Update Your Profile
             </h2>
@@ -553,7 +550,7 @@ export default function UpdateLandlordProfile() {
             <div className="mb-6 flex justify-start">
               <button
                 onClick={() => navigate(-1)}
-                className={`px-4 py-2 rounded-full font-semibold transition-colors duration-300 ${themeClasses.toggleButtonBg} ${themeClasses.toggleButtonText} ${themeClasses.toggleButtonHover}`}
+                className={`px-4 py-2 rounded-full font-semibold transition-colors duration-300 ${themeClasses.backButtonBg} ${themeClasses.backButtonText} ${themeClasses.backButtonHover}`}
                 aria-label="Go back"
               >
                 ← Back
@@ -562,8 +559,8 @@ export default function UpdateLandlordProfile() {
 
             {message && (
               <div className={`mb-4 p-3 rounded-lg text-sm text-center font-medium flex items-center justify-center gap-2 ${message.includes('successfully')
-                  ? 'text-green-700 bg-green-100 border border-green-300'
-                  : 'text-red-700 bg-red-100 border border-red-300'
+                ? 'text-green-700 bg-green-100 border border-green-300'
+                : 'text-red-700 bg-red-100 border border-red-300'
                 }`}>
                 {message.includes('successfully') ? (
                   <CheckCircle className="w-4 h-4" />
@@ -587,8 +584,8 @@ export default function UpdateLandlordProfile() {
                   value={formData.name}
                   onChange={handleChange}
                   className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${errors.name
-                      ? 'border-red-500 focus:ring-red-400'
-                      : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
+                    ? 'border-red-500 focus:ring-red-400'
+                    : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
                     } ${themeClasses.inputText} ${themeClasses.inputPlaceholder}`}
                   placeholder="Your full name"
                   required
@@ -613,8 +610,8 @@ export default function UpdateLandlordProfile() {
                   value={formData.email}
                   onChange={handleChange}
                   className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${errors.email
-                      ? 'border-red-500 focus:ring-red-400'
-                      : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
+                    ? 'border-red-500 focus:ring-red-400'
+                    : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
                     } ${themeClasses.inputText} ${themeClasses.inputPlaceholder}`}
                   placeholder="you@example.com"
                   required
@@ -639,8 +636,8 @@ export default function UpdateLandlordProfile() {
                   value={formData.phone}
                   onChange={handleChange}
                   className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${errors.phone
-                      ? 'border-red-500 focus:ring-red-400'
-                      : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
+                    ? 'border-red-500 focus:ring-red-400'
+                    : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
                     } ${themeClasses.inputText} ${themeClasses.inputPlaceholder}`}
                   placeholder="Your phone number"
                   required
@@ -666,8 +663,8 @@ export default function UpdateLandlordProfile() {
                     value={formData.password}
                     onChange={handleChange}
                     className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${errors.password
-                        ? 'border-red-500 focus:ring-red-400'
-                        : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
+                      ? 'border-red-500 focus:ring-red-400'
+                      : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
                       } ${themeClasses.inputText} ${themeClasses.inputPlaceholder}`}
                     placeholder="Leave blank to keep current password"
                   />
@@ -691,7 +688,7 @@ export default function UpdateLandlordProfile() {
 
               <div>
                 <label htmlFor="profilePicture" className={`flex items-center gap-1 font-semibold mb-1 ${themeClasses.textPrimary}`}>
-                  <ImageIcon size={18} /> Profile Picture
+                  <ImageIcon size={18} /> Profile Picture (not operational yet)
                 </label>
                 <input
                   type="file"
@@ -712,8 +709,8 @@ export default function UpdateLandlordProfile() {
                 type="submit"
                 disabled={isLoading}
                 className={`w-full py-3 sm:py-4 rounded-lg font-bold text-center transition-all duration-300 hover:shadow-xl hover:scale-105 text-sm sm:text-base transform active:scale-95 ${isLoading
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : `${themeClasses.buttonPrimaryBg} ${themeClasses.buttonPrimaryText} ${themeClasses.buttonPrimaryHover}`
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : `${themeClasses.buttonPrimaryBg} ${themeClasses.buttonPrimaryText} ${themeClasses.buttonPrimaryHover}`
                   }`}
               >
                 {isLoading ? (

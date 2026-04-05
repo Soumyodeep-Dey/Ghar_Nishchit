@@ -1,72 +1,18 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
+import AddNewPropertyModal from './AddNewPropertyModal';
 import { useDarkMode } from '../../../useDarkMode.js';
 // Removed SidebarContext usage
 import {
-  Building2,
-  Plus,
-  Search,
-  Filter,
-  MoreVertical,
-  Edit,
-  Trash2,
-  Eye,
-  Upload,
-  MapPin,
-  Bed,
-  Bath,
-  Car,
-  Wifi,
-  Tv,
-  AirVent,
-  Zap,
-  Waves,
-  Users,
-  DollarSign,
-  Calendar,
-  Star,
-  TrendingUp,
-  TrendingDown,
-  Camera,
-  Image as ImageIcon,
-  FileText,
-  Download,
-  Share2,
-  Copy,
-  ChevronDown,
-  Check,
-  X,
-  AlertCircle,
-  Home,
-  Maximize,
-  Heart,
-  ChevronLeft,
-  ChevronRight,
-  Grid3X3,
-  List,
-  SortAsc,
-  SortDesc,
-  RefreshCw,
-  BookOpen,
-  Settings,
-  BarChart3,
-  Clock,
-  CheckCircle,
-  XCircle,
-  Loader,
-  Save,
-  ArrowRight,
-  ExternalLink,
-  Phone,
-  Mail,
-  Globe,
-  Facebook,
-  Twitter,
-  Instagram,
-  Youtube
+  Building2, Plus, Search, MoreVertical, Edit, Trash2, Eye, MapPin, Bed, Bath, Car, Wifi, Tv, AirVent, Maximize, Heart, ChevronLeft, ChevronRight, ChevronDown, RefreshCw, Download, Share2, Star, TrendingUp, TrendingDown, Users, DollarSign, CheckCircle, Settings, Grid3X3, List, SortAsc, SortDesc
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import api from '../../../services/api.js';
+import { showConfirmToast } from '../../../utils/toast.jsx';
+
+// Ensure 'motion' symbol is referenced to satisfy some linters that may report it as unused
+void motion;
 
 // Custom Hooks
 const useIntersectionObserver = (options = {}) => {
@@ -92,7 +38,7 @@ const useLocalStorage = (key, initialValue) => {
     try {
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
+    } catch {
       return initialValue;
     }
   });
@@ -133,9 +79,144 @@ const AnimatedCard = ({ children, delay = 0, className = '', ...props }) => {
   );
 };
 
+// Unified Dropdown Menu Component
+const PropertyDropdownMenu = ({ property, onEdit, onDelete, onView, onToggleStatus, showMenu, setShowMenu, darkMode, theme }) => {
+  return (
+    <AnimatePresence>
+      {showMenu && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8, y: -20, rotateX: -15 }}
+          animate={{ opacity: 1, scale: 1, y: 0, rotateX: 0 }}
+          exit={{ opacity: 0, scale: 0.8, y: -20, rotateX: -15 }}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 30,
+            duration: 0.2
+          }}
+          className={`absolute right-0 top-full mt-3 w-64 backdrop-blur-2xl rounded-2xl shadow-2xl z-[9999] border border-white/20 ${theme.menuBg} overflow-visible`}
+          style={{
+            position: 'absolute',
+            right: '0',
+            top: '100%',
+            marginTop: '12px',
+            zIndex: 9999,
+            background: darkMode
+              ? 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)'
+              : 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%)',
+            boxShadow: darkMode
+              ? '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)'
+              : '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05)'
+          }}
+        >
+          {/* Menu Header */}
+          <div className={`px-4 py-3 border-b ${darkMode ? 'border-white/10' : 'border-gray-200'}`}>
+            <h3 className={`text-sm font-semibold ${darkMode ? 'text-white/90' : 'text-gray-700'}`}>
+              Property Actions
+            </h3>
+          </div>
+
+          {/* Menu Items */}
+          <div className="p-2 space-y-1">
+            <motion.button
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => { onView(property); setShowMenu(false); }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
+            >
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-600'} group-hover:scale-110 transition-transform`}>
+                <Eye className="w-4 h-4" />
+              </div>
+              <div className="flex-1 text-left">
+                <span className="font-medium">View Details</span>
+                <p className={`text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>See full property information</p>
+              </div>
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => { onEdit(property); setShowMenu(false); }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
+            >
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-green-500/20 text-green-400' : 'bg-green-100 text-green-600'} group-hover:scale-110 transition-transform`}>
+                <Edit className="w-4 h-4" />
+              </div>
+              <div className="flex-1 text-left">
+                <span className="font-medium">Edit Property</span>
+                <p className={`text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>Modify property details</p>
+              </div>
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
+            >
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-600'} group-hover:scale-110 transition-transform`}>
+                <Share2 className="w-4 h-4" />
+              </div>
+              <div className="flex-1 text-left">
+                <span className="font-medium">Share Property</span>
+                <p className={`text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>Share with others</p>
+              </div>
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
+            >
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600'} group-hover:scale-110 transition-transform`}>
+                <Download className="w-4 h-4" />
+              </div>
+              <div className="flex-1 text-left">
+                <span className="font-medium">Download Report</span>
+                <p className={`text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>Export property data</p>
+              </div>
+            </motion.button>
+
+            <div className={`mx-2 my-2 h-px ${darkMode ? 'bg-white/10' : 'bg-gray-200'}`}></div>
+
+            <motion.button
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => { onToggleStatus(property.id); setShowMenu(false); }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
+            >
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-orange-500/20 text-orange-400' : 'bg-orange-100 text-orange-600'} group-hover:scale-110 transition-transform`}>
+                <RefreshCw className="w-4 h-4" />
+              </div>
+              <div className="flex-1 text-left">
+                <span className="font-medium">Toggle Status</span>
+                <p className={`text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>Change availability status</p>
+              </div>
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.02, x: 4 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => { onDelete(property.id); setShowMenu(false); }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.deleteMenuItem} hover:shadow-lg`}
+            >
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-red-500/20 text-red-400' : 'bg-red-100 text-red-600'} group-hover:scale-110 transition-transform`}>
+                <Trash2 className="w-4 h-4" />
+              </div>
+              <div className="flex-1 text-left">
+                <span className="font-medium">Delete Property</span>
+                <p className={`text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>Remove permanently</p>
+              </div>
+            </motion.button>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
 // Property Card Component
 const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, delay = 0, viewMode = 'grid' }) => {
-  const [isHovered, setIsHovered] = useState(false);
+  // hover state removed — not used
   const [showMenu, setShowMenu] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const menuRef = useRef(null);
@@ -203,11 +284,15 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
   }, []);
 
   const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % property.images.length);
+    const len = property.images?.length || 0;
+    if (len === 0) return;
+    setCurrentImageIndex((prev) => (prev + 1) % len);
   };
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + property.images.length) % property.images.length);
+    const len = property.images?.length || 0;
+    if (len === 0) return;
+    setCurrentImageIndex((prev) => (prev - 1 + len) % len);
   };
 
   if (viewMode === 'list') {
@@ -217,7 +302,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay, duration: 0.4 }}
         whileHover={{ scale: 1.01, boxShadow: "0 10px 30px rgba(0,0,0,0.2)" }}
-        className={`backdrop-blur-xl border rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 group ${theme.listCardBg}`}
+        className={`backdrop-blur-xl border rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 group ${theme.listCardBg} relative overflow-visible`}
       >
         <div className="flex items-center space-x-6">
           <div className="w-24 h-24 rounded-lg overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
@@ -271,35 +356,17 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
                 <MoreVertical className={`w-5 h-5 ${theme.icon}`} />
               </motion.button>
 
-              <AnimatePresence>
-                {showMenu && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                    className={`absolute right-0 top-full mt-2 w-48 backdrop-blur-xl rounded-xl shadow-xl z-50 ${theme.menuBg}`}
-                  >
-                    <div className="p-2">
-                      <button onClick={() => { onView(property); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                        <Eye className="w-4 h-4" />
-                        <span>View Details</span>
-                      </button>
-                      <button onClick={() => { onEdit(property); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                        <Edit className="w-4 h-4" />
-                        <span>Edit Property</span>
-                      </button>
-                      <button onClick={() => { onToggleStatus(property.id); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                        <RefreshCw className="w-4 h-4" />
-                        <span>Toggle Status</span>
-                      </button>
-                      <button onClick={() => { onDelete(property.id); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.deleteMenuItem}`}>
-                        <Trash2 className="w-4 h-4" />
-                        <span>Delete</span>
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <PropertyDropdownMenu
+                property={property}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onView={onView}
+                onToggleStatus={onToggleStatus}
+                showMenu={showMenu}
+                setShowMenu={setShowMenu}
+                darkMode={darkMode}
+                theme={theme}
+              />
             </div>
           </div>
         </div>
@@ -313,9 +380,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
       whileHover={{ scale: 1.02, y: -5 }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className={`relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 group ${theme.cardBg}`}
+      className={`relative overflow-visible rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 group ${theme.cardBg}`}
     >
       {/* Image Carousel */}
       <div className="relative h-64 overflow-hidden rounded-t-2xl">
@@ -428,43 +493,17 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
               <MoreVertical className={`w-5 h-5 ${theme.icon}`} />
             </motion.button>
 
-            <AnimatePresence>
-              {showMenu && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                  className={`absolute right-0 top-full mt-2 w-48 backdrop-blur-xl rounded-xl shadow-xl z-50 ${theme.menuBg}`}
-                >
-                  <div className="p-2">
-                    <button onClick={() => { onView(property); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                      <Eye className="w-4 h-4" />
-                      <span>View Details</span>
-                    </button>
-                    <button onClick={() => { onEdit(property); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                      <Edit className="w-4 h-4" />
-                      <span>Edit Property</span>
-                    </button>
-                    <button className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                      <Share2 className="w-4 h-4" />
-                      <span>Share Property</span>
-                    </button>
-                    <button className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                      <Download className="w-4 h-4" />
-                      <span>Download Report</span>
-                    </button>
-                    <button onClick={() => { onToggleStatus(property.id); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.menuItem}`}>
-                      <RefreshCw className="w-4 h-4" />
-                      <span>Toggle Status</span>
-                    </button>
-                    <button onClick={() => { onDelete(property.id); setShowMenu(false); }} className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${theme.deleteMenuItem}`}>
-                      <Trash2 className="w-4 h-4" />
-                      <span>Delete</span>
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <PropertyDropdownMenu
+              property={property}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onView={onView}
+              onToggleStatus={onToggleStatus}
+              showMenu={showMenu}
+              setShowMenu={setShowMenu}
+              darkMode={darkMode}
+              theme={theme}
+            />
           </div>
         </div>
 
@@ -534,713 +573,31 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
   );
 };
 
-// Property Form Modal
-const PropertyModal = ({ isOpen, onClose, property, onSave, mode = 'add' }) => {
-  const { darkMode } = useDarkMode();
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    location: '',
-    rent: '',
-    previousRent: '',
-    bedrooms: 1,
-    bathrooms: 1,
-    area: '',
-    propertyType: 'apartment',
-    status: 'Available',
-    amenities: [],
-    images: [],
-    features: [],
-    policies: {
-      petFriendly: false,
-      smokingAllowed: false,
-      furnished: false
-    },
-    contact: {
-      phone: '',
-      email: '',
-      website: ''
-    },
-    socialMedia: {
-      facebook: '',
-      twitter: '',
-      instagram: ''
-    }
-  });
+// PropertyModal component removed - now using standardized AddNewPropertyModal
 
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef(null);
 
-  const theme = useMemo(() => {
-    if (darkMode) {
-      return {
-        bg: 'bg-slate-800/90 backdrop-blur-xl border border-slate-700/50',
-        headerBg: 'p-6 border-b border-slate-700/50',
-        title: 'text-white',
-        label: 'text-slate-300',
-        input: 'w-full p-3 rounded-xl bg-slate-700/50 border border-slate-600/50 text-white placeholder-slate-400 focus:border-cyan-500 focus:ring-cyan-500 focus:outline-none transition-colors',
-        select: 'w-full p-3 rounded-xl bg-slate-700/50 border border-slate-600/50 text-white focus:border-cyan-500 focus:ring-cyan-500 focus:outline-none transition-colors',
-        button: 'px-6 py-3 bg-gradient-to-r from-cyan-500 to-indigo-600 text-white rounded-xl font-semibold hover:brightness-110 transition-all duration-300 flex items-center space-x-2',
-        cancelButton: 'px-6 py-3 bg-slate-700/50 text-slate-300 rounded-xl font-semibold hover:bg-slate-600/50 transition-colors',
-        previousButton: 'px-6 py-3 bg-slate-700/50 text-slate-300 rounded-xl font-semibold hover:bg-slate-600/50 transition-colors',
-        stepActive: 'bg-cyan-500 text-white',
-        stepCompleted: 'bg-green-500 text-white',
-        stepInactive: 'bg-slate-700 text-slate-400',
-        stepLineCompleted: 'bg-green-500',
-        stepLineInactive: 'bg-slate-600',
-        uploadBox: 'border-2 border-dashed border-slate-600/50 rounded-xl p-8 text-center cursor-pointer hover:border-cyan-500/50 hover:bg-slate-700/30 transition-all duration-200',
-        uploadIcon: 'text-slate-400',
-        uploadText: 'text-slate-200 font-medium',
-        uploadSubText: 'text-slate-400 text-sm',
-        amenityButton: 'p-4 rounded-xl border transition-all duration-200',
-        amenityActive: 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300',
-        amenityInactive: 'bg-slate-700/30 border-slate-600/50 text-slate-300 hover:bg-slate-700/50',
-        checkbox: 'w-5 h-5 rounded border-2 border-slate-500 bg-slate-600/50 text-cyan-500 focus:ring-cyan-500 focus:ring-2',
-      }
-    }
-    return {
-      bg: 'bg-white/95 backdrop-blur-xl border border-gray-200',
-      headerBg: 'p-6 border-b border-gray-200',
-      title: 'text-gray-900',
-      label: 'text-gray-600 font-semibold',
-      input: 'w-full p-3 rounded-xl bg-gray-50 border border-gray-300 text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors',
-      select: 'w-full p-3 rounded-xl bg-gray-50 border border-gray-300 text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors',
-      button: 'px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:brightness-105 transition-all duration-300 flex items-center space-x-2',
-      cancelButton: 'px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors',
-      previousButton: 'px-6 py-3 bg-gray-200 text-gray-800 rounded-xl font-semibold hover:bg-gray-300 transition-colors',
-      stepActive: 'bg-indigo-600 text-white',
-      stepCompleted: 'bg-green-600 text-white',
-      stepInactive: 'bg-gray-200 text-gray-500',
-      stepLineCompleted: 'bg-green-500',
-      stepLineInactive: 'bg-gray-300',
-      uploadBox: 'border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 hover:bg-gray-50 transition-all duration-200',
-      uploadIcon: 'text-gray-400',
-      uploadText: 'text-gray-800 font-medium',
-      uploadSubText: 'text-gray-500 text-sm',
-      amenityButton: 'p-4 rounded-xl border transition-all duration-200',
-      amenityActive: 'bg-indigo-100 border-indigo-300 text-indigo-800',
-      amenityInactive: 'bg-gray-100 border-gray-200 text-gray-600 hover:bg-gray-200',
-      checkbox: 'w-5 h-5 rounded border-2 border-gray-300 bg-gray-100 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-0 focus:ring-2',
-    }
-  }, [darkMode]);
-
-  useEffect(() => {
-    if (property && mode === 'edit') {
-      setFormData({ ...property });
-    } else {
-      setFormData({
-        title: '',
-        description: '',
-        location: '',
-        rent: '',
-        previousRent: '',
-        bedrooms: 1,
-        bathrooms: 1,
-        area: '',
-        propertyType: 'apartment',
-        status: 'Available',
-        amenities: [],
-        images: [],
-        features: [],
-        policies: {
-          petFriendly: false,
-          smokingAllowed: false,
-          furnished: false
-        },
-        contact: {
-          phone: '',
-          email: '',
-          website: ''
-        },
-        socialMedia: {
-          facebook: '',
-          twitter: '',
-          instagram: ''
-        }
-      });
-    }
-  }, [property, mode, isOpen]);
-
-  const handleInputChange = (field, value) => {
-    if (field.includes('.')) {
-      const [parent, child] = field.split('.');
-      setFormData(prev => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: value
-        }
-      }));
-    } else {
-      setFormData(prev => ({ ...prev, [field]: value }));
-    }
+// Helper function to normalize backend property data to frontend format
+const normalizePropertyFromBackend = (backendProperty) => {
+  return {
+    id: backendProperty._id || backendProperty.id,
+    title: backendProperty.title || '',
+    description: backendProperty.description || '',
+    location: backendProperty.address ? `${backendProperty.address.city || ''}, ${backendProperty.address.state || ''}` : (backendProperty.location || ''),
+    rent: backendProperty.price || backendProperty.rent || 0,
+    bedrooms: backendProperty.bedrooms || 0,
+    bathrooms: backendProperty.bathrooms || 0,
+    area: backendProperty.area || backendProperty.size || 0,
+    propertyType: backendProperty.propertyType || 'apartment',
+    status: backendProperty.status || (backendProperty.available ? 'Available' : 'Occupied'),
+    amenities: backendProperty.amenities || [],
+    images: backendProperty.images || [],
+    rating: backendProperty.rating || 4.5,
+    trend: backendProperty.trend || null,
+    createdAt: backendProperty.createdAt || new Date().toISOString(),
+    contact: backendProperty.contact || {},
+    policies: backendProperty.policies || {},
+    ownerId: backendProperty.postedBy?._id || backendProperty.postedBy || backendProperty.ownerId || null,
   };
-
-  const handleAmenityToggle = (amenity) => {
-    setFormData(prev => ({
-      ...prev,
-      amenities: prev.amenities.includes(amenity)
-        ? prev.amenities.filter(a => a !== amenity)
-        : [...prev.amenities, amenity]
-    }));
-  };
-
-  const handleImageUpload = async (event) => {
-    const files = Array.from(event.target.files);
-    setIsUploading(true);
-
-    // Simulate upload process
-    setTimeout(() => {
-      const newImages = files.map(file => URL.createObjectURL(file));
-      setFormData(prev => ({
-        ...prev,
-        images: [...prev.images, ...newImages]
-      }));
-      setIsUploading(false);
-    }, 2000);
-  };
-
-  const removeImage = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave({
-      ...formData,
-      id: property?.id || Date.now(),
-      createdAt: property?.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    });
-    onClose();
-  };
-
-  const steps = [
-    { title: 'Basic Info', icon: Home },
-    { title: 'Details', icon: FileText },
-    { title: 'Images', icon: Camera },
-    { title: 'Contact', icon: Phone }
-  ];
-
-  if (!isOpen) return null;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className={`${theme.bg} rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col`}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className={theme.headerBg}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className={`text-2xl font-bold ${theme.title}`}>
-              {mode === 'edit' ? 'Edit Property' : 'Add New Property'}
-            </h2>
-            <motion.button
-              whileHover={{ scale: 1.1, rotate: 90 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={onClose}
-              className={`p-2 rounded-full transition-colors ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-gray-200'}`}
-            >
-              <X className={`w-6 h-6 ${darkMode ? 'text-slate-400' : 'text-gray-600'}`} />
-            </motion.button>
-          </div>
-
-          {/* Step Indicator */}
-          <div className="flex items-center space-x-4">
-            {steps.map((step, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <div className={`p-2 rounded-lg ${currentStep === index + 1
-                    ? theme.stepActive
-                    : currentStep > index + 1
-                      ? theme.stepCompleted
-                      : theme.stepInactive
-                  }`}>
-                  {currentStep > index + 1 ? (
-                    <Check className="w-4 h-4" />
-                  ) : (
-                    <step.icon className="w-4 h-4" />
-                  )}
-                </div>
-                <span className={`text-sm ${currentStep === index + 1 ? theme.title : (darkMode ? 'text-slate-400' : 'text-gray-500')
-                  }`}>
-                  {step.title}
-                </span>
-                {index < steps.length - 1 && (
-                  <div className={`w-8 h-0.5 ${currentStep > index + 1 ? theme.stepLineCompleted : theme.stepLineInactive
-                    }`} />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-6">
-            {/* Step 1: Basic Info */}
-            {currentStep === 1 && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="space-y-6"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className={`block text-sm mb-2 ${theme.label}`}>
-                      Property Title *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.title}
-                      onChange={(e) => handleInputChange('title', e.target.value)}
-                      className={theme.input}
-                      placeholder="Enter property title"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className={`block text-sm mb-2 ${theme.label}`}>
-                      Location *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.location}
-                      onChange={(e) => handleInputChange('location', e.target.value)}
-                      className={theme.input}
-                      placeholder="Enter property location"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className={`block text-sm mb-2 ${theme.label}`}>
-                    Description
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => handleInputChange('description', e.target.value)}
-                    rows={4}
-                    className={`${theme.input} resize-none`}
-                    placeholder="Describe your property..."
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <label className={`block text-sm mb-2 ${theme.label}`}>
-                      Property Type *
-                    </label>
-                    <select
-                      value={formData.propertyType}
-                      onChange={(e) => handleInputChange('propertyType', e.target.value)}
-                      className={theme.select}
-                      required
-                    >
-                      <option value="apartment">Apartment</option>
-                      <option value="house">House</option>
-                      <option value="condo">Condo</option>
-                      <option value="studio">Studio</option>
-                      <option value="villa">Villa</option>
-                      <option value="townhouse">Townhouse</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className={`block text-sm mb-2 ${theme.label}`}>
-                      Status *
-                    </label>
-                    <select
-                      value={formData.status}
-                      onChange={(e) => handleInputChange('status', e.target.value)}
-                      className={theme.select}
-                      required
-                    >
-                      <option value="Available">Available</option>
-                      <option value="Occupied">Occupied</option>
-                      <option value="Maintenance">Under Maintenance</option>
-                      <option value="Draft">Draft</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className={`block text-sm mb-2 ${theme.label}`}>
-                      Area (sq ft) *
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.area}
-                      onChange={(e) => handleInputChange('area', e.target.value)}
-                      className={theme.input}
-                      placeholder="1200"
-                      required
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Step 2: Details */}
-            {currentStep === 2 && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="space-y-6"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <div>
-                    <label className={`block text-sm mb-2 ${theme.label}`}>
-                      Bedrooms *
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={formData.bedrooms}
-                      onChange={(e) => handleInputChange('bedrooms', parseInt(e.target.value))}
-                      className={theme.input}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className={`block text-sm mb-2 ${theme.label}`}>
-                      Bathrooms *
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.5"
-                      value={formData.bathrooms}
-                      onChange={(e) => handleInputChange('bathrooms', parseFloat(e.target.value))}
-                      className={theme.input}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className={`block text-sm mb-2 ${theme.label}`}>
-                      Rent ($) *
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={formData.rent}
-                      onChange={(e) => handleInputChange('rent', e.target.value)}
-                      className={theme.input}
-                      placeholder="2500"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className={`block text-sm mb-2 ${theme.label}`}>
-                      Previous Rent ($)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={formData.previousRent}
-                      onChange={(e) => handleInputChange('previousRent', e.target.value)}
-                      className={theme.input}
-                      placeholder="2300"
-                    />
-                  </div>
-                </div>
-
-                {/* Amenities */}
-                <div>
-                  <label className={`block text-sm mb-4 ${theme.label}`}>
-                    Amenities
-                  </label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {[
-                      { key: 'wifi', label: 'WiFi', icon: Wifi },
-                      { key: 'parking', label: 'Parking', icon: Car },
-                      { key: 'ac', label: 'Air Conditioning', icon: AirVent },
-                      { key: 'tv', label: 'TV', icon: Tv },
-                      { key: 'electricity', label: 'Electricity', icon: Zap },
-                      { key: 'water', label: 'Water', icon: Waves },
-                      { key: 'gym', label: 'Gym', icon: Users },
-                      { key: 'pool', label: 'Swimming Pool', icon: Waves }
-                    ].map(({ key, label, icon: Icon }) => (
-                      <motion.button
-                        key={key}
-                        type="button"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => handleAmenityToggle(key)}
-                        className={`${theme.amenityButton} ${formData.amenities.includes(key)
-                            ? theme.amenityActive
-                            : theme.amenityInactive
-                          }`}
-                      >
-                        <Icon className="w-6 h-6 mx-auto mb-2" />
-                        <div className="text-sm font-medium">{label}</div>
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Policies */}
-                <div>
-                  <label className={`block text-sm mb-4 ${theme.label}`}>
-                    Property Policies
-                  </label>
-                  <div className="space-y-3">
-                    {[
-                      { key: 'petFriendly', label: 'Pet Friendly' },
-                      { key: 'smokingAllowed', label: 'Smoking Allowed' },
-                      { key: 'furnished', label: 'Furnished' }
-                    ].map(({ key, label }) => (
-                      <label key={key} className={`flex items-center space-x-3 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
-                        <input
-                          type="checkbox"
-                          checked={formData.policies[key]}
-                          onChange={(e) => handleInputChange(`policies.${key}`, e.target.checked)}
-                          className={theme.checkbox}
-                        />
-                        <span>{label}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Step 3: Images */}
-            {currentStep === 3 && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="space-y-6"
-              >
-                <div>
-                  <label className={`block text-sm mb-4 ${theme.label}`}>
-                    Property Images
-                  </label>
-
-                  {/* Upload Area */}
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className={theme.uploadBox}
-                  >
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-
-                    {isUploading ? (
-                      <div className="space-y-4">
-                        <Loader className={`w-12 h-12 mx-auto animate-spin ${darkMode ? 'text-cyan-400' : 'text-indigo-600'}`} />
-                        <p className={darkMode ? 'text-slate-400' : 'text-gray-600'}>Uploading images...</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <Upload className={`w-12 h-12 mx-auto ${theme.uploadIcon}`} />
-                        <div>
-                          <p className={theme.uploadText}>Click to upload images</p>
-                          <p className={theme.uploadSubText}>Support: JPG, PNG, GIF up to 10MB each</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Image Preview */}
-                  {formData.images.length > 0 && (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                      {formData.images.map((image, index) => (
-                        <div key={index} className="relative group">
-                          <img
-                            src={image}
-                            alt={`Property ${index + 1}`}
-                            className="w-full h-32 object-cover rounded-lg"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeImage(index)}
-                            className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            )}
-
-            {/* Step 4: Contact */}
-            {currentStep === 4 && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="space-y-6"
-              >
-                <div>
-                  <h3 className={`text-xl font-bold mb-4 ${theme.title}`}>Contact Information</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                      <label className={`block text-sm mb-2 ${theme.label}`}>
-                        Phone Number
-                      </label>
-                      <input
-                        type="tel"
-                        value={formData.contact.phone}
-                        onChange={(e) => handleInputChange('contact.phone', e.target.value)}
-                        className={theme.input}
-                        placeholder="+1 (555) 123-4567"
-                      />
-                    </div>
-
-                    <div>
-                      <label className={`block text-sm mb-2 ${theme.label}`}>
-                        Email Address
-                      </label>
-                      <input
-                        type="email"
-                        value={formData.contact.email}
-                        onChange={(e) => handleInputChange('contact.email', e.target.value)}
-                        className={theme.input}
-                        placeholder="contact@property.com"
-                      />
-                    </div>
-
-                    <div>
-                      <label className={`block text-sm mb-2 ${theme.label}`}>
-                        Website
-                      </label>
-                      <input
-                        type="url"
-                        value={formData.contact.website}
-                        onChange={(e) => handleInputChange('contact.website', e.target.value)}
-                        className={theme.input}
-                        placeholder="https://property.com"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className={`text-xl font-bold mb-4 ${theme.title}`}>Social Media (Optional)</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                      <label className={`block text-sm mb-2 ${theme.label}`}>
-                        Facebook
-                      </label>
-                      <input
-                        type="url"
-                        value={formData.socialMedia.facebook}
-                        onChange={(e) => handleInputChange('socialMedia.facebook', e.target.value)}
-                        className={theme.input}
-                        placeholder="https://facebook.com/property"
-                      />
-                    </div>
-
-                    <div>
-                      <label className={`block text-sm mb-2 ${theme.label}`}>
-                        Twitter
-                      </label>
-                      <input
-                        type="url"
-                        value={formData.socialMedia.twitter}
-                        onChange={(e) => handleInputChange('socialMedia.twitter', e.target.value)}
-                        className={theme.input}
-                        placeholder="https://twitter.com/property"
-                      />
-                    </div>
-
-                    <div>
-                      <label className={`block text-sm mb-2 ${theme.label}`}>
-                        Instagram
-                      </label>
-                      <input
-                        type="url"
-                        value={formData.socialMedia.instagram}
-                        onChange={(e) => handleInputChange('socialMedia.instagram', e.target.value)}
-                        className={theme.input}
-                        placeholder="https://instagram.com/property"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </div>
-
-          {/* Footer */}
-          <div className={`${theme.headerBg} flex items-center justify-between`}>
-            <div className="flex space-x-4">
-              {currentStep > 1 && (
-                <motion.button
-                  type="button"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setCurrentStep(prev => prev - 1)}
-                  className={theme.previousButton}
-                >
-                  Previous
-                </motion.button>
-              )}
-            </div>
-
-            <div className="flex space-x-4">
-              <motion.button
-                type="button"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={onClose}
-                className={theme.cancelButton}
-              >
-                Cancel
-              </motion.button>
-
-              {currentStep < steps.length ? (
-                <motion.button
-                  type="button"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setCurrentStep(prev => prev + 1)}
-                  className={theme.button}
-                >
-                  <span>Next</span>
-                  <ArrowRight className="w-4 h-4" />
-                </motion.button>
-              ) : (
-                <motion.button
-                  type="submit"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`${theme.button} bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700`}
-                >
-                  <Save className="w-4 h-4" />
-                  <span>{mode === 'edit' ? 'Update Property' : 'Save Property'}</span>
-                </motion.button>
-              )}
-            </div>
-          </div>
-        </form>
-      </motion.div>
-    </motion.div>
-  );
 };
 
 // Main Component
@@ -1248,81 +605,20 @@ const LandlordProperty = () => {
   const [currentSection] = useState('Properties');
   const { darkMode } = useDarkMode();
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
-  const [properties, setProperties] = useLocalStorage('landlord_properties', [
-    {
-      id: 1,
-      title: "Modern Downtown Loft",
-      description: "Stunning modern loft in the heart of downtown with panoramic city views",
-      location: "Manhattan, NY",
-      rent: 2800,
-      previousRent: 2600,
-      bedrooms: 2,
-      bathrooms: 2,
-      area: 1200,
-      propertyType: "apartment",
-      status: "Occupied",
-      amenities: ['wifi', 'parking', 'ac', 'tv'],
-      images: [],
-      rating: 4.8,
-      trend: 'up',
-      createdAt: '2024-01-01',
-      contact: { phone: '+1 234 567 8900', email: 'contact@modernloft.com', website: 'https://modernloft.com' },
-      socialMedia: { facebook: '', twitter: '', instagram: '' },
-      policies: { petFriendly: true, smokingAllowed: false, furnished: true }
-    },
-    {
-      id: 2,
-      title: "Luxury Penthouse",
-      description: "Exclusive penthouse with private rooftop terrace and premium amenities",
-      location: "Brooklyn, NY",
-      rent: 4200,
-      bedrooms: 3,
-      bathrooms: 2.5,
-      area: 1800,
-      propertyType: "apartment",
-      status: "Available",
-      amenities: ['wifi', 'parking', 'ac', 'tv', 'gym', 'pool'],
-      images: [],
-      rating: 4.9,
-      trend: 'up',
-      createdAt: '2024-01-02',
-      contact: { phone: '+1 234 567 8901', email: 'luxury@penthouse.com', website: '' },
-      socialMedia: { facebook: '', twitter: '', instagram: '' },
-      policies: { petFriendly: false, smokingAllowed: false, furnished: true }
-    },
-    {
-      id: 3,
-      title: "Cozy Studio Apartment",
-      description: "Perfect studio for young professionals with modern amenities",
-      location: "Queens, NY",
-      rent: 1800,
-      previousRent: 1750,
-      bedrooms: 0,
-      bathrooms: 1,
-      area: 650,
-      propertyType: "studio",
-      status: "Maintenance",
-      amenities: ['wifi', 'ac'],
-      images: [],
-      rating: 4.5,
-      trend: 'down',
-      createdAt: '2024-01-03',
-      contact: { phone: '+1 234 567 8902', email: 'cozy@studio.com', website: '' },
-      socialMedia: { facebook: '', twitter: '', instagram: '' },
-      policies: { petFriendly: true, smokingAllowed: false, furnished: false }
-    }
-  ]);
+  const [properties, setProperties] = useLocalStorage('landlord_properties', []);
 
   const [filteredProperties, setFilteredProperties] = useState(properties);
+  const [_currentUser, setCurrentUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [sortBy, setSortBy] = useState('title');
   const [sortOrder, setSortOrder] = useState('asc');
   const [viewMode, setViewMode] = useState('grid');
   const [showModal, setShowModal] = useState(false);
+  const [updateSuccess, setUpdateSuccess] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [modalMode, setModalMode] = useState('add');
-  const [isLoading, setIsLoading] = useState(false);
+  // isLoading state removed — not used
 
   // Filter and sort properties
   useEffect(() => {
@@ -1353,6 +649,76 @@ const LandlordProperty = () => {
     setFilteredProperties(filtered);
   }, [properties, searchTerm, statusFilter, sortBy, sortOrder]);
 
+  // Try to fetch properties from backend on mount and update local storage fallback
+  // Fetch properties from API once on mount.
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      try {
+        // First try to get profile (current user)
+        let profile = null;
+        try {
+          profile = await api.getProfile();
+        } catch {
+          // not authenticated or endpoint failed
+          profile = null;
+        }
+
+        if (mounted && profile) {
+          setCurrentUser(profile);
+          const userId = profile._id || profile.id || profile.userId;
+          if (userId) {
+            try {
+              // Try fetching properties that belong only to the current user
+              const remoteByUser = await api.getPropertiesByUser(userId);
+              if (mounted && Array.isArray(remoteByUser)) {
+                const normalized = remoteByUser.map(normalizePropertyFromBackend);
+                setProperties(normalized);
+                return;
+              }
+            } catch (err) {
+              console.warn('Could not load user properties from API, falling back to general properties', err.message || err);
+            }
+          }
+        }
+
+        // Fallback: fetch all properties and then filter locally to those that look like they belong to current user
+        try {
+          const remote = await api.getProperties();
+          if (mounted && Array.isArray(remote) && remote.length > 0) {
+            const normalized = remote.map(normalizePropertyFromBackend);
+
+            // If we have a current user, filter to only their properties
+            if (profile) {
+              const userId = profile._id || profile.id || profile.userId;
+              if (userId) {
+                const onlyMine = normalized.filter(p => {
+                  return p.ownerId && String(p.ownerId) === String(userId);
+                });
+                if (onlyMine.length > 0) {
+                  setProperties(onlyMine);
+                  return;
+                }
+              }
+            }
+
+            // otherwise set all remote
+            setProperties(normalized);
+            return;
+          }
+        } catch (err) {
+          console.warn('Could not load properties from API, using local data', err.message || err);
+        }
+      } catch (err) {
+        console.warn('Could not load properties from API, using local data', err.message || err);
+      }
+    };
+
+    load();
+    return () => { mounted = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleAddProperty = () => {
     setSelectedProperty(null);
     setModalMode('add');
@@ -1371,30 +737,97 @@ const LandlordProperty = () => {
   };
 
   const handleDeleteProperty = (propertyId) => {
-    if (window.confirm('Are you sure you want to delete this property?')) {
-      setProperties(prev => prev.filter(p => p.id !== propertyId));
-    }
+    showConfirmToast(
+      'Are you sure you want to delete this property?',
+      () => {
+        // Optimistic local update
+        setProperties(prev => prev.filter(p => p.id !== propertyId));
+        // Try backend delete
+        (async () => {
+          try {
+            await api.deleteProperty(propertyId);
+          } catch (err) {
+            console.warn('Failed to delete property on server, changes remain local', err.message || err);
+          }
+        })();
+      }
+    );
   };
 
   const handleToggleStatus = (propertyId) => {
+    // Toggle locally and try to persist remotely
     setProperties(prev => prev.map(p => {
       if (p.id === propertyId) {
         const statuses = ['Available', 'Occupied', 'Maintenance'];
         const currentIndex = statuses.indexOf(p.status);
         const nextIndex = (currentIndex + 1) % statuses.length;
-        return { ...p, status: statuses[nextIndex] };
+        const updated = { ...p, status: statuses[nextIndex] };
+        // send update
+        (async () => {
+          try {
+            await api.updateProperty(propertyId, updated);
+          } catch (err) {
+            console.warn('Failed to update property status on server', err.message || err);
+          }
+        })();
+        return updated;
       }
       return p;
     }));
   };
 
   const handleSaveProperty = (propertyData) => {
+    console.log('🔄 Saving property:', { modalMode, propertyData });
+
     if (modalMode === 'edit') {
-      setProperties(prev => prev.map(p =>
-        p.id === propertyData.id ? propertyData : p
-      ));
+      console.log('✏️ Updating existing property...');
+      // optimistic local update
+      setProperties(prev => prev.map(p => p.id === propertyData.id ? { ...p, ...propertyData } : p));
+      // Try remote update
+      (async () => {
+        try {
+          console.log('📡 Sending update to server...');
+          console.log('🆔 Property ID:', propertyData.id);
+          console.log('📦 Update data:', propertyData);
+
+          const updated = await api.updateProperty(propertyData.id, propertyData);
+          console.log('✅ Server response:', updated);
+
+          if (updated) {
+            // normalize server response to frontend format
+            const serverItem = normalizePropertyFromBackend(updated);
+            console.log('🔄 Normalized server item:', serverItem);
+            setProperties(prev => prev.map(p => p.id === serverItem.id || p.id === propertyData.id ? serverItem : p));
+            console.log('✅ Property updated successfully in frontend!');
+            setUpdateSuccess(true);
+            setTimeout(() => setUpdateSuccess(false), 3000); // Hide success message after 3 seconds
+          } else {
+            console.warn('⚠️ Server returned empty response');
+          }
+        } catch (err) {
+          console.error('❌ Failed to update property on server:', err.message || err);
+          console.error('❌ Error details:', err);
+          console.warn('Failed to update property on server, change kept locally', err.message || err);
+        }
+      })();
     } else {
-      setProperties(prev => [...prev, propertyData]);
+      // create locally with temporary id then try creating on server
+      const tempId = Date.now();
+      const item = { ...propertyData, id: tempId };
+      setProperties(prev => [...prev, item]);
+      (async () => {
+        try {
+          const created = await api.createProperty(propertyData);
+          // replace temp item id with server id if provided
+          if (created && (created._id || created.id)) {
+            // normalize server response into local shape
+            const serverItem = normalizePropertyFromBackend(created);
+            setProperties(prev => prev.map(p => p.id === tempId ? serverItem : p));
+          }
+        } catch (err) {
+          console.warn('Failed to create property on server, saved locally', err.message || err);
+        }
+      })();
     }
   };
 
@@ -1418,6 +851,18 @@ const LandlordProperty = () => {
 
   return (
     <div className={`min-h-screen flex relative overflow-hidden ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-r from-pink-100 via-purple-100 to-indigo-200'}`}>
+      {/* Success Notification */}
+      {updateSuccess && (
+        <motion.div
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -50 }}
+          className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg"
+        >
+          ✅ Property updated successfully!
+        </motion.div>
+      )}
+
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
@@ -1625,8 +1070,8 @@ const LandlordProperty = () => {
               ) : (
                 <div className={
                   viewMode === 'grid'
-                    ? "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8"
-                    : "space-y-4"
+                    ? "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 overflow-visible"
+                    : "space-y-4 overflow-visible"
                 }>
                   {filteredProperties.map((property, index) => (
                     <PropertyCard
@@ -1647,18 +1092,15 @@ const LandlordProperty = () => {
         </main>
       </div>
 
-      {/* Property Modal */}
-      <AnimatePresence>
-        {showModal && (
-          <PropertyModal
-            isOpen={showModal}
-            onClose={() => setShowModal(false)}
-            property={selectedProperty}
-            onSave={handleSaveProperty}
-            mode={modalMode}
-          />
-        )}
-      </AnimatePresence>
+      {/* Add New Property Modal (standardized) */}
+      <AddNewPropertyModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        isDark={darkMode}
+        mode={modalMode}
+        property={selectedProperty}
+        onSave={handleSaveProperty}
+      />
     </div>
   );
 };

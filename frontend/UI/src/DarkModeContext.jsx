@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import DarkModeContext from './DarkModeContext.js';
 
 function DarkModeProvider({ children }) {
-  // Initialize darkMode from localStorage or system preference
+  // Initialize darkMode from sessionStorage or system preference
+  // Using sessionStorage instead of localStorage so each tab/session has independent theme
   const [darkMode, setDarkMode] = useState(() => {
-    // Check if theme preference exists in localStorage
-    const savedTheme = localStorage.getItem('theme');
+    // Check if theme preference exists in sessionStorage (session-specific)
+    const savedTheme = sessionStorage.getItem('theme');
     if (savedTheme) {
       return savedTheme === 'dark';
     }
@@ -15,8 +16,8 @@ function DarkModeProvider({ children }) {
 
   // Apply theme to document when darkMode changes
   useEffect(() => {
-    // Update localStorage
-    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+    // Update sessionStorage (session-specific, won't affect other tabs)
+    sessionStorage.setItem('theme', darkMode ? 'dark' : 'light');
 
     // Update document class
     if (darkMode) {

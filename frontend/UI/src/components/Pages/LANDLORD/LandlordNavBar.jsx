@@ -17,8 +17,8 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
   const handleLogout = () => {
     // Clear authentication (example: remove token from localStorage)
     localStorage.removeItem('authToken');
-    // Redirect to login page
-    window.location.href = '/login';
+    // Redirect to home page
+    window.location.href = '/';
   };
 
   const profileDropdownRef = useRef(null);
