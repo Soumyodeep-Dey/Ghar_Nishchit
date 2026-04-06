@@ -218,7 +218,7 @@ const TenantMessage = () => {
   // Auto scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, activeConversation.id]);
+  }, [messages, activeConversation?.id]);
 
   // Typing indicator simulation
   useEffect(() => {
@@ -340,7 +340,7 @@ const TenantMessage = () => {
                   <ConversationItem
                     key={conversation.id}
                     conversation={conversation}
-                    isActive={activeConversation.id === conversation.id}
+                    isActive={activeConversation?.id === conversation.id}
                     onClick={() => setActiveConversation(conversation)}
                     index={index}
                     darkMode={darkMode}

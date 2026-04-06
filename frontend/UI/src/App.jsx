@@ -1,39 +1,41 @@
-// routes are routes
+import { Suspense, lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
-// landing page
-import Landing from './components/landing';
-
-// auth components
-import Login from './components/Auth/Login';
-import SignUp from './components/Auth/SignUp';
 import ProtectedRoute from './components/ProtectedRoute';
-import ForgotPassword from './components/Auth/ForgotPassword';
 
 // dark mode context
 import DarkModeProvider from './DarkModeContext.jsx';
 
-// tenant components
-import TenantDashboard from './components/Pages/TENANT/TenantDashboard';
-import TenantProperty from './components/Pages/TENANT/TenantProperty';
-import TenantMessage from './components/Pages/TENANT/TenantMessage';
-import TenantMaintenance from './components/Pages/TENANT/TenantMaintenance';
-import TenantPayment from './components/Pages/TENANT/TenantPayment';
-import UpdateTenantProfile from './components/Pages/TENANT/UpdateTenantProfile';
-
-// landlord components
-import LandlordDashboard from './components/Pages/LANDLORD/LandlordDashboard';
-import LandlordProperty from './components/Pages/LANDLORD/LandlordProperty';
-import LandlordMessage from './components/Pages/LANDLORD/LandlordMessage';
-import LandlordMaintenance from './components/Pages/LANDLORD/LandlordMaintenance';
-import LandlordPayment from './components/Pages/LANDLORD/LandlordPayment';
-import LandlordTenant from './components/Pages/LANDLORD/LandlordTenant';
-import UpdateLandlordProfile from './components/Pages/LANDLORD/UpdateLandlordProfile';
 
 // toast notifications
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+const Landing = lazy(() => import('./components/landing'));
+const Login = lazy(() => import('./components/Auth/Login'));
+const SignUp = lazy(() => import('./components/Auth/SignUp'));
+const ForgotPassword = lazy(() => import('./components/Auth/ForgotPassword'));
+
+const TenantDashboard = lazy(() => import('./components/Pages/TENANT/TenantDashboard'));
+const TenantProperty = lazy(() => import('./components/Pages/TENANT/TenantProperty'));
+const TenantMessage = lazy(() => import('./components/Pages/TENANT/TenantMessage'));
+const TenantMaintenance = lazy(() => import('./components/Pages/TENANT/TenantMaintenance'));
+const TenantPayment = lazy(() => import('./components/Pages/TENANT/TenantPayment'));
+const UpdateTenantProfile = lazy(() => import('./components/Pages/TENANT/UpdateTenantProfile'));
+
+const LandlordDashboard = lazy(() => import('./components/Pages/LANDLORD/LandlordDashboard'));
+const LandlordProperty = lazy(() => import('./components/Pages/LANDLORD/LandlordProperty'));
+const LandlordMessage = lazy(() => import('./components/Pages/LANDLORD/LandlordMessage'));
+const LandlordMaintenance = lazy(() => import('./components/Pages/LANDLORD/LandlordMaintenance'));
+const LandlordPayment = lazy(() => import('./components/Pages/LANDLORD/LandlordPayment'));
+const LandlordTenant = lazy(() => import('./components/Pages/LANDLORD/LandlordTenant'));
+const UpdateLandlordProfile = lazy(() => import('./components/Pages/LANDLORD/UpdateLandlordProfile'));
+
+const AppLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-200">
+    Loading...
+  </div>
+);
 
 export default function App() {
   return (
@@ -51,116 +53,118 @@ export default function App() {
           pauseOnHover
           theme="colored"
         />
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route
-            path="/tenant"
-            element={
-              <ProtectedRoute requiredRole="tenant">
-                <TenantDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/tenant/properties"
-            element={
-              <ProtectedRoute requiredRole="tenant">
-                <TenantProperty />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/tenant/messages"
-            element={
-              <ProtectedRoute requiredRole="tenant">
-                <TenantMessage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/tenant/maintenance"
-            element={
-              <ProtectedRoute requiredRole="tenant">
-                <TenantMaintenance />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/tenant/payment"
-            element={
-              <ProtectedRoute requiredRole="tenant">
-                <TenantPayment />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/tenant/profile"
-            element={
-              <ProtectedRoute requiredRole="tenant">
-                <UpdateTenantProfile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/landlord"
-            element={
-              <ProtectedRoute requiredRole="landlord">
-                <LandlordDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/landlord/properties"
-            element={
-              <ProtectedRoute requiredRole="landlord">
-                <LandlordProperty />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/landlord/messages"
-            element={
-              <ProtectedRoute requiredRole="landlord">
-                <LandlordMessage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/landlord/maintenance"
-            element={
-              <ProtectedRoute requiredRole="landlord">
-                <LandlordMaintenance />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/landlord/payment"
-            element={
-              <ProtectedRoute requiredRole="landlord">
-                <LandlordPayment />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/landlord/tenants"
-            element={
-              <ProtectedRoute requiredRole="landlord">
-                <LandlordTenant />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/landlord/profile"
-            element={
-              <ProtectedRoute requiredRole="landlord">
-                <UpdateLandlordProfile />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+        <Suspense fallback={<AppLoader />}>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route
+              path="/tenant"
+              element={
+                <ProtectedRoute requiredRole="tenant">
+                  <TenantDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tenant/properties"
+              element={
+                <ProtectedRoute requiredRole="tenant">
+                  <TenantProperty />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tenant/messages"
+              element={
+                <ProtectedRoute requiredRole="tenant">
+                  <TenantMessage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tenant/maintenance"
+              element={
+                <ProtectedRoute requiredRole="tenant">
+                  <TenantMaintenance />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tenant/payment"
+              element={
+                <ProtectedRoute requiredRole="tenant">
+                  <TenantPayment />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tenant/profile"
+              element={
+                <ProtectedRoute requiredRole="tenant">
+                  <UpdateTenantProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/landlord"
+              element={
+                <ProtectedRoute requiredRole="landlord">
+                  <LandlordDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/landlord/properties"
+              element={
+                <ProtectedRoute requiredRole="landlord">
+                  <LandlordProperty />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/landlord/messages"
+              element={
+                <ProtectedRoute requiredRole="landlord">
+                  <LandlordMessage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/landlord/maintenance"
+              element={
+                <ProtectedRoute requiredRole="landlord">
+                  <LandlordMaintenance />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/landlord/payment"
+              element={
+                <ProtectedRoute requiredRole="landlord">
+                  <LandlordPayment />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/landlord/tenants"
+              element={
+                <ProtectedRoute requiredRole="landlord">
+                  <LandlordTenant />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/landlord/profile"
+              element={
+                <ProtectedRoute requiredRole="landlord">
+                  <UpdateLandlordProfile />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </Suspense>
       </div>
     </DarkModeProvider>
   );
