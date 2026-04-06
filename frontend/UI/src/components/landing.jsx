@@ -1,4 +1,4 @@
-﻿﻿import { useEffect, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import { useDarkMode } from '../useDarkMode.js';
 import { Link } from 'react-router-dom';
 import { Home, Building, Info, DollarSign, Users, HelpCircle, Menu, X, BookOpen } from 'lucide-react';
@@ -360,13 +360,13 @@ export default function Landing() {
 
             {/* Right Side Actions */}
             <div className="flex items-center gap-4 sm:gap-8 flex-shrink-0">
-              {/* SignUp Button - Hidden on mobile and small tablets */}
+              {/* Login Button - Hidden on mobile and small tablets */}
               <Link
-                to="/signup"
+                to="/login"
                 className={`hidden lg:inline-block px-3 xl:px-4 py-2 text-sm xl:text-base rounded whitespace-nowrap transition-transform hover:scale-105 ${darkMode ? 'bg-cyan-500 hover:bg-cyan-400 text-blue-950' : 'bg-indigo-600 hover:bg-indigo-700 text-white'
                   }`}
               >
-                SignUp
+                Login
               </Link>
 
               {/* Dark Mode Toggle Button */}
@@ -427,14 +427,14 @@ export default function Landing() {
             ))}
             <li role="none" className="px-6 py-3">
               <Link
-                to="/signup"
+                to="/login"
                 className={`block px-4 py-2 rounded text-center font-semibold transition ${darkMode
                   ? 'bg-cyan-500 text-blue-950 hover:bg-cyan-400'
                   : 'bg-indigo-600 text-white hover:bg-indigo-700'
                   }`}
                 onClick={() => setMenuOpen(false)}
               >
-                SignUp
+                Login
               </Link>
             </li>
           </ul>
@@ -466,9 +466,9 @@ export default function Landing() {
           </p>
 
           {/* Primary CTA */}
-          <Link to="/signup"
+          <Link to="/login"
             className={`px-6 py-3 sm:px-8 sm:py-4 rounded-full font-semibold text-base sm:text-lg shadow-lg transition-transform hover:scale-105 ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-white text-indigo-600 hover:bg-indigo-100 transition-transform hover:scale-105'}`}>
-            Get Started
+            Login
           </Link>
 
           {/* Secondary CTA */}

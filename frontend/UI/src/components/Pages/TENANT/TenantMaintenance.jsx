@@ -556,9 +556,12 @@ const TenantMaintenance = () => {
                   placeholder="Search requests..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full border-2 border-gray-200 rounded-xl px-6 py-4 pl-12 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 text-lg"
+                  className={`w-full border-2 rounded-xl px-6 py-4 pl-12 focus:outline-none focus:ring-4 transition-all duration-300 text-lg ${darkMode
+                    ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:ring-cyan-500/20 focus:border-cyan-500'
+                    : 'bg-white border-gray-200 text-gray-800 placeholder-gray-500 focus:ring-blue-500/20 focus:border-blue-500'
+                    }`}
                 />
-                <MagnifyingGlassIcon className="h-6 w-6 text-gray-400 absolute left-4 top-5" />
+                <MagnifyingGlassIcon className={`h-6 w-6 absolute left-4 top-5 ${darkMode ? 'text-slate-400' : 'text-gray-400'}`} />
               </div>
 
               {/* Filters */}
@@ -566,23 +569,31 @@ const TenantMaintenance = () => {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
+                  style={{ colorScheme: darkMode ? 'dark' : 'light' }}
+                  className={`border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 ${darkMode
+                    ? 'bg-slate-700 border-slate-600 text-white focus:ring-cyan-500/20 focus:border-cyan-500'
+                    : 'bg-white border-gray-200 text-gray-800 focus:ring-blue-500/20 focus:border-blue-500'
+                    }`}
                 >
-                  <option value="All">All Status</option>
-                  <option value="Pending">Pending</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Completed">Completed</option>
+                  <option className={darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'} value="All">All Status</option>
+                  <option className={darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'} value="Pending">Pending</option>
+                  <option className={darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'} value="In Progress">In Progress</option>
+                  <option className={darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'} value="Completed">Completed</option>
                 </select>
 
                 <select
                   value={priorityFilter}
                   onChange={(e) => setPriorityFilter(e.target.value)}
-                  className="border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
+                  style={{ colorScheme: darkMode ? 'dark' : 'light' }}
+                  className={`border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 ${darkMode
+                    ? 'bg-slate-700 border-slate-600 text-white focus:ring-cyan-500/20 focus:border-cyan-500'
+                    : 'bg-white border-gray-200 text-gray-800 focus:ring-blue-500/20 focus:border-blue-500'
+                    }`}
                 >
-                  <option value="All">All Priority</option>
-                  <option value="High">High Priority</option>
-                  <option value="Medium">Medium Priority</option>
-                  <option value="Low">Low Priority</option>
+                  <option className={darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'} value="All">All Priority</option>
+                  <option className={darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'} value="High">High Priority</option>
+                  <option className={darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'} value="Medium">Medium Priority</option>
+                  <option className={darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'} value="Low">Low Priority</option>
                 </select>
 
                 <GlowingButton

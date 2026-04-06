@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Search, Bell, Sun, Moon, User, Settings, HelpCircle, LogOut, ChevronDown, X, MessageSquare, Wrench, CreditCard, Home, Building2, Users, DollarSign } from 'lucide-react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import { Link } from 'react-router-dom';
+import { showConfirmToast } from '../../../utils/toast.jsx';
 
 const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
   const { darkMode: isDarkMode, toggleDarkMode } = useDarkMode();
@@ -15,10 +16,15 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
 
   // Logout handler function
   const handleLogout = () => {
-    // Clear authentication (example: remove token from localStorage)
-    localStorage.removeItem('authToken');
-    // Redirect to home page
-    window.location.href = '/';
+    showConfirmToast(
+      'Are you sure you want to logout?',
+      () => {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/';
+      }
+    );
   };
 
   const profileDropdownRef = useRef(null);

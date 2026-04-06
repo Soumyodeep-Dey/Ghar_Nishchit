@@ -581,7 +581,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
             </div>
 
             <div className="flex items-center space-x-4">
-              <StatusBadge status={request.status} priority={request.priority} />
+              <StatusBadge status={request.status} priority={request.priority} darkMode={darkMode} />
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
@@ -1444,25 +1444,27 @@ const LandlordMaintenance = () => {
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
+                      style={{ colorScheme: darkMode ? 'dark' : 'light' }}
                       className={`px-4 py-3 rounded-xl focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white' : 'bg-white/70 border border-indigo-200/50 text-indigo-900'}`}
                     >
-                      <option value="All">All Status</option>
-                      <option value="Pending">Pending</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="On Hold">On Hold</option>
-                      <option value="Completed">Completed</option>
-                      <option value="Cancelled">Cancelled</option>
+                      <option style={{ backgroundColor: darkMode ? '#0f172a' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }} value="All">All Status</option>
+                      <option style={{ backgroundColor: darkMode ? '#0f172a' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }} value="Pending">Pending</option>
+                      <option style={{ backgroundColor: darkMode ? '#0f172a' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }} value="In Progress">In Progress</option>
+                      <option style={{ backgroundColor: darkMode ? '#0f172a' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }} value="On Hold">On Hold</option>
+                      <option style={{ backgroundColor: darkMode ? '#0f172a' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }} value="Completed">Completed</option>
+                      <option style={{ backgroundColor: darkMode ? '#0f172a' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }} value="Cancelled">Cancelled</option>
                     </select>
 
                     <select
                       value={priorityFilter}
                       onChange={(e) => setPriorityFilter(e.target.value)}
+                      style={{ colorScheme: darkMode ? 'dark' : 'light' }}
                       className={`px-4 py-3 rounded-xl focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white' : 'bg-white/70 border border-indigo-200/50 text-indigo-900'}`}
                     >
-                      <option value="All">All Priority</option>
-                      <option value="High">High Priority</option>
-                      <option value="Medium">Medium Priority</option>
-                      <option value="Low">Low Priority</option>
+                      <option style={{ backgroundColor: darkMode ? '#0f172a' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }} value="All">All Priority</option>
+                      <option style={{ backgroundColor: darkMode ? '#0f172a' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }} value="High">High Priority</option>
+                      <option style={{ backgroundColor: darkMode ? '#0f172a' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }} value="Medium">Medium Priority</option>
+                      <option style={{ backgroundColor: darkMode ? '#0f172a' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }} value="Low">Low Priority</option>
                     </select>
 
                     <select
@@ -1484,13 +1486,14 @@ const LandlordMaintenance = () => {
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
+                      style={{ colorScheme: darkMode ? 'dark' : 'light' }}
                       className={`px-3 py-2 rounded-lg text-sm focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white' : 'bg-white/70 border border-indigo-200/50 text-indigo-900'}`}
                     >
-                      <option value="createdAt">Date Created</option>
-                      <option value="updatedAt">Last Updated</option>
-                      <option value="priority">Priority</option>
-                      <option value="status">Status</option>
-                      <option value="property">Property</option>
+                      <option className={darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'} value="createdAt">Date Created</option>
+                      <option className={darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'} value="updatedAt">Last Updated</option>
+                      <option className={darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'} value="priority">Priority</option>
+                      <option className={darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'} value="status">Status</option>
+                      <option className={darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'} value="property">Property</option>
                     </select>
 
                     <motion.button

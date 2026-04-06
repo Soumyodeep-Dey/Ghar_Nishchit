@@ -4,6 +4,7 @@ import TenantSideBar from './TenantSideBar.jsx';
 import TenantNavBar from './TenantNavBar.jsx';
 import api from '../../../services/api.js';
 import { showErrorToast } from '../../../utils/toast.jsx';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Wrench, BarChart3, TrendingUp, TrendingDown, Building2, Heart, Bell, CreditCard, Star, X
 } from 'lucide-react';
@@ -282,6 +283,8 @@ const Modal = React.memo(({ isOpen, onClose, title, children, size = "md" }) => 
 // Main Component
 const TenantDashboard = () => {
   const { darkMode } = useDarkMode();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [currentSection, setCurrentSection] = useState('Dashboard');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -507,17 +510,18 @@ const TenantDashboard = () => {
                 { key: 'overview', label: 'Overview', icon: BarChart3, action: 'tab' },
                 { key: 'properties', label: 'Properties', icon: Building2, action: 'navigate', route: '/tenant/properties' },
                 { key: 'maintenance', label: 'Maintenance', icon: Wrench, action: 'navigate', route: '/tenant/maintenance' }
-              ].map(({ key, label, icon: Icon, action }) => (
+              ].map(({ key, label, icon: Icon, action, route }) => (
                 <button
                   key={key}
                   onClick={() => {
                     if (action === 'tab') {
-                      setCurrentSection(key === 'overview' ? 'Dashboard' : key);
+                      setCurrentSection('Dashboard');
+                      navigate('/tenant');
                     } else if (action === 'navigate') {
-                      // Navigate to route
+                      navigate(route);
                     }
                   }}
-                  className={`flex items-center space-x-3 px-6 py-3 rounded-2xl font-bold text-sm relative overflow-hidden group ${currentSection === key && action === 'tab'
+                  className={`flex items-center space-x-3 px-6 py-3 rounded-2xl font-bold text-sm relative overflow-hidden group ${(action === 'tab' && location.pathname === '/tenant') || (action === 'navigate' && location.pathname === route)
                     ? `bg-gradient-to-r ${themeConfig.tabActive} ${themeConfig.tabActiveText}`
                     : `${themeConfig.tabInactive}`
                     }`}
@@ -543,14 +547,14 @@ const TenantDashboard = () => {
                         label: 'View Properties',
                         icon: Building2,
                         color: themeConfig.buttonPrimary,
-                        onClick: () => setCurrentSection('Properties'),
+                        onClick: () => navigate('/tenant/properties'),
                         description: 'Browse available rentals'
                       },
                       {
                         label: 'Request Maintenance',
                         icon: Wrench,
                         color: themeConfig.buttonPrimary,
-                        onClick: () => setCurrentSection('Maintenance'),
+                        onClick: () => navigate('/tenant/maintenance'),
                         description: 'Report issues'
                       },
                       {
