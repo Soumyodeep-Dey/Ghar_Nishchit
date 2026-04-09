@@ -350,6 +350,7 @@ const TenantProperty = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState('title');
   const [priceRange, setPriceRange] = useState([0, 500000]);
+  const [favoriteUpdatingIds, setFavoriteUpdatingIds] = useState([]);
 
   // Fetch properties from backend
   useEffect(() => {
@@ -415,40 +416,39 @@ const TenantProperty = () => {
     fetchProperties();
   }, []);
 
-  const toggleFavorite = useCallback((id) => {
-    setProperties((prev) => {
-      const current = prev.find((p) => p.id === id);
-      const nextFav = !current?.favorite;
+  const toggleFavorite = useCallback(async (id) => {
+    const property = properties.find((p) => p.id === id);
+    if (!property) return;
 
-      // Optimistic update
-      const next = prev.map((property) =>
-        property.id === id ? { ...property, favorite: nextFav } : property
+    // Prevent duplicate API calls/toasts while one request is in flight
+    if (favoriteUpdatingIds.includes(id)) return;
+
+    const nextFav = !property.favorite;
+
+    // Optimistic UI update (pure state update)
+    setProperties((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, favorite: nextFav } : p))
+    );
+    setFavoriteUpdatingIds((prev) => [...prev, id]);
+
+    try {
+      if (nextFav) {
+        await api.addFavourite(id);
+        showSuccessToast('Added to favourites');
+      } else {
+        await api.removeFavourite(id);
+        showSuccessToast('Removed from favourites');
+      }
+    } catch (err) {
+      // Rollback on failure
+      setProperties((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, favorite: !nextFav } : p))
       );
-
-      // Persist to backend
-      (async () => {
-        try {
-          if (nextFav) {
-            await api.addFavourite(id);
-            showSuccessToast('Added to favourites');
-          } else {
-            await api.removeFavourite(id);
-            showSuccessToast('Removed from favourites');
-          }
-        } catch (err) {
-          // Rollback on failure
-          setProperties((rollbackPrev) =>
-            rollbackPrev.map((p) =>
-              p.id === id ? { ...p, favorite: !nextFav } : p
-            )
-          );
-          showErrorToast(err?.message || 'Failed to update favourites');
-        }
-      })();
-
-      return next;
-    });
-  }, []);
+      showErrorToast(err?.message || 'Failed to update favourites');
+    } finally {
+      setFavoriteUpdatingIds((prev) => prev.filter((updatingId) => updatingId !== id));
+    }
+  }, [properties, favoriteUpdatingIds]);
 
   const extractPrice = (priceString) => {
     return parseInt(priceString.replace(/[^0-9]/g, ''));
