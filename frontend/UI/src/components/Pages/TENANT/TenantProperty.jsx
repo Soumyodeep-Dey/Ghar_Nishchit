@@ -387,6 +387,23 @@ const TenantProperty = () => {
         });
 
         setProperties(transformedProperties);
+
+        // Fetch favourites and mark properties accordingly
+        try {
+          const favourites = await api.getFavourites();
+          const favIds = new Set(
+            (Array.isArray(favourites) ? favourites : []).map((p) => String(p?._id || p?.id)).filter(Boolean)
+          );
+          setProperties((prev) =>
+            prev.map((p) => ({
+              ...p,
+              favorite: favIds.has(String(p.id)),
+            }))
+          );
+        } catch (favErr) {
+          // Non-blocking: still show properties even if favourites fail
+          console.warn('Failed to load favourites', favErr?.message || favErr);
+        }
       } catch (error) {
         console.error('Error fetching properties:', error);
         showErrorToast('Failed to load properties');
@@ -399,15 +416,38 @@ const TenantProperty = () => {
   }, []);
 
   const toggleFavorite = useCallback((id) => {
-    setProperties(prev =>
-      prev.map(property =>
-        property.id === id
-          ? { ...property, favorite: !property.favorite }
-          : property
-      )
-    );
-    // TODO: Call API to save favorite
-    showSuccessToast('Favorite updated');
+    setProperties((prev) => {
+      const current = prev.find((p) => p.id === id);
+      const nextFav = !current?.favorite;
+
+      // Optimistic update
+      const next = prev.map((property) =>
+        property.id === id ? { ...property, favorite: nextFav } : property
+      );
+
+      // Persist to backend
+      (async () => {
+        try {
+          if (nextFav) {
+            await api.addFavourite(id);
+            showSuccessToast('Added to favourites');
+          } else {
+            await api.removeFavourite(id);
+            showSuccessToast('Removed from favourites');
+          }
+        } catch (err) {
+          // Rollback on failure
+          setProperties((rollbackPrev) =>
+            rollbackPrev.map((p) =>
+              p.id === id ? { ...p, favorite: !nextFav } : p
+            )
+          );
+          showErrorToast(err?.message || 'Failed to update favourites');
+        }
+      })();
+
+      return next;
+    });
   }, []);
 
   const extractPrice = (priceString) => {
@@ -477,10 +517,10 @@ const TenantProperty = () => {
           {/* Hero Section */}
           <div className="mb-8 animate-fadeIn">
             <div className="text-center mb-6">
-              <h1 className="text-4xl font-bold text-gray-800 mb-2 animate-slideDown">
+              <h1 className={`text-4xl font-bold mb-2 animate-slideDown ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>
                 Find Your Perfect Home
               </h1>
-              <p className="text-gray-600 text-lg animate-slideUp">
+              <p className={`text-lg animate-slideUp ${darkMode ? 'text-slate-200' : 'text-gray-600'}`}>
                 Discover amazing properties tailored to your lifestyle
               </p>
             </div>

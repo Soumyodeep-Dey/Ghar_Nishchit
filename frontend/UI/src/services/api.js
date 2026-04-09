@@ -86,6 +86,11 @@ const api = {
     deleteProperty: (id) => request(`/properties/${id}`, { method: 'DELETE' }),
     getPropertiesByUser: (userId) => request(`/properties/user/${userId}`, { method: 'GET' }),
 
+    // Favourites (Tenant)
+    getFavourites: () => request('/favourites', { method: 'GET' }),
+    addFavourite: (propertyId) => request('/favourites/add', { method: 'POST', body: JSON.stringify({ propertyId }) }),
+    removeFavourite: (propertyId) => request('/favourites/remove', { method: 'POST', body: JSON.stringify({ propertyId }) }),
+
     // Auth/profile
     getProfile: () => request('/auth/profile', { method: 'GET' }),
     updateProfile: (data) => request('/auth/profile', { method: 'PUT', body: JSON.stringify(data) }),
