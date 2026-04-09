@@ -5,7 +5,7 @@ import AddNewPropertyModal from './AddNewPropertyModal';
 import { useDarkMode } from '../../../useDarkMode.js';
 // Removed SidebarContext usage
 import {
-  Building2, Plus, Search, MoreVertical, Edit, Trash2, Eye, MapPin, Bed, Bath, Car, Wifi, Tv, AirVent, Maximize, Heart, ChevronLeft, ChevronRight, ChevronDown, RefreshCw, Download, Share2, Star, TrendingUp, TrendingDown, Users, DollarSign, CheckCircle, Settings, Grid3X3, List, SortAsc, SortDesc
+  Building2, Plus, Search, MoreVertical, Edit, Trash2, Eye, MapPin, Bed, Bath, Car, Wifi, Tv, AirVent, Maximize, Heart, ChevronLeft, ChevronRight, ChevronDown, RefreshCw, Download, Share2, Star, TrendingUp, TrendingDown, Users, DollarSign, CheckCircle, Settings, X, Grid3X3, List, SortAsc, SortDesc
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../services/api.js';
@@ -211,6 +211,123 @@ const PropertyDropdownMenu = ({ property, onEdit, onDelete, onView, onToggleStat
         </motion.div>
       )}
     </AnimatePresence>
+  );
+};
+
+// Simple read-only Property Details Modal
+const PropertyDetailsModal = ({ isOpen, onClose, property, isDark }) => {
+  if (!isOpen || !property) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+      onClick={onClose}
+    >
+      <div
+        className={`max-w-3xl w-full rounded-2xl shadow-2xl overflow-hidden ${isDark ? 'bg-slate-900 text-slate-100' : 'bg-white text-slate-900'}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700/40">
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <Building2 className="w-5 h-5" />
+            <span>Property Details</span>
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full hover:bg-slate-800/70 text-slate-300"
+            aria-label="Close"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="px-6 py-4 grid md:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Building2 className="w-4 h-4" />
+              <span>{property.title}</span>
+            </h3>
+            <p className="text-sm opacity-80 flex items-center gap-1">
+              <MapPin className="w-4 h-4" />
+              <span>{property.location || 'No location specified'}</span>
+            </p>
+            {property.description && (
+              <p className="text-sm opacity-90">{property.description}</p>
+            )}
+            <div className="flex flex-wrap gap-3 text-sm mt-2">
+              <span className="flex items-center gap-1">
+                <Bed className="w-4 h-4" />
+                <span>{property.bedrooms} bed</span>
+              </span>
+              <span className="flex items-center gap-1">
+                <Bath className="w-4 h-4" />
+                <span>{property.bathrooms} bath</span>
+              </span>
+              <span className="flex items-center gap-1">
+                <Maximize className="w-4 h-4" />
+                <span>{property.area} sq ft</span>
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <p className="text-xs uppercase tracking-wide opacity-60 mb-1">
+                Rent
+              </p>
+              <p className="text-2xl font-bold">
+                ${property.rent}
+                <span className="text-sm opacity-70"> / month</span>
+              </p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-wide opacity-60 mb-1">
+                Status
+              </p>
+              <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-slate-800/80">
+                <CheckCircle className="w-3 h-3" />
+                <span>{property.status}</span>
+              </p>
+            </div>
+            {Array.isArray(property.amenities) && property.amenities.length > 0 && (
+              <div>
+                <p className="text-xs uppercase tracking-wide opacity-60 mb-1">
+                  Amenities
+                </p>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  {property.amenities.map((a, i) => (
+                    <span
+                      key={`${a}-${i}`}
+                      className="px-2 py-1 rounded-full bg-slate-800/70"
+                    >
+                      {a}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {property.images && property.images.length > 0 && (
+          <div className="px-6 pb-4">
+            <p className="text-xs uppercase tracking-wide opacity-60 mb-1">
+              Images
+            </p>
+            <div className="flex gap-3 overflow-x-auto pb-2">
+              {property.images.map((src, idx) => (
+                <img
+                  key={idx}
+                  src={src}
+                  alt={`${property.title} ${idx + 1}`}
+                  className="h-20 w-32 object-cover rounded-lg border border-slate-700/60 flex-shrink-0"
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
@@ -618,6 +735,8 @@ const LandlordProperty = () => {
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [modalMode, setModalMode] = useState('add');
+  const [detailsProperty, setDetailsProperty] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   // isLoading state removed — not used
 
   // Filter and sort properties
@@ -732,8 +851,8 @@ const LandlordProperty = () => {
   };
 
   const handleViewProperty = (property) => {
-    // Implement view functionality
-    console.log('View property:', property);
+    setDetailsProperty(property);
+    setShowDetailsModal(true);
   };
 
   const handleDeleteProperty = (propertyId) => {
@@ -1092,7 +1211,7 @@ const LandlordProperty = () => {
         </main>
       </div>
 
-      {/* Add New Property Modal (standardized) */}
+      {/* Add / Edit Property Modal (standardized) */}
       <AddNewPropertyModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
@@ -1100,6 +1219,14 @@ const LandlordProperty = () => {
         mode={modalMode}
         property={selectedProperty}
         onSave={handleSaveProperty}
+      />
+
+      {/* Read-only Property Details Modal for View action */}
+      <PropertyDetailsModal
+        isOpen={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+        property={detailsProperty}
+        isDark={darkMode}
       />
     </div>
   );
