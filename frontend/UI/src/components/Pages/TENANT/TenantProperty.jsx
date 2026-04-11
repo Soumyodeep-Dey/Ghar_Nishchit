@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
@@ -65,7 +66,7 @@ const PropertyCardSkeleton = () => {
 };
 
 // Enhanced Property Card Component
-const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, index }) => {
+const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, onContact, index }) => {
   const [setRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -167,7 +168,14 @@ const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, in
                 <EyeIcon className="h-5 w-5 mr-1" />
                 View Details
               </button>
-              <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center">
+              {/* Task 1 Fix: Contact button now navigates to messages with landlord pre-selected */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onContact(property);
+                }}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center"
+              >
                 <CurrencyDollarIcon className="h-4 w-4 mr-1" />
                 Contact
               </button>
@@ -180,7 +188,7 @@ const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, in
 });
 
 // Enhanced Modal Component
-const PropertyModal = ({ property, isOpen, onClose, onToggleFavorite }) => {
+const PropertyModal = ({ property, isOpen, onClose, onToggleFavorite, onContact }) => {
   const [isClosing, setIsClosing] = useState(false);
 
   const handleClose = useCallback(() => {
@@ -323,7 +331,11 @@ const PropertyModal = ({ property, isOpen, onClose, onToggleFavorite }) => {
                       <CalendarIcon className="h-5 w-5 mr-2" />
                       Schedule Visit
                     </button>
-                    <button className="w-full bg-gray-100 text-gray-800 py-4 rounded-xl hover:bg-gray-200 transition-all duration-300 flex items-center justify-center font-semibold">
+                    {/* Task 1 Fix: Contact Landlord button in modal also navigates to messages */}
+                    <button
+                      onClick={() => onContact(property)}
+                      className="w-full bg-gray-100 text-gray-800 py-4 rounded-xl hover:bg-gray-200 transition-all duration-300 flex items-center justify-center font-semibold"
+                    >
                       <CurrencyDollarIcon className="h-5 w-5 mr-2" />
                       Contact Landlord
                     </button>
@@ -341,6 +353,7 @@ const PropertyModal = ({ property, isOpen, onClose, onToggleFavorite }) => {
 // Main Component
 const TenantProperty = () => {
   const { darkMode } = useDarkMode();
+  const navigate = useNavigate();
 
   // State - data from API
   const [properties, setProperties] = useState([]);
@@ -349,7 +362,7 @@ const TenantProperty = () => {
   const [filter, setFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState('title');
-  const [priceRange, setPriceRange] = useState([0, 500000]);
+  const [priceRange, setPriceRange] = useState([0, 5000]);
 
   // Fetch properties from backend
   useEffect(() => {
@@ -382,6 +395,8 @@ const TenantProperty = () => {
             image: prop.images && prop.images.length > 0 ? prop.images[0] : 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect width="400" height="300" fill="%23e5e7eb"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="24" fill="%239ca3af"%3ENo Image%3C/text%3E%3C/svg%3E',
             bedrooms: prop.bedrooms || 0,
             bathrooms: prop.bathrooms || 0,
+            landlordId: prop.landlordId || prop.owner || null,
+            landlordName: prop.landlordName || prop.ownerName || 'Landlord',
             favorite: false // Will be managed locally or fetched from favorites API
           };
         });
@@ -397,6 +412,19 @@ const TenantProperty = () => {
 
     fetchProperties();
   }, []);
+
+  // Task 1 Fix: Navigate to messages page with landlord pre-selected
+  const handleContact = useCallback((property) => {
+    navigate('/tenant/messages', {
+      state: {
+        contactLandlord: true,
+        landlordId: property.landlordId,
+        landlordName: property.landlordName || 'Landlord',
+        propertyTitle: property.title,
+        propertyId: property.id,
+      }
+    });
+  }, [navigate]);
 
   const toggleFavorite = useCallback((id) => {
     setProperties(prev =>
@@ -586,6 +614,7 @@ const TenantProperty = () => {
                     property={property}
                     onToggleFavorite={toggleFavorite}
                     onViewDetails={setSelectedProperty}
+                    onContact={handleContact}
                     index={index}
                   />
                 ))}
@@ -609,7 +638,7 @@ const TenantProperty = () => {
               </div>
               <div className="text-center p-6 rounded-xl bg-gradient-to-br from-green-50 to-green-100 hover:scale-105 transition-transform duration-300">
                 <div className="text-3xl font-bold text-green-600">
-                  ${Math.round(properties.reduce((sum, p) => sum + extractPrice(p.price), 0) / properties.length)}
+                  ${properties.length > 0 ? Math.round(properties.reduce((sum, p) => sum + extractPrice(p.price), 0) / properties.length) : 0}
                 </div>
                 <div className="text-gray-600">Average Price</div>
               </div>
@@ -623,6 +652,7 @@ const TenantProperty = () => {
           isOpen={!!selectedProperty}
           onClose={() => setSelectedProperty(null)}
           onToggleFavorite={toggleFavorite}
+          onContact={handleContact}
         />
       </div>
 
