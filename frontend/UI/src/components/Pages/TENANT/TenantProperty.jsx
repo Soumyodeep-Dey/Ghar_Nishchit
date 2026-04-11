@@ -65,8 +65,197 @@ const PropertyCardSkeleton = () => {
   );
 };
 
+// ─── Task 2: Schedule Visit Modal ────────────────────────────────────────────
+const ScheduleVisitModal = ({ property, isOpen, onClose }) => {
+  const { darkMode } = useDarkMode();
+  const [visitDate, setVisitDate] = useState('');
+  const [visitTime, setVisitTime] = useState('10:00');
+  const [message, setMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+
+  // Reset form when opened for a new property
+  useEffect(() => {
+    if (isOpen) {
+      setVisitDate('');
+      setVisitTime('10:00');
+      setMessage('');
+    }
+  }, [isOpen, property?.id]);
+
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 300);
+  }, [onClose]);
+
+  useEffect(() => {
+    const handleEscape = (e) => { if (e.key === 'Escape') handleClose(); };
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [isOpen, handleClose]);
+
+  // Minimum date = tomorrow
+  const minDate = new Date();
+  minDate.setDate(minDate.getDate() + 1);
+  const minDateStr = minDate.toISOString().split('T')[0];
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!visitDate) { showErrorToast('Please select a visit date'); return; }
+
+    setIsSubmitting(true);
+    try {
+      await api.scheduleVisit({
+        propertyId: property.id,
+        landlordId: property.landlordId,
+        visitDate,
+        visitTime,
+        message: message.trim() || undefined,
+      });
+      showSuccessToast('Visit scheduled successfully! The landlord will be notified.');
+      handleClose();
+    } catch (err) {
+      console.error('Schedule visit error:', err);
+      showErrorToast(err?.response?.data?.message || 'Failed to schedule visit. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!isOpen && !isClosing) return null;
+
+  return (
+    <div
+      className={`fixed inset-0 z-[60] flex items-center justify-center transition-all duration-300 ${isOpen && !isClosing ? 'opacity-100' : 'opacity-0'}`}
+      style={{ backgroundColor: 'rgba(0,0,0,0.75)' }}
+      onClick={handleClose}
+    >
+      <div
+        className={`${darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'} rounded-2xl shadow-2xl w-full max-w-md mx-4 transform transition-all duration-300 ${isOpen && !isClosing ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className={`flex items-center justify-between p-6 border-b ${darkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 rounded-xl">
+              <CalendarIcon className="h-6 w-6 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg">Schedule a Visit</h3>
+              <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-500'} truncate max-w-[200px]`}>
+                {property?.title}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handleClose}
+            className={`p-2 rounded-full ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-gray-100'} transition-colors duration-200`}
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          {/* Date picker */}
+          <div>
+            <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+              Preferred Date <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              value={visitDate}
+              min={minDateStr}
+              onChange={(e) => setVisitDate(e.target.value)}
+              required
+              className={`w-full border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 ${darkMode
+                ? 'bg-slate-700 border-slate-600 text-white focus:ring-cyan-500/20 focus:border-cyan-500'
+                : 'bg-white border-gray-200 text-gray-800 focus:ring-blue-500/20 focus:border-blue-500'}`}
+            />
+          </div>
+
+          {/* Time picker */}
+          <div>
+            <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+              Preferred Time
+            </label>
+            <select
+              value={visitTime}
+              onChange={(e) => setVisitTime(e.target.value)}
+              className={`w-full border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 ${darkMode
+                ? 'bg-slate-700 border-slate-600 text-white focus:ring-cyan-500/20 focus:border-cyan-500'
+                : 'bg-white border-gray-200 text-gray-800 focus:ring-blue-500/20 focus:border-blue-500'}`}
+            >
+              {['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'].map(t => (
+                <option key={t} value={t}>
+                  {new Date(`2000-01-01T${t}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Optional message */}
+          <div>
+            <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+              Message to Landlord <span className={`text-xs ${darkMode ? 'text-slate-500' : 'text-gray-400'}`}>(optional)</span>
+            </label>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              rows={3}
+              placeholder="e.g. I'm interested in a 12-month lease. Can we also discuss parking?"
+              className={`w-full border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 resize-none ${darkMode
+                ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:ring-cyan-500/20 focus:border-cyan-500'
+                : 'bg-white border-gray-200 text-gray-800 placeholder-gray-400 focus:ring-blue-500/20 focus:border-blue-500'}`}
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={handleClose}
+              className={`flex-1 py-3 rounded-xl border-2 font-semibold transition-all duration-300 ${darkMode
+                ? 'border-slate-600 text-slate-300 hover:bg-slate-700'
+                : 'border-gray-200 text-gray-700 hover:bg-gray-50'}`}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:shadow-lg hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-2"
+            >
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  </svg>
+                  Scheduling…
+                </>
+              ) : (
+                <>
+                  <CalendarIcon className="h-4 w-4" />
+                  Confirm Visit
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+// ─────────────────────────────────────────────────────────────────────────────
+
 // Enhanced Property Card Component
-const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, onContact, index }) => {
+const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, onContact, onScheduleVisit, index }) => {
   const [setRef, isVisible] = useIntersectionObserver({ threshold: 0.1 });
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -160,7 +349,7 @@ const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, on
               </div>
             </div>
 
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center gap-2">
               <button
                 onClick={() => onViewDetails(property)}
                 className={`flex items-center ${darkMode ? 'text-cyan-400 hover:text-cyan-300' : 'text-blue-600 hover:text-blue-800'} transition-colors duration-200 font-medium`}
@@ -168,7 +357,20 @@ const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, on
                 <EyeIcon className="h-5 w-5 mr-1" />
                 View Details
               </button>
-              {/* Task 1 Fix: Contact button now navigates to messages with landlord pre-selected */}
+              {/* Task 2: Schedule Visit button on card */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onScheduleVisit(property);
+                }}
+                className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:scale-105 ${darkMode
+                  ? 'bg-slate-700 text-cyan-400 hover:bg-slate-600'
+                  : 'bg-blue-50 text-blue-600 hover:bg-blue-100'}`}
+              >
+                <CalendarIcon className="h-4 w-4 mr-1" />
+                Visit
+              </button>
+              {/* Task 1 Fix: Contact button navigates to messages with landlord pre-selected */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -188,7 +390,7 @@ const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, on
 });
 
 // Enhanced Modal Component
-const PropertyModal = ({ property, isOpen, onClose, onToggleFavorite, onContact }) => {
+const PropertyModal = ({ property, isOpen, onClose, onToggleFavorite, onContact, onScheduleVisit }) => {
   const [isClosing, setIsClosing] = useState(false);
 
   const handleClose = useCallback(() => {
@@ -327,7 +529,15 @@ const PropertyModal = ({ property, isOpen, onClose, onToggleFavorite, onContact 
 
                   {/* Action Buttons */}
                   <div className="space-y-3">
-                    <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center justify-center font-semibold">
+                    {/* Task 2: Schedule Visit button in modal now opens the ScheduleVisitModal */}
+                    <button
+                      onClick={() => {
+                        handleClose();
+                        // slight delay so the property modal closes first
+                        setTimeout(() => onScheduleVisit(property), 310);
+                      }}
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center justify-center font-semibold"
+                    >
                       <CalendarIcon className="h-5 w-5 mr-2" />
                       Schedule Visit
                     </button>
@@ -358,6 +568,7 @@ const TenantProperty = () => {
   // State - data from API
   const [properties, setProperties] = useState([]);
   const [selectedProperty, setSelectedProperty] = useState(null);
+  const [scheduleProperty, setScheduleProperty] = useState(null); // Task 2
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
@@ -425,6 +636,11 @@ const TenantProperty = () => {
       }
     });
   }, [navigate]);
+
+  // Task 2: Open Schedule Visit modal
+  const handleScheduleVisit = useCallback((property) => {
+    setScheduleProperty(property);
+  }, []);
 
   const toggleFavorite = useCallback((id) => {
     setProperties(prev =>
@@ -615,6 +831,7 @@ const TenantProperty = () => {
                     onToggleFavorite={toggleFavorite}
                     onViewDetails={setSelectedProperty}
                     onContact={handleContact}
+                    onScheduleVisit={handleScheduleVisit}
                     index={index}
                   />
                 ))}
@@ -653,6 +870,14 @@ const TenantProperty = () => {
           onClose={() => setSelectedProperty(null)}
           onToggleFavorite={toggleFavorite}
           onContact={handleContact}
+          onScheduleVisit={handleScheduleVisit}
+        />
+
+        {/* Task 2: Schedule Visit Modal */}
+        <ScheduleVisitModal
+          property={scheduleProperty}
+          isOpen={!!scheduleProperty}
+          onClose={() => setScheduleProperty(null)}
         />
       </div>
 
