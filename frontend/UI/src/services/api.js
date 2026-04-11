@@ -126,6 +126,40 @@ const api = {
 
     // Statistics
     getMaintenanceStats: (landlordId) => request(`/maintenance/stats/${landlordId}`, { method: 'GET' }),
+
+    // ── Visit Scheduling (Task 3) ────────────────────────────────────────────
+    // Tenant: schedule a property visit
+    // payload: { propertyId, landlordId, visitDate, visitTime, message? }
+    scheduleVisit: (data) =>
+        request('/visits', { method: 'POST', body: JSON.stringify(data) }),
+
+    // Tenant: get all visits for the logged-in tenant
+    getMyVisits: (filters = {}) => {
+        const params = new URLSearchParams(filters).toString();
+        return request(`/visits/my${params ? '?' + params : ''}`, { method: 'GET' });
+    },
+
+    // Landlord: get all visit requests for properties they own
+    getLandlordVisits: (filters = {}) => {
+        const params = new URLSearchParams(filters).toString();
+        return request(`/visits/landlord${params ? '?' + params : ''}`, { method: 'GET' });
+    },
+
+    // Get a single visit by ID
+    getVisitById: (id) => request(`/visits/${id}`, { method: 'GET' }),
+
+    // Landlord: approve or reject a visit request
+    // status: 'approved' | 'rejected'
+    updateVisitStatus: (id, status, reason) =>
+        request(`/visits/${id}/status`, {
+            method: 'PATCH',
+            body: JSON.stringify({ status, ...(reason ? { reason } : {}) }),
+        }),
+
+    // Tenant: cancel a scheduled visit
+    cancelVisit: (id) =>
+        request(`/visits/${id}`, { method: 'DELETE' }),
+    // ────────────────────────────────────────────────────────────────────────
 };
 
 export default api;
