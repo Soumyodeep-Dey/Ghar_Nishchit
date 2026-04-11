@@ -11,7 +11,6 @@ const BASE = (() => {
 })();
 
 const getAuthHeader = () => {
-    // Prefer 'token' (set by Login.jsx), fall back to 'authToken' if present
     const token = localStorage.getItem('token') || localStorage.getItem('authToken');
     return token ? { Authorization: `Bearer ${token}` } : {};
 };
@@ -23,17 +22,12 @@ async function request(path, options = {}) {
         ...getAuthHeader()
     };
 
-    // Quiet logs in production; remove verbose request logging
-
     try {
         const res = await fetch(`${BASE}${path}`, { ...options, headers });
-
-        // Quiet logs in production; avoid noisy response logging
 
         if (!res.ok) {
             let errorData = null;
             const contentType = res.headers.get('content-type') || '';
-
             try {
                 if (contentType.includes('application/json')) {
                     errorData = await res.json();
@@ -43,10 +37,7 @@ async function request(path, options = {}) {
             } catch (parseError) {
                 console.error('Error parsing error response:', parseError);
             }
-
-            // Keep a concise error log for debugging
             console.error('API error', res.status, errorData);
-
             const err = new Error(
                 errorData?.message ||
                 errorData?.error ||
@@ -58,7 +49,6 @@ async function request(path, options = {}) {
             throw err;
         }
 
-        // No content
         if (res.status === 204) return null;
 
         const contentType = res.headers.get('content-type') || '';
@@ -68,7 +58,6 @@ async function request(path, options = {}) {
         }
         return res.text();
     } catch (error) {
-        // Network error or fetch failed
         if (!error.status) {
             console.error('Network error:', error);
             error.message = 'Network error: Unable to connect to server';
@@ -98,10 +87,7 @@ const api = {
     getTenantStats: () => request('/tenants/stats', { method: 'GET' }),
 
     // Maintenance Management
-    // Create new maintenance request
     createMaintenanceRequest: (data) => request('/maintenance', { method: 'POST', body: JSON.stringify(data) }),
-
-    // Get maintenance requests
     getLandlordMaintenanceRequests: (landlordId, filters = {}) => {
         const params = new URLSearchParams(filters).toString();
         return request(`/maintenance/landlord/${landlordId}${params ? '?' + params : ''}`, { method: 'GET' });
@@ -112,53 +98,42 @@ const api = {
     },
     getMaintenanceRequestById: (id) => request(`/maintenance/${id}`, { method: 'GET' }),
     getMaintenanceByProperty: (propertyId) => request(`/maintenance/property/${propertyId}`, { method: 'GET' }),
-
-    // Update maintenance requests
     updateMaintenanceRequest: (id, data) => request(`/maintenance/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     updateMaintenanceStatus: (id, status) => request(`/maintenance/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
-
-    // Comments and assignments
     addMaintenanceComment: (id, comment) => request(`/maintenance/${id}/comment`, { method: 'POST', body: JSON.stringify(comment) }),
     assignTechnician: (id, assignmentData) => request(`/maintenance/${id}/assign`, { method: 'PATCH', body: JSON.stringify(assignmentData) }),
-
-    // Delete maintenance request
     deleteMaintenanceRequest: (id) => request(`/maintenance/${id}`, { method: 'DELETE' }),
-
-    // Statistics
     getMaintenanceStats: (landlordId) => request(`/maintenance/stats/${landlordId}`, { method: 'GET' }),
 
-    // ── Visit Scheduling (Task 3) ────────────────────────────────────────────
-    // Tenant: schedule a property visit
-    // payload: { propertyId, landlordId, visitDate, visitTime, message? }
+    // ── Visit Scheduling ────────────────────────────────────────────────────
     scheduleVisit: (data) =>
         request('/visits', { method: 'POST', body: JSON.stringify(data) }),
-
-    // Tenant: get all visits for the logged-in tenant
     getMyVisits: (filters = {}) => {
         const params = new URLSearchParams(filters).toString();
         return request(`/visits/my${params ? '?' + params : ''}`, { method: 'GET' });
     },
-
-    // Landlord: get all visit requests for properties they own
     getLandlordVisits: (filters = {}) => {
         const params = new URLSearchParams(filters).toString();
         return request(`/visits/landlord${params ? '?' + params : ''}`, { method: 'GET' });
     },
-
-    // Get a single visit by ID
     getVisitById: (id) => request(`/visits/${id}`, { method: 'GET' }),
-
-    // Landlord: approve or reject a visit request
-    // status: 'approved' | 'rejected'
     updateVisitStatus: (id, status, reason) =>
         request(`/visits/${id}/status`, {
             method: 'PATCH',
             body: JSON.stringify({ status, ...(reason ? { reason } : {}) }),
         }),
+    cancelVisit: (id) => request(`/visits/${id}`, { method: 'DELETE' }),
+    // ────────────────────────────────────────────────────────────────────────
 
-    // Tenant: cancel a scheduled visit
-    cancelVisit: (id) =>
-        request(`/visits/${id}`, { method: 'DELETE' }),
+    // ── Favorites ────────────────────────────────────────────────────────────
+    // Returns array of saved property IDs (or objects) for the logged-in tenant
+    getFavorites: () => request('/favorites', { method: 'GET' }),
+
+    // Toggle a property favourite on/off.
+    // POST /favorites/:propertyId  → adds if not present, removes if already saved
+    // Backend should return { favorited: true|false }
+    toggleFavorite: (propertyId) =>
+        request(`/favorites/${propertyId}`, { method: 'POST' }),
     // ────────────────────────────────────────────────────────────────────────
 };
 
