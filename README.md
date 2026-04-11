@@ -14,18 +14,23 @@
   A promise of trust, simplicity, and transparency for millions of renters and landlords across emerging urban India.
 </p>
 
-<p align="center">
-  <a href="#-overview">Overview</a> •
-  <a href="#-what-makes-us-different">Why Us</a> •
-  <a href="#-key-features">Features</a> •
-  <a href="#-tech-stack">Tech Stack</a> •
-  <a href="#-project-structure">Structure</a> •
-  <a href="#-getting-started">Getting Started</a> •
-  <a href="#-api-documentation">API Docs</a> •
-  <a href="#-roadmap">Roadmap</a> •
-  <a href="#-contributing">Contributing</a> •
-  <a href="#-license">License</a>
-</p>
+---
+
+## 📋 Table of Contents
+
+- [📌 Overview](#-overview)
+- [✨ What Makes Us Different](#-what-makes-us-different)
+- [💡 Business Model](#-business-model)
+- [🚀 Key Features](#-key-features)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [📁 Project Structure](#-project-structure)
+- [⚡ Getting Started](#-getting-started)
+- [📖 API Documentation](#-api-documentation)
+- [🗺️ Roadmap](#️-roadmap)
+- [🤝 Contributing](#-contributing)
+- [🔒 Security](#-security)
+- [📜 License](#-license)
+- [🌟 Acknowledgements](#-acknowledgements)
 
 ---
 
@@ -477,5 +482,5 @@ THIS SOFTWARE.
 </p>
 
 <p align="center">
-  Made with ❤️ in India &nbsp;|&nbsp; <a href="#-overview">Back to Top ↑</a>
+  Made with ❤️ in India &nbsp;|&nbsp; <a href="#-table-of-contents">Back to Top ↑</a>
 </p>
