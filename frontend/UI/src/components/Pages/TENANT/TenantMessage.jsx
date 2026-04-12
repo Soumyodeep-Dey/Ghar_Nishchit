@@ -14,7 +14,7 @@ import {
   FaceSmileIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
-import api from '../../../api.js';
+import api from '../../../services/api.js';
 
 // ─── Intersection Observer hook ──────────────────────────────────────────────
 const useIntersectionObserver = (options = {}) => {

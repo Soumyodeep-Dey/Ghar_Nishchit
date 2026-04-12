@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import { showConfirmToast } from '../../../utils/toast.jsx';
-import api from '../../../api.js';
+import api from '../../../services/api.js';
 import {
   MessageSquare, Send, Paperclip, MoreVertical, Search, Phone,
   Smile, File, Calendar, Archive, Trash2, Forward, Reply, Edit3,
