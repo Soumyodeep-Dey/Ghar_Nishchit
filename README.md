@@ -7,49 +7,50 @@
   <img src="https://img.shields.io/badge/made%20for-India-orange?style=for-the-badge" alt="Made for India" />
 </p>
 
-<h1 align="center">🏠 Ghar Nishchit</h1>
+<h1 align="center">Ghar Nishchit</h1>
 
 <p align="center">
-  <b>"Ghar Nishchit" — <i>Home, Guaranteed.</i></b><br/>
+  <b>"Ghar Nishchit" &mdash; <i>Home, Guaranteed.</i></b><br/>
   A promise of trust, simplicity, and transparency for millions of renters and landlords across emerging urban India.
 </p>
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [📌 Overview](#-overview)
-- [✨ What Makes Us Different](#-what-makes-us-different)
-- [💡 Business Model](#-business-model)
-- [🚀 Key Features](#-key-features)
-- [🛠️ Tech Stack](#️-tech-stack)
-- [📁 Project Structure](#-project-structure)
-- [⚡ Getting Started](#-getting-started)
-- [📖 API Documentation](#-api-documentation)
-- [🗺️ Roadmap](#️-roadmap)
-- [🤝 Contributing](#-contributing)
-- [🔒 Security](#-security)
-- [📜 License](#-license)
-- [🌟 Acknowledgements](#-acknowledgements)
+- [Overview](#overview)
+- [What Makes Us Different](#what-makes-us-different)
+- [Business Model](#business-model)
+- [Key Features](#key-features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [API Documentation](#api-documentation)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [Security](#security)
+- [License](#license)
+- [Acknowledgements](#acknowledgements)
 
 ---
 
-## 📌 Overview
+## Overview
 
 **Ghar Nishchit** is a comprehensive, full-stack property rental management platform built for **emerging urban India**. It connects **landlords** and **tenants** directly — no middlemen, no clutter, no confusion.
 
 The platform provides end-to-end solutions for:
-- 🏘️ Property listing and discovery
-- 👥 Tenant and lease management
-- 🔧 Maintenance request tracking
-- 💬 Direct landlord-tenant communication
-- 📊 Analytics and financial reporting
+
+- Property listing and discovery
+- Tenant and lease management
+- Maintenance request tracking
+- Direct landlord-tenant communication
+- Analytics and financial reporting
 
 > Starting with **Kolkata**, **Bhubaneswar**, and the **North-East region** — cities with growing rental demand but limited tech solutions.
 
 ---
 
-## ✨ What Makes Us Different
+## What Makes Us Different
 
 Most rental platforms in India focus on saturated **metro cities** like Mumbai, Delhi, and Bangalore — leaving millions of renters in emerging cities underserved with overcomplicated apps.
 
@@ -63,11 +64,11 @@ Most rental platforms in India focus on saturated **metro cities** like Mumbai, 
 | **Minimal Steps to Connect** | From property search to landlord contact in the fewest possible clicks. |
 | **Regional Language Support** | Planned support for Bengali, Odia, and other regional languages. |
 
-> While others chase the saturated metro market, we're building for the **next wave of urban India**.
+> While others chase the saturated metro market, we are building for the **next wave of urban India**.
 
 ---
 
-## 💡 Business Model
+## Business Model
 
 ### For Landlords
 
@@ -87,14 +88,14 @@ Most rental platforms in India focus on saturated **metro cities** like Mumbai, 
 
 ### Why This Model Works
 
-- ✅ **No Hidden Charges** — Clear, upfront pricing with no surprise fees
-- ✅ **Value for Money** — Landlords pay only when they list; tenants pay only if they need premium features
-- ✅ **Fair for Emerging Markets** — Pricing designed for Tier-2 and Tier-3 city affordability
-- ✅ **Scalable** — Subscription model ensures sustainable growth while keeping the platform accessible
+- **No Hidden Charges** — Clear, upfront pricing with no surprise fees
+- **Value for Money** — Landlords pay only when they list; tenants pay only if they need premium features
+- **Fair for Emerging Markets** — Pricing designed for Tier-2 and Tier-3 city affordability
+- **Scalable** — Subscription model ensures sustainable growth while keeping the platform accessible
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
 ### For Tenants
 
@@ -122,7 +123,7 @@ Most rental platforms in India focus on saturated **metro cities** like Mumbai, 
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 
@@ -150,7 +151,7 @@ Most rental platforms in India focus on saturated **metro cities** like Mumbai, 
 | **cors** | ^2.8.5 | Cross-Origin Resource Sharing |
 | **dotenv** | ^17.1.0 | Environment variable management |
 
-### DevOps & Tools
+### DevOps and Tools
 
 | Technology | Purpose |
 |---|---|
@@ -161,50 +162,50 @@ Most rental platforms in India focus on saturated **metro cities** like Mumbai, 
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 Ghar_Nishchit/
-│
-├── backend/                        # Node.js + Express REST API
-│   ├── src/
-│   │   ├── controllers/            # Request handlers
-│   │   │   ├── auth.controller.js
-│   │   │   ├── property.controller.js
-│   │   │   ├── tenant.controller.js
-│   │   │   └── maintenance.controller.js
-│   │   ├── models/                 # MongoDB Mongoose schemas
-│   │   │   ├── user.model.js
-│   │   │   ├── property.model.js
-│   │   │   └── maintenance.model.js
-│   │   ├── routes/                 # API route definitions
-│   │   ├── middlewares/            # Auth guards & validation
-│   │   ├── utils/                  # Shared helper functions
-│   │   ├── app.js                  # Express app setup
-│   │   └── index.js                # Server entry point
-│   ├── seedMaintenance.js          # Dev seed script — maintenance data
-│   ├── seedTenantData.js           # Dev seed script — tenant data
-│   └── package.json
-│
-├── frontend/UI/                    # React 19 + Vite SPA
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Auth/               # Login, Signup, ForgotPassword
-│   │   │   └── Pages/
-│   │   │       ├── LANDLORD/       # Landlord dashboard & features
-│   │   │       └── TENANT/         # Tenant dashboard & features
-│   │   ├── services/               # Axios API service layer
-│   │   ├── utils/                  # Utility & helper functions
-│   │   ├── App.jsx                 # Root application component
-│   │   └── main.jsx                # React DOM entry point
-│   └── package.json
-│
-└── Ai/                             # AI/ML features (Coming Soon 🚧)
+|
+|-- backend/                        # Node.js + Express REST API
+|   |-- src/
+|   |   |-- controllers/            # Request handlers
+|   |   |   |-- auth.controller.js
+|   |   |   |-- property.controller.js
+|   |   |   |-- tenant.controller.js
+|   |   |   `-- maintenance.controller.js
+|   |   |-- models/                 # MongoDB Mongoose schemas
+|   |   |   |-- user.model.js
+|   |   |   |-- property.model.js
+|   |   |   `-- maintenance.model.js
+|   |   |-- routes/                 # API route definitions
+|   |   |-- middlewares/            # Auth guards and validation
+|   |   |-- utils/                  # Shared helper functions
+|   |   |-- app.js                  # Express app setup
+|   |   `-- index.js                # Server entry point
+|   |-- seedMaintenance.js          # Dev seed script - maintenance data
+|   |-- seedTenantData.js           # Dev seed script - tenant data
+|   `-- package.json
+|
+|-- frontend/UI/                    # React 19 + Vite SPA
+|   |-- src/
+|   |   |-- components/
+|   |   |   |-- Auth/               # Login, Signup, ForgotPassword
+|   |   |   `-- Pages/
+|   |   |       |-- LANDLORD/       # Landlord dashboard and features
+|   |   |       `-- TENANT/         # Tenant dashboard and features
+|   |   |-- services/               # API service layer
+|   |   |-- utils/                  # Utility and helper functions
+|   |   |-- App.jsx                 # Root application component
+|   |   `-- main.jsx                # React DOM entry point
+|   `-- package.json
+|
+`-- Ai/                             # AI/ML features (Coming Soon)
 ```
 
 ---
 
-## ⚡ Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -278,46 +279,46 @@ npm run dev
 
 ---
 
-## 📖 API Documentation
+## API Documentation
 
 ### Authentication
 
 | Method | Endpoint | Auth Required | Description |
 |---|---|---|---|
-| `POST` | `/api/auth/register` | ❌ | Register a new user |
-| `POST` | `/api/auth/login` | ❌ | User login — returns JWT |
-| `GET` | `/api/auth/profile` | ✅ | Get authenticated user profile |
+| `POST` | `/api/auth/register` | No | Register a new user |
+| `POST` | `/api/auth/login` | No | User login — returns JWT |
+| `GET` | `/api/auth/profile` | Yes | Get authenticated user profile |
 
 ### Properties
 
 | Method | Endpoint | Auth Required | Description |
 |---|---|---|---|
-| `GET` | `/api/properties` | ❌ | Get all property listings |
-| `POST` | `/api/properties` | ✅ | Create a new property listing |
-| `PUT` | `/api/properties/:id` | ✅ | Update an existing property |
-| `DELETE` | `/api/properties/:id` | ✅ | Delete a property listing |
+| `GET` | `/api/properties` | No | Get all property listings |
+| `POST` | `/api/properties` | Yes | Create a new property listing |
+| `PUT` | `/api/properties/:id` | Yes | Update an existing property |
+| `DELETE` | `/api/properties/:id` | Yes | Delete a property listing |
 
 ### Maintenance Requests
 
 | Method | Endpoint | Auth Required | Description |
 |---|---|---|---|
-| `GET` | `/api/maintenance` | ✅ | Get all maintenance requests |
-| `POST` | `/api/maintenance` | ✅ | Submit a new maintenance request |
-| `PATCH` | `/api/maintenance/:id` | ✅ | Update request status |
+| `GET` | `/api/maintenance` | Yes | Get all maintenance requests |
+| `POST` | `/api/maintenance` | Yes | Submit a new maintenance request |
+| `PATCH` | `/api/maintenance/:id` | Yes | Update request status |
 
 ### Tenants
 
 | Method | Endpoint | Auth Required | Description |
 |---|---|---|---|
-| `GET` | `/api/tenants` | ✅ | Get all tenants (landlord only) |
-| `GET` | `/api/tenants/:id` | ✅ | Get specific tenant details |
-| `PUT` | `/api/tenants/:id` | ✅ | Update tenant information |
+| `GET` | `/api/tenants` | Yes | Get all tenants (landlord only) |
+| `GET` | `/api/tenants/:id` | Yes | Get specific tenant details |
+| `PUT` | `/api/tenants/:id` | Yes | Update tenant information |
 
-> 📄 For detailed API documentation including request/response schemas, see [`backend/MAINTENANCE_API_DOCUMENTATION.md`](./backend/MAINTENANCE_API_DOCUMENTATION.md)
+> For detailed API documentation including request/response schemas, see [`backend/MAINTENANCE_API_DOCUMENTATION.md`](./backend/MAINTENANCE_API_DOCUMENTATION.md)
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
 ### Mobile Application (React Native)
 
@@ -337,7 +338,7 @@ npm run dev
 |---|---|
 | **AI Chatbot** | 24/7 support with multi-language chat (Hindi, Bengali, Odia, English) |
 | **Smart Rent Pricing** | AI-powered rent estimation based on location, amenities, and market trends |
-| **Intelligent Search** | Natural language search — *"2BHK near metro under 15k"* |
+| **Intelligent Search** | Natural language search — "2BHK near metro under 15k" |
 | **Image Analysis** | Auto-tag property photos, detect room types, and quality scoring |
 | **Fraud Detection** | Identify suspicious listings and protect users from scams |
 | **Predictive Analytics** | Forecast occupancy rates, tenant churn, and revenue trends |
@@ -362,15 +363,14 @@ npm run dev
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-Contributions are what make open-source projects thrive. **Any contribution you make is greatly appreciated.**
+Contributions are what make open-source projects thrive. Any contribution you make is greatly appreciated.
 
 ### How to Contribute
 
 1. **Fork** the repository
    ```bash
-   # Click the Fork button on GitHub, then clone your fork
    git clone https://github.com/your-username/Ghar_Nishchit.git
    ```
 
@@ -417,6 +417,7 @@ We follow the [Conventional Commits](https://www.conventionalcommits.org/) stand
 ### Reporting Bugs
 
 If you find a bug, please [open an issue](https://github.com/ChandraVerse/Ghar_Nishchit/issues) and include:
+
 - A clear, descriptive title
 - Steps to reproduce the issue
 - Expected vs. actual behaviour
@@ -426,13 +427,14 @@ If you find a bug, please [open an issue](https://github.com/ChandraVerse/Ghar_N
 ### Suggesting Features
 
 Have an idea? [Open a feature request issue](https://github.com/ChandraVerse/Ghar_Nishchit/issues) with the label `enhancement` and describe:
-- The problem you're trying to solve
+
+- The problem you are trying to solve
 - Your proposed solution
-- Any alternative approaches you've considered
+- Any alternative approaches you have considered
 
 ---
 
-## 🔒 Security
+## Security
 
 If you discover a **security vulnerability**, please do **not** open a public issue. Instead, contact the maintainers directly. We take all security reports seriously and will respond promptly.
 
@@ -445,7 +447,7 @@ If you discover a **security vulnerability**, please do **not** open a public is
 
 ---
 
-## 📜 License
+## License
 
 This project is licensed under the **ISC License**.
 
@@ -469,18 +471,18 @@ THIS SOFTWARE.
 
 ---
 
-## 🌟 Acknowledgements
+## Acknowledgements
 
 - Inspired by the real rental struggles of tenants and landlords in Eastern India
-- Built with ❤️ for Indian renters and landlords who deserve a smoother experience
+- Built for Indian renters and landlords who deserve a smoother experience
 - Thanks to all open-source contributors whose libraries power this platform
 
 ---
 
 <p align="center">
-  <b>⭐ Star this repo if you find it helpful — it means a lot!</b>
+  <b>Star this repository if you find it helpful.</b>
 </p>
 
 <p align="center">
-  Made with ❤️ in India &nbsp;|&nbsp; <a href="#-table-of-contents">Back to Top ↑</a>
+  Made in India &nbsp;|&nbsp; <a href="#table-of-contents">Back to Top</a>
 </p>
