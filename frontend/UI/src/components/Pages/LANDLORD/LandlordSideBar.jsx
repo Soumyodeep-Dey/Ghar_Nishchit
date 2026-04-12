@@ -36,7 +36,7 @@ const MENU_ITEMS = [
     label: 'Properties',
     icon: Building2,
     route: '/landlord/properties',
-    badge: 'properties',
+    badge: null,
     description: 'Property Portfolio',
     color: 'from-emerald-400 via-emerald-500 to-green-500',
     premium: true
@@ -46,7 +46,7 @@ const MENU_ITEMS = [
     label: 'Tenants',
     icon: Users,
     route: '/landlord/tenants',
-    badge: 'tenants',
+    badge: null,
     description: 'Resident Management',
     color: 'from-teal-400 via-teal-500 to-cyan-500',
     premium: true
@@ -66,7 +66,7 @@ const MENU_ITEMS = [
     label: 'Maintenance',
     icon: Settings,
     route: '/landlord/maintenance',
-    badge: 'maintenance',
+    badge: null,
     description: 'Service Requests',
     color: 'from-rose-400 via-pink-400 to-pink-500',
     premium: false
@@ -304,12 +304,6 @@ const LandlordSideBar = ({ onSectionChange }) => {
           transform: translateY(-0.25rem);
         }
         
-        /* Smooth transitions for all hover effects */
-        * {
-          transition-property: transform, color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, filter, backdrop-filter;
-          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-          transition-duration: 300ms;
-        }
       `}</style>
 
       <AnimatePresence>

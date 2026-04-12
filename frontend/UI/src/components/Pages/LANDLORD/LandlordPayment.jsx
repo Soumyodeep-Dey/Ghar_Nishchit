@@ -3,9 +3,10 @@ import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import { getCurrentYear } from '../../../utils/dateUtils.js';
 import {
-  CreditCard, DollarSign, TrendingUp, Calendar, Clock, CheckCircle, XCircle, AlertCircle, Download, Receipt, Crown, Building2, Users, Plus, Edit, Trash2, Wallet, Trophy, X, Check, Info, Database, ShieldCheck, Loader, RotateCcw, ArrowRight, Search
+  CreditCard, IndianRupee, TrendingUp, Calendar, Clock, CheckCircle, XCircle, AlertCircle, Download, Receipt, Crown, Building2, Users, Plus, Edit, Trash2, Wallet, Trophy, X, Check, Info, Database, ShieldCheck, Loader, RotateCcw, ArrowRight, Search
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import api from '../../../services/api.js';
 
 // Import the shared DarkModeContext instead of using custom theme hook
 import { useDarkMode } from '../../../useDarkMode.js';
@@ -335,7 +336,7 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-2 mb-2">
             <span className={`text-4xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'}`}>
-              ${plan.monthlyPrice}
+              ₹{plan.monthlyPrice}
             </span>
             <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>
               <div className="text-sm">/month</div>
@@ -349,10 +350,10 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
                 ${plan.monthlyPrice * 12}/year
               </span>
               <span className="text-emerald-400 font-semibold">
-                ${plan.yearlyPrice}/year
+                ₹{plan.yearlyPrice}/year
               </span>
               <span className="px-2 py-1 bg-emerald-500/20 rounded-full text-xs text-emerald-400">
-                Save ${(plan.monthlyPrice * 12 - plan.yearlyPrice)}
+                Save ₹{(plan.monthlyPrice * 12 - plan.yearlyPrice)}
               </span>
             </div>
           )}
@@ -500,7 +501,7 @@ const PaymentHistoryItem = ({ payment, onDownloadReceipt, onViewDetails, darkMod
 
         <div className="text-right">
           <div className={`text-xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>
-            ${payment.amount.toFixed(2)}
+            ₹{payment.amount.toFixed(2)}
           </div>
           <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs border ${getStatusColor(payment.status)}`}>
             {getStatusIcon(payment.status)}
@@ -595,40 +596,40 @@ const BillingSummary = ({ summary, onPayNow, darkMode }) => {
             whileHover={{ scale: 1.05, rotate: 5 }}
             className={`w-16 h-16 ${darkMode ? 'bg-slate-700/50' : 'bg-indigo-100/50'} rounded-2xl flex items-center justify-center`}
           >
-            <DollarSign className={`w-8 h-8 ${darkMode ? 'text-cyan-300' : 'text-indigo-600'}`} />
+            <IndianRupee className={`w-8 h-8 ${darkMode ? 'text-cyan-300' : 'text-indigo-600'}`} />
           </motion.div>
         </div>
 
         <div className="space-y-4 mb-6">
           <div className="flex justify-between">
             <span className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Subscription Fee</span>
-            <span className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-semibold`}>${summary.subscriptionFee.toFixed(2)}</span>
+            <span className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-semibold`}>₹{summary.subscriptionFee.toFixed(2)}</span>
           </div>
 
           {summary.additionalFees > 0 && (
             <div className="flex justify-between">
               <span className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Additional Features</span>
-              <span className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-semibold`}>${summary.additionalFees.toFixed(2)}</span>
+              <span className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-semibold`}>₹{summary.additionalFees.toFixed(2)}</span>
             </div>
           )}
 
           {summary.discount > 0 && (
             <div className="flex justify-between">
               <span className="text-emerald-400">Discount Applied</span>
-              <span className="text-emerald-400 font-semibold">-${summary.discount.toFixed(2)}</span>
+              <span className="text-emerald-400 font-semibold">-₹{summary.discount.toFixed(2)}</span>
             </div>
           )}
 
           <div className="flex justify-between">
             <span className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Tax</span>
-            <span className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-semibold`}>${summary.tax.toFixed(2)}</span>
+            <span className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-semibold`}>₹{summary.tax.toFixed(2)}</span>
           </div>
 
           <div className={`h-px ${darkMode ? 'bg-slate-600' : 'bg-indigo-200'}`}></div>
 
           <div className="flex justify-between text-xl">
             <span className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-bold`}>Total Amount</span>
-            <span className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-bold`}>${summary.totalAmount.toFixed(2)}</span>
+            <span className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-bold`}>₹{summary.totalAmount.toFixed(2)}</span>
           </div>
         </div>
 
@@ -744,7 +745,7 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment, darkMode }) => {
           {/* Amount */}
           <div className="text-center mb-8">
             <div className={`text-4xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-2`}>
-              ${amount?.toFixed(2)}
+              ₹{amount?.toFixed(2)}
             </div>
             <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>
               Payment to Ghar_Nishchit
@@ -899,7 +900,7 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment, darkMode }) => {
               </>
             ) : (
               <>
-                <span>Pay ${amount?.toFixed(2)}</span>
+                <span>Pay ₹{amount?.toFixed(2)}</span>
                 <ArrowRight className="w-5 h-5" />
               </>
             )}
@@ -1210,46 +1211,60 @@ const LandlordPayment = () => {
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(paymentMethods[0]?.id);
 
-  const [paymentHistory] = useState([
-    {
-      id: 1,
-      description: 'Professional Plan - Monthly',
-      amount: 59.00,
-      date: `${getCurrentYear()}-07-15`,
-      status: 'completed',
-      method: 'Visa •••• 4242',
-      invoiceId: `INV-${getCurrentYear()}-001`
-    },
-    {
-      id: 2,
-      description: 'Professional Plan - Monthly',
-      amount: 59.00,
-      date: `${getCurrentYear()}-06-15`,
-      status: 'completed',
-      method: 'Visa •••• 4242',
-      invoiceId: `INV-${getCurrentYear()}-002`
-    },
-    {
-      id: 3,
-      description: 'Starter Plan - Monthly',
-      amount: 29.00,
-      date: `${getCurrentYear()}-05-15`,
-      status: 'completed',
-      method: 'Visa •••• 4242',
-      invoiceId: `INV-${getCurrentYear()}-003`
-    }
-  ]);
+  // Load dynamic logic for user to only see their property rents
+  const [currentUser, setCurrentUser] = useState(null);
+  const [properties, setProperties] = useState([]);
 
-  const [billingSummary] = useState({
-    planName: 'Professional Plan',
-    propertiesCount: 12,
-    subscriptionFee: 59.00,
-    additionalFees: 0,
-    discount: 0,
-    tax: 5.31,
-    totalAmount: 64.31,
-    dueDate: `${getCurrentYear()}-08-15`
-  });
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      try {
+        const profile = await api.getProfile();
+        if (mounted && profile) {
+          setCurrentUser(profile);
+          const userId = profile._id || profile.id || profile.userId;
+          if (userId) {
+            const props = await api.getPropertiesByUser(userId);
+            if (mounted && Array.isArray(props)) {
+              setProperties(props);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to load user info for payment:', err);
+      }
+    };
+    load();
+    return () => { mounted = false; };
+  }, []);
+
+  const paymentHistory = useMemo(() => {
+    if (!properties || properties.length === 0) return [];
+    
+    // Generate subscription fee items dynamically based on the landlord's actual properties
+    return properties.map((prop, idx) => ({
+      id: idx + 1,
+      description: `Platform Subscription Fee - ${prop.title || 'Property'}`,
+      amount: 50,
+      date: `${getCurrentYear()}-08-01`,
+      status: prop.status === 'Occupied' ? 'completed' : 'pending',
+      method: 'Bank Transfer',
+      invoiceId: `INV-${getCurrentYear()}-${1000 + idx}`
+    }));
+  }, [properties]);
+
+  const billingSummary = useMemo(() => {
+    return {
+      planName: 'Platform Subscription',
+      propertiesCount: properties.length,
+      subscriptionFee: properties.length * 50, // say ₹50 per property fee to platform
+      additionalFees: 0,
+      discount: 0,
+      tax: (properties.length * 50) * 0.1, // 10% tax
+      totalAmount: (properties.length * 50) * 1.1,
+      dueDate: `${getCurrentYear()}-09-01`
+    };
+  }, [properties]);
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -1282,7 +1297,7 @@ const LandlordPayment = () => {
     addNotification({
       type: 'info',
       title: 'Plan Upgrade',
-      message: `Upgrading to ${plan.name} will cost an additional $${upgradeCost.toFixed(2)}`
+      message: `Upgrading to ${plan.name} will cost an additional ₹${upgradeCost.toFixed(2)}`
     });
 
     setPaymentAmount(upgradeCost);
@@ -1293,7 +1308,7 @@ const LandlordPayment = () => {
     addNotification({
       type: 'success',
       title: 'Payment Successful',
-      message: `Payment of $${paymentData.amount.toFixed(2)} has been processed successfully`
+      message: `Payment of ₹${paymentData.amount.toFixed(2)} has been processed successfully`
     });
   };
 
@@ -1413,10 +1428,10 @@ const LandlordPayment = () => {
                     : 'bg-gradient-to-br from-indigo-500 to-purple-600'
                     } flex items-center justify-center`}
                 >
-                  <DollarSign className="w-6 h-6 text-white" />
+                  <IndianRupee className="w-6 h-6 text-white" />
                 </motion.div>
                 <div className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>
-                  ${Math.round(useCountUp(stats.totalPaid, 2000, 0))}
+                  ₹{Math.round(useCountUp(stats.totalPaid, 2000, 0))}
                 </div>
                 <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Total Paid</div>
               </AnimatedCard>
@@ -1436,7 +1451,7 @@ const LandlordPayment = () => {
                   <TrendingUp className="w-6 h-6 text-white" />
                 </motion.div>
                 <div className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>
-                  ${Math.round(useCountUp(stats.avgMonthlySpend, 2000, 0))}
+                  ₹{Math.round(useCountUp(stats.avgMonthlySpend, 2000, 0))}
                 </div>
                 <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Avg Monthly</div>
               </AnimatedCard>

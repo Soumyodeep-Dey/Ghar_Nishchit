@@ -4,7 +4,7 @@ import LandlordNavBar from './LandlordNavBar';
 import { useDarkMode } from '../../../useDarkMode.js';
 import api from '../../../services/api';
 import {
-  Wrench, Plus, Search, MoreVertical, Edit, Trash2, Eye, Calendar, User, Clock, AlertCircle, CheckCircle, XCircle, Play, Pause, FileText, ImageIcon, Download, Phone, MessageCircle, Flag, RefreshCw, TrendingUp, Activity, DollarSign, Home, Building2, Users, Zap, Droplets, Shield, AirVent, Monitor, ArrowUp, ArrowDown, X,
+  Wrench, Plus, Search, MoreVertical, Edit, Trash2, Eye, Calendar, User, Clock, AlertCircle, CheckCircle, XCircle, Play, Pause, FileText, ImageIcon, Download, Phone, MessageCircle, Flag, RefreshCw, TrendingUp, Activity, IndianRupee, Home, Building2, Users, Zap, Droplets, Shield, AirVent, Monitor, ArrowUp, ArrowDown, X,
 } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
@@ -1411,8 +1411,8 @@ const LandlordMaintenance = () => {
               </AnimatedCard>
 
               <AnimatedCard delay={0.6} className={`backdrop-blur-xl rounded-xl p-4 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
-                <DollarSign className={`w-6 h-6 mx-auto mb-2 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
-                <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>${stats.totalCost}</div>
+                <IndianRupee className={`w-6 h-6 mx-auto mb-2 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
+                <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>₹{stats.totalCost}</div>
                 <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Total Cost</div>
               </AnimatedCard>
 

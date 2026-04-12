@@ -4,7 +4,7 @@ import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
 import { showInfoToast, showSuccessToast } from '../../../utils/toast.jsx';
 import {
-  CreditCard, Banknote, Download, Calendar, CheckCircle, Clock, AlertTriangle, DollarSign, FileText, ShieldCheck, Star, Trophy, BarChart3, X
+  CreditCard, Banknote, Download, Calendar, CheckCircle, Clock, AlertTriangle, IndianRupee, FileText, ShieldCheck, Star, Trophy, BarChart3, X
 } from 'lucide-react';
 
 // Custom hooks
@@ -54,7 +54,7 @@ const UpcomingPaymentCard = ({ payment, onPayNow }) => {
   const getPaymentIcon = (type) => {
     switch (type.toLowerCase()) {
       case 'rent': return <Banknote className="h-6 w-6 text-blue-600" />;
-      case 'utilities': return <DollarSign className="h-6 w-6 text-green-600" />;
+      case 'utilities': return <IndianRupee className="h-6 w-6 text-green-600" />;
       default: return <FileText className="h-6 w-6 text-gray-600" />;
     }
   };
@@ -296,7 +296,7 @@ const TenantPayment = () => {
       Payment Details:
       ----------------
       Type: ${payment.type}
-      Amount: ${payment.amount}
+      Amount: ₹{payment.amount}
       Method: ${payment.method}
       Status: ${payment.status}
       
@@ -364,7 +364,7 @@ const TenantPayment = () => {
               title="Pending Payments"
               value={calculations.pendingCount}
               icon={<Clock className="h-8 w-8 text-yellow-600" />}
-              subtitle={`$${calculations.pendingAmount.toFixed(2)} total`}
+              subtitle={`₹${calculations.pendingAmount.toFixed(2)} total`}
             />
 
             <PaymentSummaryCard
@@ -444,7 +444,7 @@ const TenantPayment = () => {
                     onClick={() => handleMakePayment()}
                     className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl text-lg font-semibold mt-6 flex items-center justify-center"
                   >
-                    <DollarSign className="h-6 w-6 mr-2" />
+                    <IndianRupee className="h-6 w-6 mr-2" />
                     Pay All Pending
                   </button>
                 </div>
@@ -517,7 +517,7 @@ const TenantPayment = () => {
             <div className="p-6">
               <div className="text-center mb-6">
                 <div className="p-4 bg-blue-100 rounded-2xl w-fit mx-auto mb-4">
-                  <DollarSign className="h-12 w-12 text-blue-600" />
+                  <IndianRupee className="h-12 w-12 text-blue-600" />
                 </div>
                 <h4 className="text-2xl font-bold text-gray-800">{selectedPayment.amount}</h4>
                 <p className="text-gray-600">for {selectedPayment.type}</p>
