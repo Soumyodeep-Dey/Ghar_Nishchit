@@ -43,7 +43,7 @@ const MENU_ITEMS = [
         label: 'Maintenance',
         icon: Settings,
         route: '/tenant/maintenance',
-        badge: 'maintenance',
+        badge: null,
         description: 'Service Requests',
         color: 'from-rose-400 via-pink-400 to-pink-500',
         premium: false
@@ -292,12 +292,6 @@ const TenantSideBar = ({ onSectionChange }) => {
           transform: translateY(-0.25rem);
         }
         
-        /* Smooth transitions for all hover effects */
-        * {
-          transition-property: transform, color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, filter, backdrop-filter;
-          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-          transition-duration: 300ms;
-        }
       `}</style>
 
             <AnimatePresence>

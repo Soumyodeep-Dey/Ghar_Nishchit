@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
-import { Search, Bell, Sun, Moon, User, Settings, HelpCircle, LogOut, ChevronDown, X, MessageSquare, Wrench, CreditCard, Home, Building2, Users, DollarSign } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Search, Bell, Sun, Moon, User, Settings, HelpCircle, LogOut, ChevronDown, X, MessageSquare, Wrench, CreditCard, Home, Building2, Users, IndianRupee } from 'lucide-react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import { Link } from 'react-router-dom';
 import { showConfirmToast } from '../../../utils/toast.jsx';
+import api from '../../../services/api.js';
 
 const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
   const { darkMode: isDarkMode, toggleDarkMode } = useDarkMode();
@@ -49,7 +50,7 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
     'Dashboard': Home,
     'Properties': Building2,
     'Tenants': Users,
-    'Payments': DollarSign,
+    'Payments': IndianRupee,
     'Maintenance': Settings,
     'Messages': MessageSquare
   };
@@ -59,39 +60,50 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
     return sectionIcons[currentSection] || Home;
   };
 
+  // ── Persist read IDs in localStorage so they survive page reload ──
+  const STORAGE_KEY = 'landlord_read_notification_ids';
+
+  const getReadIds = () => {
+    try {
+      return new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+    } catch { return new Set(); }
+  };
+
+  const saveReadIds = (set) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([...set]));
+  };
+
   // Sample notifications data
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: 'payment',
-      icon: CreditCard,
-      title: 'Payment Received',
-      message: 'John Doe sent ₹15,000 rent payment',
-      time: '2 minutes ago',
-      isRead: false,
-      color: 'success'
-    },
-    {
-      id: 2,
-      type: 'maintenance',
-      icon: Wrench,
-      title: 'Maintenance Request',
-      message: 'AC repair needed at Skyline Residency',
-      time: '1 hour ago',
-      isRead: false,
-      color: 'warning'
-    },
-    {
-      id: 3,
-      type: 'message',
-      icon: MessageSquare,
-      title: 'New Message',
-      message: 'Sarah Smith: "When will the plumber arrive?"',
-      time: '3 hours ago',
-      isRead: true,
-      color: 'primary'
-    }
-  ]);
+  const [notifications, setNotifications] = useState([]);
+
+  // Fetch real-time inquiries/notifications
+  useEffect(() => {
+    const fetchInquiries = async () => {
+      try {
+        const inquiries = await api.getLandlordInquiries();
+        const readIds = getReadIds();
+        const mappedNotifications = inquiries.map((inq) => ({
+          id: inq._id,
+          type: 'message',
+          icon: MessageSquare,
+          title: 'New Inquiry: ' + (inq.property?.title || 'Property'),
+          message: `${inq.seeker?.name || 'User'}: "${inq.message || 'Contact request'}"`,
+          time: new Date(inq.contactTime).toLocaleString(),
+          // Preserve read status from localStorage
+          isRead: readIds.has(inq._id),
+          color: 'primary'
+        }));
+        setNotifications(mappedNotifications);
+      } catch (err) {
+        console.error('Failed to fetch inquiries');
+      }
+    };
+    fetchInquiries();
+
+    // Poll every 30 seconds for real-time feel
+    const interval = setInterval(fetchInquiries, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -118,6 +130,9 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
 
   // Mark notification as read
   const markAsRead = (notificationId) => {
+    const readIds = getReadIds();
+    readIds.add(notificationId);
+    saveReadIds(readIds);
     setNotifications(prev =>
       prev.map(notification =>
         notification.id === notificationId
@@ -129,10 +144,14 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
 
   // Mark all notifications as read
   const markAllAsRead = () => {
+    const readIds = getReadIds();
+    notifications.forEach(n => readIds.add(n.id));
+    saveReadIds(readIds);
     setNotifications(prev =>
       prev.map(notification => ({ ...notification, isRead: true }))
     );
   };
+
 
   // Search suggestions (you can replace with real search logic)
   const searchSuggestions = [
@@ -259,45 +278,51 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
 
                   {/* Notifications List */}
                   <div className="max-h-96 overflow-y-auto">
-                    {notifications.map((notification) => {
-                      const IconComponent = notification.icon;
-                      const colorClasses = {
-                        success: 'text-green-600 bg-green-100 dark:bg-green-900/30',
-                        warning: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30',
-                        primary: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30'
-                      };
+                    {notifications.length === 0 ? (
+                      <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                        No new notifications
+                      </div>
+                    ) : (
+                      notifications.map((notification) => {
+                        const IconComponent = notification.icon;
+                        const colorClasses = {
+                          success: 'text-green-600 bg-green-100 dark:bg-green-900/30',
+                          warning: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30',
+                          primary: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30'
+                        };
 
-                      return (
-                        <div
-                          key={notification.id}
-                          className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer border-l-4 ${notification.isRead
-                            ? 'border-transparent'
-                            : 'border-blue-500 bg-blue-50/30 dark:bg-blue-900/10'
-                            }`}
-                          onClick={() => markAsRead(notification.id)}
-                        >
-                          <div className="flex items-start space-x-3">
-                            <div className={`p-2 rounded-lg ${colorClasses[notification.color]}`}>
-                              <IconComponent className="h-4 w-4" />
+                        return (
+                          <div
+                            key={notification.id}
+                            className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer border-l-4 ${notification.isRead
+                              ? 'border-transparent'
+                              : 'border-blue-500 bg-blue-50/30 dark:bg-blue-900/10'
+                              }`}
+                            onClick={() => markAsRead(notification.id)}
+                          >
+                            <div className="flex items-start space-x-3">
+                              <div className={`p-2 rounded-lg ${colorClasses[notification.color]}`}>
+                                <IconComponent className="h-4 w-4" />
+                              </div>
+                              <div className="flex-1">
+                                <p className={`font-medium ${notification.isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'}`}>
+                                  {notification.title}
+                                </p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                  {notification.message}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                                  {notification.time}
+                                </p>
+                              </div>
+                              {!notification.isRead && (
+                                <div className="h-2 w-2 bg-blue-600 rounded-full" />
+                              )}
                             </div>
-                            <div className="flex-1">
-                              <p className={`font-medium ${notification.isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'}`}>
-                                {notification.title}
-                              </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                {notification.message}
-                              </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                                {notification.time}
-                              </p>
-                            </div>
-                            {!notification.isRead && (
-                              <div className="h-2 w-2 bg-blue-600 rounded-full" />
-                            )}
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })
+                    )}
                   </div>
 
                   {/* Footer */}

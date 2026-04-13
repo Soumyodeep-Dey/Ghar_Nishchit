@@ -167,7 +167,17 @@ const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, in
                 <EyeIcon className="h-5 w-5 mr-1" />
                 View Details
               </button>
-              <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center">
+              <button 
+                onClick={async (e) => { 
+                  e.stopPropagation(); 
+                  try {
+                    await api.createInquiry({ propertyId: property.id, message: 'I am interested in this property and would like to contact you.' });
+                    showSuccessToast('Contact request sent to landlord'); 
+                  } catch (err) {
+                    showErrorToast('Failed to send contact request');
+                  }
+                }}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center">
                 <CurrencyDollarIcon className="h-4 w-4 mr-1" />
                 Contact
               </button>
@@ -317,13 +327,30 @@ const PropertyModal = ({ property, isOpen, onClose, onToggleFavorite }) => {
                     <p className="text-gray-700 leading-relaxed">{property.description}</p>
                   </div>
 
-                  {/* Action Buttons */}
                   <div className="space-y-3">
-                    <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center justify-center font-semibold">
+                    <button 
+                      onClick={async () => {
+                        try {
+                          await api.createInquiry({ propertyId: property.id, message: 'I would like to schedule a visit to this property.' });
+                          showSuccessToast('Visit scheduled successfully! Landlord will confirm shortly.');
+                        } catch (err) {
+                          showErrorToast('Failed to schedule visit');
+                        }
+                      }}
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center justify-center font-semibold">
                       <CalendarIcon className="h-5 w-5 mr-2" />
                       Schedule Visit
                     </button>
-                    <button className="w-full bg-gray-100 text-gray-800 py-4 rounded-xl hover:bg-gray-200 transition-all duration-300 flex items-center justify-center font-semibold">
+                    <button 
+                      onClick={async () => {
+                        try {
+                          await api.createInquiry({ propertyId: property.id, message: 'I am interested in this property and would like to contact you.' });
+                          showSuccessToast('Contact request sent to landlord');
+                        } catch (err) {
+                          showErrorToast('Failed to send contact request');
+                        }
+                      }}
+                      className="w-full bg-gray-100 text-gray-800 py-4 rounded-xl hover:bg-gray-200 transition-all duration-300 flex items-center justify-center font-semibold">
                       <CurrencyDollarIcon className="h-5 w-5 mr-2" />
                       Contact Landlord
                     </button>
@@ -349,7 +376,7 @@ const TenantProperty = () => {
   const [filter, setFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState('title');
-  const [priceRange, setPriceRange] = useState([0, 500000]);
+  const [priceRange, setPriceRange] = useState([0, 50000]);
   const [favoriteUpdatingIds, setFavoriteUpdatingIds] = useState([]);
 
   // Fetch properties from backend
@@ -377,7 +404,7 @@ const TenantProperty = () => {
           return {
             id: prop._id || prop.id,
             title: prop.title || 'Untitled Property',
-            price: `$${prop.price || 0}/month`,
+            price: `₹${prop.price || 0}/month`,
             location: locationString,
             description: prop.description || 'No description available',
             image: prop.images && prop.images.length > 0 ? prop.images[0] : 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect width="400" height="300" fill="%23e5e7eb"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="24" fill="%239ca3af"%3ENo Image%3C/text%3E%3C/svg%3E',
@@ -582,12 +609,12 @@ const TenantProperty = () => {
             {/* Price Range Slider */}
             <div className="mt-6">
               <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
-                Price Range: ${priceRange[0]} - ${priceRange[1]}
+                Price Range: ₹{priceRange[0]} - ₹{priceRange[1]}
               </label>
               <input
                 type="range"
                 min="0"
-                max="5000"
+                max="50000"
                 step="100"
                 value={priceRange[1]}
                 onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
@@ -610,7 +637,7 @@ const TenantProperty = () => {
                     onClick={() => {
                       setSearchTerm('');
                       setFilter('all');
-                      setPriceRange([0, 5000]);
+                      setPriceRange([0, 50000]);
                     }}
                     className={`${darkMode ? 'bg-cyan-600 hover:bg-cyan-700' : 'bg-blue-600 hover:bg-blue-700'} text-white px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105`}
                   >
@@ -649,7 +676,7 @@ const TenantProperty = () => {
               </div>
               <div className="text-center p-6 rounded-xl bg-gradient-to-br from-green-50 to-green-100 hover:scale-105 transition-transform duration-300">
                 <div className="text-3xl font-bold text-green-600">
-                  ${Math.round(properties.reduce((sum, p) => sum + extractPrice(p.price), 0) / properties.length)}
+                  ₹{Math.round(properties.reduce((sum, p) => sum + extractPrice(p.price), 0) / properties.length)}
                 </div>
                 <div className="text-gray-600">Average Price</div>
               </div>

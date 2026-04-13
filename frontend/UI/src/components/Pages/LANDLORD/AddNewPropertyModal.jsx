@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { X, Building, Home, DollarSign, Image, Upload, MapPin, Bed, Bath } from 'lucide-react';
+import { X, Building, Home, IndianRupee, Image, Upload, MapPin, Bed, Bath } from 'lucide-react';
 
 // Accept mode='add'|'edit', property to edit, and onSave callback
 const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property = null, onSave = null }) => {
@@ -57,11 +57,24 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
     setPropertyData({ ...propertyData, images: [...e.target.files] });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('📝 Modal form data:', propertyData);
     console.log('🎯 Modal mode:', mode);
     
+    // Transform images to base64
+    const resolvedImages = await Promise.all(
+      propertyData.images.map(img => {
+        if (typeof img === 'string') return Promise.resolve(img);
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(img);
+        });
+      })
+    );
+
     // Transform data to match backend schema
     const transformedData = {
       title: propertyData.title,
@@ -72,7 +85,7 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
       bedrooms: parseInt(propertyData.bedrooms) || 0,
       bathrooms: parseInt(propertyData.bathrooms) || 0,
       area: 0, // Default area - can be added to form later
-      images: propertyData.images.map(img => typeof img === 'string' ? img : URL.createObjectURL(img)), // Convert File objects to URLs
+      images: resolvedImages, // Using base64 strings
       amenities: [], // Default empty - can be added to form later
       available: propertyData.available,
       status: propertyData.available ? 'Available' : 'Occupied',
@@ -244,9 +257,9 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className={`block text-sm font-medium mb-2 ${modalTheme.text}`}>Price ($)</label>
+              <label className={`block text-sm font-medium mb-2 ${modalTheme.text}`}>Price (₹)</label>
               <div className="relative">
-                <DollarSign className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 ${modalTheme.text}`} />
+                <IndianRupee className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 ${modalTheme.text}`} />
                 <input
                   type="number"
                   name="price"

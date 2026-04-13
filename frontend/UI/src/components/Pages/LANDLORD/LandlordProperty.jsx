@@ -5,7 +5,7 @@ import AddNewPropertyModal from './AddNewPropertyModal';
 import { useDarkMode } from '../../../useDarkMode.js';
 // Removed SidebarContext usage
 import {
-  Building2, Plus, Search, MoreVertical, Edit, Trash2, Eye, MapPin, Bed, Bath, Car, Wifi, Tv, AirVent, Maximize, Heart, ChevronLeft, ChevronRight, ChevronDown, RefreshCw, Download, Share2, Star, TrendingUp, TrendingDown, Users, DollarSign, CheckCircle, Settings, X, Grid3X3, List, SortAsc, SortDesc
+  Building2, Plus, Search, MoreVertical, Edit, Trash2, Eye, MapPin, Bed, Bath, Car, Wifi, Tv, AirVent, Maximize, Heart, ChevronLeft, ChevronRight, ChevronDown, RefreshCw, Download, Share2, Star, TrendingUp, TrendingDown, Users, IndianRupee, CheckCircle, Settings, X, Grid3X3, List, SortAsc, SortDesc
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../services/api.js';
@@ -276,7 +276,7 @@ const PropertyDetailsModal = ({ isOpen, onClose, property, isDark }) => {
                 Rent
               </p>
               <p className="text-2xl font-bold">
-                ${property.rent}
+                ₹{property.rent}
                 <span className="text-sm opacity-70"> / month</span>
               </p>
             </div>
@@ -438,8 +438,8 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
                 <span className="truncate">{property.location}</span>
               </span>
               <span className="flex items-center space-x-1">
-                <DollarSign className="w-4 h-4" />
-                <span>${property.rent}/month</span>
+                <IndianRupee className="w-4 h-4" />
+                <span>₹{property.rent}/month</span>
               </span>
             </div>
             <div className={`flex items-center space-x-4 ${theme.subtleText}`}>
@@ -659,12 +659,12 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
         <div className="flex items-center justify-between">
           <div>
             <div className={`text-2xl font-bold ${theme.price}`}>
-              ${property.rent}
+              ₹{property.rent}
               <span className={`text-sm ${theme.priceUnit}`}>/month</span>
             </div>
             {property.previousRent && (
               <div className={`text-sm line-through ${darkMode ? 'text-white/50' : 'text-gray-500'}`}>
-                ${property.previousRent}
+                ₹{property.previousRent}
               </div>
             )}
           </div>
@@ -699,6 +699,7 @@ const normalizePropertyFromBackend = (backendProperty) => {
     id: backendProperty._id || backendProperty.id,
     title: backendProperty.title || '',
     description: backendProperty.description || '',
+    address: backendProperty.address || null,
     location: backendProperty.address ? `${backendProperty.address.city || ''}, ${backendProperty.address.state || ''}` : (backendProperty.location || ''),
     rent: backendProperty.price || backendProperty.rent || 0,
     bedrooms: backendProperty.bedrooms || 0,
@@ -1052,8 +1053,8 @@ const LandlordProperty = () => {
               </AnimatedCard>
 
               <AnimatedCard delay={0.4} className={`backdrop-blur-xl rounded-xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
-                <DollarSign className={`w-8 h-8 mx-auto mb-3 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
-                <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>${stats.totalRevenue.toLocaleString()}</div>
+                <IndianRupee className={`w-8 h-8 mx-auto mb-3 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
+                <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>₹{stats.totalRevenue.toLocaleString()}</div>
                 <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Monthly Revenue</div>
               </AnimatedCard>
             </div>

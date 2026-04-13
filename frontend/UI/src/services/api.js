@@ -131,6 +131,10 @@ const api = {
 
     // Statistics
     getMaintenanceStats: (landlordId) => request(`/maintenance/stats/${landlordId}`, { method: 'GET' }),
+
+    // Inquiries / Notifications
+    createInquiry: (data) => request('/inquiries', { method: 'POST', body: JSON.stringify(data) }),
+    getLandlordInquiries: () => request('/inquiries', { method: 'GET' }),
 };
 
 export default api;

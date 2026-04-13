@@ -55,39 +55,7 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
     return sectionIcons[currentSection] || Home;
   };
 
-  // Sample notifications data - will be fetched from API
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: 'payment',
-      icon: CreditCard,
-      title: 'Payment Due',
-      message: 'Rent payment of ₹15,000 is due in 3 days',
-      time: '2 minutes ago',
-      isRead: false,
-      color: 'warning'
-    },
-    {
-      id: 2,
-      type: 'maintenance',
-      icon: Wrench,
-      title: 'Maintenance Update',
-      message: 'Your AC repair request has been scheduled',
-      time: '1 hour ago',
-      isRead: false,
-      color: 'success'
-    },
-    {
-      id: 3,
-      type: 'message',
-      icon: MessageSquare,
-      title: 'New Message',
-      message: 'Landlord: "The plumber will arrive tomorrow"',
-      time: '3 hours ago',
-      isRead: true,
-      color: 'primary'
-    }
-  ]);
+  const [notifications, setNotifications] = useState([]);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -254,45 +222,51 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
 
                   {/* Notifications List */}
                   <div className="max-h-96 overflow-y-auto">
-                    {notifications.map((notification) => {
-                      const IconComponent = notification.icon;
-                      const colorClasses = {
-                        success: 'text-green-600 bg-green-100 dark:bg-green-900/30',
-                        warning: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30',
-                        primary: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30'
-                      };
+                    {notifications.length === 0 ? (
+                      <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                        No new notifications
+                      </div>
+                    ) : (
+                      notifications.map((notification) => {
+                        const IconComponent = notification.icon;
+                        const colorClasses = {
+                          success: 'text-green-600 bg-green-100 dark:bg-green-900/30',
+                          warning: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30',
+                          primary: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30'
+                        };
 
-                      return (
-                        <div
-                          key={notification.id}
-                          className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer border-l-4 ${notification.isRead
-                            ? 'border-transparent'
-                            : 'border-blue-500 bg-blue-50/30 dark:bg-blue-900/10'
-                            }`}
-                          onClick={() => markAsRead(notification.id)}
-                        >
-                          <div className="flex items-start space-x-3">
-                            <div className={`p-2 rounded-lg ${colorClasses[notification.color]}`}>
-                              <IconComponent className="h-4 w-4" />
+                        return (
+                          <div
+                            key={notification.id}
+                            className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer border-l-4 ${notification.isRead
+                              ? 'border-transparent'
+                              : 'border-blue-500 bg-blue-50/30 dark:bg-blue-900/10'
+                              }`}
+                            onClick={() => markAsRead(notification.id)}
+                          >
+                            <div className="flex items-start space-x-3">
+                              <div className={`p-2 rounded-lg ${colorClasses[notification.color]}`}>
+                                <IconComponent className="h-4 w-4" />
+                              </div>
+                              <div className="flex-1">
+                                <p className={`font-medium ${notification.isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'}`}>
+                                  {notification.title}
+                                </p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                  {notification.message}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                                  {notification.time}
+                                </p>
+                              </div>
+                              {!notification.isRead && (
+                                <div className="h-2 w-2 bg-blue-600 rounded-full" />
+                              )}
                             </div>
-                            <div className="flex-1">
-                              <p className={`font-medium ${notification.isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'}`}>
-                                {notification.title}
-                              </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                {notification.message}
-                              </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                                {notification.time}
-                              </p>
-                            </div>
-                            {!notification.isRead && (
-                              <div className="h-2 w-2 bg-blue-600 rounded-full" />
-                            )}
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })
+                    )}
                   </div>
 
                   {/* Footer */}

@@ -1,7 +1,7 @@
-﻿import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDarkMode } from '../useDarkMode.js';
 import { Link } from 'react-router-dom';
-import { Home, Building, Info, DollarSign, Users, HelpCircle, Menu, X, BookOpen } from 'lucide-react';
+import { Home, Building, Info, IndianRupee, Users, HelpCircle, Menu, X, BookOpen } from 'lucide-react';
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { showInfoToast, showSuccessToast } from '../utils/toast.jsx';
 
@@ -83,7 +83,7 @@ const quickLinks = [
 const menu = [
   { href: "#properties", label: "Properties", icon: Building },
   { href: "#about", label: "About", icon: Info },
-  { href: "#pricing", label: "Pricing", icon: DollarSign },
+  { href: "#pricing", label: "Pricing", icon: IndianRupee },
   { href: "#customers", label: "Customers", icon: Users },
   { href: "#blog", label: "Blog & Resources", icon: BookOpen },
   { href: "#help", label: "Help", icon: HelpCircle },

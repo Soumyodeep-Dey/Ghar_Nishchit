@@ -4,7 +4,7 @@ import LandlordNavBar from './LandlordNavBar';
 import AddNewPropertyModal from './AddNewPropertyModal';
 import GenerateReportModal from './GenerateReportModal';
 import {
-  DollarSign, Users, Wrench, BarChart3, TrendingUp, TrendingDown, Plus, Calendar, Building2
+  IndianRupee, Users, Wrench, BarChart3, TrendingUp, TrendingDown, Plus, Calendar, Building2
 } from 'lucide-react';
 // framer-motion removed to reduce animation overhead
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -191,7 +191,7 @@ const LandlordDashboard = () => {
       color: isDarkMode ? 'from-cyan-500 to-indigo-600' : 'from-indigo-500 to-purple-600'
     },
     {
-      icon: DollarSign,
+      icon: IndianRupee,
       title: 'Monthly Revenue',
       value: properties.reduce((acc, p) => acc + (p.status === 'Occupied' ? Number(p.rent || p.price || 0) : 0), 0) || 0,
       change: '+0%',
