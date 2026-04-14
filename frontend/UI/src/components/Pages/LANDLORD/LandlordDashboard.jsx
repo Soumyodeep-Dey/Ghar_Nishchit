@@ -197,7 +197,7 @@ const LandlordDashboard = () => {
       change: '+0%',
       trend: 'up',
       color: isDarkMode ? 'from-indigo-500 to-purple-600' : 'from-purple-500 to-pink-500',
-      prefix: '$'
+      prefix: '₹'
     },
     {
       icon: Users,
@@ -222,7 +222,27 @@ const LandlordDashboard = () => {
     let mounted = true;
     (async () => {
       try {
-        const remote = await api.getProperties();
+        let profile = null;
+        try {
+          profile = await api.getProfile();
+        } catch {
+          // not authenticated or endpoint failed
+        }
+        
+        const userId = profile?._id || profile?.id || profile?.userId;
+        let remote = [];
+
+        if (userId) {
+          try {
+            remote = await api.getPropertiesByUser(userId);
+          } catch (err) {
+            console.warn('Could not load user properties, falling back to all properties', err);
+            remote = await api.getProperties();
+          }
+        } else {
+            remote = await api.getProperties();
+        }
+
         if (mounted && Array.isArray(remote)) {
           const normalized = remote.map(r => ({
             id: r._id || r.id,
@@ -441,21 +461,21 @@ const LandlordDashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
                     {[
                       {
-                        value: '94%',
+                        value: properties.length > 0 ? `${Math.round((properties.filter(p => p.status === 'Occupied').length / properties.length) * 100)}%` : '0%',
                         label: 'Occupancy Rate',
                         color: isDarkMode ? 'text-cyan-400' : 'text-indigo-600',
                         delay: 0,
                         bgGradient: isDarkMode ? 'from-cyan-500/20 to-indigo-500/20' : 'from-indigo-500/20 to-cyan-500/20'
                       },
                       {
-                        value: '4.8',
+                        value: '0.0',
                         label: 'Avg Rating',
                         color: isDarkMode ? 'text-indigo-400' : 'text-purple-600',
                         delay: 0.15,
                         bgGradient: isDarkMode ? 'from-indigo-500/20 to-purple-500/20' : 'from-purple-500/20 to-indigo-500/20'
                       },
                       {
-                        value: '2.1',
+                        value: '0.0',
                         label: 'Avg Response (hrs)',
                         color: isDarkMode ? 'text-purple-400' : 'text-pink-600',
                         delay: 0.3,
