@@ -416,6 +416,29 @@ const VisitRequestModal = ({ isOpen, onClose, tenant, onSchedule }) => {
   const [notes, setNotes] = useState('');
   const [visitType, setVisitType] = useState('in-person');
   const [selectedProperty, setSelectedProperty] = useState('');
+  const [properties, setProperties] = useState([]);
+
+  useEffect(() => {
+    let mounted = true;
+    if (isOpen) {
+      if (tenant?.property) {
+        setSelectedProperty(tenant.property);
+      }
+      (async () => {
+        try {
+          const profile = await api.getProfile();
+          const userId = profile?._id || profile?.id || profile?.userId;
+          if (userId && mounted) {
+            const userProps = await api.getPropertiesByUser(userId);
+            setProperties(userProps);
+          }
+        } catch (err) {
+          console.error("Failed to load properties", err);
+        }
+      })();
+    }
+    return () => { mounted = false; };
+  }, [isOpen, tenant]);
 
   const availableSlots = [
     '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00'
@@ -509,14 +532,17 @@ const VisitRequestModal = ({ isOpen, onClose, tenant, onSchedule }) => {
             <label className="block text-white/80 text-sm font-medium mb-2">Property</label>
             <select
               value={selectedProperty}
+              disabled={!!tenant?.property}
               onChange={(e) => setSelectedProperty(e.target.value)}
-              className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+              className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:border-blue-500 focus:outline-none disabled:opacity-75 disabled:cursor-not-allowed [&>option]:bg-slate-800 [&>option]:text-white"
             >
-              <option value="">Select a property</option>
-              <option value="downtown-loft">Modern Downtown Loft</option>
-              <option value="luxury-penthouse">Luxury Penthouse</option>
-              <option value="cozy-studio">Cozy Studio Apartment</option>
-              <option value="garden-view">Garden View Apartment</option>
+              <option value="" className="bg-slate-800 text-white">Select a property</option>
+              {tenant?.property && !properties.find(p => p.title === tenant.property) && (
+                <option value={tenant.property} className="bg-slate-800 text-white">{tenant.property}</option>
+              )}
+              {properties.map(p => (
+                <option key={p.id || p._id} value={p.title} className="bg-slate-800 text-white">{p.title}</option>
+              ))}
             </select>
           </div>
 
@@ -600,6 +626,29 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
   const [securityDeposit, setSecurityDeposit] = useState('');
   const [startDate, setStartDate] = useState('');
   const [selectedProperty, setSelectedProperty] = useState('');
+  const [properties, setProperties] = useState([]);
+
+  useEffect(() => {
+    let mounted = true;
+    if (isOpen) {
+      if (tenant?.property) {
+        setSelectedProperty(tenant.property);
+      }
+      (async () => {
+        try {
+          const profile = await api.getProfile();
+          const userId = profile?._id || profile?.id || profile?.userId;
+          if (userId && mounted) {
+            const userProps = await api.getPropertiesByUser(userId);
+            setProperties(userProps);
+          }
+        } catch (err) {
+          console.error("Failed to load properties", err);
+        }
+      })();
+    }
+    return () => { mounted = false; };
+  }, [isOpen, tenant]);
   const [terms, setTerms] = useState({
     petsAllowed: false,
     smokingAllowed: false,
@@ -695,14 +744,17 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
               <label className="block text-white/80 text-sm font-medium mb-2">Property</label>
               <select
                 value={selectedProperty}
+                disabled={!!tenant?.property}
                 onChange={(e) => setSelectedProperty(e.target.value)}
-                className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+                className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:border-blue-500 focus:outline-none disabled:opacity-75 disabled:cursor-not-allowed [&>option]:bg-slate-800 [&>option]:text-white"
               >
-                <option value="">Select property</option>
-                <option value="downtown-loft">Modern Downtown Loft</option>
-                <option value="luxury-penthouse">Luxury Penthouse</option>
-                <option value="cozy-studio">Cozy Studio Apartment</option>
-                <option value="garden-view">Garden View Apartment</option>
+                <option value="" className="bg-slate-800 text-white">Select property</option>
+                {tenant?.property && !properties.find(p => p.title === tenant.property) && (
+                  <option value={tenant.property} className="bg-slate-800 text-white">{tenant.property}</option>
+                )}
+                {properties.map(p => (
+                  <option key={p.id || p._id} value={p.title} className="bg-slate-800 text-white">{p.title}</option>
+                ))}
               </select>
             </div>
 
@@ -711,12 +763,12 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
               <select
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
-                className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+                className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:border-blue-500 focus:outline-none [&>option]:bg-slate-800 [&>option]:text-white"
               >
-                <option value="6">6 months</option>
-                <option value="12">12 months</option>
-                <option value="18">18 months</option>
-                <option value="24">24 months</option>
+                <option value="6" className="bg-slate-800 text-white">6 months</option>
+                <option value="12" className="bg-slate-800 text-white">12 months</option>
+                <option value="18" className="bg-slate-800 text-white">18 months</option>
+                <option value="24" className="bg-slate-800 text-white">24 months</option>
               </select>
             </div>
           </div>
@@ -724,23 +776,23 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
           {/* Financial Terms */}
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-white/80 text-sm font-medium mb-2">Monthly Rent ($)</label>
+              <label className="block text-white/80 text-sm font-medium mb-2">Monthly Rent (₹)</label>
               <input
                 type="number"
                 value={rentAmount}
                 onChange={(e) => setRentAmount(e.target.value)}
-                placeholder="2500"
+                placeholder="25000"
                 className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-white/80 text-sm font-medium mb-2">Security Deposit ($)</label>
+              <label className="block text-white/80 text-sm font-medium mb-2">Security Deposit (₹)</label>
               <input
                 type="number"
                 value={securityDeposit}
                 onChange={(e) => setSecurityDeposit(e.target.value)}
-                placeholder="2500"
+                placeholder="50000"
                 className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
               />
             </div>
