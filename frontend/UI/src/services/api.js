@@ -11,7 +11,6 @@ const BASE = (() => {
 })();
 
 const getAuthHeader = () => {
-    // Prefer 'token' (set by Login.jsx), fall back to 'authToken' if present
     const token = localStorage.getItem('token') || localStorage.getItem('authToken');
     return token ? { Authorization: `Bearer ${token}` } : {};
 };
@@ -23,17 +22,12 @@ async function request(path, options = {}) {
         ...getAuthHeader()
     };
 
-    // Quiet logs in production; remove verbose request logging
-
     try {
         const res = await fetch(`${BASE}${path}`, { ...options, headers });
-
-        // Quiet logs in production; avoid noisy response logging
 
         if (!res.ok) {
             let errorData = null;
             const contentType = res.headers.get('content-type') || '';
-
             try {
                 if (contentType.includes('application/json')) {
                     errorData = await res.json();
@@ -43,10 +37,7 @@ async function request(path, options = {}) {
             } catch (parseError) {
                 console.error('Error parsing error response:', parseError);
             }
-
-            // Keep a concise error log for debugging
             console.error('API error', res.status, errorData);
-
             const err = new Error(
                 errorData?.message ||
                 errorData?.error ||
@@ -58,17 +49,14 @@ async function request(path, options = {}) {
             throw err;
         }
 
-        // No content
         if (res.status === 204) return null;
 
         const contentType = res.headers.get('content-type') || '';
         if (contentType.includes('application/json')) {
-            const data = await res.json();
-            return data;
+            return await res.json();
         }
         return res.text();
     } catch (error) {
-        // Network error or fetch failed
         if (!error.status) {
             console.error('Network error:', error);
             error.message = 'Network error: Unable to connect to server';
@@ -78,35 +66,59 @@ async function request(path, options = {}) {
 }
 
 const api = {
+    // -------------------------------------------------------------------------
     // Properties
-    getProperties: () => request('/properties', { method: 'GET' }),
-    getPropertyById: (id) => request(`/properties/${id}`, { method: 'GET' }),
-    createProperty: (data) => request('/properties', { method: 'POST', body: JSON.stringify(data) }),
-    updateProperty: (id, data) => request(`/properties/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-    deleteProperty: (id) => request(`/properties/${id}`, { method: 'DELETE' }),
-    getPropertiesByUser: (userId) => request(`/properties/user/${userId}`, { method: 'GET' }),
+    // -------------------------------------------------------------------------
+    getProperties:        ()         => request('/properties', { method: 'GET' }),
+    getPropertyById:      (id)       => request(`/properties/${id}`, { method: 'GET' }),
+    createProperty:       (data)     => request('/properties', { method: 'POST', body: JSON.stringify(data) }),
+    updateProperty:       (id, data) => request(`/properties/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    deleteProperty:       (id)       => request(`/properties/${id}`, { method: 'DELETE' }),
+    getPropertiesByUser:  (userId)   => request(`/properties/user/${userId}`, { method: 'GET' }),
 
+    // -------------------------------------------------------------------------
     // Favourites (Tenant)
-    getFavourites: () => request('/favourites', { method: 'GET' }),
-    addFavourite: (propertyId) => request('/favourites/add', { method: 'POST', body: JSON.stringify({ propertyId }) }),
-    removeFavourite: (propertyId) => request('/favourites/remove', { method: 'POST', body: JSON.stringify({ propertyId }) }),
+    // getFavourites        — returns the current user's favourites list
+    // getFavouriteProperties — alias used by TenantDashboard (same endpoint)
+    // -------------------------------------------------------------------------
+    getFavourites:           ()           => request('/favourites', { method: 'GET' }),
+    getFavouriteProperties:  (_tenantId)  => request('/favourites', { method: 'GET' }),
+    addFavourite:            (propertyId) => request('/favourites/add',    { method: 'POST', body: JSON.stringify({ propertyId }) }),
+    removeFavourite:         (propertyId) => request('/favourites/remove', { method: 'POST', body: JSON.stringify({ propertyId }) }),
 
-    // Auth/profile
-    getProfile: () => request('/auth/profile', { method: 'GET' }),
-    updateProfile: (data) => request('/auth/profile', { method: 'PUT', body: JSON.stringify(data) }),
-    changePassword: ({ email, oldPassword, newPassword }) =>
+    // -------------------------------------------------------------------------
+    // Auth / Profile
+    // -------------------------------------------------------------------------
+    getProfile:      ()     => request('/auth/profile', { method: 'GET' }),
+    updateProfile:   (data) => request('/auth/profile', { method: 'PUT', body: JSON.stringify(data) }),
+    changePassword:  ({ email, oldPassword, newPassword }) =>
         request('/auth/change-password', { method: 'POST', body: JSON.stringify({ email, oldPassword, newPassword }) }),
 
+    // -------------------------------------------------------------------------
     // Tenants (for landlords)
-    getMyTenants: () => request('/tenants', { method: 'GET' }),
-    getTenantById: (tenantId) => request(`/tenants/${tenantId}`, { method: 'GET' }),
-    getTenantStats: () => request('/tenants/stats', { method: 'GET' }),
+    // -------------------------------------------------------------------------
+    getMyTenants:    ()         => request('/tenants', { method: 'GET' }),
+    getTenantById:   (tenantId) => request(`/tenants/${tenantId}`, { method: 'GET' }),
+    getTenantStats:  ()         => request('/tenants/stats', { method: 'GET' }),
 
-    // Maintenance Management
-    // Create new maintenance request
-    createMaintenanceRequest: (data) => request('/maintenance', { method: 'POST', body: JSON.stringify(data) }),
+    // -------------------------------------------------------------------------
+    // Notifications (Tenant)
+    // getTenantNotifications — used by TenantDashboard to populate the
+    //   activity feed and unread count. Falls back to /notifications if
+    //   the backend does not expose a tenant-scoped route yet.
+    // -------------------------------------------------------------------------
+    getTenantNotifications: (_tenantId) => request('/notifications', { method: 'GET' }),
 
-    // Get maintenance requests
+    // -------------------------------------------------------------------------
+    // Payments (Tenant)
+    // getTenantPaymentHistory — used by TenantDashboard stats card.
+    // -------------------------------------------------------------------------
+    getTenantPaymentHistory: (_tenantId) => request('/payments', { method: 'GET' }),
+
+    // -------------------------------------------------------------------------
+    // Maintenance
+    // -------------------------------------------------------------------------
+    createMaintenanceRequest:     (data)                 => request('/maintenance', { method: 'POST', body: JSON.stringify(data) }),
     getLandlordMaintenanceRequests: (landlordId, filters = {}) => {
         const params = new URLSearchParams(filters).toString();
         return request(`/maintenance/landlord/${landlordId}${params ? '?' + params : ''}`, { method: 'GET' });
@@ -115,26 +127,20 @@ const api = {
         const params = new URLSearchParams(filters).toString();
         return request(`/maintenance/tenant/${tenantId}${params ? '?' + params : ''}`, { method: 'GET' });
     },
-    getMaintenanceRequestById: (id) => request(`/maintenance/${id}`, { method: 'GET' }),
-    getMaintenanceByProperty: (propertyId) => request(`/maintenance/property/${propertyId}`, { method: 'GET' }),
+    getMaintenanceRequestById:  (id)             => request(`/maintenance/${id}`, { method: 'GET' }),
+    getMaintenanceByProperty:   (propertyId)     => request(`/maintenance/property/${propertyId}`, { method: 'GET' }),
+    updateMaintenanceRequest:   (id, data)       => request(`/maintenance/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    updateMaintenanceStatus:    (id, status)     => request(`/maintenance/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+    addMaintenanceComment:      (id, comment)    => request(`/maintenance/${id}/comment`, { method: 'POST', body: JSON.stringify(comment) }),
+    assignTechnician:           (id, data)       => request(`/maintenance/${id}/assign`, { method: 'PATCH', body: JSON.stringify(data) }),
+    deleteMaintenanceRequest:   (id)             => request(`/maintenance/${id}`, { method: 'DELETE' }),
+    getMaintenanceStats:        (landlordId)     => request(`/maintenance/stats/${landlordId}`, { method: 'GET' }),
 
-    // Update maintenance requests
-    updateMaintenanceRequest: (id, data) => request(`/maintenance/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-    updateMaintenanceStatus: (id, status) => request(`/maintenance/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
-
-    // Comments and assignments
-    addMaintenanceComment: (id, comment) => request(`/maintenance/${id}/comment`, { method: 'POST', body: JSON.stringify(comment) }),
-    assignTechnician: (id, assignmentData) => request(`/maintenance/${id}/assign`, { method: 'PATCH', body: JSON.stringify(assignmentData) }),
-
-    // Delete maintenance request
-    deleteMaintenanceRequest: (id) => request(`/maintenance/${id}`, { method: 'DELETE' }),
-
-    // Statistics
-    getMaintenanceStats: (landlordId) => request(`/maintenance/stats/${landlordId}`, { method: 'GET' }),
-
-    // Inquiries / Notifications
-    createInquiry: (data) => request('/inquiries', { method: 'POST', body: JSON.stringify(data) }),
-    getLandlordInquiries: () => request('/inquiries', { method: 'GET' }),
+    // -------------------------------------------------------------------------
+    // Inquiries
+    // -------------------------------------------------------------------------
+    createInquiry:       (data) => request('/inquiries', { method: 'POST', body: JSON.stringify(data) }),
+    getLandlordInquiries: ()    => request('/inquiries', { method: 'GET' }),
 };
 
 export default api;
