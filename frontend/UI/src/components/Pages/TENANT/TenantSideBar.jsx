@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Building2, Wallet, Settings, ChevronLeft, Crown, Sparkles, LogOut } from 'lucide-react';
+import { Home, Building2, Wallet, Settings, ChevronLeft, Crown, Sparkles, LogOut, MessageSquare } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDarkMode } from '../../../useDarkMode.js';
@@ -9,14 +9,18 @@ import { showConfirmToast } from '../../../utils/toast.jsx';
 // Constants
 const SIDEBAR_WIDTHS = { collapsed: '4.5rem', expanded: '24rem' };
 const BREAKPOINT = 768;
-const USER_STATS = {
-    properties: 1,
-    maintenance: 2,
+
+// Fix 3: USER_STATS removed — badges are now driven by props/API data passed in from parent.
+// Default to 0 so no fake counts are shown to real users.
+const DEFAULT_STATS = {
+    properties: 0,
+    maintenance: 0,
     payments: 0,
-    messages: 0
+    messages: 0,
 };
 
-// Menu configuration - Static list for better performance
+// Menu configuration
+// Fix 2: Messages route is now uncommented and active.
 const MENU_ITEMS = [
     {
         id: 'dashboard',
@@ -43,7 +47,7 @@ const MENU_ITEMS = [
         label: 'Maintenance',
         icon: Settings,
         route: '/tenant/maintenance',
-        badge: null,
+        badge: 'maintenance',
         description: 'Service Requests',
         color: 'from-rose-400 via-pink-400 to-pink-500',
         premium: false
@@ -58,19 +62,22 @@ const MENU_ITEMS = [
         color: 'from-indigo-400 via-indigo-500 to-purple-500',
         premium: true
     },
-    // {
-    //   id: 'messages',
-    //   label: 'Messages',
-    //   icon: MessageSquare,
-    //   route: '/tenant/messages',
-    //   badge: 'messages',
-    //   description: 'Communication Hub',
-    //   color: 'from-violet-400 via-purple-400 to-purple-500',
-    //   premium: false
-    // }
+    {
+        id: 'messages',
+        label: 'Messages',
+        icon: MessageSquare,
+        route: '/tenant/messages',
+        badge: 'messages',
+        description: 'Communication Hub',
+        color: 'from-violet-400 via-purple-400 to-purple-500',
+        premium: false
+    },
 ];
 
-const TenantSideBar = ({ onSectionChange }) => {
+// Fix 6: Removed onSectionChange prop — it was never passed by any parent. Navigation
+// is handled entirely by react-router. If needed in the future, add it back with a parent
+// that actually passes it.
+const TenantSideBar = ({ userStats = DEFAULT_STATS }) => {
     const { darkMode: isDark } = useDarkMode();
     const [isCollapsed, setIsCollapsed] = useState(() =>
         typeof window !== 'undefined' ? window.innerWidth < BREAKPOINT : false
@@ -80,34 +87,36 @@ const TenantSideBar = ({ onSectionChange }) => {
     );
     const [showTooltip, setShowTooltip] = useState(null);
 
+    // Fix 5: Track isMobile in state so it is safe to use in JSX (no direct
+    // window.innerWidth calls during render, which breaks SSR/hydration).
+    const [isMobile, setIsMobile] = useState(() =>
+        typeof window !== 'undefined' ? window.innerWidth < BREAKPOINT : false
+    );
+
     const navigate = useNavigate();
     const location = useLocation();
     const sidebarRef = useRef(null);
 
-    // Helper function to get badge value
     const getBadgeValue = (badgeKey) => {
         if (!badgeKey) return null;
-        return USER_STATS[badgeKey] || null;
+        return userStats[badgeKey] || null;
     };
 
-    // Process menu items with dynamic badge values
     const menuItems = MENU_ITEMS.map(item => ({
         ...item,
         badge: getBadgeValue(item.badge),
         glowColor: isDark ? 'shadow-slate-400/20' : 'shadow-slate-500/15'
     }));
 
-
-    const handleNavigation = useCallback((route, sectionName = null) => {
+    const handleNavigation = useCallback((route) => {
         try {
             if (navigator.vibrate) navigator.vibrate(50);
             navigate(route);
-            if (sectionName && onSectionChange) onSectionChange(sectionName);
             if (window.innerWidth < BREAKPOINT) setTimeout(() => setIsCollapsed(true), 300);
         } catch {
             window.location.href = route;
         }
-    }, [navigate, onSectionChange]);
+    }, [navigate]);
 
     useEffect(() => {
         setSidebarWidth(isCollapsed ? SIDEBAR_WIDTHS.collapsed : SIDEBAR_WIDTHS.expanded);
@@ -117,7 +126,11 @@ const TenantSideBar = ({ onSectionChange }) => {
     }, [isCollapsed]);
 
     useEffect(() => {
-        const handleResize = () => setIsCollapsed(window.innerWidth < BREAKPOINT);
+        const handleResize = () => {
+            const mobile = window.innerWidth < BREAKPOINT;
+            setIsCollapsed(mobile);
+            setIsMobile(mobile); // Fix 5: keep isMobile state in sync
+        };
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -137,21 +150,26 @@ const TenantSideBar = ({ onSectionChange }) => {
             if (event.altKey && event.key >= '1' && event.key <= '9') {
                 event.preventDefault();
                 const index = parseInt(event.key) - 1;
-                if (menuItems[index]) handleNavigation(menuItems[index].route, menuItems[index].label);
+                if (menuItems[index]) handleNavigation(menuItems[index].route);
             }
-            if (event.key === 'Escape') setIsCollapsed(!isCollapsed);
+            // Fix 4: Escape now only collapses the sidebar (never expands it).
+            // This matches the universal "dismiss/close" expectation of the Escape key.
+            if (event.key === 'Escape' && !isCollapsed) {
+                setIsCollapsed(true);
+            }
         };
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [isCollapsed, menuItems, handleNavigation]);
 
-    const handleItemClick = (item) => handleNavigation(item.route, item.label);
+    const handleItemClick = (item) => handleNavigation(item.route);
     const handleTooltip = (itemId, show) => isCollapsed && setShowTooltip(show ? itemId : null);
     const isItemActive = (item) => {
         const pathname = location.pathname;
         return pathname === item.route || (item.route === '/tenant' && pathname === '/tenant') ||
             (pathname.startsWith(item.route + '/') && item.route !== '/tenant');
     };
+
     const handleLogout = () => {
         showConfirmToast(
             'Are you sure you want to logout?',
@@ -159,20 +177,49 @@ const TenantSideBar = ({ onSectionChange }) => {
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
-                // Redirect to home page
                 navigate('/');
             }
         );
     };
 
-    // Sub-components
+    // Fix 1: themeClasses is now declared BEFORE SidebarHeader so the sub-component
+    // can safely reference it without a ReferenceError.
+    const themeClasses = isDark ? {
+        shellBg: 'from-gray-900/95 via-slate-900/95 to-gray-900/95',
+        border: 'border-slate-800/60',
+        overlay: 'bg-slate-900/40',
+        sectionCard: 'from-gray-800/70 to-slate-800/70',
+        textPrimary: 'text-slate-100',
+        textSecondary: 'text-slate-300',
+        textMuted: 'text-slate-400',
+        buttonIdle: 'bg-slate-800/70 hover:bg-slate-700/60',
+        menuIdle: 'hover:bg-slate-800/70 hover:border-slate-700/60',
+        tooltipBg: 'bg-slate-900/95',
+        tooltipBorder: 'border-slate-700/60',
+        footerText: 'text-slate-400',
+    } : {
+        shellBg: 'from-slate-50/95 via-indigo-50/95 to-slate-50/95',
+        border: 'border-slate-200/60',
+        overlay: 'bg-slate-900/30',
+        sectionCard: 'from-white/60 to-slate-50/60',
+        textPrimary: 'text-slate-700',
+        textSecondary: 'text-slate-600',
+        textMuted: 'text-slate-500',
+        buttonIdle: 'bg-slate-100/80 hover:bg-slate-200/80',
+        menuIdle: 'hover:bg-slate-100/80 hover:border-slate-200/60',
+        tooltipBg: 'bg-white/95',
+        tooltipBorder: 'border-slate-200/60',
+        footerText: 'text-slate-400',
+    };
+
+    // SidebarHeader defined AFTER themeClasses — safe to reference it now (Fix 1).
     const SidebarHeader = () => (
         <div className={`relative z-20 p-6 border-b ${themeClasses.border} flex-shrink-0`}>
             <div className="flex items-center justify-between">
                 <motion.div
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => handleNavigation('/tenant', 'Dashboard')}
+                    onClick={() => handleNavigation('/tenant')}
                     className="flex items-center space-x-4 cursor-pointer group"
                 >
                     <motion.div
@@ -226,34 +273,6 @@ const TenantSideBar = ({ onSectionChange }) => {
         </div>
     );
 
-    const themeClasses = isDark ? {
-        shellBg: 'from-gray-900/95 via-slate-900/95 to-gray-900/95',
-        border: 'border-slate-800/60',
-        overlay: 'bg-slate-900/40',
-        sectionCard: 'from-gray-800/70 to-slate-800/70',
-        textPrimary: 'text-slate-100',
-        textSecondary: 'text-slate-300',
-        textMuted: 'text-slate-400',
-        buttonIdle: 'bg-slate-800/70 hover:bg-slate-700/60',
-        menuIdle: 'hover:bg-slate-800/70 hover:border-slate-700/60',
-        tooltipBg: 'bg-slate-900/95',
-        tooltipBorder: 'border-slate-700/60',
-        footerText: 'text-slate-400',
-    } : {
-        shellBg: 'from-slate-50/95 via-indigo-50/95 to-slate-50/95',
-        border: 'border-slate-200/60',
-        overlay: 'bg-slate-900/30',
-        sectionCard: 'from-white/60 to-slate-50/60',
-        textPrimary: 'text-slate-700',
-        textSecondary: 'text-slate-600',
-        textMuted: 'text-slate-500',
-        buttonIdle: 'bg-slate-100/80 hover:bg-slate-200/80',
-        menuIdle: 'hover:bg-slate-100/80 hover:border-slate-200/60',
-        tooltipBg: 'bg-white/95',
-        tooltipBorder: 'border-slate-200/60',
-        footerText: 'text-slate-400',
-    };
-
     return (
         <>
             <style>{`
@@ -263,39 +282,20 @@ const TenantSideBar = ({ onSectionChange }) => {
         .sidebar-scrollable::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, rgba(148,163,184,0.8) 0%, rgba(148,163,184,0.5) 100%); box-shadow: 0 0 8px rgba(148,163,184,0.3); }
         .sidebar-scrollable { scrollbar-width: thin; scrollbar-color: rgba(148,163,184,0.6) rgba(148,163,184,0.1); scroll-behavior: smooth; }
         
-        /* Enhanced hover effects */
         .group:hover .group-hover\\:animate-pulse {
           animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
-        
-        .group:hover .group-hover\\:scale-110 {
-          transform: scale(1.1);
-        }
-        
-        .group:hover .group-hover\\:scale-125 {
-          transform: scale(1.25);
-        }
-        
-        .group:hover .group-hover\\:rotate-3 {
-          transform: rotate(3deg);
-        }
-        
-        .group:hover .group-hover\\:rotate-12 {
-          transform: rotate(12deg);
-        }
-        
-        .group:hover .group-hover\\:translate-x-1 {
-          transform: translateX(0.25rem);
-        }
-        
-        .group:hover .group-hover\\:-translate-y-1 {
-          transform: translateY(-0.25rem);
-        }
-        
+        .group:hover .group-hover\\:scale-110 { transform: scale(1.1); }
+        .group:hover .group-hover\\:scale-125 { transform: scale(1.25); }
+        .group:hover .group-hover\\:rotate-3 { transform: rotate(3deg); }
+        .group:hover .group-hover\\:rotate-12 { transform: rotate(12deg); }
+        .group:hover .group-hover\\:translate-x-1 { transform: translateX(0.25rem); }
+        .group:hover .group-hover\\:-translate-y-1 { transform: translateY(-0.25rem); }
       `}</style>
 
+            {/* Fix 5: Use isMobile state instead of window.innerWidth directly in JSX */}
             <AnimatePresence>
-                {!isCollapsed && window.innerWidth < 768 && (
+                {!isCollapsed && isMobile && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -480,7 +480,6 @@ const TenantSideBar = ({ onSectionChange }) => {
                             )}
                         </AnimatePresence>
                     </motion.button>
-
                 </div>
             </motion.div>
         </>
