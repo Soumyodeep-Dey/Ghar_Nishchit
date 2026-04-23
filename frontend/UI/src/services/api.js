@@ -137,10 +137,26 @@ const api = {
     getMaintenanceStats:        (landlordId)     => request(`/maintenance/stats/${landlordId}`, { method: 'GET' }),
 
     // -------------------------------------------------------------------------
-    // Inquiries
+    // Inquiries / Messaging
     // -------------------------------------------------------------------------
-    createInquiry:       (data) => request('/inquiries', { method: 'POST', body: JSON.stringify(data) }),
-    getLandlordInquiries: ()    => request('/inquiries', { method: 'GET' }),
+    createInquiry:        (data)  => request('/inquiries', { method: 'POST', body: JSON.stringify(data) }),
+    getLandlordInquiries: ()      => request('/inquiries', { method: 'GET' }),
+    getTenantInquiries:   ()      => request('/inquiries/mine', { method: 'GET' }),
+    getInquiryMessages:   (id)    => request(`/inquiries/${id}/messages`, { method: 'GET' }),
+    replyToInquiry:       (id, content) => request(`/inquiries/${id}/messages`, {
+        method: 'POST',
+        body: JSON.stringify({ content })
+    }),
+
+    // -------------------------------------------------------------------------
+    // Visits & Contracts (Lease System)
+    // -------------------------------------------------------------------------
+    scheduleVisit:        (data)  => request('/visits/schedule', { method: 'POST', body: JSON.stringify(data) }),
+    getLandlordVisits:    ()      => request('/visits/landlord', { method: 'GET' }),
+    sendContract:         (data)  => request('/contracts/send', { method: 'POST', body: JSON.stringify(data) }),
+    getLandlordContracts: ()      => request('/contracts/landlord', { method: 'GET' }),
+    getTenantContracts:   ()      => request('/contracts/tenant', { method: 'GET' }),
+    updateContractStatus: (id, status) => request(`/contracts/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
 };
 
 export default api;

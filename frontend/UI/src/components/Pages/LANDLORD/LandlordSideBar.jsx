@@ -71,16 +71,16 @@ const MENU_ITEMS = [
     color: 'from-rose-400 via-pink-400 to-pink-500',
     premium: false
   },
-  // {
-  //   id: 'messages',
-  //   label: 'Messages',
-  //   icon: MessageSquare,
-  //   route: '/landlord/messages',
-  //   badge: 'messages',
-  //   description: 'Communication Hub',
-  //   color: 'from-violet-400 via-purple-400 to-purple-500',
-  //   premium: false
-  // }
+  {
+    id: 'messages',
+    label: 'Messages',
+    icon: MessageSquare,
+    route: '/landlord/messages',
+    badge: null,
+    description: 'Communication Hub',
+    color: 'from-violet-400 via-purple-400 to-purple-500',
+    premium: false
+  }
 ];
 
 const LandlordSideBar = ({ onSectionChange }) => {
@@ -384,11 +384,6 @@ const LandlordSideBar = ({ onSectionChange }) => {
 
                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 ${isItemActive(item) ? 'bg-white/20 group-hover:bg-white/30' : 'bg-slate-100/80 group-hover:bg-slate-200/90'}`}>
                       <item.icon className={`w-6 h-6 transition-all duration-300 group-hover:scale-110 ${isItemActive(item) ? 'text-white group-hover:text-white/90' : `${themeClasses.textPrimary} group-hover:text-blue-500`}`} />
-                      {item.premium && (
-                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full flex items-center justify-center group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">
-                          <Sparkles className="w-2 h-2 text-white group-hover:animate-pulse" />
-                        </div>
-                      )}
                     </div>
 
                     <AnimatePresence>

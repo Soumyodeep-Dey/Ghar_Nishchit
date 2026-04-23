@@ -1,6 +1,8 @@
 import Property from '../models/property.model.js';
 import Inquiry from '../models/inquiry.model.js';
 import User from '../models/user.model.js';
+import Contract from '../models/contract.model.js';
+import Visit from '../models/visit.model.js';
 import mongoose from 'mongoose';
 
 // Helper to resolve user id
@@ -94,8 +96,47 @@ export const getMyTenants = async (req, res) => {
             }
         }
 
-        console.log('Returning unique tenants:', uniqueTenants.length);
-        res.status(200).json(uniqueTenants);
+        // Fetch contracts and visits for these unique tenants
+        const tenantIds = uniqueTenants.map(t => t.id);
+        const contracts = await Contract.find({ tenant: { $in: tenantIds }, landlord: authUserId }).populate('property', 'title');
+        const visits = await Visit.find({ tenant: { $in: tenantIds }, landlord: authUserId }).populate('property', 'title');
+
+        // Enrich tenants with real contract and visit data
+        const enrichedTenants = uniqueTenants.map(tenant => {
+            const tenantContracts = contracts.filter(c => c.tenant.toString() === tenant.id.toString());
+            const tenantVisits = visits.filter(v => v.tenant.toString() === tenant.id.toString());
+
+            const activeContract = tenantContracts.find(c => c.status === 'active');
+            const status = activeContract ? 'Active' : 'Prospect';
+
+            return {
+                ...tenant,
+                status,
+                contracts: tenantContracts.map(c => ({
+                    type: c.type,
+                    startDate: c.startDate,
+                    endDate: c.endDate,
+                    status: c.status,
+                    rentAmount: c.rentAmount,
+                    property: c.property?.title
+                })),
+                visitRequests: tenantVisits.map(v => ({
+                    requestedDate: v.date,
+                    time: v.time,
+                    status: v.status,
+                    notes: v.notes,
+                    type: v.type,
+                    property: v.property?.title
+                })),
+                rentAmount: activeContract ? activeContract.rentAmount : tenant.rentAmount,
+                property: activeContract ? activeContract.property?.title : tenant.property,
+                moveInDate: activeContract ? activeContract.startDate : null,
+                leaseEndDate: activeContract ? activeContract.endDate : null
+            };
+        });
+
+        console.log('Returning enriched tenants:', enrichedTenants.length);
+        res.status(200).json(enrichedTenants);
     } catch (error) {
         console.error('Error fetching tenants:', error);
         console.error('Error stack:', error.stack);
@@ -141,6 +182,9 @@ export const getTenantById = async (req, res) => {
             return res.status(403).json({ message: 'This tenant has not inquired about any of your properties' });
         }
 
+        const contracts = await Contract.find({ tenant: tenantId, landlord: authUserId }).populate('property', 'title');
+        const visits = await Visit.find({ tenant: tenantId, landlord: authUserId }).populate('property', 'title');
+
         // Build detailed tenant profile
         const tenantProfile = {
             id: tenant._id,
@@ -157,11 +201,21 @@ export const getTenantById = async (req, res) => {
                 message: inq.message,
                 inquiryDate: inq.contactTime
             })),
-            visitRequests: inquiries.map(inq => ({
-                requestedDate: inq.contactTime,
-                property: inq.property?.title,
-                status: 'pending',
-                notes: inq.message
+            visitRequests: visits.map(v => ({
+                requestedDate: v.date,
+                time: v.time,
+                status: v.status,
+                notes: v.notes,
+                type: v.type,
+                property: v.property?.title
+            })),
+            contracts: contracts.map(c => ({
+                type: c.type,
+                startDate: c.startDate,
+                endDate: c.endDate,
+                status: c.status,
+                rentAmount: c.rentAmount,
+                property: c.property?.title
             }))
         };
 
@@ -198,11 +252,17 @@ export const getTenantStats = async (req, res) => {
 
         const uniqueSeekers = new Set(inquiries.map(i => i.seeker.toString()));
 
+        // Count active contracts
+        const activeContractsCount = await Contract.countDocuments({
+            landlord: authUserId,
+            status: 'active'
+        });
+
         const stats = {
             totalProperties: myProperties.length,
             totalInquiries,
             totalProspects: uniqueSeekers.size,
-            activeTenants: 0, // Would need a lease system to track this
+            activeTenants: activeContractsCount, // Using real lease system count
             overduePayments: 0 // Would need a payment system to track this
         };
 

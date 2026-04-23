@@ -337,16 +337,6 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
                 </div>
               </div>
             </div>
-            {tenant.status === 'Prospect' && (
-              <motion.button 
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => onScheduleVisit(tenant)}
-                className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-lg transition-colors"
-                >
-                  Schedule
-              </motion.button>
-            )}
           </div>
         )}
 
@@ -1382,31 +1372,41 @@ const LandlordTenant = () => {
     setShowVisitModal(true);
   };
 
-  const handleVisitScheduled = (visitData) => {
-    setTenants(prev => prev.map(t =>
-      t.id === visitData.tenantId
-        ? {
-          ...t,
-          visitRequests: [
-            ...(t.visitRequests || []),
-            {
-              requestedDate: visitData.date,
-              time: visitData.time,
-              property: visitData.property,
-              status: 'scheduled',
-              notes: visitData.notes,
-              type: visitData.type
-            }
-          ]
-        }
-        : t
-    ));
+  const handleVisitScheduled = async (visitData) => {
+    try {
+      await api.scheduleVisit(visitData);
 
-    addNotification({
-      type: 'success',
-      title: 'Visit Scheduled',
-      message: `Property visit has been scheduled for ${visitData.date} at ${visitData.time}`
-    });
+      setTenants(prev => prev.map(t =>
+        t.id === visitData.tenantId
+          ? {
+            ...t,
+            visitRequests: [
+              ...(t.visitRequests || []),
+              {
+                requestedDate: visitData.date,
+                time: visitData.time,
+                property: visitData.property,
+                status: 'scheduled',
+                notes: visitData.notes,
+                type: visitData.type
+              }
+            ]
+          }
+          : t
+      ));
+
+      addNotification({
+        type: 'success',
+        title: 'Visit Scheduled',
+        message: `Property visit has been scheduled for ${visitData.date} at ${visitData.time}`
+      });
+    } catch (error) {
+      addNotification({
+        type: 'error',
+        title: 'Error',
+        message: error.message || 'Failed to schedule visit'
+      });
+    }
   };
 
   const handleSendContract = (tenant) => {
@@ -1414,33 +1414,43 @@ const LandlordTenant = () => {
     setShowContractModal(true);
   };
 
-  const handleContractSent = (contractData) => {
-    setTenants(prev => prev.map(t =>
-      t.id === contractData.tenantId
-        ? {
-          ...t,
-          contracts: [
-            ...(t.contracts || []),
-            {
-              type: contractData.contractType,
-              startDate: contractData.startDate,
-              endDate: new Date(new Date(contractData.startDate).setMonth(new Date(contractData.startDate).getMonth() + contractData.duration)).toISOString().split('T')[0],
-              status: 'pending',
-              rentAmount: contractData.rentAmount,
-              securityDeposit: contractData.securityDeposit,
-              property: contractData.property,
-              terms: contractData.terms
-            }
-          ]
-        }
-        : t
-    ));
+  const handleContractSent = async (contractData) => {
+    try {
+      await api.sendContract(contractData);
 
-    addNotification({
-      type: 'success',
-      title: 'Contract Sent',
-      message: `Lease contract has been sent to ${selectedTenant?.name}`
-    });
+      setTenants(prev => prev.map(t =>
+        t.id === contractData.tenantId
+          ? {
+            ...t,
+            contracts: [
+              ...(t.contracts || []),
+              {
+                type: contractData.contractType,
+                startDate: contractData.startDate,
+                endDate: new Date(new Date(contractData.startDate).setMonth(new Date(contractData.startDate).getMonth() + contractData.duration)).toISOString().split('T')[0],
+                status: 'pending',
+                rentAmount: contractData.rentAmount,
+                securityDeposit: contractData.securityDeposit,
+                property: contractData.property,
+                terms: contractData.terms
+              }
+            ]
+          }
+          : t
+      ));
+
+      addNotification({
+        type: 'success',
+        title: 'Contract Sent',
+        message: `Lease contract has been sent to ${selectedTenant?.name}`
+      });
+    } catch (error) {
+      addNotification({
+        type: 'error',
+        title: 'Error',
+        message: error.message || 'Failed to send contract'
+      });
+    }
   };
 
   return (
