@@ -10,7 +10,8 @@ import maintenanceRoutes   from './routes/maintenance.routes.js';
 import inquiryRoutes       from './routes/inquiry.routes.js';
 import notificationRoutes  from './routes/notification.routes.js';
 import paymentRoutes       from './routes/payment.routes.js';
-
+import visitRoutes         from './routes/visit.routes.js';
+import contractRoutes      from './routes/contract.routes.js';
 dotenv.config();
 
 const app = express();
@@ -38,7 +39,8 @@ app.use('/api/maintenance',   maintenanceRoutes);
 app.use('/api/inquiries',     inquiryRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/payments',      paymentRoutes);
-
+app.use('/api/visits',        visitRoutes);
+app.use('/api/contracts',     contractRoutes);
 app.use((err, _req, res, _next) => {
   console.error(err.stack);
   res.status(500).json({ message: 'Something went wrong!' });

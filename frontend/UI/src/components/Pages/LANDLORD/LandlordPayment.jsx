@@ -336,18 +336,20 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-2 mb-2">
             <span className={`text-4xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'}`}>
-              ₹{plan.monthlyPrice}
+              {plan.isCustomPricing ? plan.monthlyPrice : `₹${plan.monthlyPrice}`}
             </span>
-            <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>
-              <div className="text-sm">/month</div>
-              <div className="text-xs">per property</div>
-            </div>
+            {!plan.isCustomPricing && (
+              <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>
+                <div className="text-sm">/month</div>
+                <div className="text-xs">per property</div>
+              </div>
+            )}
           </div>
 
-          {plan.yearlyPrice && (
+          {plan.yearlyPrice && !plan.isCustomPricing && (
             <div className="flex items-center justify-center space-x-2 text-sm">
               <span className={`${darkMode ? 'text-blue-300' : 'text-gray-500'} line-through`}>
-                ${plan.monthlyPrice * 12}/year
+                ₹{plan.monthlyPrice * 12}/year
               </span>
               <span className="text-emerald-400 font-semibold">
                 ₹{plan.yearlyPrice}/year
@@ -418,11 +420,13 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
         >
           {isCurrentPlan
             ? 'Current Plan'
-            : canUpgrade
-              ? 'Upgrade Now'
-              : canDowngrade
-                ? 'Downgrade'
-                : 'Select Plan'
+            : plan.isCustomPricing
+              ? 'Contact Sales'
+              : canUpgrade
+                ? 'Upgrade Now'
+                : canDowngrade
+                  ? 'Downgrade'
+                  : 'Select Plan'
           }
         </motion.button>
 
@@ -1128,7 +1132,7 @@ const LandlordPayment = () => {
         'Basic tenant management',
         'Payment tracking',
         'Email support',
-        'Mobile app access',
+        'Responsive web access',
         'Document storage (1GB)'
       ],
       trialDays: 14
@@ -1147,8 +1151,7 @@ const LandlordPayment = () => {
         'Up to 25 properties',
         'Advanced analytics',
         'Automated rent collection',
-        'Priority support',
-        'Custom branding',
+        'Priority email/chat support',
         'Document storage (10GB)',
         'Financial reporting',
         'Maintenance tracking'
@@ -1158,25 +1161,24 @@ const LandlordPayment = () => {
     {
       id: 3,
       name: 'Enterprise',
-      description: 'For large property portfolios',
-      monthlyPrice: 99,
-      yearlyPrice: 990,
-      propertyLimit: 'Unlimited',
-      supportLevel: '24/7',
+      description: 'For large agencies & portfolios',
+      isCustomPricing: true,
+      monthlyPrice: 'Custom',
+      yearlyPrice: null,
+      propertyLimit: '50+',
+      supportLevel: 'Account Manager',
       tier: 3,
       icon: <Trophy className="w-8 h-8 text-white" />,
       features: [
-        'Unlimited properties',
-        'Advanced AI insights',
-        'Multi-user access',
-        '24/7 phone support',
-        'White-label solution',
-        'Unlimited storage',
-        'API access',
-        'Dedicated account manager',
-        'Custom integrations'
+        'Unlimited property listings',
+        'Bulk tenant onboarding',
+        'Multi-user team access',
+        'Premium priority support',
+        'Advanced financial exports',
+        '100GB Document storage',
+        'Dedicated account manager'
       ],
-      trialDays: 30
+      trialDays: null
     }
   ]);
 
@@ -1287,11 +1289,27 @@ const LandlordPayment = () => {
 
   // Event handlers
   const handleSelectPlan = (plan) => {
+    if (plan.isCustomPricing) {
+      addNotification({
+        type: 'info',
+        title: 'Contact Sales',
+        message: `Please contact our sales team to discuss custom pricing for the ${plan.name} plan.`
+      });
+      return;
+    }
     setPaymentAmount(plan.monthlyPrice);
     setShowPaymentModal(true);
   };
 
   const handleUpgradePlan = (plan) => {
+    if (plan.isCustomPricing) {
+      addNotification({
+        type: 'info',
+        title: 'Contact Sales',
+        message: `Please contact our sales team to upgrade to the ${plan.name} plan.`
+      });
+      return;
+    }
     const upgradeCost = plan.monthlyPrice - (currentPlan?.monthlyPrice || 0);
 
     addNotification({
@@ -1586,23 +1604,33 @@ const LandlordPayment = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div className={`text-center p-6 ${darkMode ? 'bg-slate-700/50' : 'bg-indigo-50/50'} rounded-xl`}>
                         <Building2 className={`w-8 h-8 mx-auto mb-3 ${darkMode ? 'text-cyan-400' : 'text-indigo-500'}`} />
-                        <div className={`text-3xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>12</div>
+                        <div className={`text-3xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>
+                          {properties.length}
+                        </div>
                         <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Properties Listed</div>
-                        <div className={`text-xs ${darkMode ? 'text-cyan-400' : 'text-indigo-500'} mt-1`}>of 25 allowed</div>
+                        <div className={`text-xs ${darkMode ? 'text-cyan-400' : 'text-indigo-500'} mt-1`}>
+                          {currentPlan?.propertyLimit === 'Unlimited' ? 'Unlimited' : `of ${currentPlan?.propertyLimit || 'allowed'}`}
+                        </div>
                       </div>
 
                       <div className={`text-center p-6 ${darkMode ? 'bg-slate-700/50' : 'bg-indigo-50/50'} rounded-xl`}>
                         <Users className="w-8 h-8 mx-auto mb-3 text-emerald-400" />
-                        <div className={`text-3xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>34</div>
+                        <div className={`text-3xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>
+                          {properties.reduce((acc, p) => acc + (p.tenantCount || (p.status === 'Occupied' ? 1 : 0)), 0)}
+                        </div>
                         <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Active Tenants</div>
                         <div className="text-xs text-emerald-400 mt-1">Unlimited</div>
                       </div>
 
                       <div className={`text-center p-6 ${darkMode ? 'bg-slate-700/50' : 'bg-indigo-50/50'} rounded-xl`}>
                         <Database className={`w-8 h-8 mx-auto mb-3 ${darkMode ? 'text-blue-400' : 'text-purple-500'}`} />
-                        <div className={`text-3xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>7.2</div>
+                        <div className={`text-3xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>
+                          {((properties.length * 50) / 1024).toFixed(2)}
+                        </div>
                         <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>GB Storage Used</div>
-                        <div className={`text-xs ${darkMode ? 'text-blue-400' : 'text-purple-500'} mt-1`}>of 10 GB</div>
+                        <div className={`text-xs ${darkMode ? 'text-blue-400' : 'text-purple-500'} mt-1`}>
+                          Estimates (~50MB/prop)
+                        </div>
                       </div>
                     </div>
                   </AnimatedCard>
@@ -1657,12 +1685,12 @@ const LandlordPayment = () => {
                           </thead>
                           <tbody>
                             {[
-                              { feature: 'Properties', values: ['1-5', '6-25', 'Unlimited'] },
-                              { feature: 'Storage', values: ['1GB', '10GB', 'Unlimited'] },
-                              { feature: 'Support', values: ['Email', 'Priority', '24/7 Phone'] },
-                              { feature: 'Analytics', values: ['Basic', 'Advanced', 'AI Powered'] },
-                              { feature: 'Branding', values: ['❌', '✅', '✅'] },
-                              { feature: 'API Access', values: ['❌', '❌', '✅'] }
+                              { feature: 'Properties', values: ['1-5', '6-25', '50+'] },
+                              { feature: 'Storage', values: ['1GB', '10GB', '100GB'] },
+                              { feature: 'Support', values: ['Email', 'Priority', 'Account Manager'] },
+                              { feature: 'Analytics', values: ['Basic', 'Advanced', 'Custom'] },
+                              { feature: 'Bulk Onboarding', values: ['❌', '❌', '✅'] },
+                              { feature: 'Team Access', values: ['❌', '❌', '✅'] }
                             ].map((row, index) => (
                               <tr key={index} className={`border-b ${darkMode ? 'border-slate-800 hover:bg-slate-800/50' : 'border-indigo-100 hover:bg-indigo-50/50'}`}>
                                 <td className={`py-4 ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-medium`}>{row.feature}</td>

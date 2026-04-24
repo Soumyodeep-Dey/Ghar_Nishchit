@@ -224,108 +224,147 @@ const PropertyDetailsModal = ({ isOpen, onClose, property, isDark }) => {
       onClick={onClose}
     >
       <div
-        className={`max-w-3xl w-full rounded-2xl shadow-2xl overflow-hidden ${isDark ? 'bg-slate-900 text-slate-100' : 'bg-white text-slate-900'}`}
+        className={`max-w-4xl w-full rounded-2xl shadow-2xl overflow-hidden ${isDark ? 'bg-slate-900 text-slate-100' : 'bg-white text-slate-900'}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700/40">
-          <h2 className="text-xl font-bold flex items-center gap-2">
+        {/* Top Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 absolute top-0 w-full z-10 bg-gradient-to-b from-black/70 to-transparent">
+          <h2 className="text-xl font-bold flex items-center gap-2 text-white drop-shadow-md">
             <Building2 className="w-5 h-5" />
             <span>Property Details</span>
           </h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-slate-800/70 text-slate-300"
+            className="p-2 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-md border border-white/20 transition-colors"
             aria-label="Close"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="px-6 py-4 grid md:grid-cols-2 gap-6">
-          <div className="space-y-3">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <Building2 className="w-4 h-4" />
-              <span>{property.title}</span>
-            </h3>
-            <p className="text-sm opacity-80 flex items-center gap-1">
-              <MapPin className="w-4 h-4" />
-              <span>{property.location || 'No location specified'}</span>
-            </p>
-            {property.description && (
-              <p className="text-sm opacity-90">{property.description}</p>
-            )}
-            <div className="flex flex-wrap gap-3 text-sm mt-2">
-              <span className="flex items-center gap-1">
-                <Bed className="w-4 h-4" />
-                <span>{property.bedrooms} bed</span>
-              </span>
-              <span className="flex items-center gap-1">
-                <Bath className="w-4 h-4" />
-                <span>{property.bathrooms} bath</span>
-              </span>
-              <span className="flex items-center gap-1">
-                <Maximize className="w-4 h-4" />
-                <span>{property.area} sq ft</span>
-              </span>
+        {/* Hero Image Section */}
+        <div className="w-full h-64 sm:h-80 bg-slate-800 relative">
+          {property.images && property.images.length > 0 ? (
+            <img 
+              src={property.images[0]} 
+              alt={property.title}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+              }}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500/20 to-purple-600/20">
+               <Building2 className="w-20 h-20 opacity-30" />
             </div>
+          )}
+          <div className="absolute bottom-4 right-4 px-4 py-2 rounded-xl backdrop-blur-md bg-black/60 border border-white/20 text-white font-semibold shadow-lg">
+            ₹{property.rent} <span className="text-sm font-normal opacity-80">/ month</span>
           </div>
-
-          <div className="space-y-4">
-            <div>
-              <p className="text-xs uppercase tracking-wide opacity-60 mb-1">
-                Rent
-              </p>
-              <p className="text-2xl font-bold">
-                ₹{property.rent}
-                <span className="text-sm opacity-70"> / month</span>
-              </p>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-wide opacity-60 mb-1">
-                Status
-              </p>
-              <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-slate-800/80">
-                <CheckCircle className="w-3 h-3" />
+          <div className="absolute bottom-4 left-4">
+             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold backdrop-blur-md bg-white/95 text-slate-900 shadow-xl">
+                <CheckCircle className={`w-4 h-4 ${property.status === 'Available' ? 'text-emerald-600' : property.status === 'Occupied' ? 'text-blue-600' : 'text-orange-600'}`} />
                 <span>{property.status}</span>
-              </p>
-            </div>
-            {Array.isArray(property.amenities) && property.amenities.length > 0 && (
-              <div>
-                <p className="text-xs uppercase tracking-wide opacity-60 mb-1">
-                  Amenities
-                </p>
-                <div className="flex flex-wrap gap-2 text-xs">
-                  {property.amenities.map((a, i) => (
-                    <span
-                      key={`${a}-${i}`}
-                      className="px-2 py-1 rounded-full bg-slate-800/70"
-                    >
-                      {a}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
+             </span>
           </div>
         </div>
 
-        {property.images && property.images.length > 0 && (
-          <div className="px-6 pb-4">
-            <p className="text-xs uppercase tracking-wide opacity-60 mb-1">
-              Images
-            </p>
-            <div className="flex gap-3 overflow-x-auto pb-2">
-              {property.images.map((src, idx) => (
-                <img
-                  key={idx}
-                  src={src}
-                  alt={`${property.title} ${idx + 1}`}
-                  className="h-20 w-32 object-cover rounded-lg border border-slate-700/60 flex-shrink-0"
-                />
-              ))}
+        {/* Content Section */}
+        <div className="px-6 py-8 overflow-y-auto max-h-[50vh]">
+          <div className="flex flex-col md:flex-row gap-8">
+            {/* Left: Main Details */}
+            <div className="flex-1 space-y-6">
+              <div>
+                <h3 className="text-3xl font-bold mb-2">
+                  {property.title}
+                </h3>
+                <p className="text-lg opacity-80 flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-indigo-500" />
+                  <span>{property.location || 'No location specified'}</span>
+                </p>
+              </div>
+
+              {property.description && (
+                <div className={`${isDark ? 'bg-slate-800/50' : 'bg-slate-100/80'} p-4 rounded-xl`}>
+                  <p className="text-sm opacity-90 leading-relaxed">{property.description}</p>
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-4 pt-2">
+                <div className={`flex items-center gap-3 ${isDark ? 'bg-indigo-500/10' : 'bg-indigo-50'} px-4 py-3 rounded-2xl flex-1 min-w-[120px]`}>
+                  <div className={`p-2 ${isDark ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-200 text-indigo-600'} rounded-xl`}><Bed className="w-5 h-5" /></div>
+                  <div>
+                    <p className="text-xs opacity-60 font-bold uppercase tracking-wider">Bedrooms</p>
+                    <p className="font-bold text-xl">{property.bedrooms}</p>
+                  </div>
+                </div>
+                <div className={`flex items-center gap-3 ${isDark ? 'bg-emerald-500/10' : 'bg-emerald-50'} px-4 py-3 rounded-2xl flex-1 min-w-[120px]`}>
+                  <div className={`p-2 ${isDark ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-200 text-emerald-600'} rounded-xl`}><Bath className="w-5 h-5" /></div>
+                  <div>
+                    <p className="text-xs opacity-60 font-bold uppercase tracking-wider">Bathrooms</p>
+                    <p className="font-bold text-xl">{property.bathrooms}</p>
+                  </div>
+                </div>
+                <div className={`flex items-center gap-3 ${isDark ? 'bg-purple-500/10' : 'bg-purple-50'} px-4 py-3 rounded-2xl flex-1 min-w-[120px]`}>
+                  <div className={`p-2 ${isDark ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-200 text-purple-600'} rounded-xl`}><Maximize className="w-5 h-5" /></div>
+                  <div>
+                    <p className="text-xs opacity-60 font-bold uppercase tracking-wider">Area</p>
+                    <p className="font-bold text-xl">{property.area} <span className="text-sm">sq ft</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Amenities & Extra Images */}
+            <div className="md:w-72 space-y-6">
+              {Array.isArray(property.amenities) && property.amenities.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-bold uppercase tracking-wider opacity-60 mb-3">
+                    Amenities
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {property.amenities.map((a, i) => (
+                      <span
+                        key={`${a}-${i}`}
+                        className={`px-3 py-1.5 rounded-lg ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} border text-sm font-medium shadow-sm`}
+                      >
+                        {a}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {property.images && property.images.length > 1 && (
+                <div>
+                  <h4 className="text-sm font-bold uppercase tracking-wider opacity-60 mb-3">
+                    More Photos
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    {property.images.slice(1, 5).map((src, idx) => (
+                      <div key={idx} className="relative aspect-video rounded-lg overflow-hidden border border-slate-700/30 shadow-sm">
+                        <img
+                          src={src}
+                          alt={`${property.title} ${idx + 2}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  {property.images.length > 5 && (
+                     <p className="text-xs text-center mt-3 opacity-60 font-medium">+{property.images.length - 5} more images</p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-        )}
+        </div>
+
       </div>
     </div>
   );
@@ -424,7 +463,15 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
         <div className="flex items-center space-x-6">
           <div className="w-24 h-24 rounded-lg overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
             {property.images?.[0] ? (
-              <img src={property.images[0]} alt={property.title} className="w-full h-full object-cover" />
+              <img 
+                src={property.images[0]} 
+                alt={property.title} 
+                className="w-full h-full object-cover" 
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+                }}
+              />
             ) : (
               <Building2 className="w-12 h-12 text-white/50" />
             )}
@@ -515,6 +562,10 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
                 src={property.images[currentImageIndex]}
                 alt={property.title}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+                }}
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">

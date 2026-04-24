@@ -358,6 +358,11 @@ const LandlordDashboard = () => {
               <p className={`text-lg ${themeConfig.textSecondary} max-w-2xl mx-auto leading-relaxed`}>
                 Your comprehensive property management dashboard with real-time insights and advanced analytics
               </p>
+              {properties.length > 0 && properties.every(p => p.status !== 'Occupied') && (
+                <p className={`text-sm ${isDarkMode ? 'text-cyan-400' : 'text-indigo-500'} mt-3 flex items-center justify-center gap-2`}>
+                  💡 Tip: Your properties are listed! Check your <strong>Messages</strong> tab for tenant inquiries.
+                </p>
+              )}
             </div>
 
             {/* Stats Grid - Reduced Size */}

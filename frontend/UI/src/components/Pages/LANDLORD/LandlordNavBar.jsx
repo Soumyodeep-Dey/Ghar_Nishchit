@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, Bell, Sun, Moon, User, Settings, HelpCircle, LogOut, ChevronDown, X, MessageSquare, Wrench, CreditCard, Home, Building2, Users, IndianRupee } from 'lucide-react';
 import { useDarkMode } from '../../../useDarkMode.js';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { showConfirmToast } from '../../../utils/toast.jsx';
 import api from '../../../services/api.js';
 
@@ -11,6 +11,7 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const navigate = useNavigate();
 
   // Get user data from localStorage - use 'user' key from authentication
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')) || { name: '', email: '' });
@@ -73,36 +74,48 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify([...set]));
   };
 
-  // Sample notifications data
+  // ── Fetch real notifications from the DB ─────────────────────────────────
   const [notifications, setNotifications] = useState([]);
 
-  // Fetch real-time inquiries/notifications
-  useEffect(() => {
-    const fetchInquiries = async () => {
-      try {
-        const inquiries = await api.getLandlordInquiries();
-        const readIds = getReadIds();
-        const mappedNotifications = inquiries.map((inq) => ({
-          id: inq._id,
-          type: 'message',
-          icon: MessageSquare,
-          title: 'New Inquiry: ' + (inq.property?.title || 'Property'),
-          message: `${inq.seeker?.name || 'User'}: "${inq.message || 'Contact request'}"`,
-          time: new Date(inq.contactTime).toLocaleString(),
-          // Preserve read status from localStorage
-          isRead: readIds.has(inq._id),
-          color: 'primary'
-        }));
-        setNotifications(mappedNotifications);
-      } catch (err) {
-        console.error('Failed to fetch inquiries');
-      }
-    };
-    fetchInquiries();
+  const fetchNotifications = async () => {
+    try {
+      const data = await api.getNotifications();           // GET /api/notifications
+      const iconMap = {
+        inquiry:     MessageSquare,
+        maintenance: Wrench,
+        payment:     CreditCard,
+        general:     Bell,
+        message:     MessageSquare,
+      };
+      const colorMap = {
+        inquiry:     'primary',
+        maintenance: 'warning',
+        payment:     'success',
+        general:     'primary',
+        message:     'primary',
+      };
+      const mapped = (Array.isArray(data) ? data : []).map((n) => ({
+        id:      n.id || n._id,
+        type:    n.type,
+        icon:    iconMap[n.type] || Bell,
+        title:   n.title,
+        message: n.message,
+        time:    n.time || new Date(n.createdAt).toLocaleString(),
+        isRead:  n.read,
+        color:   colorMap[n.type] || 'primary',
+        relatedId: n.relatedId,
+      }));
+      setNotifications(mapped);
+    } catch (err) {
+      console.error('Failed to fetch notifications:', err);
+    }
+  };
 
-    // Poll every 30 seconds for real-time feel
-    const interval = setInterval(fetchInquiries, 30000);
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
@@ -128,28 +141,34 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Mark notification as read
-  const markAsRead = (notificationId) => {
-    const readIds = getReadIds();
-    readIds.add(notificationId);
-    saveReadIds(readIds);
+  // Mark notification as read (persist to DB)
+  const markAsRead = async (notification) => {
+    // Optimistic UI update
     setNotifications(prev =>
-      prev.map(notification =>
-        notification.id === notificationId
-          ? { ...notification, isRead: true }
-          : notification
-      )
+      prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n)
     );
+    try {
+      await api.markNotificationRead(notification.id);
+    } catch (err) {
+      console.error('Failed to mark as read:', err);
+    }
+    
+    setIsNotificationsOpen(false); // Close dropdown
+    
+    // Redirect logic
+    if (notification.type === 'inquiry' || notification.type === 'message') {
+      navigate('/landlord/messages', { state: { activeInquiryId: notification.relatedId } });
+    }
   };
 
-  // Mark all notifications as read
-  const markAllAsRead = () => {
-    const readIds = getReadIds();
-    notifications.forEach(n => readIds.add(n.id));
-    saveReadIds(readIds);
-    setNotifications(prev =>
-      prev.map(notification => ({ ...notification, isRead: true }))
-    );
+  // Mark all as read (persist to DB)
+  const markAllAsRead = async () => {
+    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    try {
+      await api.markAllNotificationsRead();
+    } catch (err) {
+      console.error('Failed to mark all as read:', err);
+    }
   };
 
 
@@ -298,7 +317,7 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
                               ? 'border-transparent'
                               : 'border-blue-500 bg-blue-50/30 dark:bg-blue-900/10'
                               }`}
-                            onClick={() => markAsRead(notification.id)}
+                            onClick={() => markAsRead(notification)}
                           >
                             <div className="flex items-start space-x-3">
                               <div className={`p-2 rounded-lg ${colorClasses[notification.color]}`}>

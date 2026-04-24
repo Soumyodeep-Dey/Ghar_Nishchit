@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
-import { showConfirmToast } from '../../../utils/toast.jsx';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { showConfirmToast, showSuccessToast, showErrorToast } from '../../../utils/toast.jsx';
+import api from '../../../services/api.js';
 import {
   MessageSquare, Send, Paperclip, MoreVertical, Search, Phone, Smile, File, Calendar, Archive, Trash2, Forward, Reply, Edit3, Download, Check, CheckCheck, AlertCircle, Pin, X, Volume2, VolumeX, Heart, ThumbsUp, Laugh, Angry, Frown, Meh, Bold, Italic, Wrench, CreditCard, FileText, Building2
 } from 'lucide-react';
@@ -303,7 +305,7 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
     <motion.div
       whileHover={{ scale: 1.02, x: 5 }}
       onClick={onClick}
-      className={`relative p-4 rounded-xl cursor-pointer transition-all duration-200 group ${isActive
+      className={`relative p-4 rounded-xl cursor-pointer transition-all duration-200 group ${showMenu ? 'z-50' : 'hover:z-40 z-10'} ${isActive
         ? 'bg-gradient-to-r from-indigo-500/20 to-indigo-600/20 dark:from-cyan-500/20 dark:to-cyan-600/20 border border-indigo-500/30 dark:border-cyan-500/30'
         : 'hover:bg-indigo-50 dark:hover:bg-slate-800/50 border border-transparent'
         }`}
@@ -467,51 +469,7 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
 // Message Input Component
 const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = "Type your message..." }) => {
   const [message, setMessage] = useState('');
-  const [attachments, setAttachments] = useState([]);
-  const [showEmoji, setShowEmoji] = useState(false);
-  const [showTemplates, setShowTemplates] = useState(false);
-  const [isBold, setIsBold] = useState(false);
-  const [isItalic, setIsItalic] = useState(false);
-  const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
-
-  const templates = [
-    {
-      title: "Rent Reminder",
-      content: "Hi! This is a friendly reminder that your rent payment is due on {date}. Please let me know if you have any questions.",
-      category: "Payment"
-    },
-    {
-      title: "Maintenance Update",
-      content: "I wanted to update you on the maintenance request you submitted. We have scheduled the repair for {date} between {time}.",
-      category: "Maintenance"
-    },
-    {
-      title: "Property Inspection",
-      content: "We will be conducting a routine property inspection on {date}. Please let me know if this time works for you.",
-      category: "Inspection"
-    },
-    {
-      title: "Welcome Message",
-      content: "Welcome to your new home! Please don't hesitate to reach out if you have any questions or concerns.",
-      category: "General"
-    },
-    {
-      title: "Lease Renewal",
-      content: "Your lease is coming up for renewal. Let's schedule a time to discuss the terms for the upcoming year.",
-      category: "Lease"
-    }
-  ];
-
-  const quickActions = [
-    { label: "Schedule Inspection", icon: Calendar, action: "inspection" },
-    { label: "Send Payment Link", icon: CreditCard, action: "payment" },
-    { label: "Maintenance Request", icon: Wrench, action: "maintenance" },
-    { label: "Property Rules", icon: FileText, action: "rules" },
-    { label: "Emergency Contact", icon: Phone, action: "emergency" }
-  ];
-
-  const emojis = ['😊', '👍', '❤️', '😂', '😢', '🔥', '👌', '🎉', '💯', '🏠', '🔧', '💰', '📅', '📞', '✅', '❌', '⚠️', '🚨'];
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -522,18 +480,14 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
   }, [message]);
 
   const handleSend = () => {
-    if (message.trim() || attachments.length > 0) {
+    if (message.trim()) {
       onSend({
         content: message.trim(),
-        attachments,
+        attachments: [],
         replyTo: replyTo?.id,
-        formatting: {
-          bold: isBold,
-          italic: isItalic
-        }
+        formatting: { bold: false, italic: false }
       });
       setMessage('');
-      setAttachments([]);
       if (replyTo) onCancelReply();
     }
   };
@@ -543,39 +497,6 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
       e.preventDefault();
       handleSend();
     }
-  };
-
-  const handleFileUpload = (e) => {
-    const files = Array.from(e.target.files);
-    const newAttachments = files.map(file => ({
-      id: Date.now() + Math.random(),
-      name: file.name,
-      size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
-      type: file.type.startsWith('image/') ? 'image' : 'file',
-      url: URL.createObjectURL(file),
-      file
-    }));
-    setAttachments(prev => [...prev, ...newAttachments]);
-  };
-
-  const removeAttachment = (id) => {
-    setAttachments(prev => prev.filter(att => att.id !== id));
-  };
-
-  const insertTemplate = (template) => {
-    setMessage(template.content);
-    setShowTemplates(false);
-  };
-
-  const handleQuickAction = (action) => {
-    const actionMessages = {
-      inspection: "I'd like to schedule a property inspection. When would be a good time for you?",
-      payment: "Here's your payment portal link: [Payment Link]. Let me know if you need any assistance.",
-      maintenance: "Please describe the maintenance issue you're experiencing, and I'll arrange for repairs.",
-      rules: "Please review the property rules and regulations attached. Let me know if you have any questions.",
-      emergency: "For emergencies, please call: [Emergency Number]. For non-urgent matters, continue messaging here."
-    };
-    setMessage(actionMessages[action] || '');
   };
 
   return (
@@ -602,201 +523,11 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
         </motion.div>
       )}
 
-      {/* Attachments preview */}
-      {attachments.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {attachments.map((attachment) => (
-            <motion.div
-              key={attachment.id}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="relative group"
-            >
-              {attachment.type === 'image' ? (
-                <div className="relative">
-                  <img
-                    src={attachment.url}
-                    alt={attachment.name}
-                    className="w-16 h-16 object-cover rounded-lg"
-                  />
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => removeAttachment(attachment.id)}
-                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="w-3 h-3" />
-                  </motion.button>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-2 p-2 bg-indigo-50 dark:bg-slate-700 rounded-lg pr-8">
-                  <File className="w-5 h-5 text-indigo-400 dark:text-cyan-400" />
-                  <div>
-                    <div className="text-sm font-medium text-indigo-700 dark:text-cyan-100 truncate max-w-20">{attachment.name}</div>
-                    <div className="text-xs text-gray-500 dark:text-blue-300">{attachment.size}</div>
-                  </div>
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => removeAttachment(attachment.id)}
-                    className="absolute top-1 right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="w-3 h-3" />
-                  </motion.button>
-                </div>
-              )}
-            </motion.div>
-          ))}
-        </div>
-      )}
-
-      {/* Quick actions */}
-      <div className="flex flex-wrap gap-2">
-        {quickActions.map((action) => (
-          <motion.button
-            key={action.action}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => handleQuickAction(action.action)}
-            className="flex items-center space-x-1 px-3 py-1 bg-indigo-100 dark:bg-cyan-500/20 rounded-full text-xs text-indigo-700 dark:text-cyan-300 hover:bg-indigo-200 dark:hover:bg-cyan-500/30 transition-colors"
-          >
-            <action.icon className="w-3 h-3" />
-            <span>{action.label}</span>
-          </motion.button>
-        ))}
-      </div>
-
       {/* Message input area */}
       <div className="relative">
         <div className="flex items-end space-x-3">
-          {/* Toolbar */}
-          <div className="flex flex-col space-y-2">
-            {/* Attachment button */}
-            <div className="relative">
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                onChange={handleFileUpload}
-                className="hidden"
-                accept="image/*,.pdf,.doc,.docx,.txt"
-              />
-              <motion.button
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => fileInputRef.current?.click()}
-                className="p-2 bg-indigo-100 dark:bg-slate-700 rounded-lg hover:bg-indigo-200 dark:hover:bg-slate-600 transition-colors"
-              >
-                <Paperclip className="w-5 h-5 text-indigo-600 dark:text-cyan-300" />
-              </motion.button>
-            </div>
-
-            {/* Templates button */}
-            <div className="relative">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setShowTemplates(!showTemplates)}
-                className="p-2 bg-indigo-100 dark:bg-slate-700 rounded-lg hover:bg-indigo-200 dark:hover:bg-slate-600 transition-colors"
-              >
-                <FileText className="w-5 h-5 text-indigo-600 dark:text-cyan-300" />
-              </motion.button>
-
-              <AnimatePresence>
-                {showTemplates && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                    className="absolute bottom-full mb-2 left-0 w-80 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-indigo-200 dark:border-slate-700 rounded-xl shadow-xl z-50"
-                  >
-                    <div className="p-4">
-                      <h3 className="text-sm font-semibold text-indigo-700 dark:text-cyan-100 mb-3">Message Templates</h3>
-                      <div className="space-y-2 max-h-60 overflow-y-auto">
-                        {templates.map((template, index) => (
-                          <motion.button
-                            key={index}
-                            whileHover={{ scale: 1.02 }}
-                            onClick={() => insertTemplate(template)}
-                            className="w-full text-left p-3 rounded-lg hover:bg-indigo-100 dark:hover:bg-slate-700 transition-colors"
-                          >
-                            <div className="text-sm font-medium text-indigo-700 dark:text-cyan-100">{template.title}</div>
-                            <div className="text-xs text-gray-600 dark:text-blue-300 mt-1">{template.category}</div>
-                            <div className="text-xs text-gray-500 dark:text-blue-200 mt-1 line-clamp-2">{template.content}</div>
-                          </motion.button>
-                        ))}
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Emoji button */}
-            <div className="relative">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setShowEmoji(!showEmoji)}
-                className="p-2 bg-indigo-100 dark:bg-slate-700 rounded-lg hover:bg-indigo-200 dark:hover:bg-slate-600 transition-colors"
-              >
-                <Smile className="w-5 h-5 text-indigo-600 dark:text-cyan-300" />
-              </motion.button>
-
-              <AnimatePresence>
-                {showEmoji && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                    className="absolute bottom-full mb-2 left-0 w-64 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-indigo-200 dark:border-slate-700 rounded-xl shadow-xl z-50"
-                  >
-                    <div className="p-4">
-                      <div className="grid grid-cols-6 gap-2">
-                        {emojis.map((emoji, index) => (
-                          <motion.button
-                            key={index}
-                            whileHover={{ scale: 1.2 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => {
-                              setMessage(prev => prev + emoji);
-                              setShowEmoji(false);
-                            }}
-                            className="p-2 hover:bg-indigo-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-lg"
-                          >
-                            {emoji}
-                          </motion.button>
-                        ))}
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-
           {/* Text input */}
           <div className="flex-1 relative">
-            {/* Formatting toolbar */}
-            <div className="flex items-center space-x-2 mb-2 opacity-50 hover:opacity-100 transition-opacity">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setIsBold(!isBold)}
-                className={`p-1 rounded ${isBold ? 'bg-indigo-500 dark:bg-cyan-500 text-white' : 'hover:bg-indigo-100 dark:hover:bg-slate-700'}`}
-              >
-                <Bold className="w-4 h-4" />
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setIsItalic(!isItalic)}
-                className={`p-1 rounded ${isItalic ? 'bg-indigo-500 dark:bg-cyan-500 text-white' : 'hover:bg-indigo-100 dark:hover:bg-slate-700'}`}
-              >
-                <Italic className="w-4 h-4" />
-              </motion.button>
-            </div>
-
             <textarea
               ref={textareaRef}
               value={message}
@@ -806,20 +537,19 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
               }}
               onKeyPress={handleKeyPress}
               placeholder={placeholder}
-              className={`w-full p-3 bg-indigo-50 dark:bg-slate-700 border border-indigo-200 dark:border-slate-600 rounded-xl text-indigo-700 dark:text-cyan-100 placeholder-gray-500 dark:placeholder-blue-300 focus:border-indigo-500 dark:focus:border-cyan-400 focus:outline-none transition-colors resize-none ${isBold ? 'font-bold' : ''
-                } ${isItalic ? 'italic' : ''}`}
+              className="w-full p-3 bg-indigo-50 dark:bg-slate-700 border border-indigo-200 dark:border-slate-600 rounded-xl text-indigo-700 dark:text-cyan-100 placeholder-gray-500 dark:placeholder-blue-300 focus:border-indigo-500 dark:focus:border-cyan-400 focus:outline-none transition-colors resize-none"
               rows={1}
               style={{ minHeight: '48px' }}
             />
           </div>
 
-          {/* Send/Record button */}
+          {/* Send button */}
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={message.trim() || attachments.length > 0 ? handleSend : undefined}
-            disabled={!message.trim() && attachments.length === 0}
-            className={`p-3 rounded-xl font-semibold transition-all duration-300 ${message.trim() || attachments.length > 0
+            onClick={message.trim() ? handleSend : undefined}
+            disabled={!message.trim()}
+            className={`p-3 rounded-xl font-semibold transition-all duration-300 ${message.trim()
               ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 dark:from-cyan-500 dark:to-cyan-600 text-white hover:from-indigo-600 hover:to-indigo-700 dark:hover:from-cyan-600 dark:hover:to-cyan-700 shadow-lg'
               : 'bg-indigo-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
               }`}
@@ -836,126 +566,193 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
 const LandlordMessage = () => {
   const [currentSection] = useState('Messages');
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
-  const [conversations, setConversations] = useLocalStorage('landlord_conversations', [
-    {
-      id: 1,
-      name: "John Doe",
-      avatar: "JD",
-      lastMessage: "Hi, when can we schedule the apartment viewing?",
-      time: "10:30 AM",
-      unread: 2,
-      online: true,
-      property: "Modern Downtown Loft",
-      isPinned: false,
-      isMuted: false,
-      isTyping: false,
-      priority: 'normal'
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      avatar: "JS",
-      lastMessage: "Thank you for fixing the plumbing issue so quickly!",
-      time: "Yesterday",
-      unread: 0,
-      online: false,
-      property: "Luxury Penthouse",
-      isPinned: true,
-      isMuted: false,
-      isTyping: false,
-      priority: 'normal'
-    },
-    {
-      id: 3,
-      name: "Robert Johnson",
-      avatar: "RJ",
-      lastMessage: "The rent payment has been submitted successfully.",
-      time: "2 days ago",
-      unread: 0,
-      online: true,
-      property: "Cozy Studio Apartment",
-      isPinned: false,
-      isMuted: false,
-      isTyping: true,
-      priority: 'high'
-    },
-    {
-      id: 4,
-      name: "Emily Davis",
-      avatar: "ED",
-      lastMessage: "Could you please send me the lease renewal documents?",
-      time: "1 week ago",
-      unread: 1,
-      online: false,
-      property: "Garden View Apartment",
-      isPinned: false,
-      isMuted: false,
-      isTyping: false,
-      priority: 'normal'
-    }
-  ]);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const [messages, setMessages] = useLocalStorage('landlord_messages', [
-    {
-      id: 1,
-      conversationId: 1,
-      sender: "John Doe",
-      content: "Hi, when can we schedule the apartment viewing?",
-      time: "10:30 AM",
-      isOwn: false,
-      status: "read",
-      attachments: [],
-      reactions: {},
-      isForwarded: false,
-      replyTo: null,
-      edited: false,
-      pinned: false,
-      priority: 'normal'
-    },
-    {
-      id: 2,
-      conversationId: 1,
-      sender: "You",
-      content: "Hi John! I'm available this Saturday at 2 PM or Sunday at 11 AM. Which works better for you?",
-      time: "10:32 AM",
-      isOwn: true,
-      status: "read",
-      attachments: [],
-      reactions: { '👍': 1 },
-      isForwarded: false,
-      replyTo: null,
-      edited: false,
-      pinned: false,
-      priority: 'normal',
-      propertyActions: [
-        { label: "Schedule Viewing", action: "schedule" },
-        { label: "Property Details", action: "details" }
-      ]
-    },
-    {
-      id: 3,
-      conversationId: 1,
-      sender: "John Doe",
-      content: "Saturday at 2 PM works perfectly! Should I bring anything specific?",
-      time: "10:35 AM",
-      isOwn: false,
-      status: "read",
-      attachments: [],
-      reactions: {},
-      isForwarded: false,
-      replyTo: { id: 2, sender: "You", content: "Hi John! I'm available this Saturday..." },
-      edited: false,
-      pinned: false,
-      priority: 'normal'
-    }
-  ]);
+  // ── Real data state ──────────────────────────────────────────────────────────
+  const [inquiries, setInquiries] = useState([]);          // list of inquiry threads
+  const [messages, setMessages] = useState([]);             // messages of active thread
+  const [isLoadingInquiries, setIsLoadingInquiries] = useState(true);
+  const [isSending, setIsSending] = useState(false);
 
-  const [activeConversation, setActiveConversation] = useState(conversations[0]);
+  // Shape an inquiry into the "conversation" format the existing UI expects
+  const toConversation = useCallback((inq) => ({
+    id:          inq._id,
+    name:        inq.seeker?.name  || 'Tenant',
+    avatar:      (inq.seeker?.name || 'T').charAt(0).toUpperCase(),
+    lastMessage: inq.replies?.length
+                   ? inq.replies[inq.replies.length - 1].content
+                   : inq.message,
+    time:        new Date(inq.contactTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    unread:      0,
+    online:      false,
+    property:    inq.property?.title || '',
+    isPinned:    false,
+    isMuted:     false,
+    isTyping:    false,
+    priority:    'normal',
+    // keep original for API calls
+    _raw:        inq
+  }), []);
+
+  const conversations = useMemo(() => inquiries.map(toConversation), [inquiries, toConversation]);
+
+  // ── Load inquiries on mount ──────────────────────────────────────────────────
+  useEffect(() => {
+    const fetchInquiries = async () => {
+      try {
+        setIsLoadingInquiries(true);
+        const data = await api.getLandlordInquiries();
+        setInquiries(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Failed to load inquiries:', err);
+        showErrorToast('Failed to load conversations');
+      } finally {
+        setIsLoadingInquiries(false);
+      }
+    };
+    fetchInquiries();
+  }, []);
+
+  const [activeConversation, setActiveConversation] = useState(null);
+
+  // ── Auto-select conversation based on notification redirect or default to first
+  useEffect(() => {
+    if (conversations.length > 0) {
+      if (location.state?.activeInquiryId) {
+        const target = conversations.find(c => String(c.id) === String(location.state.activeInquiryId));
+        if (target && target.id !== activeConversation?.id) {
+          setActiveConversation(target);
+          // Clear state so we don't force select it again if user clicks another conversation
+          navigate(location.pathname, { replace: true, state: {} });
+        } else if (!activeConversation) {
+          setActiveConversation(conversations[0]);
+        }
+      } else if (!activeConversation) {
+        setActiveConversation(conversations[0]);
+      }
+    }
+  }, [conversations, location.state, location.pathname, navigate, activeConversation]);
+
+  // ── Load messages when active conversation changes ───────────────────────────
+  useEffect(() => {
+    if (!activeConversation) { setMessages([]); return; }
+    const fetchMessages = async () => {
+      try {
+        const data = await api.getInquiryMessages(activeConversation.id);
+        // Shape messages for the existing MessageBubble component
+        const shaped = (Array.isArray(data) ? data : []).map(m => ({
+          id:          m._id,
+          conversationId: activeConversation.id,
+          sender:      m.senderName || (m.role === 'tenant' ? 'Tenant' : 'Landlord'),
+          content:     m.content,
+          time:        new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          isOwn:       m.isOwn,
+          status:      'read',
+          attachments: [],
+          reactions:   {},
+          isForwarded: false,
+          replyTo:     null,
+          edited:      false,
+          pinned:      false,
+          priority:    'normal'
+        }));
+        setMessages(shaped);
+      } catch (err) {
+        console.error('Failed to load messages:', err);
+        showErrorToast('Failed to load messages');
+      }
+    };
+    fetchMessages();
+  }, [activeConversation]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [replyTo, setReplyTo] = useState(null);
   const messagesEndRef = useRef(null);
 
+  // ── Lease Agreement Modal State ─────────────────────────────────────────────
+  const [showLeaseModal, setShowLeaseModal] = useState(false);
+  const [leaseForm, setLeaseForm] = useState({
+    type: 'residential',
+    rentAmount: '',
+    securityDeposit: '',
+    startDate: '',
+    endDate: '',
+    terms: 'Standard lease terms apply. Rent is due on the 1st of each month.'
+  });
+
+  const handleOpenLeaseModal = () => {
+    if (!activeConversation || !activeConversation._raw) return;
+    const property = activeConversation._raw.property;
+    
+    let rent = '';
+    let deposit = '';
+    let type = 'residential';
+    
+    if (property) {
+      if (property.price) {
+        rent = property.price;
+        deposit = property.price * 2; // Default 2 months rent for security deposit
+      }
+      if (property.propertyType === 'commercial') {
+        type = 'commercial';
+      }
+    }
+
+    const today = new Date();
+    const nextYear = new Date(today);
+    nextYear.setFullYear(today.getFullYear() + 1);
+
+    setLeaseForm({
+      type,
+      rentAmount: rent,
+      securityDeposit: deposit,
+      startDate: today.toISOString().split('T')[0],
+      endDate: nextYear.toISOString().split('T')[0],
+      terms: 'Standard lease terms apply. Rent is due on the 1st of each month.'
+    });
+    
+    setShowLeaseModal(true);
+  };
+
+  const handleSendLease = async (e) => {
+    e.preventDefault();
+    if (!activeConversation || !activeConversation._raw) return;
+
+    setIsSending(true);
+    try {
+      const propertyId = activeConversation._raw.property?._id || activeConversation._raw.property;
+      const tenantId = activeConversation._raw.seeker?._id || activeConversation._raw.seeker;
+      
+      const start = new Date(leaseForm.startDate);
+      const end = new Date(leaseForm.endDate);
+      let durationMonths = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+      if (durationMonths <= 0) durationMonths = 12;
+
+      await api.sendContract({
+        property: propertyId,
+        tenantId: tenantId,
+        contractType: 'lease', // Must match backend enum: 'lease', 'rental', 'sublease'
+        duration: durationMonths,
+        startDate: leaseForm.startDate,
+        rentAmount: Number(leaseForm.rentAmount),
+        securityDeposit: Number(leaseForm.securityDeposit),
+        customClauses: leaseForm.terms // Backend expects string here, 'terms' is an object schema
+      });
+      
+      showSuccessToast('Lease agreement sent successfully!');
+      setShowLeaseModal(false);
+      
+      // Send a message notifying the tenant
+      await handleSendMessage({ content: `📜 I have sent a digital lease agreement for you to review and sign. You can find it in your Contracts tab.` });
+      
+    } catch (err) {
+      console.error(err);
+      showErrorToast('Failed to send lease agreement');
+    } finally {
+      setIsSending(false);
+    }
+  };
   // Filter conversations
   const filteredConversations = useMemo(() => {
     return conversations.filter(conv => {
@@ -979,49 +776,70 @@ const LandlordMessage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [activeMessages]);
 
-  // Handle sending messages
-  const handleSendMessage = (messageData) => {
-    const newMessage = {
-      id: Date.now(),
+  // Handle sending messages — calls real API
+  const handleSendMessage = useCallback(async (messageData) => {
+    if (!activeConversation || isSending || !messageData.content?.trim()) return;
+    setIsSending(true);
+
+    const optimistic = {
+      id:            `opt_${Date.now()}`,
       conversationId: activeConversation.id,
-      sender: "You",
-      content: messageData.content,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      isOwn: true,
-      status: "sent",
-      attachments: messageData.attachments || [],
-      reactions: {},
-      isForwarded: false,
-      replyTo: messageData.replyTo ? activeMessages.find(m => m.id === messageData.replyTo) : null,
-      edited: false,
-      pinned: false,
-      priority: 'normal',
-      formatting: messageData.formatting
+      sender:        'You',
+      content:       messageData.content,
+      time:          new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      isOwn:         true,
+      status:        'sent',
+      attachments:   [],
+      reactions:     {},
+      isForwarded:   false,
+      replyTo:       null,
+      edited:        false,
+      pinned:        false,
+      priority:      'normal'
     };
+    setMessages(prev => [...prev, optimistic]);
 
-    setMessages(prev => [...prev, newMessage]);
+    try {
+      const saved = await api.replyToInquiry(activeConversation.id, messageData.content);
+      const shaped = {
+        id:            saved._id,
+        conversationId: activeConversation.id,
+        sender:        'You',
+        content:       saved.content,
+        time:          new Date(saved.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isOwn:         true,
+        status:        'delivered',
+        attachments:   [],
+        reactions:     {},
+        isForwarded:   false,
+        replyTo:       null,
+        edited:        false,
+        pinned:        false,
+        priority:      'normal'
+      };
+      setMessages(prev => prev.map(m => m.id === optimistic.id ? shaped : m));
 
-    // Update last message in conversation
-    setConversations(prev => prev.map(conv =>
-      conv.id === activeConversation.id
-        ? { ...conv, lastMessage: messageData.content, time: "now" }
-        : conv
-    ));
-
-    // Simulate message delivery
-    setTimeout(() => {
-      setMessages(prev => prev.map(msg =>
-        msg.id === newMessage.id ? { ...msg, status: "delivered" } : msg
-      ));
-    }, 1000);
-
-    // Simulate message read
-    setTimeout(() => {
-      setMessages(prev => prev.map(msg =>
-        msg.id === newMessage.id ? { ...msg, status: "read" } : msg
-      ));
-    }, 3000);
-  };
+      // Update last message preview in inquiry list and move to top
+      setInquiries(prev => {
+        const idx = prev.findIndex(inq => inq._id === activeConversation.id);
+        if (idx === -1) return prev;
+        const updatedInq = { 
+          ...prev[idx], 
+          contactTime: new Date(), 
+          replies: [...(prev[idx].replies || []), { content: messageData.content, createdAt: new Date() }] 
+        };
+        const newList = [...prev];
+        newList.splice(idx, 1);
+        newList.unshift(updatedInq);
+        return newList;
+      });
+    } catch (err) {
+      setMessages(prev => prev.filter(m => m.id !== optimistic.id));
+      showErrorToast('Failed to send message');
+    } finally {
+      setIsSending(false);
+    }
+  }, [activeConversation, isSending]);
 
   // Handle message reactions
   const handleReaction = (messageId, emoji) => {
@@ -1061,11 +879,11 @@ const LandlordMessage = () => {
     setMessages(prev => prev.filter(msg => msg.id !== messageId));
   };
 
-  // Handle archive conversation
+  // Handle archive conversation (local only — just removes from view)
   const handleArchiveConversation = (conversationId) => {
-    setConversations(prev => prev.filter(conv => conv.id !== conversationId));
+    setInquiries(prev => prev.filter(inq => inq._id !== conversationId));
     if (activeConversation?.id === conversationId) {
-      setActiveConversation(conversations[0]);
+      setActiveConversation(conversations.find(c => c.id !== conversationId) || null);
     }
   };
 
@@ -1073,18 +891,25 @@ const LandlordMessage = () => {
   const handleDeleteConversation = (conversationId) => {
     showConfirmToast(
       'Are you sure you want to delete this conversation?',
-      () => {
-        setConversations(prev => prev.filter(conv => conv.id !== conversationId));
-        setMessages(prev => prev.filter(msg => msg.conversationId !== conversationId));
-        if (activeConversation?.id === conversationId) {
-          setActiveConversation(conversations[0]);
+      async () => {
+        try {
+          await api.deleteInquiry(conversationId);
+          setInquiries(prev => prev.filter(inq => inq._id !== conversationId));
+          if (activeConversation?.id === conversationId) {
+            setActiveConversation(null);
+          }
+          showSuccessToast('Conversation deleted');
+        } catch (error) {
+          console.error(error);
+          showErrorToast('Failed to delete conversation');
         }
       }
     );
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-indigo-50 to-purple-100 dark:from-gray-900 dark:via-slate-900 dark:to-blue-950 flex relative overflow-hidden">
+    <>
+    <div className="h-screen bg-gradient-to-br from-white via-indigo-50 to-purple-100 dark:from-gray-900 dark:via-slate-900 dark:to-blue-950 flex relative overflow-hidden">
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
@@ -1254,7 +1079,14 @@ const LandlordMessage = () => {
                         </div>
                       </div>
 
-
+                      {/* Send Lease Button */}
+                      <button
+                        onClick={handleOpenLeaseModal}
+                        className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 dark:from-cyan-500 dark:to-cyan-600 text-white rounded-lg hover:shadow-lg transition-all"
+                      >
+                        <FileText className="w-4 h-4" />
+                        <span className="font-medium text-sm">Send Lease</span>
+                      </button>
                     </div>
                   </div>
 
@@ -1302,6 +1134,111 @@ const LandlordMessage = () => {
         </main>
       </div>
     </div>
+
+    {/* Lease Modal */}
+    {showLeaseModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-gray-200 dark:border-slate-700"
+        >
+          <div className="p-6 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <FileText className="h-6 w-6 text-indigo-500 dark:text-cyan-500" />
+              Create Lease Agreement
+            </h3>
+            <button onClick={() => setShowLeaseModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <form onSubmit={handleSendLease} className="p-6 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Lease Type</label>
+                <select
+                  required
+                  value={leaseForm.type}
+                  onChange={(e) => setLeaseForm({...leaseForm, type: e.target.value})}
+                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 border"
+                >
+                  <option value="residential">Residential</option>
+                  <option value="commercial">Commercial</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rent Amount (₹)</label>
+                <input
+                  type="number"
+                  required
+                  value={leaseForm.rentAmount}
+                  onChange={(e) => setLeaseForm({...leaseForm, rentAmount: e.target.value})}
+                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 border"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
+                <input
+                  type="date"
+                  required
+                  value={leaseForm.startDate}
+                  onChange={(e) => setLeaseForm({...leaseForm, startDate: e.target.value})}
+                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 border"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
+                <input
+                  type="date"
+                  required
+                  value={leaseForm.endDate}
+                  onChange={(e) => setLeaseForm({...leaseForm, endDate: e.target.value})}
+                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 border"
+                />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Security Deposit (₹)</label>
+                <input
+                  type="number"
+                  required
+                  value={leaseForm.securityDeposit}
+                  onChange={(e) => setLeaseForm({...leaseForm, securityDeposit: e.target.value})}
+                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 border"
+                />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Terms & Conditions</label>
+                <textarea
+                  required
+                  rows="3"
+                  value={leaseForm.terms}
+                  onChange={(e) => setLeaseForm({...leaseForm, terms: e.target.value})}
+                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 border"
+                ></textarea>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => setShowLeaseModal(false)}
+                className="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSending}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {isSending ? 'Sending...' : 'Send Agreement'}
+              </button>
+            </div>
+          </form>
+        </motion.div>
+      </div>
+    )}
+    </>
   );
 };
 
