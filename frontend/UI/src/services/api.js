@@ -147,6 +147,14 @@ const api = {
         method: 'POST',
         body: JSON.stringify({ content })
     }),
+    deleteInquiry:        (id)    => request(`/inquiries/${id}`, { method: 'DELETE' }),
+
+    // -------------------------------------------------------------------------
+    // Notifications
+    // -------------------------------------------------------------------------
+    getNotifications:          ()   => request('/notifications', { method: 'GET' }),
+    markNotificationRead:      (id) => request(`/notifications/${id}/read`, { method: 'PATCH' }),
+    markAllNotificationsRead:  ()   => request('/notifications/read-all', { method: 'PATCH' }),
 
     // -------------------------------------------------------------------------
     // Visits & Contracts (Lease System)

@@ -404,7 +404,18 @@ const TenantMaintenance = () => {
       const profile = await api.getProfile();
 
       const uploadedAttachments = newRequest.attachments.length > 0
-        ? await Promise.all(newRequest.attachments.map(file => api.uploadFile(file)))
+        ? await Promise.all(newRequest.attachments.map(file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve({
+              id: Date.now().toString() + Math.random().toString(36).substring(7),
+              name: file.name,
+              type: file.type.startsWith('image/') ? 'image' : 'file',
+              size: (file.size / 1024).toFixed(2) + ' KB',
+              url: reader.result
+            });
+            reader.onerror = error => reject(error);
+            reader.readAsDataURL(file);
+          })))
         : [];
 
       const requestData = {

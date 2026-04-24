@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Building2, Wallet, Settings, ChevronLeft, Crown, Sparkles, LogOut, MessageSquare } from 'lucide-react';
+import { Home, Building2, Wallet, Settings, ChevronLeft, Crown, Sparkles, LogOut, MessageSquare, FileText } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDarkMode } from '../../../useDarkMode.js';
@@ -70,6 +70,16 @@ const MENU_ITEMS = [
         badge: 'messages',
         description: 'Communication Hub',
         color: 'from-violet-400 via-purple-400 to-purple-500',
+        premium: false
+    },
+    {
+        id: 'contracts',
+        label: 'Contracts',
+        icon: FileText,
+        route: '/tenant/contracts',
+        badge: null,
+        description: 'Lease Agreements',
+        color: 'from-teal-400 via-cyan-400 to-cyan-500',
         premium: false
     },
 ];

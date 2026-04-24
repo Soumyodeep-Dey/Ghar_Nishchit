@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Search, Bell, Sun, Moon, User, Settings, HelpCircle, LogOut, ChevronDown, X, MessageSquare, Wrench, CreditCard, Home, Building2, Heart } from 'lucide-react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import { Link, useNavigate } from 'react-router-dom';
+import api from '../../../services/api.js';
 
 // Safe user reader — returns null if localStorage is missing or malformed.
 const readUserFromStorage = () => {
@@ -40,13 +41,33 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
   const fetchNotifications = useCallback(async () => {
     setNotifLoading(true);
     try {
-      // TODO: replace with real API call, e.g.:
-      // const res = await fetch('/api/tenant/notifications', {
-      //   headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
-      // });
-      // const data = await res.json();
-      // setNotifications(data);
-      setNotifications([]);
+      const data = await api.getNotifications();
+      const iconMap = {
+        inquiry:     MessageSquare,
+        maintenance: Wrench,
+        payment:     CreditCard,
+        general:     Bell,
+        message:     MessageSquare,
+      };
+      const colorMap = {
+        inquiry:     'primary',
+        maintenance: 'warning',
+        payment:     'success',
+        general:     'primary',
+        message:     'primary',
+      };
+      const mapped = (Array.isArray(data) ? data : []).map((n) => ({
+        id:      n.id || n._id,
+        type:    n.type,
+        icon:    iconMap[n.type] || Bell,
+        title:   n.title,
+        message: n.message,
+        time:    n.time || new Date(n.createdAt).toLocaleString(),
+        isRead:  n.read,
+        color:   colorMap[n.type] || 'primary',
+        relatedId: n.relatedId,
+      }));
+      setNotifications(mapped);
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
     } finally {
@@ -100,14 +121,28 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const markAsRead = (id) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
-    // TODO: PATCH /api/tenant/notifications/:id/read
+  const markAsRead = async (notification) => {
+    setNotifications(prev => prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n));
+    try {
+      await api.markNotificationRead(notification.id);
+    } catch (err) {
+      console.error('Failed to mark as read:', err);
+    }
+    setIsNotificationsOpen(false); // Close dropdown
+    
+    // Redirect logic
+    if (notification.type === 'inquiry' || notification.type === 'message') {
+      navigate('/tenant/messages', { state: { activeInquiryId: notification.relatedId } });
+    }
   };
 
-  const markAllAsRead = () => {
+  const markAllAsRead = async () => {
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-    // TODO: PATCH /api/tenant/notifications/read-all
+    try {
+      await api.markAllNotificationsRead();
+    } catch (err) {
+      console.error('Failed to mark all as read:', err);
+    }
   };
 
   // Search suggestions — each entry navigates on click.
@@ -285,7 +320,7 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
                                 ? 'border-transparent'
                                 : 'border-blue-500 bg-blue-50/30 dark:bg-blue-900/10'
                             }`}
-                            onClick={() => markAsRead(notification.id)}
+                            onClick={() => markAsRead(notification)}
                           >
                             <div className="flex items-start space-x-3">
                               <div className={`p-2 rounded-lg flex-shrink-0 ${colorClasses[notification.color]}`}>

@@ -12,11 +12,12 @@ import {
     getMaintenanceStats,
     getMaintenanceByProperty
 } from '../controllers/maintenance.controller.js';
+import { verifyToken } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
-// Create new maintenance request
-router.post('/', createMaintenanceRequest);
+// Create new maintenance request (requires auth to identify tenant)
+router.post('/', verifyToken, createMaintenanceRequest);
 
 // Get maintenance requests by landlord
 router.get('/landlord/:landlordId', getLandlordMaintenanceRequests);

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
-import { showConfirmToast } from '../../../utils/toast.jsx';
-import { showErrorToast } from '../../../utils/toast.jsx';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { showConfirmToast, showSuccessToast, showErrorToast } from '../../../utils/toast.jsx';
 import api from '../../../services/api.js';
 import {
   MessageSquare, Send, Paperclip, MoreVertical, Search, Phone, Smile, File, Calendar, Archive, Trash2, Forward, Reply, Edit3, Download, Check, CheckCheck, AlertCircle, Pin, X, Volume2, VolumeX, Heart, ThumbsUp, Laugh, Angry, Frown, Meh, Bold, Italic, Wrench, CreditCard, FileText, Building2
@@ -305,7 +305,7 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
     <motion.div
       whileHover={{ scale: 1.02, x: 5 }}
       onClick={onClick}
-      className={`relative p-4 rounded-xl cursor-pointer transition-all duration-200 group ${isActive
+      className={`relative p-4 rounded-xl cursor-pointer transition-all duration-200 group ${showMenu ? 'z-50' : 'hover:z-40 z-10'} ${isActive
         ? 'bg-gradient-to-r from-indigo-500/20 to-indigo-600/20 dark:from-cyan-500/20 dark:to-cyan-600/20 border border-indigo-500/30 dark:border-cyan-500/30'
         : 'hover:bg-indigo-50 dark:hover:bg-slate-800/50 border border-transparent'
         }`}
@@ -566,6 +566,8 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
 const LandlordMessage = () => {
   const [currentSection] = useState('Messages');
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // ── Real data state ──────────────────────────────────────────────────────────
   const [inquiries, setInquiries] = useState([]);          // list of inquiry threads
@@ -614,12 +616,23 @@ const LandlordMessage = () => {
 
   const [activeConversation, setActiveConversation] = useState(null);
 
-  // ── Auto-select first conversation once loaded ───────────────────────────────
+  // ── Auto-select conversation based on notification redirect or default to first
   useEffect(() => {
-    if (!activeConversation && conversations.length > 0) {
-      setActiveConversation(conversations[0]);
+    if (conversations.length > 0) {
+      if (location.state?.activeInquiryId) {
+        const target = conversations.find(c => String(c.id) === String(location.state.activeInquiryId));
+        if (target && target.id !== activeConversation?.id) {
+          setActiveConversation(target);
+          // Clear state so we don't force select it again if user clicks another conversation
+          navigate(location.pathname, { replace: true, state: {} });
+        } else if (!activeConversation) {
+          setActiveConversation(conversations[0]);
+        }
+      } else if (!activeConversation) {
+        setActiveConversation(conversations[0]);
+      }
     }
-  }, [conversations, activeConversation]);
+  }, [conversations, location.state, location.pathname, navigate, activeConversation]);
 
   // ── Load messages when active conversation changes ───────────────────────────
   useEffect(() => {
@@ -657,6 +670,89 @@ const LandlordMessage = () => {
   const [replyTo, setReplyTo] = useState(null);
   const messagesEndRef = useRef(null);
 
+  // ── Lease Agreement Modal State ─────────────────────────────────────────────
+  const [showLeaseModal, setShowLeaseModal] = useState(false);
+  const [leaseForm, setLeaseForm] = useState({
+    type: 'residential',
+    rentAmount: '',
+    securityDeposit: '',
+    startDate: '',
+    endDate: '',
+    terms: 'Standard lease terms apply. Rent is due on the 1st of each month.'
+  });
+
+  const handleOpenLeaseModal = () => {
+    if (!activeConversation || !activeConversation._raw) return;
+    const property = activeConversation._raw.property;
+    
+    let rent = '';
+    let deposit = '';
+    let type = 'residential';
+    
+    if (property) {
+      if (property.price) {
+        rent = property.price;
+        deposit = property.price * 2; // Default 2 months rent for security deposit
+      }
+      if (property.propertyType === 'commercial') {
+        type = 'commercial';
+      }
+    }
+
+    const today = new Date();
+    const nextYear = new Date(today);
+    nextYear.setFullYear(today.getFullYear() + 1);
+
+    setLeaseForm({
+      type,
+      rentAmount: rent,
+      securityDeposit: deposit,
+      startDate: today.toISOString().split('T')[0],
+      endDate: nextYear.toISOString().split('T')[0],
+      terms: 'Standard lease terms apply. Rent is due on the 1st of each month.'
+    });
+    
+    setShowLeaseModal(true);
+  };
+
+  const handleSendLease = async (e) => {
+    e.preventDefault();
+    if (!activeConversation || !activeConversation._raw) return;
+
+    setIsSending(true);
+    try {
+      const propertyId = activeConversation._raw.property?._id || activeConversation._raw.property;
+      const tenantId = activeConversation._raw.seeker?._id || activeConversation._raw.seeker;
+      
+      const start = new Date(leaseForm.startDate);
+      const end = new Date(leaseForm.endDate);
+      let durationMonths = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+      if (durationMonths <= 0) durationMonths = 12;
+
+      await api.sendContract({
+        property: propertyId,
+        tenantId: tenantId,
+        contractType: 'lease', // Must match backend enum: 'lease', 'rental', 'sublease'
+        duration: durationMonths,
+        startDate: leaseForm.startDate,
+        rentAmount: Number(leaseForm.rentAmount),
+        securityDeposit: Number(leaseForm.securityDeposit),
+        customClauses: leaseForm.terms // Backend expects string here, 'terms' is an object schema
+      });
+      
+      showSuccessToast('Lease agreement sent successfully!');
+      setShowLeaseModal(false);
+      
+      // Send a message notifying the tenant
+      await handleSendMessage({ content: `📜 I have sent a digital lease agreement for you to review and sign. You can find it in your Contracts tab.` });
+      
+    } catch (err) {
+      console.error(err);
+      showErrorToast('Failed to send lease agreement');
+    } finally {
+      setIsSending(false);
+    }
+  };
   // Filter conversations
   const filteredConversations = useMemo(() => {
     return conversations.filter(conv => {
@@ -723,12 +819,20 @@ const LandlordMessage = () => {
       };
       setMessages(prev => prev.map(m => m.id === optimistic.id ? shaped : m));
 
-      // Update last message preview in inquiry list
-      setInquiries(prev => prev.map(inq =>
-        inq._id === activeConversation.id
-          ? { ...inq, replies: [...(inq.replies || []), { content: messageData.content, createdAt: new Date() }] }
-          : inq
-      ));
+      // Update last message preview in inquiry list and move to top
+      setInquiries(prev => {
+        const idx = prev.findIndex(inq => inq._id === activeConversation.id);
+        if (idx === -1) return prev;
+        const updatedInq = { 
+          ...prev[idx], 
+          contactTime: new Date(), 
+          replies: [...(prev[idx].replies || []), { content: messageData.content, createdAt: new Date() }] 
+        };
+        const newList = [...prev];
+        newList.splice(idx, 1);
+        newList.unshift(updatedInq);
+        return newList;
+      });
     } catch (err) {
       setMessages(prev => prev.filter(m => m.id !== optimistic.id));
       showErrorToast('Failed to send message');
@@ -783,20 +887,28 @@ const LandlordMessage = () => {
     }
   };
 
-  // Handle delete conversation (local only)
+  // Handle delete conversation
   const handleDeleteConversation = (conversationId) => {
     showConfirmToast(
       'Are you sure you want to delete this conversation?',
-      () => {
-        setInquiries(prev => prev.filter(inq => inq._id !== conversationId));
-        if (activeConversation?.id === conversationId) {
-          setActiveConversation(null);
+      async () => {
+        try {
+          await api.deleteInquiry(conversationId);
+          setInquiries(prev => prev.filter(inq => inq._id !== conversationId));
+          if (activeConversation?.id === conversationId) {
+            setActiveConversation(null);
+          }
+          showSuccessToast('Conversation deleted');
+        } catch (error) {
+          console.error(error);
+          showErrorToast('Failed to delete conversation');
         }
       }
     );
   };
 
   return (
+    <>
     <div className="h-screen bg-gradient-to-br from-white via-indigo-50 to-purple-100 dark:from-gray-900 dark:via-slate-900 dark:to-blue-950 flex relative overflow-hidden">
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
@@ -967,7 +1079,14 @@ const LandlordMessage = () => {
                         </div>
                       </div>
 
-
+                      {/* Send Lease Button */}
+                      <button
+                        onClick={handleOpenLeaseModal}
+                        className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 dark:from-cyan-500 dark:to-cyan-600 text-white rounded-lg hover:shadow-lg transition-all"
+                      >
+                        <FileText className="w-4 h-4" />
+                        <span className="font-medium text-sm">Send Lease</span>
+                      </button>
                     </div>
                   </div>
 
@@ -1015,6 +1134,111 @@ const LandlordMessage = () => {
         </main>
       </div>
     </div>
+
+    {/* Lease Modal */}
+    {showLeaseModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-gray-200 dark:border-slate-700"
+        >
+          <div className="p-6 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <FileText className="h-6 w-6 text-indigo-500 dark:text-cyan-500" />
+              Create Lease Agreement
+            </h3>
+            <button onClick={() => setShowLeaseModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <form onSubmit={handleSendLease} className="p-6 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Lease Type</label>
+                <select
+                  required
+                  value={leaseForm.type}
+                  onChange={(e) => setLeaseForm({...leaseForm, type: e.target.value})}
+                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 border"
+                >
+                  <option value="residential">Residential</option>
+                  <option value="commercial">Commercial</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rent Amount (₹)</label>
+                <input
+                  type="number"
+                  required
+                  value={leaseForm.rentAmount}
+                  onChange={(e) => setLeaseForm({...leaseForm, rentAmount: e.target.value})}
+                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 border"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
+                <input
+                  type="date"
+                  required
+                  value={leaseForm.startDate}
+                  onChange={(e) => setLeaseForm({...leaseForm, startDate: e.target.value})}
+                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 border"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
+                <input
+                  type="date"
+                  required
+                  value={leaseForm.endDate}
+                  onChange={(e) => setLeaseForm({...leaseForm, endDate: e.target.value})}
+                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 border"
+                />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Security Deposit (₹)</label>
+                <input
+                  type="number"
+                  required
+                  value={leaseForm.securityDeposit}
+                  onChange={(e) => setLeaseForm({...leaseForm, securityDeposit: e.target.value})}
+                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 border"
+                />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Terms & Conditions</label>
+                <textarea
+                  required
+                  rows="3"
+                  value={leaseForm.terms}
+                  onChange={(e) => setLeaseForm({...leaseForm, terms: e.target.value})}
+                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 border"
+                ></textarea>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => setShowLeaseModal(false)}
+                className="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSending}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {isSending ? 'Sending...' : 'Send Agreement'}
+              </button>
+            </div>
+          </form>
+        </motion.div>
+      </div>
+    )}
+    </>
   );
 };
 

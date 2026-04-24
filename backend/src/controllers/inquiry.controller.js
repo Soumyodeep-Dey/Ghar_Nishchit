@@ -93,13 +93,25 @@ export const getLandlordInquiries = async (req, res) => {
     const propertyIds = properties.map(p => p._id);
 
     const inquiries = await Inquiry.find({ property: { $in: propertyIds } })
-      .populate('property', 'title')
+      .populate('property', 'title price propertyType')
       .populate('seeker',   'name email')
       .populate('replies.sender', 'name')
       .sort({ contactTime: -1 });
 
-    console.log('[Inquiry] Inquiries found:', inquiries.length);
-    res.status(200).json(inquiries);
+    // Deduplicate inquiries: keep 1:1 ratio between (seeker, property)
+    const uniqueMap = new Map();
+    for (const inq of inquiries) {
+      const key = `${inq.seeker?._id || inq.seeker}_${inq.property?._id || inq.property}`;
+      if (!uniqueMap.has(key)) {
+        uniqueMap.set(key, inq);
+      } else {
+        // Option to merge replies or just keep newest (which is the first one since sorted by contactTime -1)
+      }
+    }
+    const deduplicated = Array.from(uniqueMap.values());
+
+    console.log('[Inquiry] Inquiries found:', deduplicated.length);
+    res.status(200).json(deduplicated);
   } catch (error) {
     console.error('Error fetching inquiries:', error);
     res.status(500).json({ message: 'Error fetching inquiries' });
@@ -123,7 +135,17 @@ export const getTenantInquiries = async (req, res) => {
       .populate('replies.sender', 'name')
       .sort({ contactTime: -1 });
 
-    res.status(200).json(inquiries);
+    // Deduplicate inquiries: keep 1:1 ratio between (seeker, property)
+    const uniqueMap = new Map();
+    for (const inq of inquiries) {
+      const key = `${inq.seeker?._id || inq.seeker}_${inq.property?._id || inq.property}`;
+      if (!uniqueMap.has(key)) {
+        uniqueMap.set(key, inq);
+      }
+    }
+    const deduplicated = Array.from(uniqueMap.values());
+
+    res.status(200).json(deduplicated);
   } catch (error) {
     console.error('Error fetching tenant inquiries:', error);
     res.status(500).json({ message: 'Error fetching inquiries' });
@@ -217,6 +239,7 @@ export const replyToInquiry = async (req, res) => {
     };
 
     inquiry.replies.push(reply);
+    inquiry.contactTime = reply.createdAt; // Update contactTime so the thread moves to top
     await inquiry.save();
 
     const savedReply = inquiry.replies[inquiry.replies.length - 1];
@@ -227,25 +250,43 @@ export const replyToInquiry = async (req, res) => {
       await Notification.create({
         userId:    notifyUserId,
         title:     'New Message',
-        message:   `${sender?.name || 'Someone'} sent you a message`,
-        type:      'inquiry',
+        message:   `New message from ${sender?.name || 'someone'} regarding "${inquiry.property?.title || 'property'}"`,
+        type:      'message',
         relatedId: inquiry._id
       });
     } catch (notifErr) {
-      console.warn('[Inquiry] Failed to create reply notification:', notifErr.message);
+      console.warn('[Inquiry] Failed to create notification for reply:', notifErr.message);
     }
 
-    res.status(201).json({
-      _id:       savedReply._id,
-      sender:    userId,
-      senderName:sender?.name || '',
-      role,
-      content:   savedReply.content,
-      createdAt: savedReply.createdAt,
-      isOwn:     true
-    });
+    res.status(201).json(savedReply);
   } catch (error) {
     console.error('Error replying to inquiry:', error);
     res.status(500).json({ message: 'Error sending message' });
+  }
+};
+
+// ─── DELETE /api/inquiries/:id ──────────────────────────────────────────────
+// Both: delete an inquiry (conversation thread)
+export const deleteInquiry = async (req, res) => {
+  try {
+    const userId = req.user.userId || req.user.id || req.user._id;
+    const inquiry = await Inquiry.findById(req.params.id);
+
+    if (!inquiry) return res.status(404).json({ message: 'Inquiry not found' });
+
+    // Authorization
+    const seekerId   = String(inquiry.seeker);
+    const landlordId = String(inquiry.landlord || inquiry.property?.postedBy || '');
+    const uid        = String(userId);
+    
+    if (uid !== seekerId && uid !== landlordId) {
+      return res.status(403).json({ message: 'Not authorized to delete this conversation' });
+    }
+
+    await Inquiry.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: 'Conversation deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting inquiry:', error);
+    res.status(500).json({ message: 'Error deleting conversation' });
   }
 };

@@ -12,134 +12,101 @@ const resolveUserId = (user) => {
 };
 
 /**
- * Get all tenants (prospects) for the landlord's properties
- * This includes people who have inquired about any of the landlord's properties
+ * Get all REAL tenants for the landlord.
+ * A "tenant" is someone who has an active (or any) lease contract with this landlord.
+ * People who only sent inquiries are NOT tenants — they appear as notifications.
  */
 export const getMyTenants = async (req, res) => {
     try {
-        console.log('=== getMyTenants called ===');
-        console.log('req.user:', req.user);
-
         const authUserId = resolveUserId(req.user);
-        console.log('Resolved authUserId:', authUserId);
-
         if (!authUserId) {
-            console.log('No authUserId found');
             return res.status(401).json({ message: 'Authentication required' });
         }
 
-        // Find all properties posted by this landlord
-        const myProperties = await Property.find({ postedBy: authUserId }).select('_id title');
-        console.log('Found properties:', myProperties.length);
+        // Fetch ALL contracts for this landlord (active & pending — both are real interactions)
+        const contracts = await Contract.find({ landlord: authUserId })
+            .populate('tenant', 'name email phone profilePicture')
+            .populate('property', 'title price address')
+            .sort({ createdAt: -1 });
 
-        if (myProperties.length === 0) {
-            console.log('No properties found for landlord, returning empty array');
+        if (contracts.length === 0) {
             return res.status(200).json([]);
         }
 
-        const propertyIds = myProperties.map(p => p._id);
-        console.log('Property IDs:', propertyIds);
+        // Fetch visits for all tenant IDs
+        const tenantIds = [...new Set(contracts.map(c => c.tenant?._id?.toString()).filter(Boolean))];
+        const visits = await Visit.find({ tenant: { $in: tenantIds }, landlord: authUserId })
+            .populate('property', 'title');
 
-        // Find all inquiries for these properties
-        const inquiries = await Inquiry.find({
-            property: { $in: propertyIds }
-        })
-            .populate('seeker', 'name email phone profilePicture')
-            .populate('property', 'title price address')
-            .sort({ contactTime: -1 });
+        // Build one record per unique tenant (group multiple contracts)
+        const tenantMap = new Map();
 
-        console.log('Found inquiries:', inquiries.length);
+        for (const contract of contracts) {
+            const tenantUser = contract.tenant;
+            if (!tenantUser) continue;
 
-        // Transform inquiries into tenant data
-        const tenants = inquiries.map(inquiry => {
-            const seeker = inquiry.seeker;
-            if (!seeker) {
-                console.log('Inquiry missing seeker:', inquiry._id);
-                return null;
+            const tid = tenantUser._id.toString();
+
+            if (!tenantMap.has(tid)) {
+                tenantMap.set(tid, {
+                    id:          tenantUser._id,
+                    name:        tenantUser.name || 'Unknown',
+                    email:       tenantUser.email || '',
+                    phone:       tenantUser.phone || '',
+                    avatar:      tenantUser.profilePicture || '',
+                    isVerified:  !!tenantUser.email,
+                    isPremium:   false,
+                    isOnline:    false,
+                    rating:      0,
+                    contracts:   [],
+                    visitRequests: visits
+                        .filter(v => v.tenant.toString() === tid)
+                        .map(v => ({
+                            requestedDate: v.date,
+                            time:          v.time,
+                            status:        v.status,
+                            notes:         v.notes,
+                            type:          v.type,
+                            property:      v.property?.title
+                        }))
+                });
             }
 
-            return {
-                id: seeker._id,
-                name: seeker.name || 'Unknown',
-                email: seeker.email || '',
-                phone: seeker.phone || '',
-                avatar: seeker.profilePicture || '',
-                property: inquiry.property?.title || '',
-                propertyId: inquiry.property?._id,
-                status: 'Prospect', // All inquiries are prospects unless we have a lease system
-                inquiryDate: inquiry.contactTime,
-                message: inquiry.message,
-                rentAmount: inquiry.property?.price || 0,
-                isOnline: false,
-                isVerified: !!seeker.email,
-                isPremium: false,
-                rating: 0,
-                tags: ['New Inquiry'],
-                visitRequests: [{
-                    requestedDate: inquiry.contactTime,
-                    property: inquiry.property?.title,
-                    status: 'pending',
-                    notes: inquiry.message
-                }]
-            };
-        }).filter(t => t !== null);
-
-        // Remove duplicates (same tenant might inquire about multiple properties or same property multiple times)
-        // Keep the most recent inquiry
-        const uniqueTenants = [];
-        const seenIds = new Set();
-
-        for (const tenant of tenants) {
-            if (!seenIds.has(tenant.id.toString())) {
-                seenIds.add(tenant.id.toString());
-                uniqueTenants.push(tenant);
-            }
+            tenantMap.get(tid).contracts.push({
+                _id:             contract._id,
+                type:            contract.type,
+                startDate:       contract.startDate,
+                endDate:         contract.endDate,
+                status:          contract.status,
+                rentAmount:      contract.rentAmount,
+                securityDeposit: contract.securityDeposit,
+                property:        contract.property?.title,
+                propertyId:      contract.property?._id
+            });
         }
 
-        // Fetch contracts and visits for these unique tenants
-        const tenantIds = uniqueTenants.map(t => t.id);
-        const contracts = await Contract.find({ tenant: { $in: tenantIds }, landlord: authUserId }).populate('property', 'title');
-        const visits = await Visit.find({ tenant: { $in: tenantIds }, landlord: authUserId }).populate('property', 'title');
-
-        // Enrich tenants with real contract and visit data
-        const enrichedTenants = uniqueTenants.map(tenant => {
-            const tenantContracts = contracts.filter(c => c.tenant.toString() === tenant.id.toString());
-            const tenantVisits = visits.filter(v => v.tenant.toString() === tenant.id.toString());
-
-            const activeContract = tenantContracts.find(c => c.status === 'active');
-            const status = activeContract ? 'Active' : 'Prospect';
+        // Compute derived fields per tenant
+        const result = [...tenantMap.values()].map(t => {
+            const activeContract  = t.contracts.find(c => c.status === 'active');
+            const pendingContract = t.contracts.find(c => c.status === 'pending');
+            const primaryContract = activeContract || pendingContract || t.contracts[0];
 
             return {
-                ...tenant,
-                status,
-                contracts: tenantContracts.map(c => ({
-                    type: c.type,
-                    startDate: c.startDate,
-                    endDate: c.endDate,
-                    status: c.status,
-                    rentAmount: c.rentAmount,
-                    property: c.property?.title
-                })),
-                visitRequests: tenantVisits.map(v => ({
-                    requestedDate: v.date,
-                    time: v.time,
-                    status: v.status,
-                    notes: v.notes,
-                    type: v.type,
-                    property: v.property?.title
-                })),
-                rentAmount: activeContract ? activeContract.rentAmount : tenant.rentAmount,
-                property: activeContract ? activeContract.property?.title : tenant.property,
-                moveInDate: activeContract ? activeContract.startDate : null,
-                leaseEndDate: activeContract ? activeContract.endDate : null
+                ...t,
+                property:    primaryContract?.property || '',
+                propertyId:  primaryContract?.propertyId || null,
+                rentAmount:  primaryContract?.rentAmount || 0,
+                moveInDate:  primaryContract?.startDate || null,
+                leaseEndDate:primaryContract?.endDate   || null,
+                status:      activeContract ? 'Active' : pendingContract ? 'Pending' : 'Inactive',
+                tags:        activeContract ? ['Active Lease'] : pendingContract ? ['Contract Pending'] : ['Past Tenant'],
             };
         });
 
-        console.log('Returning enriched tenants:', enrichedTenants.length);
-        res.status(200).json(enrichedTenants);
+        console.log('Returning contract-based tenants:', result.length);
+        res.status(200).json(result);
     } catch (error) {
         console.error('Error fetching tenants:', error);
-        console.error('Error stack:', error.stack);
         res.status(500).json({ message: error.message, error: error.toString() });
     }
 };
@@ -236,34 +203,25 @@ export const getTenantStats = async (req, res) => {
             return res.status(401).json({ message: 'Authentication required' });
         }
 
-        // Find all properties posted by this landlord
+        // Properties count
         const myProperties = await Property.find({ postedBy: authUserId }).select('_id');
         const propertyIds = myProperties.map(p => p._id);
 
-        // Count total inquiries
-        const totalInquiries = await Inquiry.countDocuments({
-            property: { $in: propertyIds }
-        });
+        // Inquiry-based prospects (people who sent messages but don't have a contract yet)
+        const inquiries = await Inquiry.find({ property: { $in: propertyIds } }).select('seeker');
+        const uniqueInquiryUserIds = new Set(inquiries.map(i => i.seeker?.toString()).filter(Boolean));
 
-        // Get unique seekers (prospects)
-        const inquiries = await Inquiry.find({
-            property: { $in: propertyIds }
-        }).select('seeker');
-
-        const uniqueSeekers = new Set(inquiries.map(i => i.seeker.toString()));
-
-        // Count active contracts
-        const activeContractsCount = await Contract.countDocuments({
-            landlord: authUserId,
-            status: 'active'
-        });
+        // Contract-based tenant counts
+        const activeContracts  = await Contract.countDocuments({ landlord: authUserId, status: 'active' });
+        const pendingContracts = await Contract.countDocuments({ landlord: authUserId, status: 'pending' });
 
         const stats = {
-            totalProperties: myProperties.length,
-            totalInquiries,
-            totalProspects: uniqueSeekers.size,
-            activeTenants: activeContractsCount, // Using real lease system count
-            overduePayments: 0 // Would need a payment system to track this
+            totalProperties:  myProperties.length,
+            totalInquiries:   inquiries.length,
+            totalProspects:   uniqueInquiryUserIds.size,   // inquiry senders
+            activeTenants:    activeContracts,              // signed lease
+            pendingContracts: pendingContracts,             // sent but not yet signed
+            overduePayments:  0
         };
 
         res.status(200).json(stats);

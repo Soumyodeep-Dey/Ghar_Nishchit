@@ -126,6 +126,10 @@ const TenantMessage = () => {
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const typingTimer = useRef(null);
+  // Guard so the location.state effect fires exactly once per navigation
+  const processedNavState = useRef(false);
+  // Always-current snapshot of inquiries, without being a reactive dependency
+  const inquiriesRef = useRef([]);
 
   const emojis = ['😀', '😃', '😊', '😍', '🤔', '👍', '👎', '❤️', '🎉', '🔥', '💯', '🏠', '🔑', '💰'];
 
@@ -135,7 +139,9 @@ const TenantMessage = () => {
       try {
         setIsLoading(true);
         const data = await api.getTenantInquiries();
-        setInquiries(Array.isArray(data) ? data : []);
+        const list = Array.isArray(data) ? data : [];
+        inquiriesRef.current = list;   // keep ref in sync
+        setInquiries(list);
       } catch (err) {
         console.error('Failed to load inquiries:', err);
         showErrorToast('Failed to load conversations');
@@ -148,26 +154,27 @@ const TenantMessage = () => {
 
   // ── Handle navigation state from TenantProperty "Contact Landlord" button ───
   useEffect(() => {
-    // Only process when we are done loading the existing inquiries
-    if (!location.state?.propertyId || isLoading) return;
+    // Wait until inquiries are loaded, and only run once per navigation
+    if (!location.state?.propertyId || isLoading || processedNavState.current) return;
+    processedNavState.current = true;   // ← prevent re-entry on any future re-render
 
     const { propertyId, propertyTitle, initialMessage } = location.state;
     const msg = initialMessage || `Hi, I am interested in ${propertyTitle || 'this property'}.`;
 
-    const existing = inquiries.find(inq => {
+    // Read current inquiries from the ref — not from reactive state
+    const existing = inquiriesRef.current.find(inq => {
       const pid = inq.property?._id || inq.property;
       return String(pid) === String(propertyId);
     });
 
     if (existing) {
       setActiveInquiry(existing);
-      // Automatically send the interest message to the existing thread
       api.replyToInquiry(existing._id, msg)
         .then(savedReply => {
           setMessages(prev => [...prev, savedReply]);
-          setInquiries(prev => prev.map(inq => 
-            inq._id === existing._id 
-              ? { ...inq, replies: [...(inq.replies || []), { content: msg, createdAt: new Date() }] } 
+          setInquiries(prev => prev.map(inq =>
+            inq._id === existing._id
+              ? { ...inq, replies: [...(inq.replies || []), { content: msg, createdAt: new Date() }] }
               : inq
           ));
           showSuccessToast(`Sent another message to ${propertyTitle || 'Landlord'}`);
@@ -184,6 +191,7 @@ const TenantMessage = () => {
         try {
           setIsSending(true);
           const created = await api.createInquiry({ propertyId, message: msg });
+          inquiriesRef.current = [created, ...inquiriesRef.current];
           setInquiries(prev => [created, ...prev]);
           setActiveInquiry(created);
           showSuccessToast(`Started conversation for ${propertyTitle || 'property'}`);
@@ -197,7 +205,19 @@ const TenantMessage = () => {
       };
       startInquiry();
     }
-  }, [location.state, inquiries, isLoading, navigate, location.pathname]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state, isLoading]);
+
+  // ── Auto-select conversation based on notification redirect ──────────────────
+  useEffect(() => {
+    if (inquiries.length > 0 && location.state?.activeInquiryId) {
+      const target = inquiries.find(inq => String(inq._id) === String(location.state.activeInquiryId));
+      if (target && target._id !== activeInquiry?._id) {
+        setActiveInquiry(target);
+        navigate(location.pathname, { replace: true, state: {} });
+      }
+    }
+  }, [inquiries, location.state, location.pathname, navigate, activeInquiry]);
 
   // ── Load messages when active inquiry changes ────────────────────────────────
   useEffect(() => {
@@ -240,12 +260,20 @@ const TenantMessage = () => {
       const saved = await api.replyToInquiry(activeInquiry._id, text);
       setMessages(prev => prev.map(m => m._id === optimistic._id ? saved : m));
 
-      // Update last message preview in conversation list
-      setInquiries(prev => prev.map(inq =>
-        inq._id === activeInquiry._id
-          ? { ...inq, replies: [...(inq.replies || []), { content: text, createdAt: new Date() }] }
-          : inq
-      ));
+      // Update last message preview in conversation list and move to top
+      setInquiries(prev => {
+        const idx = prev.findIndex(inq => inq._id === activeInquiry._id);
+        if (idx === -1) return prev;
+        const updatedInq = { 
+          ...prev[idx], 
+          contactTime: new Date(), 
+          replies: [...(prev[idx].replies || []), { content: text, createdAt: new Date() }] 
+        };
+        const newList = [...prev];
+        newList.splice(idx, 1);
+        newList.unshift(updatedInq);
+        return newList;
+      });
     } catch (err) {
       setMessages(prev => prev.filter(m => m._id !== optimistic._id));
       showErrorToast('Failed to send message');

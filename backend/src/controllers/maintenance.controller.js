@@ -1,6 +1,8 @@
 import Maintenance from '../models/maintenance.model.js';
 import Property from '../models/property.model.js';
 import User from '../models/user.model.js';
+import Contract from '../models/contract.model.js';
+import Inquiry from '../models/inquiry.model.js';
 
 // Create a new maintenance request
 export const createMaintenanceRequest = async (req, res) => {
@@ -8,9 +10,6 @@ export const createMaintenanceRequest = async (req, res) => {
         const {
             title,
             description,
-            property,
-            tenant,
-            landlord,
             priority,
             category,
             isEmergency,
@@ -18,41 +17,67 @@ export const createMaintenanceRequest = async (req, res) => {
             attachments
         } = req.body;
 
-        // Validate required fields
-        if (!title || !description || !property || !tenant || !landlord) {
+        if (!title || !description) {
             return res.status(400).json({
                 success: false,
-                message: 'Missing required fields'
+                message: 'Title and description are required'
             });
         }
 
-        // Get property and tenant details
-        const propertyDoc = await Property.findById(property);
-        const tenantDoc = await User.findById(tenant);
-
-        if (!propertyDoc) {
-            return res.status(404).json({
-                success: false,
-                message: 'Property not found'
-            });
+        // Get tenant from JWT token
+        const tenantId = req.user?.userId || req.user?.id || req.user?._id;
+        if (!tenantId) {
+            return res.status(401).json({ success: false, message: 'Authentication required' });
         }
 
+        const tenantDoc = await User.findById(tenantId);
         if (!tenantDoc) {
-            return res.status(404).json({
+            return res.status(404).json({ success: false, message: 'Tenant not found' });
+        }
+
+        // Auto-resolve property & landlord from active contract, fall back to latest inquiry
+        let propertyId = null;
+        let landlordId = null;
+        let propertyDoc = null;
+
+        const activeContract = await Contract.findOne({ tenant: tenantId, status: 'active' })
+            .sort({ createdAt: -1 });
+        
+        if (activeContract) {
+            propertyId = activeContract.property;
+            landlordId = activeContract.landlord;
+        } else {
+            // Fall back to most recent inquiry
+            const latestInquiry = await Inquiry.findOne({ seeker: tenantId })
+                .sort({ contactTime: -1 })
+                .populate('property', '_id postedBy');
+            if (latestInquiry) {
+                propertyId = latestInquiry.property?._id;
+                landlordId = latestInquiry.landlord || latestInquiry.property?.postedBy;
+            }
+        }
+
+        if (!propertyId || !landlordId) {
+            return res.status(400).json({
                 success: false,
-                message: 'Tenant not found'
+                message: 'No active rental or property inquiry found. Please contact your landlord first.'
             });
+        }
+
+        propertyDoc = await Property.findById(propertyId);
+        if (!propertyDoc) {
+            return res.status(404).json({ success: false, message: 'Property not found' });
         }
 
         // Create maintenance request
         const maintenanceRequest = new Maintenance({
             title,
             description,
-            property,
+            property: propertyId,
             propertyName: propertyDoc.title,
-            tenant,
+            tenant: tenantId,
             tenantName: tenantDoc.name,
-            landlord,
+            landlord: landlordId,
             priority: priority || 'Medium',
             category: category || 'general',
             isEmergency: isEmergency || false,

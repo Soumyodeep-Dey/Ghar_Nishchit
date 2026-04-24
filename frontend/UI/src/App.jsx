@@ -22,6 +22,7 @@ const TenantMessage = lazy(() => import('./components/Pages/TENANT/TenantMessage
 const TenantMaintenance = lazy(() => import('./components/Pages/TENANT/TenantMaintenance'));
 const TenantPayment = lazy(() => import('./components/Pages/TENANT/TenantPayment'));
 const UpdateTenantProfile = lazy(() => import('./components/Pages/TENANT/UpdateTenantProfile'));
+const TenantContracts = lazy(() => import('./components/Pages/TENANT/TenantContracts'));
 
 const LandlordDashboard = lazy(() => import('./components/Pages/LANDLORD/LandlordDashboard'));
 const LandlordProperty = lazy(() => import('./components/Pages/LANDLORD/LandlordProperty'));
@@ -104,6 +105,14 @@ export default function App() {
               element={
                 <ProtectedRoute requiredRole="tenant">
                   <UpdateTenantProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tenant/contracts"
+              element={
+                <ProtectedRoute requiredRole="tenant">
+                  <TenantContracts />
                 </ProtectedRoute>
               }
             />
