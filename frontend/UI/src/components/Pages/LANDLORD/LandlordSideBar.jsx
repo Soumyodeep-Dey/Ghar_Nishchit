@@ -326,22 +326,14 @@ const LandlordSideBar = ({ onSectionChange }) => {
           opacity: 1,
           width: sidebarWidth
         }}
-        transition={{ duration: 0.7, type: "spring", stiffness: 120, damping: 20 }}
-        className={`fixed left-0 top-0 h-screen bg-gradient-to-br ${themeClasses.shellBg} backdrop-blur-3xl border-r ${themeClasses.border} shadow-2xl z-40 flex flex-col transition-all duration-700`}
+        transition={{ duration: 0.3 }}
+        className={`fixed left-0 top-0 h-screen bg-gradient-to-br ${themeClasses.shellBg} backdrop-blur-3xl border-r ${themeClasses.border} shadow-2xl z-40 flex flex-col transition-[width] duration-300 ease-in-out`}
         style={{ width: sidebarWidth, height: '100vh', maxHeight: '100vh', overflow: 'hidden', '--sidebar-width': sidebarWidth }}
       >
-        {/* Soft background particles */}
+        {/* Soft static background glow — no continuous animation */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <motion.div
-            animate={{ scale: [1, 1.2, 1], rotate: [0, 360], x: [-30, 30, -30], y: [-30, 30, -30] }}
-            transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-            className={`absolute -top-32 -left-32 w-64 h-64 ${isDark ? 'bg-gradient-radial from-blue-500/10 via-cyan-400/5 to-transparent' : 'bg-gradient-radial from-blue-200/20 via-cyan-200/10 to-transparent'} rounded-full blur-2xl`}
-          />
-          <motion.div
-            animate={{ scale: [1.2, 1, 1.2], rotate: [360, 0], x: [30, -30, 30], y: [30, -30, 30] }}
-            transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
-            className={`absolute -bottom-32 -right-32 w-64 h-64 ${isDark ? 'bg-gradient-radial from-emerald-500/10 via-green-400/5 to-transparent' : 'bg-gradient-radial from-emerald-200/20 via-green-200/10 to-transparent'} rounded-full blur-2xl`}
-          />
+          <div className={`absolute -top-32 -left-32 w-64 h-64 ${isDark ? 'bg-blue-500/5' : 'bg-blue-200/15'} rounded-full blur-3xl`} />
+          <div className={`absolute -bottom-32 -right-32 w-64 h-64 ${isDark ? 'bg-emerald-500/5' : 'bg-emerald-200/15'} rounded-full blur-3xl`} />
         </div>
 
         <SidebarHeader />
@@ -355,7 +347,7 @@ const LandlordSideBar = ({ onSectionChange }) => {
                   key={item.id}
                   initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  transition={{ delay: 0, duration: 0.2 }}
                   onMouseEnter={() => { handleTooltip(item.id, true); }}
                   onMouseLeave={() => { handleTooltip(item.id, false); }}
                   className="relative"
