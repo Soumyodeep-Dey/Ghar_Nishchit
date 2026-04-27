@@ -160,6 +160,10 @@ const LandlordDashboard = () => {
 
   const { darkMode: isDarkMode } = useDarkMode();
   const [properties, setProperties] = useState([]);
+  const [tenantStats, setTenantStats] = useState({
+    activeTenants: 0,
+    pendingContracts: 0
+  });
 
   const updateSection = useCallback((path) => {
     if (path === '/landlord' || path === '/landlord/') {
@@ -202,7 +206,7 @@ const LandlordDashboard = () => {
     {
       icon: Users,
       title: 'Active Tenants',
-      value: properties.reduce((acc, p) => acc + (p.tenantCount || 0), 0) || 0,
+      value: tenantStats.activeTenants || 0,
       change: '+0%',
       trend: 'up',
       color: isDarkMode ? 'from-purple-500 to-pink-600' : 'from-pink-400 to-rose-500'
@@ -215,7 +219,7 @@ const LandlordDashboard = () => {
       trend: 'down',
       color: isDarkMode ? 'from-pink-500 to-rose-600' : 'from-rose-400 to-pink-500'
     }
-  ], [isDarkMode, properties]);
+  ], [isDarkMode, properties, tenantStats.activeTenants]);
 
   // Load properties on mount
   useEffect(() => {
@@ -238,6 +242,18 @@ const LandlordDashboard = () => {
           } catch (err) {
             console.warn('Could not load user properties, falling back to all properties', err);
             remote = await api.getProperties();
+          }
+
+          try {
+            const stats = await api.getTenantStats();
+            if (mounted && stats) {
+              setTenantStats({
+                activeTenants: Number(stats.activeTenants || 0),
+                pendingContracts: Number(stats.pendingContracts || 0)
+              });
+            }
+          } catch (statsErr) {
+            console.warn('Could not load tenant stats:', statsErr);
           }
         } else {
             remote = await api.getProperties();

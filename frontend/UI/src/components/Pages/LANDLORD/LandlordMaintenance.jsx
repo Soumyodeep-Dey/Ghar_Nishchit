@@ -3,8 +3,9 @@ import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import { useDarkMode } from '../../../useDarkMode.js';
 import api from '../../../services/api';
+import { useNavigate } from 'react-router-dom';
 import {
-  Wrench, Plus, Search, MoreVertical, Edit, Trash2, Eye, Calendar, User, Clock, AlertCircle, CheckCircle, XCircle, Play, Pause, FileText, ImageIcon, Download, Phone, MessageCircle, Flag, RefreshCw, TrendingUp, Activity, IndianRupee, Home, Building2, Users, Zap, Droplets, Shield, AirVent, Monitor, ArrowUp, ArrowDown, X,
+  Wrench, Plus, Search, MoreVertical, Edit, Trash2, Eye, Calendar, User, Clock, AlertCircle, CheckCircle, XCircle, Play, Pause, FileText, ImageIcon, Download, Phone, MessageCircle, Flag, RefreshCw, TrendingUp, Activity, IndianRupee, Home, Building2, Users, Zap, Droplets, Shield, AirVent, Monitor, ArrowUp, ArrowDown, X, Share2, Bell,
 } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
@@ -518,14 +519,21 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
 };
 
 // Detailed Request Modal Component
-const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateStatus }) => {
+const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateStatus, onAssignTechnician, onNotify, onOpenMessageThread }) => {
   const [newComment, setNewComment] = useState('');
   const [newStatus, setNewStatus] = useState(request?.status || '');
   const [activeTab, setActiveTab] = useState('overview');
+  const [technicianName, setTechnicianName] = useState('');
+  const [technicianPhone, setTechnicianPhone] = useState('');
+  const [technicianEmail, setTechnicianEmail] = useState('');
+  const [isAssigning, setIsAssigning] = useState(false);
   const { darkMode } = useDarkMode();
 
   useEffect(() => {
     setNewStatus(request?.status || '');
+    setTechnicianName(request?.assignedTo || '');
+    setTechnicianPhone(request?.assignedToContact?.phone || '');
+    setTechnicianEmail(request?.assignedToContact?.email || '');
   }, [request]);
 
   if (!isOpen || !request) return null;
@@ -546,6 +554,119 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
     if (newStatus !== request.status) {
       onUpdateStatus(request.id, newStatus);
     }
+  };
+
+  const notify = (type, title, message) => {
+    if (onNotify) onNotify({ type, title, message });
+  };
+
+  const handleAssignTechnician = async () => {
+    if (!technicianName.trim()) return;
+    setIsAssigning(true);
+    try {
+      await onAssignTechnician(request.id, {
+        assignedTo: technicianName.trim(),
+        assignedToContact: {
+          phone: technicianPhone.trim(),
+          email: technicianEmail.trim()
+        }
+      });
+    } finally {
+      setIsAssigning(false);
+    }
+  };
+
+  const handleMessageTenant = () => {
+    const email = request?.tenantEmail?.trim();
+    const phone = request?.tenantPhone?.trim();
+    if (email) {
+      window.open(`mailto:${email}?subject=${encodeURIComponent(`Update on ${request.title}`)}`);
+      return;
+    }
+    if (phone) {
+      window.open(`tel:${phone}`);
+      return;
+    }
+    if (request?.inquiryId && onOpenMessageThread) {
+      onOpenMessageThread(request.inquiryId);
+      return;
+    }
+    notify('warning', 'Contact Not Available', 'No tenant email or phone is available for this request.');
+  };
+
+  const handleScheduleVisit = () => {
+    const input = window.prompt('Enter visit date & time (e.g. 29 Apr, 4:00 PM):');
+    if (!input || !input.trim()) return;
+
+    onAddComment(request.id, {
+      text: `Visit scheduled for ${input.trim()}.`,
+      author: 'Landlord',
+      timestamp: new Date().toISOString(),
+      attachments: []
+    });
+    notify('success', 'Visit Scheduled', `Visit marked for ${input.trim()}.`);
+  };
+
+  const handleShareReport = async () => {
+    const report = [
+      `Maintenance Report`,
+      `Request: ${request.title}`,
+      `Property: ${request.property || '-'}`,
+      `Tenant: ${request.tenant || '-'}`,
+      `Status: ${request.status}`,
+      `Priority: ${request.priority}`,
+      `Created: ${new Date(request.createdAt).toLocaleString()}`,
+      `Description: ${request.description || '-'}`
+    ].join('\n');
+
+    try {
+      await navigator.clipboard.writeText(report);
+      notify('success', 'Report Copied', 'Maintenance report copied to clipboard.');
+    } catch (error) {
+      console.error('Failed to copy report:', error);
+      notify('error', 'Share Failed', 'Could not copy report. Please try again.');
+    }
+  };
+
+  const handleExportPdf = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      notify('error', 'Export Failed', 'Popup blocked. Please allow popups and try again.');
+      return;
+    }
+
+    const html = `
+      <html>
+        <head>
+          <title>Maintenance Report - ${request.title}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 24px; color: #111; }
+            h1 { margin-bottom: 8px; }
+            .meta { margin: 6px 0; }
+            .section { margin-top: 18px; }
+          </style>
+        </head>
+        <body>
+          <h1>Maintenance Report</h1>
+          <div class="meta"><strong>Request:</strong> ${request.title}</div>
+          <div class="meta"><strong>Property:</strong> ${request.property || '-'}</div>
+          <div class="meta"><strong>Tenant:</strong> ${request.tenant || '-'}</div>
+          <div class="meta"><strong>Status:</strong> ${request.status}</div>
+          <div class="meta"><strong>Priority:</strong> ${request.priority}</div>
+          <div class="meta"><strong>Created:</strong> ${new Date(request.createdAt).toLocaleString()}</div>
+          <div class="section">
+            <strong>Description</strong>
+            <p>${request.description || '-'}</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => printWindow.print(), 300);
   };
 
   return (
@@ -754,6 +875,10 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
+                          onClick={() => {
+                            const phone = request?.assignedToContact?.phone?.trim();
+                            if (phone) window.open(`tel:${phone}`);
+                          }}
                           className={`p-2 ${darkMode ? 'bg-green-500/20 hover:bg-green-500/30' : 'bg-green-100 hover:bg-green-200'} rounded-lg transition-colors`}
                         >
                           <Phone className={`w-4 h-4 ${darkMode ? 'text-green-300' : 'text-green-600'}`} />
@@ -761,6 +886,10 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
+                          onClick={() => {
+                            const email = request?.assignedToContact?.email?.trim();
+                            if (email) window.open(`mailto:${email}`);
+                          }}
                           className={`p-2 ${darkMode ? 'bg-blue-500/20 hover:bg-blue-500/30' : 'bg-blue-100 hover:bg-blue-200'} rounded-lg transition-colors`}
                         >
                           <MessageCircle className={`w-4 h-4 ${darkMode ? 'text-blue-300' : 'text-blue-600'}`} />
@@ -780,6 +909,41 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                       </motion.button>
                     </div>
                   )}
+
+                  <div className="grid grid-cols-1 gap-3 mt-4">
+                    <input
+                      type="text"
+                      placeholder="Technician name"
+                      value={technicianName}
+                      onChange={(e) => setTechnicianName(e.target.value)}
+                      className={`w-full p-3 ${darkMode ? 'bg-white/10 border-white/20 text-white placeholder-white/50' : 'bg-white border-indigo-200 text-indigo-900 placeholder-indigo-400/50'} border rounded-lg focus:border-blue-500 focus:outline-none`}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Phone (optional)"
+                      value={technicianPhone}
+                      onChange={(e) => setTechnicianPhone(e.target.value)}
+                      className={`w-full p-3 ${darkMode ? 'bg-white/10 border-white/20 text-white placeholder-white/50' : 'bg-white border-indigo-200 text-indigo-900 placeholder-indigo-400/50'} border rounded-lg focus:border-blue-500 focus:outline-none`}
+                    />
+                    <input
+                      type="email"
+                      placeholder="Email (optional)"
+                      value={technicianEmail}
+                      onChange={(e) => setTechnicianEmail(e.target.value)}
+                      className={`w-full p-3 ${darkMode ? 'bg-white/10 border-white/20 text-white placeholder-white/50' : 'bg-white border-indigo-200 text-indigo-900 placeholder-indigo-400/50'} border rounded-lg focus:border-blue-500 focus:outline-none`}
+                    />
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleAssignTechnician}
+                      disabled={!technicianName.trim() || isAssigning}
+                      className="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-pink-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isAssigning
+                        ? (request.assignedTo ? 'Reassigning...' : 'Assigning...')
+                        : (request.assignedTo ? 'Reassign Technician' : 'Assign Technician')}
+                    </motion.button>
+                  </div>
                 </div>
 
                 {/* Quick Actions */}
@@ -790,6 +954,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
+                      onClick={handleMessageTenant}
                       className={`flex items-center justify-center space-x-2 p-3 ${darkMode ? 'bg-blue-500/20 hover:bg-blue-500/30' : 'bg-blue-100 hover:bg-blue-200'} rounded-lg transition-colors`}
                     >
                       <MessageCircle className={`w-4 h-4 ${darkMode ? 'text-blue-300' : 'text-blue-600'}`} />
@@ -799,6 +964,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
+                      onClick={handleScheduleVisit}
                       className={`flex items-center justify-center space-x-2 p-3 ${darkMode ? 'bg-green-500/20 hover:bg-green-500/30' : 'bg-green-100 hover:bg-green-200'} rounded-lg transition-colors`}
                     >
                       <Calendar className={`w-4 h-4 ${darkMode ? 'text-green-300' : 'text-green-600'}`} />
@@ -808,6 +974,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
+                      onClick={handleShareReport}
                       className={`flex items-center justify-center space-x-2 p-3 ${darkMode ? 'bg-purple-500/20 hover:bg-purple-500/30' : 'bg-purple-100 hover:bg-purple-200'} rounded-lg transition-colors`}
                     >
                       <MessageCircle className={`w-4 h-4 ${darkMode ? 'text-purple-300' : 'text-purple-600'}`} />
@@ -817,6 +984,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
+                      onClick={handleExportPdf}
                       className={`flex items-center justify-center space-x-2 p-3 ${darkMode ? 'bg-orange-500/20 hover:bg-orange-500/30' : 'bg-orange-100 hover:bg-orange-200'} rounded-lg transition-colors`}
                     >
                       <Download className={`w-4 h-4 ${darkMode ? 'text-orange-300' : 'text-orange-600'}`} />
@@ -1070,10 +1238,11 @@ const NotificationToast = ({ notifications, onRemove }) => {
 const LandlordMaintenance = () => {
   const [currentSection] = useState('Maintenance');
   const { darkMode } = useDarkMode();
+  const navigate = useNavigate();
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
 
-  // Get landlord ID from localStorage (adjust based on your auth implementation)
-  const landlordId = localStorage.getItem('userId') || localStorage.getItem('landlordId');
+  // Resolve landlord ID from profile first, then localStorage fallback
+  const [landlordId, setLandlordId] = useState(localStorage.getItem('userId') || localStorage.getItem('landlordId') || '');
 
   // State management
   const [maintenanceRequests, setMaintenanceRequests] = useState([]);
@@ -1100,6 +1269,23 @@ const LandlordMaintenance = () => {
 
   const { notifications, addNotification, removeNotification } = useNotification();
 
+  useEffect(() => {
+    const resolveLandlordId = async () => {
+      if (landlordId) return;
+      try {
+        const profile = await api.getProfile();
+        const resolvedId = profile?.id || profile?._id || '';
+        if (resolvedId) {
+          setLandlordId(resolvedId);
+          localStorage.setItem('userId', resolvedId);
+        }
+      } catch (error) {
+        console.error('Failed to resolve landlord profile:', error);
+      }
+    };
+    resolveLandlordId();
+  }, [landlordId]);
+
   // Fetch maintenance requests from API
   const fetchMaintenanceRequests = async () => {
     try {
@@ -1115,18 +1301,41 @@ const LandlordMaintenance = () => {
       // Remove undefined values
       Object.keys(filters).forEach(key => filters[key] === undefined && delete filters[key]);
 
-      const response = await api.getLandlordMaintenanceRequests(landlordId, filters);
+      const [response, inquiries] = await Promise.all([
+        api.getLandlordMaintenanceRequests(landlordId, filters),
+        api.getLandlordInquiries().catch(() => [])
+      ]);
 
+      const contactMap = {};
+      (Array.isArray(inquiries) ? inquiries : []).forEach((inq) => {
+        const tenantKey = String(inq?.seeker?._id || inq?.seeker || '');
+        const propertyKey = String(inq?.property?._id || inq?.property || '');
+        if (!tenantKey || !propertyKey) return;
+        contactMap[`${tenantKey}_${propertyKey}`] = {
+          email: inq?.seeker?.email || '',
+          inquiryId: inq?._id || ''
+        };
+      });
       if (response.success) {
         // Transform API data to match component structure
         const transformedData = response.data.map(req => ({
+          ...(function () {
+            const tenantId = req.tenant?._id || req.tenant;
+            const propertyId = req.property?._id || req.property;
+            const contactFallback = contactMap[`${String(tenantId)}_${String(propertyId)}`] || {};
+            return {
+              tenantId,
+              propertyId,
+              tenantEmail: req.tenant?.email || contactFallback.email || '',
+              tenantPhone: req.tenant?.phone || '',
+              inquiryId: contactFallback.inquiryId || ''
+            };
+          })(),
           id: req._id,
           title: req.title,
           description: req.description,
           property: req.propertyName,
-          propertyId: req.property?._id || req.property,
           tenant: req.tenantName,
-          tenantId: req.tenant?._id || req.tenant,
           createdAt: req.createdAt,
           updatedAt: req.updatedAt,
           status: req.status,
@@ -1134,6 +1343,7 @@ const LandlordMaintenance = () => {
           progress: req.progress,
           category: req.category,
           assignedTo: req.assignedTo,
+          assignedToContact: req.assignedToContact || {},
           estimatedCost: req.estimatedCost,
           actualCost: req.actualCost,
           isEmergency: req.isEmergency,
@@ -1157,6 +1367,10 @@ const LandlordMaintenance = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const openMessageThread = (inquiryId) => {
+    navigate('/landlord/messages', { state: { activeInquiryId: inquiryId } });
   };
 
   const fetchStats = async () => {
@@ -1203,7 +1417,14 @@ const LandlordMaintenance = () => {
 
   // Get unique properties for filter
   const properties = useMemo(() => {
-    return [...new Set(maintenanceRequests.map(r => r.property))];
+    const map = new Map();
+    maintenanceRequests.forEach((r) => {
+      const key = String(r.propertyId || '');
+      if (key && !map.has(key)) {
+        map.set(key, { id: key, name: r.property || 'Property' });
+      }
+    });
+    return Array.from(map.values());
   }, [maintenanceRequests]);
 
   // Event handlers
@@ -1296,6 +1517,51 @@ const LandlordMaintenance = () => {
         type: 'error',
         title: 'Error',
         message: 'Failed to add comment'
+      });
+    }
+  };
+
+  const handleAssignTechnician = async (requestId, payload) => {
+    try {
+      const response = await api.assignTechnician(requestId, payload);
+      if (response?.success) {
+        const updated = response.data;
+        setMaintenanceRequests(prev => prev.map(req => (
+          req.id === requestId
+            ? {
+              ...req,
+              assignedTo: updated.assignedTo,
+              assignedToContact: updated.assignedToContact,
+              history: updated.history || req.history,
+              updatedAt: updated.updatedAt || req.updatedAt
+            }
+            : req
+        )));
+
+        if (selectedRequest?.id === requestId) {
+          setSelectedRequest(prev => prev ? {
+            ...prev,
+            assignedTo: updated.assignedTo,
+            assignedToContact: updated.assignedToContact,
+            history: updated.history || prev.history,
+            updatedAt: updated.updatedAt || prev.updatedAt
+          } : prev);
+        }
+
+        addNotification({
+          type: 'success',
+          title: 'Technician Assigned',
+          message: `${updated.assignedTo} has been assigned successfully.`
+        });
+
+        fetchStats();
+      }
+    } catch (error) {
+      console.error('Error assigning technician:', error);
+      addNotification({
+        type: 'error',
+        title: 'Assignment Failed',
+        message: error?.message || 'Failed to assign technician'
       });
     }
   };
@@ -1474,7 +1740,7 @@ const LandlordMaintenance = () => {
                     >
                       <option value="All">All Properties</option>
                       {properties.map((property) => (
-                        <option key={property} value={property}>{property}</option>
+                        <option key={property.id} value={property.id}>{property.name}</option>
                       ))}
                     </select>
                   </div>
@@ -1583,6 +1849,9 @@ const LandlordMaintenance = () => {
             }}
             onAddComment={handleAddComment}
             onUpdateStatus={handleStatusChange}
+            onAssignTechnician={handleAssignTechnician}
+            onNotify={addNotification}
+            onOpenMessageThread={openMessageThread}
           />
         )}
       </AnimatePresence>

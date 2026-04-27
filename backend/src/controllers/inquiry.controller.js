@@ -265,6 +265,41 @@ export const replyToInquiry = async (req, res) => {
   }
 };
 
+// ─── DELETE /api/inquiries/:id/messages/:messageId ────────────────────────────
+// Both: delete an individual message from a conversation thread.
+export const deleteMessage = async (req, res) => {
+  try {
+    const { id, messageId } = req.params;
+    const userId = req.user.userId || req.user.id || req.user._id;
+
+    const inquiry = await Inquiry.findById(id);
+    if (!inquiry) return res.status(404).json({ message: 'Inquiry not found' });
+
+    // Authorization
+    const seekerId   = String(inquiry.seeker);
+    const landlordId = String(inquiry.landlord || inquiry.property?.postedBy || '');
+    const uid        = String(userId);
+    
+    if (uid !== seekerId && uid !== landlordId) {
+      return res.status(403).json({ message: 'Not authorized to delete this message' });
+    }
+
+    if (messageId === id + '_init') {
+      // It's the initial message.
+      inquiry.message = 'This message was deleted';
+    } else {
+      // It's a reply. Pull it from the replies array.
+      inquiry.replies = inquiry.replies.filter(r => String(r._id) !== String(messageId));
+    }
+
+    await inquiry.save();
+    res.status(200).json({ message: 'Message deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting message:', error);
+    res.status(500).json({ message: 'Error deleting message' });
+  }
+};
+
 // ─── DELETE /api/inquiries/:id ──────────────────────────────────────────────
 // Both: delete an inquiry (conversation thread)
 export const deleteInquiry = async (req, res) => {
@@ -290,3 +325,5 @@ export const deleteInquiry = async (req, res) => {
     res.status(500).json({ message: 'Error deleting conversation' });
   }
 };
+
+
