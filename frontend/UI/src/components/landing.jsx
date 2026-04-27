@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Home, Building, Info, IndianRupee, Users, HelpCircle, Menu, X, BookOpen } from 'lucide-react';
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { showInfoToast, showSuccessToast } from '../utils/toast.jsx';
+import Chatbot from './Chatbot.jsx';
 
 
 import p1 from '../assets/p1.jpg';
@@ -1102,6 +1103,7 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+      <Chatbot darkMode={darkMode} />
     </div>
   );
 }

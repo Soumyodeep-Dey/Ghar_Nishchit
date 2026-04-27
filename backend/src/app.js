@@ -10,6 +10,7 @@ import maintenanceRoutes   from './routes/maintenance.routes.js';
 import inquiryRoutes       from './routes/inquiry.routes.js';
 import notificationRoutes  from './routes/notification.routes.js';
 import paymentRoutes       from './routes/payment.routes.js';
+import chatbotRoutes       from './routes/chatbot.routes.js';
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.use('/api/maintenance',   maintenanceRoutes);
 app.use('/api/inquiries',     inquiryRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/payments',      paymentRoutes);
+app.use('/api/chatbot',       chatbotRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error(err.stack);
