@@ -10,7 +10,10 @@ import {
   XMarkIcon, CheckIcon, FaceSmileIcon, MagnifyingGlassIcon,
   BuildingOfficeIcon, ClockIcon
 } from '@heroicons/react/24/outline';
-
+import {
+  FileText, CheckCircle, Clock, XCircle, Home, Calendar,
+  IndianRupee, Shield, User, AlertTriangle, RefreshCw, Eye, X
+} from 'lucide-react';
 // ── Typing dots ───────────────────────────────────────────────────────────────
 const TypingIndicator = () => (
   <div className="flex justify-start mb-4 animate-fadeIn">
@@ -107,7 +110,166 @@ const ConversationItem = ({ inquiry, isActive, onClick, darkMode }) => {
   );
 };
 
+// ─── Status Badge ─────────────────────────────────────────────────────────────
+const StatusBadge = ({ status }) => {
+  const cfg = {
+    pending:   { label: 'Awaiting Your Signature', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Clock },
+    active:    { label: 'Active Lease',             color: 'bg-green-100  text-green-800  border-green-200',  icon: CheckCircle },
+    completed: { label: 'Completed',                color: 'bg-blue-100   text-blue-800   border-blue-200',   icon: CheckCircle },
+    cancelled: { label: 'Cancelled',                color: 'bg-red-100    text-red-800    border-red-200',    icon: XCircle },
+  }[status?.toLowerCase()] || { label: status, color: 'bg-gray-100 text-gray-700 border-gray-200', icon: FileText };
+
+  const Icon = cfg.icon;
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${cfg.color}`}>
+      <Icon className="w-3.5 h-3.5" />
+      {cfg.label}
+    </span>
+  );
+};
+
+// ─── Contract Detail Modal ────────────────────────────────────────────────────
+const ContractModal = ({ contract, onClose, onAccept, onDecline, accepting }) => {
+  const { darkMode } = useDarkMode();
+  if (!contract) return null;
+
+  const isPending = contract.status === 'pending';
+  const bg = darkMode ? 'bg-slate-900' : 'bg-white';
+  const text = darkMode ? 'text-slate-100' : 'text-gray-900';
+  const sub = darkMode ? 'text-slate-400' : 'text-gray-500';
+  const border = darkMode ? 'border-slate-700' : 'border-gray-200';
+  const rowBg = darkMode ? 'bg-slate-800' : 'bg-gray-50';
+
+  const Row = ({ label, value }) => (
+    <div className={`flex justify-between items-center py-3 px-4 rounded-xl ${rowBg}`}>
+      <span className={`text-sm font-medium ${sub}`}>{label}</span>
+      <span className={`text-sm font-semibold ${text}`}>{value}</span>
+    </div>
+  );
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
+      <div
+        className={`${bg} rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto`}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className={`sticky top-0 ${bg} p-6 border-b ${border} rounded-t-3xl flex items-center justify-between`}>
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-gradient-to-br from-blue-50 to-indigo-600 rounded-xl">
+              <FileText className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h2 className={`text-xl font-bold ${text}`}>Lease Contract</h2>
+              <p className={`text-sm ${sub}`}>{contract.property?.title || 'Property Contract'}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className={`p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors ${sub}`}>
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="p-6 space-y-5">
+          {/* Status banner for pending */}
+          {isPending && (
+            <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+              <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-amber-800">Action Required</p>
+                <p className="text-sm text-amber-700 mt-0.5">
+                  Your landlord has sent you this lease contract. Please review all terms carefully before signing.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <StatusBadge status={contract.status} />
+
+          {/* Contract Details */}
+          <div className="space-y-2">
+            <h3 className={`text-sm font-semibold uppercase tracking-wider ${sub} mb-3`}>Contract Details</h3>
+            <Row label="Contract Type"    value={contract.type?.charAt(0).toUpperCase() + contract.type?.slice(1) || '—'} />
+            <Row label="Property"         value={contract.property?.title || '—'} />
+            <Row label="Duration"         value={contract.duration ? `${contract.duration} months` : '—'} />
+            <Row label="Monthly Rent"     value={contract.rentAmount ? `₹${Number(contract.rentAmount).toLocaleString('en-IN')}` : '—'} />
+            <Row label="Security Deposit" value={contract.securityDeposit ? `₹${Number(contract.securityDeposit).toLocaleString('en-IN')}` : '—'} />
+            <Row label="Start Date"       value={contract.startDate ? new Date(contract.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'} />
+            <Row label="End Date"         value={contract.endDate ? new Date(contract.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'} />
+          </div>
+
+          {/* Landlord */}
+          {contract.landlord && (
+            <div className="space-y-2">
+              <h3 className={`text-sm font-semibold uppercase tracking-wider ${sub} mb-3`}>Landlord</h3>
+              <Row label="Name"  value={contract.landlord.name || '—'} />
+              <Row label="Email" value={contract.landlord.email || '—'} />
+            </div>
+          )}
+
+          {/* Terms */}
+          {contract.terms && (
+            <div>
+              <h3 className={`text-sm font-semibold uppercase tracking-wider ${sub} mb-3`}>Terms & Conditions</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { key: 'petsAllowed',       label: 'Pets Allowed' },
+                  { key: 'smokingAllowed',     label: 'Smoking Allowed' },
+                  { key: 'sublettingAllowed',  label: 'Subletting Allowed' },
+                  { key: 'earlyTermination',   label: 'Early Termination Clause' },
+                ].map(({ key, label }) => (
+                  <div key={key} className={`flex items-center gap-2 px-3 py-2.5 rounded-xl ${rowBg}`}>
+                    {contract.terms[key]
+                      ? <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                      : <XCircle className="w-4 h-4 text-red-400 flex-shrink-0" />}
+                    <span className={`text-sm ${text}`}>{label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Custom Clauses */}
+          {contract.customClauses && (
+            <div className={`p-4 rounded-xl ${rowBg}`}>
+              <p className={`text-xs font-semibold uppercase tracking-wider ${sub} mb-2`}>Additional Clauses</p>
+              <p className={`text-sm ${text} leading-relaxed`}>{contract.customClauses}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer Actions */}
+        {isPending && (
+          <div className={`sticky bottom-0 ${bg} p-6 border-t ${border} rounded-b-3xl`}>
+            <p className={`text-xs ${sub} text-center mb-4`}>
+              By clicking "Accept & Sign", you agree to all terms stated in this contract.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={onDecline}
+                disabled={accepting}
+                className="flex-1 py-3 rounded-xl border border-red-200 text-red-600 font-semibold text-sm hover:bg-red-50 transition-colors disabled:opacity-50"
+              >
+                Decline
+              </button>
+              <button
+                onClick={() => onAccept(contract._id || contract.id)}
+                disabled={accepting}
+                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold text-sm hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg shadow-green-500/25 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {accepting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                {accepting ? 'Processing…' : 'Accept & Sign'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // ── Main component ────────────────────────────────────────────────────────────
+
 const TenantMessage = () => {
   const { darkMode } = useDarkMode();
   const location = useLocation();
@@ -121,6 +283,9 @@ const TenantMessage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [pendingContract, setPendingContract] = useState(null);
+  const [showContractModal, setShowContractModal] = useState(false);
+  const [accepting, setAccepting] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const messagesEndRef = useRef(null);
@@ -233,6 +398,57 @@ const TenantMessage = () => {
     };
     fetchMessages();
   }, [activeInquiry]);
+  // ── Load pending contract when active inquiry changes ──────────────────────────
+  useEffect(() => {
+    if (!activeInquiry) { setPendingContract(null); return; }
+    const fetchContracts = async () => {
+      try {
+        const data = await api.getTenantContracts();
+        const propId = activeInquiry.property?._id || activeInquiry.property;
+        const contractsForProperty = (data || []).filter(c =>
+          String(c.property?._id || c.property) === String(propId)
+        );
+        const hasActive = contractsForProperty.some(c => c.status === 'active');
+        const pending = hasActive
+          ? null
+          : contractsForProperty.find(c => c.status === 'pending');
+        setPendingContract(pending || null);
+      } catch (err) {
+        console.error('Failed to fetch contracts for this property:', err);
+      }
+    };
+    fetchContracts();
+  }, [activeInquiry]);
+
+  // ── Handle Accept Contract ───────────────────────────────────────────────────
+  const handleAcceptContract = async (contractId) => {
+    try {
+      setAccepting(true);
+      await api.updateContractStatus(contractId, 'active');
+      showSuccessToast('🎉 Lease accepted!');
+      setPendingContract(prev => ({ ...prev, status: 'active' }));
+      setShowContractModal(false);
+    } catch (err) {
+      console.error(err);
+      showErrorToast('Failed to accept contract');
+    } finally {
+      setAccepting(false);
+    }
+  };
+
+  // ── Handle Decline Contract ──────────────────────────────────────────────────
+  const handleDeclineContract = async () => {
+    if (!pendingContract) return;
+    try {
+      await api.updateContractStatus(pendingContract._id || pendingContract.id, 'cancelled');
+      showSuccessToast('Contract declined');
+      setPendingContract(null);
+      setShowContractModal(false);
+    } catch (err) {
+      console.error(err);
+      showErrorToast('Failed to decline contract');
+    }
+  };
 
   // ── Auto-scroll on new messages ──────────────────────────────────────────────
   useEffect(() => {
@@ -386,7 +602,30 @@ const TenantMessage = () => {
                   </div>
                 </div>
 
+                {/* Pending Contract Banner */}
+                {pendingContract && pendingContract.status === 'pending' && (
+
+                  <div className={`p-4 flex items-center justify-between ${darkMode ? 'bg-amber-900/20 border-amber-800' : 'bg-amber-50 border-amber-200'} border-b`}>
+                    <div className="flex items-center gap-3">
+                      <AlertTriangle className={`w-5 h-5 ${darkMode ? 'text-amber-400' : 'text-amber-600'}`} />
+                      <div>
+                        <p className={`text-sm font-semibold ${darkMode ? 'text-amber-400' : 'text-amber-800'}`}>Action Required</p>
+                        <p className={`text-xs ${darkMode ? 'text-amber-500' : 'text-amber-700'}`}>
+                          A lease agreement has been sent for this property.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setShowContractModal(true)}
+                      className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-bold rounded-xl shadow-md transition-all"
+                    >
+                      Review & Sign
+                    </button>
+                  </div>
+                )}
+
                 {/* Messages */}
+
                 <div className={`flex-1 overflow-y-auto p-6 ${darkMode ? 'bg-gradient-to-b from-gray-900 to-gray-800' : 'bg-gradient-to-b from-gray-50 to-white'} custom-scrollbar`}>
                   {messages.length === 0 ? (
                     <div className="text-center py-12">
@@ -478,7 +717,19 @@ const TenantMessage = () => {
         </main>
       </div>
 
+      {/* Detail Modal */}
+      {showContractModal && pendingContract && (
+        <ContractModal
+          contract={pendingContract}
+          onClose={() => setShowContractModal(false)}
+          onAccept={handleAcceptContract}
+          onDecline={handleDeclineContract}
+          accepting={accepting}
+        />
+      )}
+
       <style>{`
+
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: ${darkMode ? '#1e293b' : '#f1f5f9'}; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: linear-gradient(45deg,#3b82f6,#8b5cf6); border-radius: 10px; }

@@ -346,7 +346,10 @@ const TenantMaintenance = () => {
         const profile = await api.getProfile();
 
         if (profile && profile.id) {
-          const maintenanceData = await api.getTenantMaintenanceRequests(profile.id);
+          const maintenanceResponse = await api.getTenantMaintenanceRequests(profile.id);
+          const maintenanceData = Array.isArray(maintenanceResponse)
+            ? maintenanceResponse
+            : (Array.isArray(maintenanceResponse?.data) ? maintenanceResponse.data : []);
           const transformedRequests = Array.isArray(maintenanceData)
             ? maintenanceData.map(normalizeRequest)
             : [];
@@ -428,7 +431,8 @@ const TenantMaintenance = () => {
         attachments: uploadedAttachments
       };
 
-      const createdRequest = await api.createMaintenanceRequest(requestData);
+      const createdResponse = await api.createMaintenanceRequest(requestData);
+      const createdRequest = createdResponse?.data || createdResponse;
       setRequests(prev => [normalizeRequest(createdRequest), ...prev]);
       setNewRequest({ title: '', description: '', priority: 'Medium', attachments: [] });
       setShowNewRequestForm(false);

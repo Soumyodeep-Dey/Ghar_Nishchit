@@ -875,9 +875,19 @@ const LandlordMessage = () => {
   };
 
   // Handle delete message
-  const handleDeleteMessage = (messageId) => {
-    setMessages(prev => prev.filter(msg => msg.id !== messageId));
+  const handleDeleteMessage = async (messageId) => {
+    try {
+      if (activeConversation) {
+        await api.deleteMessage(activeConversation.id, messageId);
+        setMessages(prev => prev.filter(msg => msg.id !== messageId));
+        showSuccessToast('Message deleted');
+      }
+    } catch (err) {
+      console.error('Failed to delete message:', err);
+      showErrorToast('Failed to delete message');
+    }
   };
+
 
   // Handle archive conversation (local only — just removes from view)
   const handleArchiveConversation = (conversationId) => {
