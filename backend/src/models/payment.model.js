@@ -25,7 +25,8 @@ const paymentSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ['UPI', 'Bank Transfer', 'Cash', 'Card', 'Other'],
+      // 'Razorpay' added to support gateway payments
+      enum: ['UPI', 'Bank Transfer', 'Cash', 'Card', 'Razorpay', 'Other'],
       default: 'UPI',
     },
     dueDate: {
@@ -39,6 +40,19 @@ const paymentSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+
+    // ── Razorpay Gateway Fields ───────────────────────────────
+    // Stored so we can verify payments and reconcile via webhook
+    razorpayOrderId: {
+      type: String,
+      default: null,
+      index: true, // fast lookup in webhook handler
+    },
+    razorpayPaymentId: {
+      type: String,
+      default: null,
+    },
+    // ─────────────────────────────────────────────────────────
   },
   { timestamps: true }
 );
