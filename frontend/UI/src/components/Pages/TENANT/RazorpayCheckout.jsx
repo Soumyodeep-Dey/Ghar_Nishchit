@@ -15,26 +15,26 @@
  *     onSuccess={(payment) => { ... }}
  *     onFailure={(msg)     => { ... }}
  *   />
+ *
+ * No axios required — uses the project’s own api.js (fetch-based).
  */
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../../../services/api.js';
 import './RazorpayCheckout.css';
-
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api';
 
 // Lazily injects the Razorpay checkout.js SDK only when the user clicks Pay
 function loadRazorpaySDK() {
   return new Promise((resolve) => {
     if (window.Razorpay) return resolve(true);
-    const script    = document.createElement('script');
-    script.src      = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.onload   = () => resolve(true);
-    script.onerror  = () => resolve(false);
+    const script  = document.createElement('script');
+    script.src    = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload  = () => resolve(true);
+    script.onerror = () => resolve(false);
     document.body.appendChild(script);
   });
 }
 
-// Best-effort method detection from the payment_id prefix
+// Best-effort method label from the Razorpay payment_id prefix
 function detectPaymentMethod(razorpay_payment_id) {
   if (!razorpay_payment_id) return 'Razorpay';
   const id = razorpay_payment_id.toLowerCase();
@@ -48,9 +48,9 @@ export default function RazorpayCheckout({
   amount,
   dueDate,
   note,
-  tenantName    = '',
-  tenantEmail   = '',
-  tenantPhone   = '',
+  tenantName  = '',
+  tenantEmail = '',
+  tenantPhone = '',
   onSuccess,
   onFailure,
 }) {
@@ -62,7 +62,7 @@ export default function RazorpayCheckout({
     setStatus(null);
 
     try {
-      // ── 1. Inject Razorpay SDK ──
+      // ── 1. Inject Razorpay SDK ────────────────────────────────────
       const sdkLoaded = await loadRazorpaySDK();
       if (!sdkLoaded) {
         alert('Could not load Razorpay. Please check your internet connection.');
@@ -70,22 +70,19 @@ export default function RazorpayCheckout({
         return;
       }
 
-      // ── 2. Create Razorpay order on our backend ──
-      const token = localStorage.getItem('token');
-      const { data: orderData } = await axios.post(
-        `${API_BASE}/payments/create-order`,
-        { propertyId, amount, dueDate, note },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      // ── 2. Create order on our backend via api.js ────────────────
+      // api.createRazorpayOrder uses the same fetch + auth header as all
+      // other api.js calls — no axios, no duplicate token logic.
+      const orderData = await api.createRazorpayOrder({ propertyId, amount, dueDate, note });
 
-      // ── 3. Open Razorpay Checkout Popup ──
+      // ── 3. Open Razorpay Checkout Popup ───────────────────────
       const options = {
         key:         orderData.keyId,
-        amount:      orderData.amount,   // paise from backend
+        amount:      orderData.amount,    // already in paise from backend
         currency:    orderData.currency,
         name:        'Ghar Nishchit',
         description: `Rent Payment — ₹${Number(amount).toLocaleString('en-IN')}`,
-        image:       '/logo.png',         // your app logo (optional)
+        image:       '/logo.png',
         order_id:    orderData.orderId,
 
         // Pre-fill tenant details so they don’t have to type them again
@@ -95,35 +92,31 @@ export default function RazorpayCheckout({
           contact: tenantPhone,
         },
 
-        // Payment methods to show (all enabled by default in Razorpay)
-        // config.display.blocks lets you customise order — leave default for all
         theme: {
-          color:          '#01696f',  // Ghar Nishchit teal
+          color:          '#01696f',          // Ghar Nishchit teal
           backdrop_color: 'rgba(0,0,0,0.6)',
         },
 
-        // ── 4. Success handler — verify signature on our backend ──
+        // ── 4. Success handler: verify signature on our backend ──────
         handler: async function (response) {
           try {
-            const { data: verifyData } = await axios.post(
-              `${API_BASE}/payments/verify`,
-              {
-                razorpay_order_id:   response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature:  response.razorpay_signature,
-                paymentDbId:         orderData.paymentId,
-                paymentMethod:       detectPaymentMethod(response.razorpay_payment_id),
-              },
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
+            const verifyData = await api.verifyRazorpayPayment({
+              razorpay_order_id:   response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature:  response.razorpay_signature,
+              paymentDbId:         orderData.paymentId,
+              paymentMethod:       detectPaymentMethod(response.razorpay_payment_id),
+            });
             setStatus('success');
             setLoading(false);
             onSuccess?.(verifyData.payment);
           } catch {
             setStatus('failed');
             setLoading(false);
-            onFailure?.('Verification failed after payment. Contact support with payment ID: ' +
-              response.razorpay_payment_id);
+            onFailure?.(
+              'Verification failed after payment. Contact support with payment ID: ' +
+              response.razorpay_payment_id
+            );
           }
         },
 
@@ -139,7 +132,7 @@ export default function RazorpayCheckout({
 
       const rzp = new window.Razorpay(options);
 
-      // Payment failure callback (e.g., OTP wrong, insufficient funds)
+      // Payment failure (wrong OTP, insufficient funds, etc.)
       rzp.on('payment.failed', (response) => {
         console.error('Razorpay payment.failed:', response.error);
         setStatus('failed');
@@ -148,12 +141,12 @@ export default function RazorpayCheckout({
       });
 
       rzp.open();
-      // Note: setLoading(false) is NOT called here — the popup is open.
-      // It’s called inside handler / ondismiss / payment.failed instead.
+      // setLoading(false) is intentionally NOT called here:
+      // it is called inside handler / ondismiss / payment.failed.
 
     } catch (err) {
       console.error('Payment flow error:', err);
-      const msg = err?.response?.data?.message ?? 'Could not initiate payment. Please try again.';
+      const msg = err?.message ?? 'Could not initiate payment. Please try again.';
       alert(msg);
       setLoading(false);
     }
@@ -167,6 +160,7 @@ export default function RazorpayCheckout({
 
   return (
     <div className="rzp-checkout">
+
       {/* Status banners */}
       {status === 'success' && (
         <div className="rzp-banner rzp-banner--success" role="alert">
@@ -230,7 +224,7 @@ export default function RazorpayCheckout({
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
           <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
         </svg>
-        Secured by Razorpay &mdash; Supports Card, UPI, Net Banking &amp; Wallets
+        Secured by Razorpay — Supports Card, UPI, Net Banking &amp; Wallets
       </p>
     </div>
   );
