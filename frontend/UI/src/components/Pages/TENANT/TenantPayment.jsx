@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
+import RazorpayCheckout from './RazorpayCheckout';
 import { showInfoToast, showSuccessToast, showErrorToast } from '../../../utils/toast.jsx';
 import api from '../../../services/api.js';
 import {
@@ -9,7 +10,7 @@ import {
   IndianRupee, FileText, ShieldCheck, Star, Trophy, BarChart3, X
 } from 'lucide-react';
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
+// ─── Sub-components ─────────────────────────────────────────────────────
 
 const PaymentSummaryCard = ({ title, value, icon, subtitle = '' }) => (
   <div className="rounded-2xl p-6 shadow-md bg-white">
@@ -83,15 +84,16 @@ const PaymentHistoryRow = ({ payment, onDownloadReceipt }) => {
     Paid:    'bg-green-100 text-green-700',
     Pending: 'bg-yellow-100 text-yellow-700',
     Overdue: 'bg-red-100 text-red-700',
+    Failed:  'bg-red-100 text-red-700',
   };
-  const StatusIcon = { Paid: CheckCircle, Pending: Clock, Overdue: AlertTriangle }[payment.status] || FileText;
+  const StatusIcon = { Paid: CheckCircle, Pending: Clock, Overdue: AlertTriangle, Failed: AlertTriangle }[payment.status] || FileText;
 
   return (
     <tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
       <td className="py-4 px-6">
         <div className="flex items-center">
           <Calendar className="h-4 w-4 text-gray-400 mr-2" />
-          {new Date(payment.date).toLocaleDateString()}
+          {new Date(payment.date || payment.createdAt).toLocaleDateString()}
         </div>
       </td>
       <td className="py-4 px-6">
@@ -99,7 +101,7 @@ const PaymentHistoryRow = ({ payment, onDownloadReceipt }) => {
           <div className="p-2 rounded-lg bg-blue-100 mr-3">
             <Banknote className="h-4 w-4 text-blue-600" />
           </div>
-          {payment.type}
+          {payment.type || 'Rent'}
         </div>
       </td>
       <td className="py-4 px-6">
@@ -110,7 +112,7 @@ const PaymentHistoryRow = ({ payment, onDownloadReceipt }) => {
       <td className="py-4 px-6">
         <div className="flex items-center">
           <CreditCard className="h-4 w-4 text-gray-400 mr-2" />
-          {payment.method}
+          {payment.method || payment.paymentMethod || '—'}
         </div>
       </td>
       <td className="py-4 px-6">
@@ -139,55 +141,45 @@ const PaymentHistoryRow = ({ payment, onDownloadReceipt }) => {
   );
 };
 
-const PaymentMethodCard = ({ method, icon, isSelected, onSelect }) => (
-  <div
-    className={`border rounded-2xl p-6 cursor-pointer transition-colors ${
-      isSelected ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-200 hover:border-blue-300'
-    }`}
-    onClick={onSelect}
-  >
-    <div className="flex items-center">
-      <input type="radio" checked={isSelected} onChange={onSelect} className="mr-4 w-4 h-4 text-blue-600" />
-      <div className="flex items-center">
-        <div className={`p-2 rounded-xl mr-3 ${isSelected ? 'bg-blue-100' : 'bg-gray-100'}`}>{icon}</div>
-        <span className={`font-medium ${isSelected ? 'text-blue-700' : 'text-gray-700'}`}>{method}</span>
-      </div>
-      {isSelected && <CheckCircle className="h-5 w-5 text-blue-600 ml-auto" />}
-    </div>
-  </div>
-);
-
-// ─── Main Component ───────────────────────────────────────────────────────────
+// ─── Main Component ──────────────────────────────────────────────────
 
 const TenantPayment = () => {
   const { darkMode } = useDarkMode();
 
-  const [paymentHistory,    setPaymentHistory]    = useState([]);
-  const [upcomingPayments,  setUpcomingPayments]  = useState([]);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('bank');
-  const [isLoading,         setIsLoading]         = useState(true);
-  const [showPaymentModal,  setShowPaymentModal]  = useState(false);
-  const [selectedPayment,   setSelectedPayment]   = useState(null);
-  const [showPayAllModal,   setShowPayAllModal]   = useState(false);
+  const [paymentHistory,   setPaymentHistory]   = useState([]);
+  const [upcomingPayments, setUpcomingPayments] = useState([]);
+  const [isLoading,        setIsLoading]        = useState(true);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPayment,  setSelectedPayment]  = useState(null);
+  // currentUser is used to prefill Razorpay checkout (name/email/phone)
+  const [currentUser,      setCurrentUser]      = useState({});
 
-  // ── Fetch real data from API ───────────────────────────────────────────────
+  // ── Fetch payments + profile on mount ────────────────────────────────
+  const fetchPayments = useCallback(async () => {
+    try {
+      const data = await api.getTenantPaymentHistory();
+      const history  = data?.history  || data?.paymentHistory  || data || [];
+      const upcoming = data?.upcoming || data?.upcomingPayments || [];
+      setPaymentHistory(Array.isArray(history)  ? history  : []);
+      setUpcomingPayments(Array.isArray(upcoming) ? upcoming : []);
+    } catch (err) {
+      console.error('Failed to load payments:', err);
+      showErrorToast('Could not load payment data. Please try again.');
+    }
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
       setIsLoading(true);
       try {
-        const data = await api.getTenantPaymentHistory();
-        if (cancelled) return;
-
-        const history   = (data?.history   || data?.paymentHistory   || []);
-        const upcoming  = (data?.upcoming  || data?.upcomingPayments || []);
-
-        setPaymentHistory(history);
-        setUpcomingPayments(upcoming);
-      } catch (err) {
-        if (!cancelled) {
-          console.error('Failed to load payment data:', err);
-          showErrorToast('Could not load payment data. Please try again.');
+        // Fetch payments and profile in parallel
+        const [, profile] = await Promise.allSettled([
+          fetchPayments(),
+          api.getProfile(),
+        ]);
+        if (!cancelled && profile.status === 'fulfilled') {
+          setCurrentUser(profile.value || {});
         }
       } finally {
         if (!cancelled) setIsLoading(false);
@@ -195,102 +187,82 @@ const TenantPayment = () => {
     };
     load();
     return () => { cancelled = true; };
-  }, []);
+  }, [fetchPayments]);
 
-  // ── Memoised calculations ──────────────────────────────────────────────────
+  // ── Memoised stats ───────────────────────────────────────────────
   const calculations = useMemo(() => {
-    const paidPayments    = paymentHistory.filter(p => p.status === 'Paid');
-    const totalPaid       = paidPayments.reduce((s, p) => s + Number(p.amount || 0), 0);
-    const pendingAmount   = upcomingPayments.reduce((s, p) => s + Number(p.amount || 0), 0);
-    const nextPaymentDue  = upcomingPayments.length > 0
-      ? new Date(Math.min(...upcomingPayments.map(p => new Date(p.date)))).toLocaleDateString()
+    const paidPayments   = paymentHistory.filter(p => p.status === 'Paid');
+    const totalPaid      = paidPayments.reduce((s, p) => s + Number(p.amount || 0), 0);
+    const pendingAmount  = upcomingPayments.reduce((s, p) => s + Number(p.amount || 0), 0);
+    const nextPaymentDue = upcomingPayments.length > 0
+      ? new Date(Math.min(...upcomingPayments.map(p => new Date(p.date || p.dueDate)))).toLocaleDateString()
       : 'N/A';
-
-    // Real success rate: paid / total (paid + overdue), ignore pending future
-    const overdueCount   = paymentHistory.filter(p => p.status === 'Overdue').length;
-    const successBase    = paidPayments.length + overdueCount;
-    const successRate    = successBase > 0
+    const overdueCount = paymentHistory.filter(p => p.status === 'Overdue').length;
+    const successBase  = paidPayments.length + overdueCount;
+    const successRate  = successBase > 0
       ? ((paidPayments.length / successBase) * 100).toFixed(1) + '%'
       : 'N/A';
-
     return { totalPaid, pendingAmount, nextPaymentDue, pendingCount: upcomingPayments.length, successRate };
   }, [paymentHistory, upcomingPayments]);
 
-  // ── Handlers ──────────────────────────────────────────────────────────────
+  // ── Handlers ────────────────────────────────────────────────────
   const handleMakePayment = useCallback((payment = null) => {
     if (payment) {
       setSelectedPayment(payment);
       setShowPaymentModal(true);
     } else {
-      // "Pay All Pending" — open confirm modal only if there's something to pay
       if (upcomingPayments.length === 0) {
         showInfoToast('No pending payments at this time.');
         return;
       }
-      setShowPayAllModal(true);
+      // Open modal for the first pending payment when "Pay All" is clicked
+      setSelectedPayment(upcomingPayments[0]);
+      setShowPaymentModal(true);
     }
   }, [upcomingPayments]);
 
-  const handlePaymentSubmit = useCallback(async () => {
-    if (!selectedPayment) return;
-    const methodLabel = selectedPaymentMethod === 'bank' ? 'Bank Transfer' : 'Credit Card';
-    const newHistoryItem = {
-      ...selectedPayment,
-      method:  methodLabel,
-      status:  'Paid',
-      receipt: `#REC-${Date.now()}`,
-    };
-    // Optimistic UI update
-    setPaymentHistory(prev => [newHistoryItem, ...prev]);
-    setUpcomingPayments(prev => prev.filter(p => p.id !== selectedPayment.id));
+  // Called by RazorpayCheckout on successful verified payment
+  const handlePaymentSuccess = useCallback(async (payment) => {
     setShowPaymentModal(false);
     setSelectedPayment(null);
-    showSuccessToast('Payment completed successfully!');
-  }, [selectedPayment, selectedPaymentMethod]);
+    showSuccessToast('✅ Rent paid successfully!');
+    // Refresh payment list from server so history is up-to-date
+    await fetchPayments();
+  }, [fetchPayments]);
 
-  const handlePayAll = useCallback(async () => {
-    const methodLabel = selectedPaymentMethod === 'bank' ? 'Bank Transfer' : 'Credit Card';
-    const newItems = upcomingPayments.map(p => ({
-      ...p,
-      method:  methodLabel,
-      status:  'Paid',
-      receipt: `#REC-${Date.now()}-${p.id}`,
-    }));
-    setPaymentHistory(prev => [...newItems, ...prev]);
-    setUpcomingPayments([]);
-    setShowPayAllModal(false);
-    showSuccessToast(`${newItems.length} payment(s) completed successfully!`);
-  }, [upcomingPayments, selectedPaymentMethod]);
+  const handlePaymentFailure = useCallback((msg) => {
+    showErrorToast(msg || 'Payment failed. Please try again.');
+  }, []);
 
   const downloadReceipt = useCallback((payment) => {
     const amount = Number(payment.amount).toLocaleString('en-IN');
-    const receiptContent = `
-============================================
-              PAYMENT RECEIPT
-============================================
-
-Receipt Number: ${payment.receipt}
-Date: ${payment.date}
-
-Payment Details:
-----------------
-Type:   ${payment.type}
-Amount: ₹${amount}
-Method: ${payment.method}
-Status: ${payment.status}
-
-Thank you for your payment!
-============================================
-    `.trim();
+    const receiptContent = [
+      '============================================',
+      '              PAYMENT RECEIPT',
+      '============================================',
+      '',
+      `Receipt:  ${payment.razorpayPaymentId || payment.receipt || payment.id}`,
+      `Date:     ${new Date(payment.paidAt || payment.date || payment.createdAt).toLocaleDateString()}`,
+      '',
+      'Payment Details:',
+      '----------------',
+      `Type:     ${payment.type || 'Rent'}`,
+      `Amount:   ₹${amount}`,
+      `Method:   ${payment.paymentMethod || payment.method || 'Razorpay'}`,
+      `Status:   ${payment.status}`,
+      '',
+      'Thank you for your payment!',
+      '============================================',
+    ].join('\n');
 
     const link = document.createElement('a');
     link.href = `data:text/plain;charset=utf-8,${encodeURIComponent(receiptContent)}`;
-    link.download = `receipt-${payment.receipt}.txt`;
+    link.download = `receipt-${payment.razorpayPaymentId || payment.id}.txt`;
     link.click();
-    showSuccessToast('Receipt downloaded successfully');
+    showSuccessToast('Receipt downloaded');
   }, []);
 
-  // ── Loading screen ─────────────────────────────────────────────────────────
+  // ── Loading screen ────────────────────────────────────────────────
   const bgClass = darkMode
     ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950'
     : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400';
@@ -320,7 +292,7 @@ Thank you for your payment!
     );
   }
 
-  // ── Main render ────────────────────────────────────────────────────────────
+  // ── Main render ───────────────────────────────────────────────
   const cardBg   = darkMode ? 'bg-slate-800/80 border-gray-700/50' : 'bg-white/80 border-white/50';
   const textHead = darkMode ? 'text-white' : 'text-gray-800';
   const textSub  = darkMode ? 'text-gray-300' : 'text-gray-600';
@@ -392,37 +364,45 @@ Thank you for your payment!
                 ) : (
                   <div className="space-y-4">
                     {upcomingPayments.map(p => (
-                      <UpcomingPaymentCard key={p.id} payment={p} onPayNow={handleMakePayment} />
+                      <UpcomingPaymentCard key={p.id || p._id} payment={p} onPayNow={handleMakePayment} />
                     ))}
                   </div>
                 )}
               </div>
 
-              {/* Methods */}
+              {/* Methods info + Pay All button */}
               <div>
                 <h3 className={`font-semibold ${textHead} mb-6 flex items-center text-lg`}>
                   <ShieldCheck className="h-6 w-6 mr-2 text-green-600" />
                   Payment Methods
                 </h3>
-                <div className="space-y-4">
-                  <PaymentMethodCard
-                    method="Bank Transfer"
-                    icon={<Banknote className="h-6 w-6 text-blue-600" />}
-                    isSelected={selectedPaymentMethod === 'bank'}
-                    onSelect={() => setSelectedPaymentMethod('bank')}
-                  />
-                  <PaymentMethodCard
-                    method="Credit Card"
-                    icon={<CreditCard className="h-6 w-6 text-purple-600" />}
-                    isSelected={selectedPaymentMethod === 'card'}
-                    onSelect={() => setSelectedPaymentMethod('card')}
-                  />
+                <div className="space-y-3">
+                  {[
+                    { label: 'UPI (GPay, PhonePe, Paytm…)', icon: <IndianRupee className="h-5 w-5 text-green-600" /> },
+                    { label: 'Credit / Debit Card',           icon: <CreditCard  className="h-5 w-5 text-blue-600"  /> },
+                    { label: 'Net Banking',                   icon: <Banknote    className="h-5 w-5 text-purple-600"/> },
+                    { label: 'Wallets (Mobikwik, Freecharge)', icon: <ShieldCheck className="h-5 w-5 text-orange-500"/> },
+                  ].map(({ label, icon }) => (
+                    <div key={label}
+                      className={`flex items-center gap-3 p-3 rounded-xl border ${
+                        darkMode ? 'border-gray-600 bg-slate-700/50' : 'border-gray-200 bg-gray-50'
+                      }`}
+                    >
+                      {icon}
+                      <span className={`text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>{label}</span>
+                    </div>
+                  ))}
+
+                  <p className={`text-xs mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Powered by Razorpay — Your preferred method is auto-selected in the payment screen.
+                  </p>
+
                   <button
                     onClick={() => handleMakePayment()}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl text-lg font-semibold mt-6 flex items-center justify-center"
+                    className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl text-lg font-semibold mt-4 flex items-center justify-center transition-colors"
                   >
                     <IndianRupee className="h-6 w-6 mr-2" />
-                    Pay All Pending
+                    Pay Now via Razorpay
                   </button>
                 </div>
               </div>
@@ -466,7 +446,7 @@ Thank you for your payment!
                   </thead>
                   <tbody>
                     {paymentHistory.map(p => (
-                      <PaymentHistoryRow key={p.id} payment={p} onDownloadReceipt={downloadReceipt} />
+                      <PaymentHistoryRow key={p.id || p._id} payment={p} onDownloadReceipt={downloadReceipt} />
                     ))}
                   </tbody>
                 </table>
@@ -476,16 +456,32 @@ Thank you for your payment!
         </main>
       </div>
 
-      {/* Single Payment Modal */}
+      {/* ──────────────────────────────────────────────────────────────
+           Razorpay Payment Modal
+           — Replaces the old fake "Confirm Payment" modal entirely.
+           — RazorpayCheckout handles the full flow:
+               1. POST /api/payments/create-order  (backend creates Razorpay order)
+               2. Razorpay popup opens             (Card / UPI / Net Banking / Wallet / OTP)
+               3. POST /api/payments/verify        (backend verifies HMAC signature)
+               4. onSuccess → refreshes payment list from server
+      ────────────────────────────────────────────────────────────── */}
       {showPaymentModal && selectedPayment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full m-4">
+
+            {/* Modal Header */}
             <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-gray-800">Confirm Payment</h3>
-              <button onClick={() => setShowPaymentModal(false)} className="p-2 hover:bg-gray-100 rounded-full">
+              <h3 className="text-xl font-bold text-gray-800">Pay Rent</h3>
+              <button
+                onClick={() => { setShowPaymentModal(false); setSelectedPayment(null); }}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                aria-label="Close payment modal"
+              >
                 <X className="h-6 w-6 text-gray-500" />
               </button>
             </div>
+
+            {/* Payment Summary */}
             <div className="p-6">
               <div className="text-center mb-6">
                 <div className="p-4 bg-blue-100 rounded-2xl w-fit mx-auto mb-4">
@@ -494,77 +490,29 @@ Thank you for your payment!
                 <h4 className="text-2xl font-bold text-gray-800">
                   ₹{Number(selectedPayment.amount).toLocaleString('en-IN')}
                 </h4>
-                <p className="text-gray-600">for {selectedPayment.type}</p>
+                <p className="text-gray-500 text-sm mt-1">
+                  {selectedPayment.type || 'Rent'}
+                  {selectedPayment.property?.title ? ` — ${selectedPayment.property.title}` : ''}
+                </p>
+                {selectedPayment.dueDate && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    Due: {new Date(selectedPayment.dueDate || selectedPayment.date).toLocaleDateString()}
+                  </p>
+                )}
               </div>
-              <div className="space-y-4">
-                <div className="bg-gray-50 rounded-xl p-4 flex justify-between text-sm">
-                  <span className="text-gray-600">Payment Method:</span>
-                  <span className="font-semibold">
-                    {selectedPaymentMethod === 'bank' ? 'Bank Transfer' : 'Credit Card'}
-                  </span>
-                </div>
-                <div className="flex space-x-3">
-                  <button
-                    onClick={() => setShowPaymentModal(false)}
-                    className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl hover:bg-gray-300"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handlePaymentSubmit}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl"
-                  >
-                    Confirm Payment
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Pay All Modal */}
-      {showPayAllModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full m-4">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-gray-800">Pay All Pending</h3>
-              <button onClick={() => setShowPayAllModal(false)} className="p-2 hover:bg-gray-100 rounded-full">
-                <X className="h-6 w-6 text-gray-500" />
-              </button>
-            </div>
-            <div className="p-6">
-              <div className="text-center mb-6">
-                <div className="p-4 bg-green-100 rounded-2xl w-fit mx-auto mb-4">
-                  <IndianRupee className="h-12 w-12 text-green-600" />
-                </div>
-                <h4 className="text-2xl font-bold text-gray-800">
-                  ₹{calculations.pendingAmount.toLocaleString('en-IN')}
-                </h4>
-                <p className="text-gray-600">{upcomingPayments.length} pending payment(s)</p>
-              </div>
-              <div className="space-y-4">
-                <div className="bg-gray-50 rounded-xl p-4 flex justify-between text-sm">
-                  <span className="text-gray-600">Payment Method:</span>
-                  <span className="font-semibold">
-                    {selectedPaymentMethod === 'bank' ? 'Bank Transfer' : 'Credit Card'}
-                  </span>
-                </div>
-                <div className="flex space-x-3">
-                  <button
-                    onClick={() => setShowPayAllModal(false)}
-                    className="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl hover:bg-gray-300"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handlePayAll}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl"
-                  >
-                    Pay All
-                  </button>
-                </div>
-              </div>
+              {/* ★ RazorpayCheckout replaces the old Confirm button ★ */}
+              <RazorpayCheckout
+                propertyId={selectedPayment.propertyId || selectedPayment.property?._id || selectedPayment.id}
+                amount={selectedPayment.amount}
+                dueDate={selectedPayment.dueDate || selectedPayment.date}
+                note={`Rent payment — ${selectedPayment.type || 'Rent'}`}
+                tenantName={currentUser.name  || currentUser.fullName  || ''}
+                tenantEmail={currentUser.email || ''}
+                tenantPhone={currentUser.phone || currentUser.contact  || ''}
+                onSuccess={handlePaymentSuccess}
+                onFailure={handlePaymentFailure}
+              />
             </div>
           </div>
         </div>
