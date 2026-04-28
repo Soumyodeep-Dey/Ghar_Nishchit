@@ -12,6 +12,7 @@ import notificationRoutes  from './routes/notification.routes.js';
 import paymentRoutes       from './routes/payment.routes.js';
 import visitRoutes         from './routes/visit.routes.js';
 import contractRoutes      from './routes/contract.routes.js';
+import { handleWebhook }   from './controllers/payment.controller.js';
 dotenv.config();
 
 const app = express();
@@ -23,14 +24,9 @@ app.use(
   })
 );
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Razorpay webhook MUST receive a raw Buffer — mount paymentRoutes ONCE at
-// /api/payments BEFORE express.json() so the /webhook sub-route (which uses
-// express.raw on its own) gets the unparsed body it needs.
-// All other sub-routes (/create-order, /verify, etc.) are unaffected because
-// express.raw only applies to the single /webhook handler inside the router.
-// ─────────────────────────────────────────────────────────────────────────────
-app.use('/api/payments', paymentRoutes);
+// Razorpay webhook MUST receive a raw Buffer for HMAC verification.
+// Keep this route BEFORE express.json(), but mount all other payment routes AFTER.
+app.post('/api/payments/webhook', express.raw({ type: 'application/json' }), handleWebhook);
 
 // Global JSON + URL-encoded body parsing for all other routes
 app.use(express.json({ limit: '50mb' }));
@@ -48,6 +44,7 @@ app.use('/api/tenants',       tenantRoutes);
 app.use('/api/maintenance',   maintenanceRoutes);
 app.use('/api/inquiries',     inquiryRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/payments',      paymentRoutes);
 app.use('/api/visits',        visitRoutes);
 app.use('/api/contracts',     contractRoutes);
 

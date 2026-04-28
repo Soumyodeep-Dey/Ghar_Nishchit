@@ -7,26 +7,12 @@ import {
   getPaymentStats,
   createOrder,
   verifyPayment,
-  handleWebhook,
 } from '../controllers/payment.controller.js';
 
 const router = express.Router();
 
-// ───────────────────────────────────────────────────────────────
-// Razorpay Webhook — NO JWT auth, raw body required for HMAC verification
-// Register this URL in Razorpay Dashboard → Settings → Webhooks:
-//   https://yourdomain.com/api/payments/webhook
-//   Events: payment.captured, payment.failed
-// ───────────────────────────────────────────────────────────────
-router.post(
-  '/webhook',
-  express.raw({ type: 'application/json' }),
-  handleWebhook
-);
-
-// ───────────────────────────────────────────────────────────────
-// All routes below this line require a valid JWT
-// ───────────────────────────────────────────────────────────────
+// All routes in this router require a valid JWT.
+// Webhook is mounted directly in `app.js` so it can run BEFORE express.json().
 router.use(verifyToken);
 
 // Existing routes (unchanged)

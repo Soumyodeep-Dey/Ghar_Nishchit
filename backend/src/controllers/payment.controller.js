@@ -38,6 +38,12 @@ export const createOrder = async (req, res) => {
       return res.status(401).json({ message: 'Unauthorised — userId missing from token' });
     }
 
+    if (!req.body || typeof req.body !== 'object') {
+      return res.status(400).json({
+        message: 'Request body is missing or invalid JSON. Ensure Content-Type: application/json and that the server has JSON parsing enabled.',
+      });
+    }
+
     const { propertyId, amount, dueDate, note } = req.body;
 
     if (!amount || Number(amount) <= 0) {
@@ -55,11 +61,12 @@ export const createOrder = async (req, res) => {
     }
 
     const amountInPaise = Math.round(Number(amount) * 100);
+    const receipt = `r_${Date.now().toString(36)}_${String(tenantId).slice(-6)}`.slice(0, 40);
 
     const rzpOrder = await razorpay.orders.create({
       amount:   amountInPaise,
       currency: 'INR',
-      receipt:  `rcpt_${tenantId}_${Date.now()}`,
+      receipt,
       notes: {
         tenantId:   tenantId.toString(),
         propertyId: safePropertyId ? safePropertyId.toString() : 'manual',
@@ -88,9 +95,14 @@ export const createOrder = async (req, res) => {
     });
 
   } catch (err) {
-    console.error('[createOrder] ERROR:', err.message);
-    if (err.error) console.error('[createOrder] Razorpay API error:', JSON.stringify(err.error));
-    return res.status(500).json({ message: 'Failed to create Razorpay order', detail: err.message });
+    const msg =
+      err?.error?.description ||
+      err?.error?.reason ||
+      err?.message ||
+      'Unknown error';
+    console.error('[createOrder] ERROR:', msg);
+    if (err?.error) console.error('[createOrder] Razorpay API error:', JSON.stringify(err.error));
+    return res.status(500).json({ message: 'Failed to create Razorpay order', detail: msg });
   }
 };
 
