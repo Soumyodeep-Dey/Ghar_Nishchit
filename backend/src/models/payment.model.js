@@ -8,10 +8,13 @@ const paymentSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    // propertyId is optional — manual payments (no linked property) are valid.
+    // When populated from an upcoming payment, it will always be set.
     propertyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Property',
-      required: true,
+      required: false,
+      default: null,
     },
     amount: {
       type: Number,
@@ -25,8 +28,8 @@ const paymentSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ['UPI', 'Bank Transfer', 'Cash', 'Card', 'Other'],
-      default: 'UPI',
+      enum: ['UPI', 'Bank Transfer', 'Cash', 'Card', 'Razorpay', 'Other'],
+      default: 'Razorpay',
     },
     dueDate: {
       type: Date,
@@ -38,6 +41,17 @@ const paymentSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: '',
+    },
+
+    // ── Razorpay Gateway Fields ─────────────────────────────────
+    razorpayOrderId: {
+      type: String,
+      default: null,
+      index: true,
+    },
+    razorpayPaymentId: {
+      type: String,
+      default: null,
     },
   },
   { timestamps: true }
