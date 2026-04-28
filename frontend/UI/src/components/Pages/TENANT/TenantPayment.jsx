@@ -134,18 +134,15 @@ const TenantPayment = () => {
   const [upcomingPayments, setUpcomingPayments] = useState([]);
   const [isLoading,        setIsLoading]        = useState(true);
   const [currentUser,      setCurrentUser]      = useState({});
-  const [properties,       setProperties]       = useState([]);
 
   // Modal state
-  // selectedPayment = an upcoming payment object OR null (manual pay)
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPayment,  setSelectedPayment]  = useState(null);
 
-  // Manual pay form state (used when no upcoming payment is selected)
+  // Manual pay form state
   const [manualAmount,     setManualAmount]     = useState('');
-  const [manualPropertyId, setManualPropertyId] = useState('');
   const [manualNote,       setManualNote]       = useState('Rent payment');
-  const [manualReady,      setManualReady]      = useState(false); // true once form submitted
+  const [manualReady,      setManualReady]      = useState(false);
 
   // ── Fetch on mount ──────────────────────────────────────────────
   const fetchPayments = useCallback(async () => {
@@ -166,17 +163,12 @@ const TenantPayment = () => {
     const load = async () => {
       setIsLoading(true);
       try {
-        const [, profileResult, propsResult] = await Promise.allSettled([
+        const [, profileResult] = await Promise.allSettled([
           fetchPayments(),
           api.getProfile(),
-          api.getProperties(),
         ]);
         if (!cancelled) {
           if (profileResult.status === 'fulfilled') setCurrentUser(profileResult.value || {});
-          if (propsResult.status   === 'fulfilled') {
-            const list = propsResult.value;
-            setProperties(Array.isArray(list) ? list : (list?.properties || []));
-          }
         }
       } finally {
         if (!cancelled) setIsLoading(false);
@@ -206,11 +198,10 @@ const TenantPayment = () => {
   const openModal = useCallback((payment = null) => {
     setSelectedPayment(payment);
     setManualAmount('');
-    setManualPropertyId(properties[0]?._id?.toString() || '');
     setManualNote('Rent payment');
     setManualReady(false);
     setShowPaymentModal(true);
-  }, [properties]);
+  }, []);
 
   const closeModal = useCallback(() => {
     setShowPaymentModal(false);
@@ -252,18 +243,18 @@ const TenantPayment = () => {
     showSuccessToast('Receipt downloaded');
   }, []);
 
-  // ── Derived values for the open modal ────────────────────────────
-  // When selectedPayment is set, use its values.
-  // When null (manual pay), use the form fields once manualReady=true.
+  // ── Derived props for RazorpayCheckout ───────────────────────────
+  // propertyId is intentionally left undefined for manual payments —
+  // the backend createOrder accepts it as optional.
   const checkoutProps = selectedPayment
     ? {
-        propertyId: selectedPayment.propertyId || selectedPayment.property?._id || selectedPayment.id,
+        propertyId: selectedPayment.propertyId || selectedPayment.property?._id || undefined,
         amount:     selectedPayment.amount,
         dueDate:    selectedPayment.dueDate || selectedPayment.date,
         note:       `Rent — ${selectedPayment.type || 'Rent'}`,
       }
     : {
-        propertyId: manualPropertyId,
+        propertyId: undefined,   // optional — backend handles null gracefully
         amount:     Number(manualAmount),
         dueDate:    new Date().toISOString(),
         note:       manualNote,
@@ -390,7 +381,6 @@ const TenantPayment = () => {
                   <p className={`text-xs mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                     Powered by Razorpay — Your preferred method is auto-selected at checkout.
                   </p>
-                  {/* This button ALWAYS opens the modal — never shows toast */}
                   <button
                     onClick={() => openModal(null)}
                     className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl text-lg font-semibold mt-4 flex items-center justify-center transition-colors"
@@ -449,15 +439,7 @@ const TenantPayment = () => {
         </main>
       </div>
 
-      {/* ─────────────────────────────────────────────────────────────
-           Payment Modal
-           Two modes:
-             A) selectedPayment is set  → pre-filled from upcoming payment row
-             B) selectedPayment is null → manual form (amount + property + note)
-                                           tenant fills in and clicks “Proceed to Pay”
-                                           which sets manualReady=true and shows
-                                           RazorpayCheckout with the entered values.
-      ───────────────────────────────────────────────────────────── */}
+      {/* Payment Modal */}
       {showPaymentModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full m-4">
@@ -472,7 +454,7 @@ const TenantPayment = () => {
             </div>
 
             <div className="p-6">
-              {/* ── MODE A: pre-filled from upcoming payment ── */}
+              {/* MODE A: pre-filled from upcoming payment */}
               {selectedPayment ? (
                 <>
                   <div className="text-center mb-6">
@@ -494,19 +476,14 @@ const TenantPayment = () => {
                   />
                 </>
               ) : (
-                /* ── MODE B: manual pay form ── */
+                /* MODE B: manual pay — amount only, no property required */
                 <>
                   {!manualReady ? (
-                    /* Step 1 — fill in amount & property */
                     <form
                       onSubmit={(e) => {
                         e.preventDefault();
                         if (!manualAmount || Number(manualAmount) <= 0) {
-                          showErrorToast('Please enter a valid amount.');
-                          return;
-                        }
-                        if (!manualPropertyId) {
-                          showErrorToast('Please select a property.');
+                          showErrorToast('Please enter a valid amount greater than ₹0.');
                           return;
                         }
                         setManualReady(true);
@@ -517,7 +494,7 @@ const TenantPayment = () => {
                         <div className="p-4 bg-green-100 rounded-2xl w-fit mx-auto mb-3">
                           <IndianRupee className="h-10 w-10 text-green-600" />
                         </div>
-                        <p className="text-sm text-gray-500">Enter payment details below</p>
+                        <p className="text-sm text-gray-500">Enter the amount you want to pay</p>
                       </div>
 
                       {/* Amount */}
@@ -530,6 +507,7 @@ const TenantPayment = () => {
                           min="1"
                           step="1"
                           required
+                          autoFocus
                           placeholder="e.g. 12000"
                           value={manualAmount}
                           onChange={e => setManualAmount(e.target.value)}
@@ -537,40 +515,9 @@ const TenantPayment = () => {
                         />
                       </div>
 
-                      {/* Property */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Property <span className="text-red-500">*</span>
-                        </label>
-                        {properties.length > 0 ? (
-                          <select
-                            required
-                            value={manualPropertyId}
-                            onChange={e => setManualPropertyId(e.target.value)}
-                            className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-green-400 ${inputCls}`}
-                          >
-                            <option value="">Select property…</option>
-                            {properties.map(p => (
-                              <option key={p._id || p.id} value={p._id || p.id}>
-                                {p.title || p.name || p.address || p._id}
-                              </option>
-                            ))}
-                          </select>
-                        ) : (
-                          <input
-                            type="text"
-                            required
-                            placeholder="Enter property ID"
-                            value={manualPropertyId}
-                            onChange={e => setManualPropertyId(e.target.value)}
-                            className={`w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-green-400 ${inputCls}`}
-                          />
-                        )}
-                      </div>
-
                       {/* Note */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Note</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Note (optional)</label>
                         <input
                           type="text"
                           placeholder="e.g. May rent"
@@ -584,7 +531,7 @@ const TenantPayment = () => {
                         type="submit"
                         className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold text-lg transition-colors"
                       >
-                        Proceed to Pay
+                        Proceed to Pay ₹{manualAmount ? Number(manualAmount).toLocaleString('en-IN') : '—'}
                       </button>
                     </form>
                   ) : (
@@ -602,7 +549,7 @@ const TenantPayment = () => {
                           onClick={() => setManualReady(false)}
                           className="text-xs text-blue-500 underline mt-1"
                         >
-                          ← Edit details
+                          ← Edit amount
                         </button>
                       </div>
                       <RazorpayCheckout
