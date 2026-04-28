@@ -78,7 +78,7 @@ const api = {
 
     // -------------------------------------------------------------------------
     // Favourites (Tenant)
-    // getFavourites        — returns the current user's favourites list
+    // getFavourites        — returns the current user’s favourites list
     // getFavouriteProperties — alias used by TenantDashboard (same endpoint)
     // -------------------------------------------------------------------------
     getFavourites:           ()           => request('/favourites', { method: 'GET' }),
@@ -114,6 +114,31 @@ const api = {
     // getTenantPaymentHistory — used by TenantDashboard stats card.
     // -------------------------------------------------------------------------
     getTenantPaymentHistory: (_tenantId) => request('/payments', { method: 'GET' }),
+    getPaymentStats:         ()          => request('/payments/stats', { method: 'GET' }),
+
+    // -------------------------------------------------------------------------
+    // Payments — Razorpay Gateway
+    //
+    // createRazorpayOrder  — Step 1: creates a Razorpay order on the backend.
+    //   Returns { orderId, amount (paise), currency, paymentId, keyId }.
+    //   Call this before opening the Razorpay checkout popup.
+    //
+    // verifyRazorpayPayment — Step 2: sends the three Razorpay response fields
+    //   (order_id, payment_id, signature) to the backend for HMAC-SHA256
+    //   verification. Only call this inside the Razorpay handler callback.
+    //   Returns { message, payment } where payment is the updated DB record.
+    // -------------------------------------------------------------------------
+    createRazorpayOrder: (data) =>
+        request('/payments/create-order', {
+            method: 'POST',
+            body: JSON.stringify(data),  // { propertyId, amount, dueDate?, note? }
+        }),
+
+    verifyRazorpayPayment: (data) =>
+        request('/payments/verify', {
+            method: 'POST',
+            body: JSON.stringify(data),  // { razorpay_order_id, razorpay_payment_id, razorpay_signature, paymentDbId, paymentMethod }
+        }),
 
     // -------------------------------------------------------------------------
     // Maintenance
