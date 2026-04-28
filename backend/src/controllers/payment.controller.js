@@ -3,13 +3,12 @@ import crypto  from 'crypto';
 import Payment from '../models/payment.model.js';
 import mongoose from 'mongoose';
 
-// ── Razorpay client ─────────────────────────────────────────────────────
+// ── Razorpay client ──────────────────────────────────────────────────────────
 let razorpay;
 try {
   if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
     console.error(
-      '[Payment] ERROR: RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET is missing in .env\n' +
-      '  → Add them to backend/.env and restart the server.'
+      '[Payment] ERROR: RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET is missing in .env'
     );
   } else {
     razorpay = new Razorpay({
@@ -22,58 +21,53 @@ try {
   console.error('[Payment] Failed to init Razorpay client:', e.message);
 }
 
-// ───────────────────────────────────────────────────────────────
-// STEP 1 →  POST /api/payments/create-order
-// ───────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// STEP 1 → POST /api/payments/create-order
+// ─────────────────────────────────────────────────────────────────────────────
 export const createOrder = async (req, res) => {
   try {
-    // ── Guard: keys must be present ──────────────────────────────
     if (!razorpay) {
-      console.error('[createOrder] Razorpay not initialised — check .env keys');
       return res.status(500).json({
-        message: 'Payment gateway not configured. Ask the admin to add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to the server .env file.',
+        message: 'Payment gateway not configured. Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to backend/.env and restart.',
       });
+    }
+
+    // JWT payload uses { userId, role } — see auth.controller.js
+    const tenantId = req.user?.userId;
+    if (!tenantId) {
+      return res.status(401).json({ message: 'Unauthorised — userId missing from token' });
     }
 
     const { propertyId, amount, dueDate, note } = req.body;
 
-    // ── Guard: amount is required ───────────────────────────────
     if (!amount || Number(amount) <= 0) {
-      return res.status(400).json({ message: 'amount is required and must be greater than 0' });
+      return res.status(400).json({ message: 'amount is required and must be > 0' });
     }
 
-    // ── Validate propertyId if provided ─────────────────────────
-    // propertyId is optional at the gateway level — it is only required
-    // when saving to MongoDB (schema). If the tenant is doing a manual
-    // payment with no property linked yet, we accept it as null so the
-    // Razorpay order is still created and the tenant can pay.
+    // Validate propertyId only if provided
     let safePropertyId = null;
     if (propertyId) {
       if (mongoose.Types.ObjectId.isValid(propertyId)) {
         safePropertyId = propertyId;
       } else {
-        return res.status(400).json({ message: `Invalid propertyId: "${propertyId}". Must be a valid MongoDB ObjectId.` });
+        return res.status(400).json({ message: `Invalid propertyId: "${propertyId}"` });
       }
     }
 
     const amountInPaise = Math.round(Number(amount) * 100);
 
-    // ── Create Razorpay order ──────────────────────────────────
     const rzpOrder = await razorpay.orders.create({
       amount:   amountInPaise,
       currency: 'INR',
-      receipt:  `rcpt_${req.user.id}_${Date.now()}`,
+      receipt:  `rcpt_${tenantId}_${Date.now()}`,
       notes: {
-        tenantId:   req.user.id.toString(),
+        tenantId:   tenantId.toString(),
         propertyId: safePropertyId ? safePropertyId.toString() : 'manual',
       },
     });
 
-    // ── Save Pending record ────────────────────────────────────
-    // propertyId is stored only when valid; schema allows null via { required: false }
-    // (see payment.model.js — propertyId required is relaxed below)
     const paymentDoc = {
-      tenantId:        req.user.id,
+      tenantId:        tenantId,
       amount:          Number(amount),
       status:          'Pending',
       paymentMethod:   'Razorpay',
@@ -94,18 +88,18 @@ export const createOrder = async (req, res) => {
     });
 
   } catch (err) {
-    // Log the REAL error so it shows up in your terminal
     console.error('[createOrder] ERROR:', err.message);
     if (err.error) console.error('[createOrder] Razorpay API error:', JSON.stringify(err.error));
     return res.status(500).json({ message: 'Failed to create Razorpay order', detail: err.message });
   }
 };
 
-// ───────────────────────────────────────────────────────────────
-// STEP 2 →  POST /api/payments/verify
-// ───────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// STEP 2 → POST /api/payments/verify
+// ─────────────────────────────────────────────────────────────────────────────
 export const verifyPayment = async (req, res) => {
   try {
+    const tenantId = req.user?.userId;
     const {
       razorpay_order_id,
       razorpay_payment_id,
@@ -121,11 +115,11 @@ export const verifyPayment = async (req, res) => {
 
     if (digest !== razorpay_signature) {
       await Payment.findByIdAndUpdate(paymentDbId, { status: 'Failed' });
-      return res.status(400).json({ message: 'Payment verification failed. Signature mismatch.' });
+      return res.status(400).json({ message: 'Payment verification failed — signature mismatch.' });
     }
 
     const updated = await Payment.findOneAndUpdate(
-      { _id: paymentDbId, tenantId: req.user.id },
+      { _id: paymentDbId, tenantId },
       {
         status:            'Paid',
         paidAt:            new Date(),
@@ -145,9 +139,9 @@ export const verifyPayment = async (req, res) => {
   }
 };
 
-// ───────────────────────────────────────────────────────────────
-// WEBHOOK  →  POST /api/payments/webhook
-// ───────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// WEBHOOK → POST /api/payments/webhook
+// ─────────────────────────────────────────────────────────────────────────────
 export const handleWebhook = async (req, res) => {
   try {
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
@@ -184,12 +178,13 @@ export const handleWebhook = async (req, res) => {
   }
 };
 
-// ───────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 // EXISTING FUNCTIONS
-// ───────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 export const getPayments = async (req, res) => {
   try {
-    const payments = await Payment.find({ tenantId: req.user.id })
+    const tenantId = req.user?.userId;
+    const payments = await Payment.find({ tenantId })
       .sort({ createdAt: -1 })
       .populate('propertyId', 'title location')
       .lean();
@@ -217,9 +212,10 @@ export const getPayments = async (req, res) => {
 
 export const createPayment = async (req, res) => {
   try {
+    const tenantId = req.user?.userId;
     const { propertyId, amount, status, paymentMethod, dueDate, note } = req.body;
     const payment = await Payment.create({
-      tenantId: req.user.id,
+      tenantId,
       propertyId,
       amount,
       status,
@@ -237,11 +233,12 @@ export const createPayment = async (req, res) => {
 
 export const updatePaymentStatus = async (req, res) => {
   try {
+    const tenantId = req.user?.userId;
     const { status } = req.body;
     const update = { status };
     if (status === 'Paid') update.paidAt = new Date();
     const payment = await Payment.findOneAndUpdate(
-      { _id: req.params.id, tenantId: req.user.id },
+      { _id: req.params.id, tenantId },
       update,
       { new: true }
     );
@@ -255,7 +252,8 @@ export const updatePaymentStatus = async (req, res) => {
 
 export const getPaymentStats = async (req, res) => {
   try {
-    const all = await Payment.find({ tenantId: req.user.id }).lean();
+    const tenantId = req.user?.userId;
+    const all = await Payment.find({ tenantId }).lean();
     const stats = {
       total:           all.length,
       paid:            all.filter(p => p.status === 'Paid').length,
