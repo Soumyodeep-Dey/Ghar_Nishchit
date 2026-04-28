@@ -24,16 +24,13 @@ app.use(
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// IMPORTANT: The Razorpay webhook route MUST be mounted BEFORE express.json().
-// Razorpay sends a raw Buffer body, and we need it unparsed to verify the
-// HMAC-SHA256 signature. If express.json() runs first, the raw body is lost
-// and every webhook will fail with a signature mismatch.
-//
-// express.raw({ type: 'application/json' }) is applied on the route itself
-// (see payment.routes.js), so only that one route receives a raw Buffer.
-// All other routes continue to receive a parsed JSON object as normal.
+// Razorpay webhook MUST receive a raw Buffer — mount paymentRoutes ONCE at
+// /api/payments BEFORE express.json() so the /webhook sub-route (which uses
+// express.raw on its own) gets the unparsed body it needs.
+// All other sub-routes (/create-order, /verify, etc.) are unaffected because
+// express.raw only applies to the single /webhook handler inside the router.
 // ─────────────────────────────────────────────────────────────────────────────
-app.use('/api/payments/webhook', paymentRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Global JSON + URL-encoded body parsing for all other routes
 app.use(express.json({ limit: '50mb' }));
@@ -51,7 +48,6 @@ app.use('/api/tenants',       tenantRoutes);
 app.use('/api/maintenance',   maintenanceRoutes);
 app.use('/api/inquiries',     inquiryRoutes);
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/payments',      paymentRoutes);
 app.use('/api/visits',        visitRoutes);
 app.use('/api/contracts',     contractRoutes);
 
