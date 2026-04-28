@@ -5,7 +5,8 @@ import {
   getTenantInquiries,
   getInquiryMessages,
   replyToInquiry,
-  deleteInquiry
+  deleteInquiry,
+  deleteMessage
 } from '../controllers/inquiry.controller.js';
 import { verifyToken } from '../middlewares/auth.middleware.js';
 
@@ -18,6 +19,8 @@ router.get('/',                       getLandlordInquiries);   // Landlord: list
 router.get('/mine',                   getTenantInquiries);     // Tenant: list my inquiries
 router.get('/:id/messages',           getInquiryMessages);     // Both: fetch thread
 router.post('/:id/messages',          replyToInquiry);         // Both: send a reply
+router.delete('/:id/messages/:messageId', deleteMessage);      // Both: delete individual message
 router.delete('/:id',                 deleteInquiry);          // Both: delete conversation
+
 
 export default router;

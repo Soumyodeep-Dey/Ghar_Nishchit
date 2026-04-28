@@ -322,16 +322,9 @@ const TenantContracts = () => {
       setAccepting(true);
       await api.updateContractStatus(contractId, 'active');
 
-      // Optimistically update UI
-      setContracts(prev =>
-        prev.map(c =>
-          (c._id === contractId || c.id === contractId)
-            ? { ...c, status: 'active' }
-            : c
-        )
-      );
+      // Refetch to clear deleted duplicate contracts
+      await fetchContracts();
 
-      setSelectedContract(prev => prev ? { ...prev, status: 'active' } : null);
       showSuccessToast('🎉 Lease accepted! You are now an active tenant.');
     } catch (err) {
       showErrorToast(err.message || 'Failed to accept contract. Please try again.');

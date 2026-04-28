@@ -16,8 +16,11 @@ import { verifyToken } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
+// All maintenance routes require auth
+router.use(verifyToken);
+
 // Create new maintenance request (requires auth to identify tenant)
-router.post('/', verifyToken, createMaintenanceRequest);
+router.post('/', createMaintenanceRequest);
 
 // Get maintenance requests by landlord
 router.get('/landlord/:landlordId', getLandlordMaintenanceRequests);

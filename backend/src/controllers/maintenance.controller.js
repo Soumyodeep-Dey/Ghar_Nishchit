@@ -3,6 +3,16 @@ import Property from '../models/property.model.js';
 import User from '../models/user.model.js';
 import Contract from '../models/contract.model.js';
 import Inquiry from '../models/inquiry.model.js';
+import Notification from '../models/notification.model.js';
+
+const createNotificationSafe = async ({ userId, title, message, type = 'maintenance', relatedId = null }) => {
+    if (!userId) return;
+    try {
+        await Notification.create({ userId, title, message, type, relatedId });
+    } catch (error) {
+        console.error('Failed to create maintenance notification:', error);
+    }
+};
 
 // Create a new maintenance request
 export const createMaintenanceRequest = async (req, res) => {
@@ -91,6 +101,13 @@ export const createMaintenanceRequest = async (req, res) => {
         });
 
         await maintenanceRequest.save();
+
+        await createNotificationSafe({
+            userId: landlordId,
+            title: 'New Maintenance Request',
+            message: `${tenantDoc.name} submitted: ${title}`,
+            relatedId: maintenanceRequest._id
+        });
 
         res.status(201).json({
             success: true,
@@ -243,6 +260,8 @@ export const updateMaintenanceRequest = async (req, res) => {
             });
         }
 
+        const previousStatus = maintenanceRequest.status;
+
         // Track status changes
         if (updateData.status && updateData.status !== maintenanceRequest.status) {
             maintenanceRequest.history.push({
@@ -270,6 +289,15 @@ export const updateMaintenanceRequest = async (req, res) => {
 
         maintenanceRequest.updatedAt = new Date();
         await maintenanceRequest.save();
+
+        if (updateData.status && updateData.status !== previousStatus) {
+            await createNotificationSafe({
+                userId: maintenanceRequest.tenant,
+                title: 'Maintenance Status Updated',
+                message: `Your request "${maintenanceRequest.title}" is now ${updateData.status}.`,
+                relatedId: maintenanceRequest._id
+            });
+        }
 
         res.status(200).json({
             success: true,
@@ -320,6 +348,13 @@ export const updateStatus = async (req, res) => {
 
         maintenanceRequest.updatedAt = new Date();
         await maintenanceRequest.save();
+
+        await createNotificationSafe({
+            userId: maintenanceRequest.tenant,
+            title: 'Maintenance Status Updated',
+            message: `Your request "${maintenanceRequest.title}" changed from ${oldStatus} to ${status}.`,
+            relatedId: maintenanceRequest._id
+        });
 
         res.status(200).json({
             success: true,
@@ -378,6 +413,14 @@ export const addComment = async (req, res) => {
         maintenanceRequest.updatedAt = new Date();
         await maintenanceRequest.save();
 
+        const isLandlordAuthor = String(author || '').toLowerCase().includes('landlord');
+        await createNotificationSafe({
+            userId: isLandlordAuthor ? maintenanceRequest.tenant : maintenanceRequest.landlord,
+            title: 'New Maintenance Comment',
+            message: `${author} commented on "${maintenanceRequest.title}".`,
+            relatedId: maintenanceRequest._id
+        });
+
         res.status(200).json({
             success: true,
             message: 'Comment added successfully',
@@ -429,6 +472,13 @@ export const assignTechnician = async (req, res) => {
 
         maintenanceRequest.updatedAt = new Date();
         await maintenanceRequest.save();
+
+        await createNotificationSafe({
+            userId: maintenanceRequest.tenant,
+            title: 'Technician Assigned',
+            message: `A technician was assigned for "${maintenanceRequest.title}".`,
+            relatedId: maintenanceRequest._id
+        });
 
         res.status(200).json({
             success: true,

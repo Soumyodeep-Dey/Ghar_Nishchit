@@ -147,7 +147,9 @@ const api = {
         method: 'POST',
         body: JSON.stringify({ content })
     }),
+    deleteMessage:        (id, messageId) => request(`/inquiries/${id}/messages/${messageId}`, { method: 'DELETE' }),
     deleteInquiry:        (id)    => request(`/inquiries/${id}`, { method: 'DELETE' }),
+
 
     // -------------------------------------------------------------------------
     // Notifications
