@@ -11,7 +11,7 @@ import DarkModeProvider from './DarkModeContext.jsx';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import Chatbot from '../../../Ai/Chatbot.jsx';
+import Chatbot from './Ai/Chatbot.jsx';
 
 const Landing = lazy(() => import('./components/landing'));
 const Login = lazy(() => import('./components/Auth/Login'));
