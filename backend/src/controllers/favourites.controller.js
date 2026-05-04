@@ -1,5 +1,31 @@
 import Favorite from '../models/favourites.model.js';
 import Property from '../models/property.model.js';
+import { query as neonQuery } from '../db/neon.js';
+
+// ── NeonDB Sync Helpers ──────────────────────────────────────────────────────
+const addFavToNeon = async (seekerId, propertyId) => {
+  try {
+    await neonQuery(
+      `INSERT INTO favorites (seeker_id, property_id)
+       VALUES ($1, $2)
+       ON CONFLICT (seeker_id, property_id) DO NOTHING`,
+      [seekerId.toString(), propertyId.toString()]
+    );
+  } catch (e) {
+    console.warn('[NeonDB] favorite add warning:', e.message);
+  }
+};
+
+const removeFavFromNeon = async (seekerId, propertyId) => {
+  try {
+    await neonQuery(
+      `DELETE FROM favorites WHERE seeker_id = $1 AND property_id = $2`,
+      [seekerId.toString(), propertyId.toString()]
+    );
+  } catch (e) {
+    console.warn('[NeonDB] favorite remove warning:', e.message);
+  }
+};
 
 // Get all favourites for the logged-in user
 export const getFavourites = async (req, res) => {
@@ -28,6 +54,10 @@ export const addFavourite = async (req, res) => {
       fav.properties.push(propertyId);
     }
     await fav.save();
+
+    // Dual-write to NeonDB
+    await addFavToNeon(req.user.userId, propertyId);
+
     res.status(201).json({ message: 'Added to favourites', favourites: fav.properties });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -49,6 +79,10 @@ export const removeFavourite = async (req, res) => {
       return res.status(404).json({ message: 'Property not found in favourites' });
     }
     await fav.save();
+
+    // Dual-write to NeonDB
+    await removeFavFromNeon(req.user.userId, propertyId);
+
     res.status(200).json({ message: 'Removed from favourites', favourites: fav.properties });
   } catch (error) {
     res.status(500).json({ message: error.message });
