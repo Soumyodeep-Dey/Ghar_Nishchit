@@ -1,7 +1,7 @@
-﻿﻿import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDarkMode } from '../useDarkMode.js';
 import { Link } from 'react-router-dom';
-import { Home, Building, Info, DollarSign, Users, HelpCircle, Menu, X, BookOpen } from 'lucide-react';
+import { Home, Building, Info, IndianRupee, Users, HelpCircle, Menu, X, BookOpen } from 'lucide-react';
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { showInfoToast, showSuccessToast } from '../utils/toast.jsx';
 
@@ -83,7 +83,7 @@ const quickLinks = [
 const menu = [
   { href: "#properties", label: "Properties", icon: Building },
   { href: "#about", label: "About", icon: Info },
-  { href: "#pricing", label: "Pricing", icon: DollarSign },
+  { href: "#pricing", label: "Pricing", icon: IndianRupee },
   { href: "#customers", label: "Customers", icon: Users },
   { href: "#blog", label: "Blog & Resources", icon: BookOpen },
   { href: "#help", label: "Help", icon: HelpCircle },
@@ -152,7 +152,7 @@ function CustomerCard({ customer, darkMode }) {
         {customer.name.charAt(0)}
       </div>
       <p className={`font-semibold text-lg mb-2 ${darkMode ? 'text-cyan-300' : 'text-indigo-700'}`}>{customer.name}</p>
-      <blockquote className={`relative italic pl-6 before:content-['“'] before:absolute before:left-0 before:text-4xl ${darkMode ? 'text-blue-200 before:text-cyan-400' : 'text-gray-800 before:text-indigo-400'}`}>
+      <blockquote className={`relative italic pl-6 before:content-['"'] before:absolute before:left-0 before:text-4xl ${darkMode ? 'text-blue-200 before:text-cyan-400' : 'text-gray-800 before:text-indigo-400'}`}>
         {customer.feedback}
       </blockquote>
       <div className={`mt-4 flex items-center space-x-1 ${darkMode ? 'text-cyan-400' : 'text-yellow-400'}`}>
@@ -360,13 +360,13 @@ export default function Landing() {
 
             {/* Right Side Actions */}
             <div className="flex items-center gap-4 sm:gap-8 flex-shrink-0">
-              {/* SignUp Button - Hidden on mobile and small tablets */}
+              {/* Login Button - Hidden on mobile and small tablets */}
               <Link
-                to="/signup"
+                to="/login"
                 className={`hidden lg:inline-block px-3 xl:px-4 py-2 text-sm xl:text-base rounded whitespace-nowrap transition-transform hover:scale-105 ${darkMode ? 'bg-cyan-500 hover:bg-cyan-400 text-blue-950' : 'bg-indigo-600 hover:bg-indigo-700 text-white'
                   }`}
               >
-                SignUp
+                Login
               </Link>
 
               {/* Dark Mode Toggle Button */}
@@ -427,14 +427,14 @@ export default function Landing() {
             ))}
             <li role="none" className="px-6 py-3">
               <Link
-                to="/signup"
+                to="/login"
                 className={`block px-4 py-2 rounded text-center font-semibold transition ${darkMode
                   ? 'bg-cyan-500 text-blue-950 hover:bg-cyan-400'
                   : 'bg-indigo-600 text-white hover:bg-indigo-700'
                   }`}
                 onClick={() => setMenuOpen(false)}
               >
-                SignUp
+                Login
               </Link>
             </li>
           </ul>
@@ -466,9 +466,9 @@ export default function Landing() {
           </p>
 
           {/* Primary CTA */}
-          <Link to="/signup"
+          <Link to="/login"
             className={`px-6 py-3 sm:px-8 sm:py-4 rounded-full font-semibold text-base sm:text-lg shadow-lg transition-transform hover:scale-105 ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-white text-indigo-600 hover:bg-indigo-100 transition-transform hover:scale-105'}`}>
-            Get Started
+            Login
           </Link>
 
           {/* Secondary CTA */}
@@ -698,10 +698,10 @@ export default function Landing() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           <PricingCard
             title="Standard Listing"
-            price="₹ 499/listing"
+            price="₹ 499"
             features={[
-              "One-time fee per property",
-              "30-day listing validity",
+              "List 1 property",
+              "Subscription valid for 30 days",
               "Basic property analytics"
             ]}
             buttonClass={`px-4 py-2 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
@@ -710,11 +710,12 @@ export default function Landing() {
           />
           <PricingCard
             title="Featured Listing"
-            price="₹ 999/listing"
+            price="₹ 999"
             features={[
               "Boosted visibility in search",
               "60-day listing validity",
-              "Priority placement"
+              "Priority placement",
+              "List 5 properties per month"
             ]}
             buttonClass={`px-4 py-2 rounded transition ${darkMode ? 'bg-white text-cyan-700 hover:bg-gray-100' : 'bg-white text-emerald-600 hover:bg-gray-100'}`}
             onClick={() => showInfoToast('Please login first to choose a plan')}
@@ -727,7 +728,9 @@ export default function Landing() {
             features={[
               "Trust verification badge",
               "Enhanced credibility",
-              "One-time verification"
+              "One-time verification",
+              "Unlimited property listings per month",
+              "All features of Standard & Featured Listing"
             ]}
             buttonClass={`px-4 py-2 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
             onClick={() => showInfoToast('Please login first to choose a plan')}

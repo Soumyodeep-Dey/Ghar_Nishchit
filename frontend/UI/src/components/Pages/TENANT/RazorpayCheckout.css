@@ -1,0 +1,179 @@
+/* =============================================================
+   RazorpayCheckout.css
+   Matches Ghar Nishchit’s Nexus teal palette.
+   Supports light + dark mode via prefers-color-scheme.
+   ============================================================= */
+
+.rzp-checkout {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ────────────────────── Pay Button ────────────────────── */
+.rzp-pay-btn {
+  display:         inline-flex;
+  align-items:     center;
+  justify-content: center;
+  gap:             8px;
+  padding:         12px 28px;
+  min-width:       200px;
+  min-height:      44px;      /* accessibility: 44px touch target */
+  background-color: #01696f;
+  color:           #ffffff;
+  border:          none;
+  border-radius:   8px;
+  font-size:       1rem;
+  font-weight:     600;
+  letter-spacing:  0.01em;
+  cursor:          pointer;
+  transition:
+    background-color 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform        120ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow       180ms cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(1, 105, 111, 0.3);
+}
+
+.rzp-pay-btn:hover:not(:disabled) {
+  background-color: #0c4e54;
+  box-shadow: 0 4px 12px rgba(1, 105, 111, 0.35);
+  transform: translateY(-1px);
+}
+
+.rzp-pay-btn:active:not(:disabled) {
+  background-color: #0f3638;
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(1, 105, 111, 0.2);
+}
+
+.rzp-pay-btn:disabled,
+.rzp-pay-btn--loading {
+  opacity: 0.65;
+  cursor:  not-allowed;
+  transform: none;
+}
+
+.rzp-pay-btn__icon {
+  width:  18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* ────────────────────── Spinner ──────────────────────── */
+@keyframes rzp-spin {
+  to { transform: rotate(360deg); }
+}
+
+.rzp-spinner {
+  display:       inline-block;
+  width:         16px;
+  height:        16px;
+  border:        2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation:     rzp-spin 0.65s linear infinite;
+  flex-shrink:   0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rzp-spinner { animation: none; opacity: 0.7; }
+}
+
+/* ────────────────────── Status Banners ─────────────────── */
+.rzp-banner {
+  display:     flex;
+  align-items: flex-start;
+  gap:         12px;
+  padding:     14px 16px;
+  border-radius: 8px;
+  border:      1px solid transparent;
+  font-size:   0.9rem;
+}
+
+.rzp-banner strong {
+  display:     block;
+  font-size:   0.95rem;
+  margin-bottom: 2px;
+}
+
+.rzp-banner p {
+  margin:    0;
+  opacity:   0.85;
+  max-width: 100%;
+}
+
+.rzp-banner__icon {
+  font-size:   1.2rem;
+  flex-shrink: 0;
+  margin-top:  1px;
+}
+
+/* Success */
+.rzp-banner--success {
+  background-color: #d4dfcc;
+  color:            #1e3f0a;
+  border-color:     #437a22;
+}
+
+/* Error */
+.rzp-banner--error {
+  background-color: #e0ced7;
+  color:            #561740;
+  border-color:     #a12c7b;
+}
+
+/* Warning / Cancelled */
+.rzp-banner--warning {
+  background-color: #e7d7c4;
+  color:            #4b2614;
+  border-color:     #da7101;
+}
+
+/* ────────────────────── Secure Note ───────────────────── */
+.rzp-secure-note {
+  display:     flex;
+  align-items: center;
+  gap:         5px;
+  font-size:   0.78rem;
+  color:       #7a7974;
+  margin:      0;
+}
+
+/* ────────────────────── Dark Mode ─────────────────────── */
+@media (prefers-color-scheme: dark) {
+  .rzp-pay-btn {
+    background-color: #4f98a3;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+
+  .rzp-pay-btn:hover:not(:disabled) {
+    background-color: #227f8b;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+
+  .rzp-pay-btn:active:not(:disabled) {
+    background-color: #1a626b;
+  }
+
+  .rzp-banner--success {
+    background-color: #3a4435;
+    color:            #b8d4a8;
+    border-color:     #6daa45;
+  }
+
+  .rzp-banner--error {
+    background-color: #4c3d46;
+    color:            #e4b8d5;
+    border-color:     #d163a7;
+  }
+
+  .rzp-banner--warning {
+    background-color: #564b3e;
+    color:            #f5c99e;
+    border-color:     #fdab43;
+  }
+
+  .rzp-secure-note {
+    color: #797876;
+  }
+}

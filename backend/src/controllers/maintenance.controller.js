@@ -1,6 +1,18 @@
 import Maintenance from '../models/maintenance.model.js';
 import Property from '../models/property.model.js';
 import User from '../models/user.model.js';
+import Contract from '../models/contract.model.js';
+import Inquiry from '../models/inquiry.model.js';
+import Notification from '../models/notification.model.js';
+
+const createNotificationSafe = async ({ userId, title, message, type = 'maintenance', relatedId = null }) => {
+    if (!userId) return;
+    try {
+        await Notification.create({ userId, title, message, type, relatedId });
+    } catch (error) {
+        console.error('Failed to create maintenance notification:', error);
+    }
+};
 
 // Create a new maintenance request
 export const createMaintenanceRequest = async (req, res) => {
@@ -8,9 +20,6 @@ export const createMaintenanceRequest = async (req, res) => {
         const {
             title,
             description,
-            property,
-            tenant,
-            landlord,
             priority,
             category,
             isEmergency,
@@ -18,41 +27,67 @@ export const createMaintenanceRequest = async (req, res) => {
             attachments
         } = req.body;
 
-        // Validate required fields
-        if (!title || !description || !property || !tenant || !landlord) {
+        if (!title || !description) {
             return res.status(400).json({
                 success: false,
-                message: 'Missing required fields'
+                message: 'Title and description are required'
             });
         }
 
-        // Get property and tenant details
-        const propertyDoc = await Property.findById(property);
-        const tenantDoc = await User.findById(tenant);
-
-        if (!propertyDoc) {
-            return res.status(404).json({
-                success: false,
-                message: 'Property not found'
-            });
+        // Get tenant from JWT token
+        const tenantId = req.user?.userId || req.user?.id || req.user?._id;
+        if (!tenantId) {
+            return res.status(401).json({ success: false, message: 'Authentication required' });
         }
 
+        const tenantDoc = await User.findById(tenantId);
         if (!tenantDoc) {
-            return res.status(404).json({
+            return res.status(404).json({ success: false, message: 'Tenant not found' });
+        }
+
+        // Auto-resolve property & landlord from active contract, fall back to latest inquiry
+        let propertyId = null;
+        let landlordId = null;
+        let propertyDoc = null;
+
+        const activeContract = await Contract.findOne({ tenant: tenantId, status: 'active' })
+            .sort({ createdAt: -1 });
+        
+        if (activeContract) {
+            propertyId = activeContract.property;
+            landlordId = activeContract.landlord;
+        } else {
+            // Fall back to most recent inquiry
+            const latestInquiry = await Inquiry.findOne({ seeker: tenantId })
+                .sort({ contactTime: -1 })
+                .populate('property', '_id postedBy');
+            if (latestInquiry) {
+                propertyId = latestInquiry.property?._id;
+                landlordId = latestInquiry.landlord || latestInquiry.property?.postedBy;
+            }
+        }
+
+        if (!propertyId || !landlordId) {
+            return res.status(400).json({
                 success: false,
-                message: 'Tenant not found'
+                message: 'No active rental or property inquiry found. Please contact your landlord first.'
             });
+        }
+
+        propertyDoc = await Property.findById(propertyId);
+        if (!propertyDoc) {
+            return res.status(404).json({ success: false, message: 'Property not found' });
         }
 
         // Create maintenance request
         const maintenanceRequest = new Maintenance({
             title,
             description,
-            property,
+            property: propertyId,
             propertyName: propertyDoc.title,
-            tenant,
+            tenant: tenantId,
             tenantName: tenantDoc.name,
-            landlord,
+            landlord: landlordId,
             priority: priority || 'Medium',
             category: category || 'general',
             isEmergency: isEmergency || false,
@@ -66,6 +101,13 @@ export const createMaintenanceRequest = async (req, res) => {
         });
 
         await maintenanceRequest.save();
+
+        await createNotificationSafe({
+            userId: landlordId,
+            title: 'New Maintenance Request',
+            message: `${tenantDoc.name} submitted: ${title}`,
+            relatedId: maintenanceRequest._id
+        });
 
         res.status(201).json({
             success: true,
@@ -218,6 +260,8 @@ export const updateMaintenanceRequest = async (req, res) => {
             });
         }
 
+        const previousStatus = maintenanceRequest.status;
+
         // Track status changes
         if (updateData.status && updateData.status !== maintenanceRequest.status) {
             maintenanceRequest.history.push({
@@ -245,6 +289,15 @@ export const updateMaintenanceRequest = async (req, res) => {
 
         maintenanceRequest.updatedAt = new Date();
         await maintenanceRequest.save();
+
+        if (updateData.status && updateData.status !== previousStatus) {
+            await createNotificationSafe({
+                userId: maintenanceRequest.tenant,
+                title: 'Maintenance Status Updated',
+                message: `Your request "${maintenanceRequest.title}" is now ${updateData.status}.`,
+                relatedId: maintenanceRequest._id
+            });
+        }
 
         res.status(200).json({
             success: true,
@@ -295,6 +348,13 @@ export const updateStatus = async (req, res) => {
 
         maintenanceRequest.updatedAt = new Date();
         await maintenanceRequest.save();
+
+        await createNotificationSafe({
+            userId: maintenanceRequest.tenant,
+            title: 'Maintenance Status Updated',
+            message: `Your request "${maintenanceRequest.title}" changed from ${oldStatus} to ${status}.`,
+            relatedId: maintenanceRequest._id
+        });
 
         res.status(200).json({
             success: true,
@@ -353,6 +413,14 @@ export const addComment = async (req, res) => {
         maintenanceRequest.updatedAt = new Date();
         await maintenanceRequest.save();
 
+        const isLandlordAuthor = String(author || '').toLowerCase().includes('landlord');
+        await createNotificationSafe({
+            userId: isLandlordAuthor ? maintenanceRequest.tenant : maintenanceRequest.landlord,
+            title: 'New Maintenance Comment',
+            message: `${author} commented on "${maintenanceRequest.title}".`,
+            relatedId: maintenanceRequest._id
+        });
+
         res.status(200).json({
             success: true,
             message: 'Comment added successfully',
@@ -404,6 +472,13 @@ export const assignTechnician = async (req, res) => {
 
         maintenanceRequest.updatedAt = new Date();
         await maintenanceRequest.save();
+
+        await createNotificationSafe({
+            userId: maintenanceRequest.tenant,
+            title: 'Technician Assigned',
+            message: `A technician was assigned for "${maintenanceRequest.title}".`,
+            relatedId: maintenanceRequest._id
+        });
 
         res.status(200).json({
             success: true,

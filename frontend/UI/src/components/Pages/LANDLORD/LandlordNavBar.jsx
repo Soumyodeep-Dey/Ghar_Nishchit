@@ -1,7 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
-import { Search, Bell, Sun, Moon, User, Settings, HelpCircle, LogOut, ChevronDown, X, MessageSquare, Wrench, CreditCard, Home, Building2, Users, DollarSign } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Search, Bell, Sun, Moon, User, Settings, HelpCircle, LogOut, ChevronDown, X, MessageSquare, Wrench, CreditCard, Home, Building2, Users, IndianRupee } from 'lucide-react';
 import { useDarkMode } from '../../../useDarkMode.js';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { showConfirmToast } from '../../../utils/toast.jsx';
+import api from '../../../services/api.js';
 
 const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
   const { darkMode: isDarkMode, toggleDarkMode } = useDarkMode();
@@ -9,16 +11,22 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const navigate = useNavigate();
 
   // Get user data from localStorage - use 'user' key from authentication
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user')) || { name: '', email: '' });
 
   // Logout handler function
   const handleLogout = () => {
-    // Clear authentication (example: remove token from localStorage)
-    localStorage.removeItem('authToken');
-    // Redirect to home page
-    window.location.href = '/';
+    showConfirmToast(
+      'Are you sure you want to logout?',
+      () => {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/';
+      }
+    );
   };
 
   const profileDropdownRef = useRef(null);
@@ -43,7 +51,7 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
     'Dashboard': Home,
     'Properties': Building2,
     'Tenants': Users,
-    'Payments': DollarSign,
+    'Payments': IndianRupee,
     'Maintenance': Settings,
     'Messages': MessageSquare
   };
@@ -53,39 +61,62 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
     return sectionIcons[currentSection] || Home;
   };
 
-  // Sample notifications data
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: 'payment',
-      icon: CreditCard,
-      title: 'Payment Received',
-      message: 'John Doe sent ₹15,000 rent payment',
-      time: '2 minutes ago',
-      isRead: false,
-      color: 'success'
-    },
-    {
-      id: 2,
-      type: 'maintenance',
-      icon: Wrench,
-      title: 'Maintenance Request',
-      message: 'AC repair needed at Skyline Residency',
-      time: '1 hour ago',
-      isRead: false,
-      color: 'warning'
-    },
-    {
-      id: 3,
-      type: 'message',
-      icon: MessageSquare,
-      title: 'New Message',
-      message: 'Sarah Smith: "When will the plumber arrive?"',
-      time: '3 hours ago',
-      isRead: true,
-      color: 'primary'
+  // ── Persist read IDs in localStorage so they survive page reload ──
+  const STORAGE_KEY = 'landlord_read_notification_ids';
+
+  const getReadIds = () => {
+    try {
+      return new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+    } catch { return new Set(); }
+  };
+
+  const saveReadIds = (set) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([...set]));
+  };
+
+  // ── Fetch real notifications from the DB ─────────────────────────────────
+  const [notifications, setNotifications] = useState([]);
+
+  const fetchNotifications = async () => {
+    try {
+      const data = await api.getNotifications();           // GET /api/notifications
+      const iconMap = {
+        inquiry:     MessageSquare,
+        maintenance: Wrench,
+        payment:     CreditCard,
+        general:     Bell,
+        message:     MessageSquare,
+      };
+      const colorMap = {
+        inquiry:     'primary',
+        maintenance: 'warning',
+        payment:     'success',
+        general:     'primary',
+        message:     'primary',
+      };
+      const mapped = (Array.isArray(data) ? data : []).map((n) => ({
+        id:      n.id || n._id,
+        type:    n.type,
+        icon:    iconMap[n.type] || Bell,
+        title:   n.title,
+        message: n.message,
+        time:    n.time || new Date(n.createdAt).toLocaleString(),
+        isRead:  n.read,
+        color:   colorMap[n.type] || 'primary',
+        relatedId: n.relatedId,
+      }));
+      setNotifications(mapped);
+    } catch (err) {
+      console.error('Failed to fetch notifications:', err);
     }
-  ]);
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -110,23 +141,36 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Mark notification as read
-  const markAsRead = (notificationId) => {
+  // Mark notification as read (persist to DB)
+  const markAsRead = async (notification) => {
+    // Optimistic UI update
     setNotifications(prev =>
-      prev.map(notification =>
-        notification.id === notificationId
-          ? { ...notification, isRead: true }
-          : notification
-      )
+      prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n)
     );
+    try {
+      await api.markNotificationRead(notification.id);
+    } catch (err) {
+      console.error('Failed to mark as read:', err);
+    }
+    
+    setIsNotificationsOpen(false); // Close dropdown
+    
+    // Redirect logic
+    if (notification.type === 'inquiry' || notification.type === 'message') {
+      navigate('/landlord/messages', { state: { activeInquiryId: notification.relatedId } });
+    }
   };
 
-  // Mark all notifications as read
-  const markAllAsRead = () => {
-    setNotifications(prev =>
-      prev.map(notification => ({ ...notification, isRead: true }))
-    );
+  // Mark all as read (persist to DB)
+  const markAllAsRead = async () => {
+    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    try {
+      await api.markAllNotificationsRead();
+    } catch (err) {
+      console.error('Failed to mark all as read:', err);
+    }
   };
+
 
   // Search suggestions (you can replace with real search logic)
   const searchSuggestions = [
@@ -253,45 +297,51 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
 
                   {/* Notifications List */}
                   <div className="max-h-96 overflow-y-auto">
-                    {notifications.map((notification) => {
-                      const IconComponent = notification.icon;
-                      const colorClasses = {
-                        success: 'text-green-600 bg-green-100 dark:bg-green-900/30',
-                        warning: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30',
-                        primary: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30'
-                      };
+                    {notifications.length === 0 ? (
+                      <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                        No new notifications
+                      </div>
+                    ) : (
+                      notifications.map((notification) => {
+                        const IconComponent = notification.icon;
+                        const colorClasses = {
+                          success: 'text-green-600 bg-green-100 dark:bg-green-900/30',
+                          warning: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30',
+                          primary: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30'
+                        };
 
-                      return (
-                        <div
-                          key={notification.id}
-                          className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer border-l-4 ${notification.isRead
-                            ? 'border-transparent'
-                            : 'border-blue-500 bg-blue-50/30 dark:bg-blue-900/10'
-                            }`}
-                          onClick={() => markAsRead(notification.id)}
-                        >
-                          <div className="flex items-start space-x-3">
-                            <div className={`p-2 rounded-lg ${colorClasses[notification.color]}`}>
-                              <IconComponent className="h-4 w-4" />
+                        return (
+                          <div
+                            key={notification.id}
+                            className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer border-l-4 ${notification.isRead
+                              ? 'border-transparent'
+                              : 'border-blue-500 bg-blue-50/30 dark:bg-blue-900/10'
+                              }`}
+                            onClick={() => markAsRead(notification)}
+                          >
+                            <div className="flex items-start space-x-3">
+                              <div className={`p-2 rounded-lg ${colorClasses[notification.color]}`}>
+                                <IconComponent className="h-4 w-4" />
+                              </div>
+                              <div className="flex-1">
+                                <p className={`font-medium ${notification.isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'}`}>
+                                  {notification.title}
+                                </p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                  {notification.message}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                                  {notification.time}
+                                </p>
+                              </div>
+                              {!notification.isRead && (
+                                <div className="h-2 w-2 bg-blue-600 rounded-full" />
+                              )}
                             </div>
-                            <div className="flex-1">
-                              <p className={`font-medium ${notification.isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'}`}>
-                                {notification.title}
-                              </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                {notification.message}
-                              </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                                {notification.time}
-                              </p>
-                            </div>
-                            {!notification.isRead && (
-                              <div className="h-2 w-2 bg-blue-600 rounded-full" />
-                            )}
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })
+                    )}
                   </div>
 
                   {/* Footer */}

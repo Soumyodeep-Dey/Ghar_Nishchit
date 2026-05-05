@@ -4,7 +4,7 @@ import LandlordNavBar from './LandlordNavBar';
 import AddNewPropertyModal from './AddNewPropertyModal';
 import GenerateReportModal from './GenerateReportModal';
 import {
-  DollarSign, Users, Wrench, BarChart3, TrendingUp, TrendingDown, Plus, Calendar, Building2
+  IndianRupee, Users, Wrench, BarChart3, TrendingUp, TrendingDown, Plus, Calendar, Building2
 } from 'lucide-react';
 // framer-motion removed to reduce animation overhead
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -160,6 +160,10 @@ const LandlordDashboard = () => {
 
   const { darkMode: isDarkMode } = useDarkMode();
   const [properties, setProperties] = useState([]);
+  const [tenantStats, setTenantStats] = useState({
+    activeTenants: 0,
+    pendingContracts: 0
+  });
 
   const updateSection = useCallback((path) => {
     if (path === '/landlord' || path === '/landlord/') {
@@ -191,18 +195,18 @@ const LandlordDashboard = () => {
       color: isDarkMode ? 'from-cyan-500 to-indigo-600' : 'from-indigo-500 to-purple-600'
     },
     {
-      icon: DollarSign,
+      icon: IndianRupee,
       title: 'Monthly Revenue',
       value: properties.reduce((acc, p) => acc + (p.status === 'Occupied' ? Number(p.rent || p.price || 0) : 0), 0) || 0,
       change: '+0%',
       trend: 'up',
       color: isDarkMode ? 'from-indigo-500 to-purple-600' : 'from-purple-500 to-pink-500',
-      prefix: '$'
+      prefix: '₹'
     },
     {
       icon: Users,
       title: 'Active Tenants',
-      value: properties.reduce((acc, p) => acc + (p.tenantCount || 0), 0) || 0,
+      value: tenantStats.activeTenants || 0,
       change: '+0%',
       trend: 'up',
       color: isDarkMode ? 'from-purple-500 to-pink-600' : 'from-pink-400 to-rose-500'
@@ -215,14 +219,46 @@ const LandlordDashboard = () => {
       trend: 'down',
       color: isDarkMode ? 'from-pink-500 to-rose-600' : 'from-rose-400 to-pink-500'
     }
-  ], [isDarkMode, properties]);
+  ], [isDarkMode, properties, tenantStats.activeTenants]);
 
   // Load properties on mount
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
-        const remote = await api.getProperties();
+        let profile = null;
+        try {
+          profile = await api.getProfile();
+        } catch {
+          // not authenticated or endpoint failed
+        }
+        
+        const userId = profile?._id || profile?.id || profile?.userId;
+        let remote = [];
+
+        if (userId) {
+          try {
+            remote = await api.getPropertiesByUser(userId);
+          } catch (err) {
+            console.warn('Could not load user properties, falling back to all properties', err);
+            remote = await api.getProperties();
+          }
+
+          try {
+            const stats = await api.getTenantStats();
+            if (mounted && stats) {
+              setTenantStats({
+                activeTenants: Number(stats.activeTenants || 0),
+                pendingContracts: Number(stats.pendingContracts || 0)
+              });
+            }
+          } catch (statsErr) {
+            console.warn('Could not load tenant stats:', statsErr);
+          }
+        } else {
+            remote = await api.getProperties();
+        }
+
         if (mounted && Array.isArray(remote)) {
           const normalized = remote.map(r => ({
             id: r._id || r.id,
@@ -338,6 +374,11 @@ const LandlordDashboard = () => {
               <p className={`text-lg ${themeConfig.textSecondary} max-w-2xl mx-auto leading-relaxed`}>
                 Your comprehensive property management dashboard with real-time insights and advanced analytics
               </p>
+              {properties.length > 0 && properties.every(p => p.status !== 'Occupied') && (
+                <p className={`text-sm ${isDarkMode ? 'text-cyan-400' : 'text-indigo-500'} mt-3 flex items-center justify-center gap-2`}>
+                  💡 Tip: Your properties are listed! Check your <strong>Messages</strong> tab for tenant inquiries.
+                </p>
+              )}
             </div>
 
             {/* Stats Grid - Reduced Size */}
@@ -441,21 +482,21 @@ const LandlordDashboard = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
                     {[
                       {
-                        value: '94%',
+                        value: properties.length > 0 ? `${Math.round((properties.filter(p => p.status === 'Occupied').length / properties.length) * 100)}%` : '0%',
                         label: 'Occupancy Rate',
                         color: isDarkMode ? 'text-cyan-400' : 'text-indigo-600',
                         delay: 0,
                         bgGradient: isDarkMode ? 'from-cyan-500/20 to-indigo-500/20' : 'from-indigo-500/20 to-cyan-500/20'
                       },
                       {
-                        value: '4.8',
+                        value: '0.0',
                         label: 'Avg Rating',
                         color: isDarkMode ? 'text-indigo-400' : 'text-purple-600',
                         delay: 0.15,
                         bgGradient: isDarkMode ? 'from-indigo-500/20 to-purple-500/20' : 'from-purple-500/20 to-indigo-500/20'
                       },
                       {
-                        value: '2.1',
+                        value: '0.0',
                         label: 'Avg Response (hrs)',
                         color: isDarkMode ? 'text-purple-400' : 'text-pink-600',
                         delay: 0.3,
