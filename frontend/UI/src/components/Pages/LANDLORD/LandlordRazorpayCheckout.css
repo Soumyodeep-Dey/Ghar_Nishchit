@@ -1,0 +1,349 @@
+/* =============================================================
+   LandlordRazorpayCheckout.css
+   Subscription payment widget for landlords.
+   Mirrors tenant's RazorpayCheckout.css — Nexus teal palette.
+   Supports light + dark mode via prefers-color-scheme
+   and [data-theme="dark"] for the manual toggle.
+   ============================================================= */
+
+.lrzp-checkout {
+  display:        flex;
+  flex-direction: column;
+  gap:            14px;
+}
+
+/* ─────────────────────── Plan Summary Card ─────────────────────── */
+.lrzp-plan-summary {
+  background-color: #f3f0ec;
+  border:           1px solid #d4d1ca;
+  border-radius:    10px;
+  padding:          16px 18px;
+  font-size:        0.9rem;
+}
+
+.lrzp-plan-summary__header {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     center;
+  margin-bottom:   12px;
+  gap:             8px;
+  flex-wrap:       wrap;
+}
+
+.lrzp-plan-summary__name {
+  font-weight:  700;
+  font-size:    1rem;
+  color:        #28251d;
+}
+
+.lrzp-plan-summary__validity {
+  font-size:   0.78rem;
+  color:       #7a7974;
+  background:  #edeae5;
+  padding:     2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.lrzp-plan-summary__breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lrzp-plan-summary__row {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     center;
+  color:           #7a7974;
+  font-size:       0.875rem;
+}
+
+.lrzp-plan-summary__row span:last-child {
+  font-weight:  600;
+  color:        #28251d;
+}
+
+.lrzp-plan-summary__row--total {
+  font-size:   1rem;
+  font-weight: 700;
+  color:       #28251d !important;
+}
+
+.lrzp-plan-summary__row--total span {
+  color:       #01696f !important;
+  font-size:   1.05rem;
+}
+
+.lrzp-plan-summary__divider {
+  height:           1px;
+  background-color: #d4d1ca;
+  margin:           4px 0;
+}
+
+/* ─────────────────────── Pay Button ─────────────────────── */
+.lrzp-pay-btn {
+  display:         inline-flex;
+  align-items:     center;
+  justify-content: center;
+  gap:             8px;
+  padding:         12px 28px;
+  min-width:       200px;
+  min-height:      44px;      /* accessibility: 44 px touch target */
+  background-color: #01696f;
+  color:           #ffffff;
+  border:          none;
+  border-radius:   8px;
+  font-size:       1rem;
+  font-weight:     600;
+  letter-spacing:  0.01em;
+  cursor:          pointer;
+  transition:
+    background-color 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform        120ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow       180ms cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(1, 105, 111, 0.3);
+  width: 100%;
+}
+
+.lrzp-pay-btn:hover:not(:disabled) {
+  background-color: #0c4e54;
+  box-shadow:       0 4px 12px rgba(1, 105, 111, 0.35);
+  transform:        translateY(-1px);
+}
+
+.lrzp-pay-btn:active:not(:disabled) {
+  background-color: #0f3638;
+  transform:        translateY(0);
+  box-shadow:       0 1px 3px rgba(1, 105, 111, 0.2);
+}
+
+.lrzp-pay-btn:disabled,
+.lrzp-pay-btn--loading {
+  opacity:   0.65;
+  cursor:    not-allowed;
+  transform: none;
+}
+
+.lrzp-pay-btn__icon {
+  width:      18px;
+  height:     18px;
+  flex-shrink: 0;
+}
+
+/* ─────────────────────── Spinner ─────────────────────── */
+@keyframes lrzp-spin {
+  to { transform: rotate(360deg); }
+}
+
+.lrzp-spinner {
+  display:          inline-block;
+  width:            16px;
+  height:           16px;
+  border:           2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius:    50%;
+  animation:        lrzp-spin 0.65s linear infinite;
+  flex-shrink:      0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lrzp-spinner { animation: none; opacity: 0.7; }
+}
+
+/* ─────────────────────── Status Banners ─────────────────────── */
+.lrzp-banner {
+  display:       flex;
+  align-items:   flex-start;
+  gap:           12px;
+  padding:       14px 16px;
+  border-radius: 8px;
+  border:        1px solid transparent;
+  font-size:     0.9rem;
+}
+
+.lrzp-banner strong {
+  display:       block;
+  font-size:     0.95rem;
+  margin-bottom: 2px;
+}
+
+.lrzp-banner p {
+  margin:    0;
+  opacity:   0.85;
+  max-width: 100%;
+}
+
+.lrzp-banner__icon {
+  font-size:   1.2rem;
+  flex-shrink: 0;
+  margin-top:  1px;
+}
+
+/* Success */
+.lrzp-banner--success {
+  background-color: #d4dfcc;
+  color:            #1e3f0a;
+  border-color:     #437a22;
+}
+
+/* Error */
+.lrzp-banner--error {
+  background-color: #e0ced7;
+  color:            #561740;
+  border-color:     #a12c7b;
+}
+
+/* Warning / Cancelled */
+.lrzp-banner--warning {
+  background-color: #e7d7c4;
+  color:            #4b2614;
+  border-color:     #da7101;
+}
+
+/* ─────────────────────── Secure Note ─────────────────────── */
+.lrzp-secure-note {
+  display:     flex;
+  align-items: center;
+  gap:         5px;
+  font-size:   0.78rem;
+  color:       #7a7974;
+  margin:      0;
+}
+
+/* ═══════════════════════ DARK MODE ═══════════════════════ */
+/* Auto dark (system preference) */
+@media (prefers-color-scheme: dark) {
+  .lrzp-plan-summary {
+    background-color: #1c1b19;
+    border-color:     #393836;
+  }
+
+  .lrzp-plan-summary__name {
+    color: #cdccca;
+  }
+
+  .lrzp-plan-summary__validity {
+    background: #22211f;
+    color:      #797876;
+  }
+
+  .lrzp-plan-summary__row {
+    color: #797876;
+  }
+
+  .lrzp-plan-summary__row span:last-child {
+    color: #cdccca;
+  }
+
+  .lrzp-plan-summary__row--total span {
+    color: #4f98a3 !important;
+  }
+
+  .lrzp-plan-summary__divider {
+    background-color: #393836;
+  }
+
+  .lrzp-pay-btn {
+    background-color: #4f98a3;
+    box-shadow:       0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+
+  .lrzp-pay-btn:hover:not(:disabled) {
+    background-color: #227f8b;
+    box-shadow:       0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+
+  .lrzp-pay-btn:active:not(:disabled) {
+    background-color: #1a626b;
+  }
+
+  .lrzp-banner--success {
+    background-color: #3a4435;
+    color:            #b8d4a8;
+    border-color:     #6daa45;
+  }
+
+  .lrzp-banner--error {
+    background-color: #4c3d46;
+    color:            #e4b8d5;
+    border-color:     #d163a7;
+  }
+
+  .lrzp-banner--warning {
+    background-color: #564b3e;
+    color:            #f5c99e;
+    border-color:     #fdab43;
+  }
+
+  .lrzp-secure-note {
+    color: #797876;
+  }
+}
+
+/* Manual dark toggle: [data-theme="dark"] on <html> */
+[data-theme="dark"] .lrzp-plan-summary {
+  background-color: #1c1b19;
+  border-color:     #393836;
+}
+
+[data-theme="dark"] .lrzp-plan-summary__name {
+  color: #cdccca;
+}
+
+[data-theme="dark"] .lrzp-plan-summary__validity {
+  background: #22211f;
+  color:      #797876;
+}
+
+[data-theme="dark"] .lrzp-plan-summary__row {
+  color: #797876;
+}
+
+[data-theme="dark"] .lrzp-plan-summary__row span:last-child {
+  color: #cdccca;
+}
+
+[data-theme="dark"] .lrzp-plan-summary__row--total span {
+  color: #4f98a3 !important;
+}
+
+[data-theme="dark"] .lrzp-plan-summary__divider {
+  background-color: #393836;
+}
+
+[data-theme="dark"] .lrzp-pay-btn {
+  background-color: #4f98a3;
+  box-shadow:       0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .lrzp-pay-btn:hover:not(:disabled) {
+  background-color: #227f8b;
+  box-shadow:       0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .lrzp-pay-btn:active:not(:disabled) {
+  background-color: #1a626b;
+}
+
+[data-theme="dark"] .lrzp-banner--success {
+  background-color: #3a4435;
+  color:            #b8d4a8;
+  border-color:     #6daa45;
+}
+
+[data-theme="dark"] .lrzp-banner--error {
+  background-color: #4c3d46;
+  color:            #e4b8d5;
+  border-color:     #d163a7;
+}
+
+[data-theme="dark"] .lrzp-banner--warning {
+  background-color: #564b3e;
+  color:            #f5c99e;
+  border-color:     #fdab43;
+}
+
+[data-theme="dark"] .lrzp-secure-note {
+  color: #797876;
+}
