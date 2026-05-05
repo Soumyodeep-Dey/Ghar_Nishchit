@@ -710,11 +710,12 @@ export default function Landing() {
           />
           <PricingCard
             title="Featured Listing"
-            price="₹ 999/listing"
+            price="₹ 999"
             features={[
               "Boosted visibility in search",
               "60-day listing validity",
-              "Priority placement"
+              "Priority placement",
+              "List 5 properties per month"
             ]}
             buttonClass={`px-4 py-2 rounded transition ${darkMode ? 'bg-white text-cyan-700 hover:bg-gray-100' : 'bg-white text-emerald-600 hover:bg-gray-100'}`}
             onClick={() => showInfoToast('Please login first to choose a plan')}
