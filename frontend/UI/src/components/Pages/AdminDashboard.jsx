@@ -1,83 +1,50 @@
-import { useState, useEffect } from 'react';
-import { useDarkMode } from '../../useDarkMode';
-import { Users, Home, FileText, Trash2, Shield, LogOut, ArrowLeft } from 'lucide-react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { showErrorToast, showSuccessToast } from '../../utils/toast';
+import { useDarkMode } from '../../useDarkMode';
+import {
+  LayoutDashboard, Users, Home, FileText, Wrench,
+  IndianRupee, Megaphone, Shield, LogOut, Menu, X, AlertTriangle
+} from 'lucide-react';
+
+import { useAdminData } from './Admin/useAdminData';
+import AdminOverview    from './Admin/AdminOverview';
+import AdminUsers       from './Admin/AdminUsers';
+import AdminProperties  from './Admin/AdminProperties';
+import AdminMaintenance from './Admin/AdminMaintenance';
+import AdminPayments    from './Admin/AdminPayments';
+import AdminContracts   from './Admin/AdminContracts';
+import AdminBroadcast   from './Admin/AdminBroadcast';
+
+const NAV = [
+  { id: 'overview',     label: 'Overview',     icon: LayoutDashboard },
+  { id: 'users',        label: 'Users',         icon: Users },
+  { id: 'properties',   label: 'Properties',    icon: Home },
+  { id: 'contracts',    label: 'Contracts',     icon: FileText },
+  { id: 'maintenance',  label: 'Maintenance',   icon: Wrench },
+  { id: 'payments',     label: 'Payments',      icon: IndianRupee },
+  { id: 'broadcast',    label: 'Broadcast',     icon: Megaphone },
+];
 
 export default function AdminDashboard() {
   const { darkMode } = useDarkMode();
   const navigate = useNavigate();
-  const [data, setData] = useState({ users: [], properties: [], contracts: [] });
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('users');
+  const [activeTab, setActiveTab] = useState('overview');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const fetchDashboardData = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/dashboard`);
-      const result = await response.json();
-      if (result.success) {
-        setData({
-          users: result.users,
-          properties: result.properties,
-          contracts: result.contracts
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching admin data:', error);
-      showErrorToast('Failed to load admin data');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    data, loading,
+    deleteUser, updateUserStatus,
+    deleteProperty, updateProperty,
+    deleteContract,
+    updateMaintenanceStatus,
+    broadcast,
+  } = useAdminData();
 
-  useEffect(() => {
-    // Check if the user is the admin
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (user.role !== 'admin' || user.email !== 'ritam@gmail.com') {
-      navigate('/');
-    } else {
-      fetchDashboardData();
-    }
-  }, [navigate]);
-
-  const handleDeleteUser = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
-    try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/user/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        showSuccessToast('User deleted');
-        fetchDashboardData();
-      }
-    } catch (e) {
-      showErrorToast('Error deleting user');
-    }
-  };
-
-  const handleDeleteProperty = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this property?')) return;
-    try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/property/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        showSuccessToast('Property deleted');
-        fetchDashboardData();
-      }
-    } catch (e) {
-      showErrorToast('Error deleting property');
-    }
-  };
-
-  const handleDeleteContract = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this contract?')) return;
-    try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/contract/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        showSuccessToast('Contract deleted');
-        fetchDashboardData();
-      }
-    } catch (e) {
-      showErrorToast('Error deleting contract');
-    }
-  };
+  // Guard — only admin can view
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  if (user.role !== 'admin' || user.email !== 'ritam@gmail.com') {
+    navigate('/'); return null;
+  }
 
   const logout = () => {
     localStorage.removeItem('token');
@@ -85,140 +52,110 @@ export default function AdminDashboard() {
     navigate('/login');
   };
 
-  if (loading) {
-    return <div className="min-h-screen flex justify-center items-center">Loading Admin Panel...</div>;
-  }
+  const actions = { deleteUser, updateUserStatus, deleteProperty, updateProperty, deleteContract, updateMaintenanceStatus, broadcast };
+
+  const slaBreaches = data?.analytics?.slaBreaches || 0;
+
+  const Sidebar = ({ mobile }) => (
+    <aside className={`${mobile ? 'w-full' : 'w-60 hidden lg:flex'} flex-col bg-[#1e1b4b] text-white h-full`}>
+      {/* Logo */}
+      <div className="flex items-center gap-3 px-5 py-5 border-b border-white/10">
+        <div className="p-2 bg-indigo-500 rounded-xl"><Shield size={20} /></div>
+        <div>
+          <p className="font-bold text-sm leading-none">GharNishchit</p>
+          <p className="text-xs text-indigo-300 mt-0.5">Master Control</p>
+        </div>
+        {mobile && (
+          <button onClick={() => setSidebarOpen(false)} className="ml-auto p-1 hover:bg-white/10 rounded-lg"><X size={18} /></button>
+        )}
+      </div>
+
+      {/* Nav */}
+      <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+        {NAV.map(({ id, label, icon: Icon }) => {
+          const badge = id === 'maintenance' && slaBreaches > 0 ? slaBreaches : null;
+          return (
+            <button
+              key={id}
+              onClick={() => { setActiveTab(id); setSidebarOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${activeTab === id ? 'bg-indigo-500 text-white shadow-lg' : 'text-indigo-200 hover:bg-white/10 hover:text-white'}`}
+            >
+              <Icon size={18} />
+              <span className="flex-1 text-left">{label}</span>
+              {badge && (
+                <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">{badge}</span>
+              )}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Admin info */}
+      <div className="p-4 border-t border-white/10">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-sm font-bold">R</div>
+          <div>
+            <p className="text-xs font-semibold">Ritam</p>
+            <p className="text-xs text-indigo-400">Super Admin</p>
+          </div>
+        </div>
+        <button onClick={logout} className="w-full flex items-center justify-center gap-2 py-2 bg-red-600/80 hover:bg-red-600 rounded-xl text-sm font-medium transition">
+          <LogOut size={16} /> Logout
+        </button>
+      </div>
+    </aside>
+  );
+
+  const tabTitle = NAV.find(n => n.id === activeTab)?.label || '';
 
   return (
-    <div className={`min-h-screen p-6 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
-      <div className="max-w-7xl mx-auto">
-        <header className="flex justify-between items-center mb-8">
-          <div className="flex items-center gap-4">
-            <Shield size={32} className="text-indigo-600" />
-            <h1 className="text-3xl font-bold">Master Admin Controller</h1>
+    <div className={`flex h-screen overflow-hidden ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
+      {/* Desktop Sidebar */}
+      <Sidebar />
+
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-50 flex lg:hidden">
+          <div className="w-72 flex flex-col h-full"><Sidebar mobile /></div>
+          <div className="flex-1 bg-black/50" onClick={() => setSidebarOpen(false)} />
+        </div>
+      )}
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Topbar */}
+        <header className={`flex items-center gap-4 px-5 py-4 border-b ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} shadow-sm`}>
+          <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"><Menu size={20} /></button>
+          <div className="flex-1">
+            <h1 className="font-bold text-lg">{tabTitle}</h1>
+            {data && <p className="text-xs text-gray-500 dark:text-gray-400">{data.analytics?.totalUsers} users · {data.properties?.length} properties</p>}
           </div>
-          <button onClick={logout} className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-            <LogOut size={20} /> Logout
-          </button>
+          {slaBreaches > 0 && (
+            <button onClick={() => setActiveTab('maintenance')} className="flex items-center gap-2 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl text-xs font-semibold border border-red-200 dark:border-red-800 hover:bg-red-100 transition">
+              <AlertTriangle size={14} />{slaBreaches} SLA Alert{slaBreaches > 1 ? 's' : ''}
+            </button>
+          )}
         </header>
 
-        {/* Dashboard Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="p-6 rounded-2xl shadow-lg bg-indigo-600 text-white cursor-pointer hover:scale-105 transition" onClick={() => setActiveTab('users')}>
-            <div className="flex items-center gap-4">
-              <Users size={40} />
-              <div>
-                <p className="text-sm opacity-80">Total Users</p>
-                <h2 className="text-3xl font-bold">{data.users.length}</h2>
-              </div>
+        {/* Page Content */}
+        <main className="flex-1 overflow-y-auto p-5">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center h-full gap-4">
+              <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+              <p className="text-gray-500 text-sm">Loading Master Control Panel...</p>
             </div>
-          </div>
-          <div className="p-6 rounded-2xl shadow-lg bg-teal-600 text-white cursor-pointer hover:scale-105 transition" onClick={() => setActiveTab('properties')}>
-            <div className="flex items-center gap-4">
-              <Home size={40} />
-              <div>
-                <p className="text-sm opacity-80">Total Properties</p>
-                <h2 className="text-3xl font-bold">{data.properties.length}</h2>
-              </div>
-            </div>
-          </div>
-          <div className="p-6 rounded-2xl shadow-lg bg-rose-600 text-white cursor-pointer hover:scale-105 transition" onClick={() => setActiveTab('contracts')}>
-            <div className="flex items-center gap-4">
-              <FileText size={40} />
-              <div>
-                <p className="text-sm opacity-80">Total Contracts</p>
-                <h2 className="text-3xl font-bold">{data.contracts.length}</h2>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Dynamic Content Table */}
-        <div className={`p-6 rounded-2xl shadow-xl ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-          <h2 className="text-xl font-bold mb-4 capitalize">{activeTab} Management</h2>
-          <div className="overflow-x-auto">
-            {activeTab === 'users' && (
-              <table className="w-full text-left">
-                <thead>
-                  <tr className={`border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                    <th className="py-3 px-4">Name</th>
-                    <th className="py-3 px-4">Email</th>
-                    <th className="py-3 px-4">Role</th>
-                    <th className="py-3 px-4">Joined</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.users.map(u => (
-                    <tr key={u._id} className={`border-b ${darkMode ? 'border-gray-700 hover:bg-gray-750' : 'border-gray-100 hover:bg-gray-50'}`}>
-                      <td className="py-3 px-4">{u.name}</td>
-                      <td className="py-3 px-4">{u.email}</td>
-                      <td className="py-3 px-4 font-semibold capitalize text-indigo-500">{u.role}</td>
-                      <td className="py-3 px-4">{new Date(u.createdAt).toLocaleDateString()}</td>
-                      <td className="py-3 px-4 text-right">
-                        <button onClick={() => handleDeleteUser(u._id)} className="text-red-500 hover:text-red-700"><Trash2 size={18} /></button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-
-            {activeTab === 'properties' && (
-              <table className="w-full text-left">
-                <thead>
-                  <tr className={`border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                    <th className="py-3 px-4">Title</th>
-                    <th className="py-3 px-4">Location</th>
-                    <th className="py-3 px-4">Rent</th>
-                    <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.properties.map(p => (
-                    <tr key={p._id} className={`border-b ${darkMode ? 'border-gray-700 hover:bg-gray-750' : 'border-gray-100 hover:bg-gray-50'}`}>
-                      <td className="py-3 px-4 font-medium">{p.title}</td>
-                      <td className="py-3 px-4">{p.location?.address}</td>
-                      <td className="py-3 px-4">₹{p.price}</td>
-                      <td className="py-3 px-4 capitalize">{p.status}</td>
-                      <td className="py-3 px-4 text-right">
-                        <button onClick={() => handleDeleteProperty(p._id)} className="text-red-500 hover:text-red-700"><Trash2 size={18} /></button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-
-            {activeTab === 'contracts' && (
-              <table className="w-full text-left">
-                <thead>
-                  <tr className={`border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                    <th className="py-3 px-4">Tenant</th>
-                    <th className="py-3 px-4">Landlord</th>
-                    <th className="py-3 px-4">Amount</th>
-                    <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.contracts.map(c => (
-                    <tr key={c._id} className={`border-b ${darkMode ? 'border-gray-700 hover:bg-gray-750' : 'border-gray-100 hover:bg-gray-50'}`}>
-                      <td className="py-3 px-4">{c.tenant?.name || 'Unknown'}</td>
-                      <td className="py-3 px-4">{c.landlord?.name || 'Unknown'}</td>
-                      <td className="py-3 px-4">₹{c.rentAmount}</td>
-                      <td className="py-3 px-4 capitalize">{c.status}</td>
-                      <td className="py-3 px-4 text-right">
-                        <button onClick={() => handleDeleteContract(c._id)} className="text-red-500 hover:text-red-700"><Trash2 size={18} /></button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </div>
+          ) : (
+            <>
+              {activeTab === 'overview'    && <AdminOverview   analytics={data?.analytics}   setActiveTab={setActiveTab} />}
+              {activeTab === 'users'       && <AdminUsers      users={data?.users}            actions={actions} />}
+              {activeTab === 'properties'  && <AdminProperties properties={data?.properties}  actions={actions} />}
+              {activeTab === 'contracts'   && <AdminContracts  contracts={data?.contracts}    actions={actions} />}
+              {activeTab === 'maintenance' && <AdminMaintenance maintenance={data?.maintenance} analytics={data?.analytics} actions={actions} />}
+              {activeTab === 'payments'    && <AdminPayments   payments={data?.payments}      analytics={data?.analytics} />}
+              {activeTab === 'broadcast'   && <AdminBroadcast  inquiries={data?.inquiries}    broadcast={broadcast} />}
+            </>
+          )}
+        </main>
       </div>
     </div>
   );

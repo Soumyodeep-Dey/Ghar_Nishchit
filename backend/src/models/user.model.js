@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
   role: { type: String, enum: ["tenant", "landlord"], required: true },
   password: { type: String, required: true },
   profilePicture: { type: String, default: "" },
+  status: { type: String, enum: ["active", "suspended", "banned"], default: "active" },
   createdAt: { type: Date, default: Date.now }
 });
 

@@ -22,7 +22,7 @@ const propertySchema = new mongoose.Schema({
   amenities: { type: [String], default: [] }, // e.g., ['wifi', 'parking', 'ac', 'tv', 'gym', 'pool']
   postedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   available: { type: Boolean, default: true },
-  status: { type: String, enum: ['Available', 'Occupied', 'Maintenance'], default: 'Available' },
+  status: { type: String, enum: ['Available', 'Occupied', 'Maintenance', 'Pending'], default: 'Pending' },
   rating: { type: Number, min: 0, max: 5, default: 4.5 },
   trend: { type: String, enum: ['up', 'down'], default: null },
   contact: {
