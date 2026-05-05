@@ -152,7 +152,7 @@ function CustomerCard({ customer, darkMode }) {
         {customer.name.charAt(0)}
       </div>
       <p className={`font-semibold text-lg mb-2 ${darkMode ? 'text-cyan-300' : 'text-indigo-700'}`}>{customer.name}</p>
-      <blockquote className={`relative italic pl-6 before:content-['“'] before:absolute before:left-0 before:text-4xl ${darkMode ? 'text-blue-200 before:text-cyan-400' : 'text-gray-800 before:text-indigo-400'}`}>
+      <blockquote className={`relative italic pl-6 before:content-['"'] before:absolute before:left-0 before:text-4xl ${darkMode ? 'text-blue-200 before:text-cyan-400' : 'text-gray-800 before:text-indigo-400'}`}>
         {customer.feedback}
       </blockquote>
       <div className={`mt-4 flex items-center space-x-1 ${darkMode ? 'text-cyan-400' : 'text-yellow-400'}`}>
@@ -698,10 +698,10 @@ export default function Landing() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           <PricingCard
             title="Standard Listing"
-            price="₹ 499/listing"
+            price="₹ 499"
             features={[
-              "One-time fee per property",
-              "30-day listing validity",
+              "List 1 property",
+              "Subscription valid for 30 days",
               "Basic property analytics"
             ]}
             buttonClass={`px-4 py-2 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
@@ -710,11 +710,12 @@ export default function Landing() {
           />
           <PricingCard
             title="Featured Listing"
-            price="₹ 999/listing"
+            price="₹ 999"
             features={[
               "Boosted visibility in search",
               "60-day listing validity",
-              "Priority placement"
+              "Priority placement",
+              "List 5 properties per month"
             ]}
             buttonClass={`px-4 py-2 rounded transition ${darkMode ? 'bg-white text-cyan-700 hover:bg-gray-100' : 'bg-white text-emerald-600 hover:bg-gray-100'}`}
             onClick={() => showInfoToast('Please login first to choose a plan')}
@@ -727,7 +728,9 @@ export default function Landing() {
             features={[
               "Trust verification badge",
               "Enhanced credibility",
-              "One-time verification"
+              "One-time verification",
+              "Unlimited property listings per month",
+              "All features of Standard & Featured Listing"
             ]}
             buttonClass={`px-4 py-2 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
             onClick={() => showInfoToast('Please login first to choose a plan')}
