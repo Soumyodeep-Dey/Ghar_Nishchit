@@ -728,7 +728,9 @@ export default function Landing() {
             features={[
               "Trust verification badge",
               "Enhanced credibility",
-              "One-time verification"
+              "One-time verification",
+              "Unlimited property listings per month",
+              "All features of Standard & Featured Listing"
             ]}
             buttonClass={`px-4 py-2 rounded transition ${darkMode ? 'bg-cyan-400 text-blue-950 hover:bg-cyan-300' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
             onClick={() => showInfoToast('Please login first to choose a plan')}
