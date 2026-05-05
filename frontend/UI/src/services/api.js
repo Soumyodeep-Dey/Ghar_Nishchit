@@ -78,7 +78,7 @@ const api = {
 
     // -------------------------------------------------------------------------
     // Favourites (Tenant)
-    // getFavourites        — returns the current user’s favourites list
+    // getFavourites        — returns the current user's favourites list
     // getFavouriteProperties — alias used by TenantDashboard (same endpoint)
     // -------------------------------------------------------------------------
     getFavourites:           ()           => request('/favourites', { method: 'GET' }),
@@ -117,7 +117,7 @@ const api = {
     getPaymentStats:         ()          => request('/payments/stats', { method: 'GET' }),
 
     // -------------------------------------------------------------------------
-    // Payments — Razorpay Gateway
+    // Payments — Tenant Razorpay Gateway
     //
     // createRazorpayOrder  — Step 1: creates a Razorpay order on the backend.
     //   Returns { orderId, amount (paise), currency, paymentId, keyId }.
@@ -139,6 +139,38 @@ const api = {
             method: 'POST',
             body: JSON.stringify(data),  // { razorpay_order_id, razorpay_payment_id, razorpay_signature, paymentDbId, paymentMethod }
         }),
+
+    // -------------------------------------------------------------------------
+    // Payments — Landlord Razorpay Subscription Gateway
+    //
+    // createLandlordRazorpayOrder  — Step 1: creates a Razorpay order for a
+    //   landlord subscription plan. Returns { orderId, amount (paise),
+    //   currency, paymentId, keyId }.
+    //
+    // verifyLandlordRazorpayPayment — Step 2: verifies the HMAC-SHA256
+    //   signature and activates the plan in the DB.
+    //   Returns { message, payment }.
+    //
+    // getLandlordSubscriptionPayments — full payment history for the landlord.
+    // getLandlordSubscriptionStats    — summary stats (total spent, active plan).
+    // -------------------------------------------------------------------------
+    createLandlordRazorpayOrder: (data) =>
+        request('/landlord-payments/create-order', {
+            method: 'POST',
+            body: JSON.stringify(data),  // { planId, planName, amount (total incl. GST) }
+        }),
+
+    verifyLandlordRazorpayPayment: (data) =>
+        request('/landlord-payments/verify', {
+            method: 'POST',
+            body: JSON.stringify(data),  // { razorpay_order_id, razorpay_payment_id, razorpay_signature, paymentDbId, paymentMethod, planId, planName }
+        }),
+
+    getLandlordSubscriptionPayments: () =>
+        request('/landlord-payments', { method: 'GET' }),
+
+    getLandlordSubscriptionStats: () =>
+        request('/landlord-payments/stats', { method: 'GET' }),
 
     // -------------------------------------------------------------------------
     // Maintenance
