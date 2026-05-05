@@ -11,7 +11,7 @@ import DarkModeProvider from './DarkModeContext.jsx';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import Chatbot from '../../../Ai/Chatbot.jsx';
+import Chatbot from './Ai/Chatbot.jsx';
 
 const Landing = lazy(() => import('./components/landing'));
 const Login = lazy(() => import('./components/Auth/Login'));
@@ -33,6 +33,8 @@ const LandlordMaintenance = lazy(() => import('./components/Pages/LANDLORD/Landl
 const LandlordPayment = lazy(() => import('./components/Pages/LANDLORD/LandlordPayment'));
 const LandlordTenant = lazy(() => import('./components/Pages/LANDLORD/LandlordTenant'));
 const UpdateLandlordProfile = lazy(() => import('./components/Pages/LANDLORD/UpdateLandlordProfile'));
+
+const AdminDashboard = lazy(() => import('./components/Pages/AdminDashboard'));
 
 const AppLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-200">
@@ -171,6 +173,14 @@ export default function App() {
               element={
                 <ProtectedRoute requiredRole="landlord">
                   <UpdateLandlordProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminDashboard />
                 </ProtectedRoute>
               }
             />
