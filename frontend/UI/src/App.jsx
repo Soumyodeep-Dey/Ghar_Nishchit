@@ -34,6 +34,8 @@ const LandlordPayment = lazy(() => import('./components/Pages/LANDLORD/LandlordP
 const LandlordTenant = lazy(() => import('./components/Pages/LANDLORD/LandlordTenant'));
 const UpdateLandlordProfile = lazy(() => import('./components/Pages/LANDLORD/UpdateLandlordProfile'));
 
+const AdminDashboard = lazy(() => import('./components/Pages/AdminDashboard'));
+
 const AppLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-200">
     Loading...
@@ -171,6 +173,14 @@ export default function App() {
               element={
                 <ProtectedRoute requiredRole="landlord">
                   <UpdateLandlordProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminDashboard />
                 </ProtectedRoute>
               }
             />

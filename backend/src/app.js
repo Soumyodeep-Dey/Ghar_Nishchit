@@ -12,6 +12,7 @@ import notificationRoutes  from './routes/notification.routes.js';
 import paymentRoutes       from './routes/payment.routes.js';
 import visitRoutes         from './routes/visit.routes.js';
 import contractRoutes      from './routes/contract.routes.js';
+import adminRoutes         from './routes/admin.routes.js';
 import { handleWebhook }   from './controllers/payment.controller.js';
 dotenv.config();
 
@@ -47,6 +48,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/payments',      paymentRoutes);
 app.use('/api/visits',        visitRoutes);
 app.use('/api/contracts',     contractRoutes);
+app.use('/api/admin',         adminRoutes);
 
 app.use((err, _req, res, _next) => {
   console.error(err.stack);
