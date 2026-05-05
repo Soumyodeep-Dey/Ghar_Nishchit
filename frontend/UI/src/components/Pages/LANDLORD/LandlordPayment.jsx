@@ -256,6 +256,7 @@ const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete, dar
 
 // Subscription Plan Card Component
 const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular = false, darkMode }) => {
+  const [isHovered, setIsHovered] = useState(false);
   const isCurrentPlan = currentPlan?.id === plan.id;
   const canUpgrade = currentPlan && plan.tier > currentPlan.tier;
   const canDowngrade = currentPlan && plan.tier < currentPlan.tier;
@@ -336,29 +337,12 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-2 mb-2">
             <span className={`text-4xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'}`}>
-              {plan.isCustomPricing ? plan.monthlyPrice : `₹${plan.monthlyPrice}`}
+              ₹{plan.price.toLocaleString('en-IN')}
             </span>
-            {!plan.isCustomPricing && (
-              <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>
-                <div className="text-sm">/month</div>
-                <div className="text-xs">per property</div>
-              </div>
-            )}
           </div>
-
-          {plan.yearlyPrice && !plan.isCustomPricing && (
-            <div className="flex items-center justify-center space-x-2 text-sm">
-              <span className={`${darkMode ? 'text-blue-300' : 'text-gray-500'} line-through`}>
-                ₹{plan.monthlyPrice * 12}/year
-              </span>
-              <span className="text-emerald-400 font-semibold">
-                ₹{plan.yearlyPrice}/year
-              </span>
-              <span className="px-2 py-1 bg-emerald-500/20 rounded-full text-xs text-emerald-400">
-                Save ₹{(plan.monthlyPrice * 12 - plan.yearlyPrice)}
-              </span>
-            </div>
-          )}
+          <div className={`text-sm ${darkMode ? 'text-blue-300' : 'text-gray-500'}`}>
+            {plan.validity}
+          </div>
         </div>
 
         {/* Features */}
@@ -371,7 +355,7 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
               transition={{ delay: index * 0.1 }}
               className="flex items-center space-x-3"
             >
-              <div className="w-5 h-5 bg-emerald-500/20 rounded-full flex items-center justify-center">
+              <div className="w-5 h-5 bg-emerald-500/20 rounded-full flex items-center justify-center flex-shrink-0">
                 <Check className="w-3 h-3 text-emerald-400" />
               </div>
               <span className={`${darkMode ? 'text-blue-200' : 'text-gray-700'} text-sm`}>{feature}</span>
@@ -379,7 +363,7 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
           ))}
         </div>
 
-        {/* Limits */}
+        {/* Plan limits */}
         <div className={`${darkMode ? 'bg-slate-800/50' : 'bg-indigo-50/50'} rounded-xl p-4 mb-8`}>
           <div className="grid grid-cols-2 gap-4 text-center">
             <div>
@@ -420,22 +404,13 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
         >
           {isCurrentPlan
             ? 'Current Plan'
-            : plan.isCustomPricing
-              ? 'Contact Sales'
-              : canUpgrade
-                ? 'Upgrade Now'
-                : canDowngrade
-                  ? 'Downgrade'
-                  : 'Select Plan'
+            : canUpgrade
+              ? 'Upgrade Now'
+              : canDowngrade
+                ? 'Downgrade'
+                : 'Choose Plan'
           }
         </motion.button>
-
-        {/* Additional info */}
-        {plan.trialDays && !isCurrentPlan && (
-          <p className={`text-center ${darkMode ? 'text-cyan-100' : 'text-gray-500'} text-xs mt-3`}>
-            {plan.trialDays}-day free trial included
-          </p>
-        )}
       </div>
     </motion.div>
   );
@@ -592,7 +567,7 @@ const BillingSummary = ({ summary, onPayNow, darkMode }) => {
           <div>
             <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-2`}>Current Bill</h3>
             <p className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>
-              {summary.planName} • {summary.propertiesCount} properties
+              {summary.planName} • {summary.propertiesCount} {summary.propertiesCount === 1 ? 'property' : 'properties'}
             </p>
           </div>
 
@@ -625,7 +600,7 @@ const BillingSummary = ({ summary, onPayNow, darkMode }) => {
           )}
 
           <div className="flex justify-between">
-            <span className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Tax</span>
+            <span className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Tax (18% GST)</span>
             <span className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-semibold`}>₹{summary.tax.toFixed(2)}</span>
           </div>
 
@@ -785,11 +760,11 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment, darkMode }) => {
               </div>
             </motion.div>
 
-            {/* PayPal */}
+            {/* UPI */}
             <motion.div
               whileHover={{ scale: 1.02 }}
-              onClick={() => setSelectedMethod('paypal')}
-              className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedMethod === 'paypal'
+              onClick={() => setSelectedMethod('upi')}
+              className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedMethod === 'upi'
                 ? darkMode
                   ? 'border-cyan-400 bg-cyan-400/10'
                   : 'border-indigo-500 bg-indigo-500/10'
@@ -801,10 +776,10 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment, darkMode }) => {
               <div className="flex items-center space-x-3">
                 <Wallet className={`w-6 h-6 ${darkMode ? 'text-cyan-400' : 'text-indigo-500'}`} />
                 <div>
-                  <div className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-medium`}>PayPal</div>
-                  <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Pay with PayPal account</div>
+                  <div className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-medium`}>UPI</div>
+                  <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>PhonePe, GPay, Paytm</div>
                 </div>
-                {selectedMethod === 'paypal' && (
+                {selectedMethod === 'upi' && (
                   <Check className={`w-5 h-5 ${darkMode ? 'text-cyan-400' : 'text-indigo-500'} ml-auto`} />
                 )}
               </div>
@@ -828,7 +803,7 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment, darkMode }) => {
                   className={`w-full p-3 ${darkMode
                     ? 'bg-slate-700/50 border border-slate-600 text-cyan-100 placeholder-blue-300'
                     : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700 placeholder-gray-500'
-                    } rounded-lg focus:${darkMode ? 'border-cyan-400' : 'border-indigo-500'} focus:outline-none`}
+                    } rounded-lg focus:outline-none`}
                 />
               </div>
 
@@ -843,21 +818,21 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment, darkMode }) => {
                     className={`w-full p-3 ${darkMode
                       ? 'bg-slate-700/50 border border-slate-600 text-cyan-100 placeholder-blue-300'
                       : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700 placeholder-gray-500'
-                      } rounded-lg focus:${darkMode ? 'border-cyan-400' : 'border-indigo-500'} focus:outline-none`}
+                      } rounded-lg focus:outline-none`}
                   />
                 </div>
 
                 <div>
                   <label className={`block ${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm mb-2`}>CVV</label>
                   <input
-                    type="text"
-                    placeholder="123"
+                    type="password"
+                    placeholder="•••"
                     value={cardDetails.cvv}
                     onChange={(e) => setCardDetails(prev => ({ ...prev, cvv: e.target.value }))}
                     className={`w-full p-3 ${darkMode
                       ? 'bg-slate-700/50 border border-slate-600 text-cyan-100 placeholder-blue-300'
                       : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700 placeholder-gray-500'
-                      } rounded-lg focus:${darkMode ? 'border-cyan-400' : 'border-indigo-500'} focus:outline-none`}
+                      } rounded-lg focus:outline-none`}
                   />
                 </div>
               </div>
@@ -872,7 +847,7 @@ const PaymentModal = ({ isOpen, onClose, amount, onPayment, darkMode }) => {
                   className={`w-full p-3 ${darkMode
                     ? 'bg-slate-700/50 border border-slate-600 text-cyan-100 placeholder-blue-300'
                     : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700 placeholder-gray-500'
-                    } rounded-lg focus:${darkMode ? 'border-cyan-400' : 'border-indigo-500'} focus:outline-none`}
+                    } rounded-lg focus:outline-none`}
                 />
               </div>
             </motion.div>
@@ -967,7 +942,7 @@ const NotificationToast = ({ notifications, onRemove, darkMode }) => {
 
 // Add Payment Method Modal Component
 const AddPaymentMethodModal = ({ isOpen, onClose, onAdd, darkMode }) => {
-  const [paymentType, setPaymentType] = useState('card'); // 'card' or 'upi'
+  const [paymentType, setPaymentType] = useState('card');
   const [cardDetails, setCardDetails] = useState({ number: '', expiry: '', cvv: '', name: '' });
   const [upiId, setUpiId] = useState('');
 
@@ -976,7 +951,7 @@ const AddPaymentMethodModal = ({ isOpen, onClose, onAdd, darkMode }) => {
   const handleAdd = () => {
     if (paymentType === 'card') {
       onAdd({
-        type: 'visa', // Default to visa for now
+        type: 'visa',
         ...cardDetails
       });
     } else {
@@ -1062,7 +1037,7 @@ const AddPaymentMethodModal = ({ isOpen, onClose, onAdd, darkMode }) => {
                   </div>
                   <div>
                     <label className={`block ${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm mb-2`}>CVV</label>
-                    <input type="text" placeholder="123" onChange={e => setCardDetails({ ...cardDetails, cvv: e.target.value })} className={`w-full p-3 ${darkMode ? 'bg-slate-700/50 border border-slate-600 text-cyan-100' : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700'} rounded-lg focus:outline-none`} />
+                    <input type="password" placeholder="•••" onChange={e => setCardDetails({ ...cardDetails, cvv: e.target.value })} className={`w-full p-3 ${darkMode ? 'bg-slate-700/50 border border-slate-600 text-cyan-100' : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700'} rounded-lg focus:outline-none`} />
                   </div>
                 </div>
                 <div>
@@ -1115,74 +1090,67 @@ const LandlordPayment = () => {
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
   const { notifications, addNotification, removeNotification } = useNotification();
 
-  // Sample data
+  // ─── Subscription Plans (synced with landing page pricing) ───────────────────
+  // Source: frontend/UI/src/components/landing.jsx  →  "For Landlords" section
   const [subscriptionPlans] = useState([
     {
       id: 1,
-      name: 'Starter',
-      description: 'Perfect for individual landlords',
-      monthlyPrice: 29,
-      yearlyPrice: 290,
-      propertyLimit: '1-5',
+      name: 'Standard Listing',
+      description: 'Perfect for individual landlords starting out',
+      price: 499,
+      validity: 'Subscription valid for 30 days',
+      propertyLimit: '1',
       supportLevel: 'Email',
       tier: 1,
       icon: <Building2 className="w-8 h-8 text-white" />,
       features: [
-        'Up to 5 properties',
-        'Basic tenant management',
-        'Payment tracking',
+        'List 1 property',
+        'Subscription valid for 30 days',
+        'Basic property analytics',
         'Email support',
-        'Responsive web access',
-        'Document storage (1GB)'
-      ],
-      trialDays: 14
+        'Responsive web access'
+      ]
     },
     {
       id: 2,
-      name: 'Professional',
-      description: 'Ideal for growing portfolios',
-      monthlyPrice: 59,
-      yearlyPrice: 590,
-      propertyLimit: '6-25',
+      name: 'Featured Listing',
+      description: 'Best for landlords who want maximum visibility',
+      price: 999,
+      validity: '60-day listing validity',
+      propertyLimit: '5/mo',
       supportLevel: 'Priority',
       tier: 2,
       icon: <Crown className="w-8 h-8 text-white" />,
       features: [
-        'Up to 25 properties',
-        'Advanced analytics',
-        'Automated rent collection',
-        'Priority email/chat support',
-        'Document storage (10GB)',
-        'Financial reporting',
-        'Maintenance tracking'
-      ],
-      trialDays: 14
+        'Boosted visibility in search',
+        '60-day listing validity',
+        'Priority placement',
+        'List 5 properties per month',
+        'Priority support'
+      ]
     },
     {
       id: 3,
-      name: 'Enterprise',
-      description: 'For large agencies & portfolios',
-      isCustomPricing: true,
-      monthlyPrice: 'Custom',
-      yearlyPrice: null,
-      propertyLimit: '50+',
-      supportLevel: 'Account Manager',
+      name: 'Verified Badge',
+      description: 'For serious landlords with large portfolios',
+      price: 1499,
+      validity: 'One-time verification + monthly billing',
+      propertyLimit: 'Unlimited',
+      supportLevel: 'Premium',
       tier: 3,
       icon: <Trophy className="w-8 h-8 text-white" />,
       features: [
-        'Unlimited property listings',
-        'Bulk tenant onboarding',
-        'Multi-user team access',
-        'Premium priority support',
-        'Advanced financial exports',
-        '100GB Document storage',
-        'Dedicated account manager'
-      ],
-      trialDays: null
+        'Trust verification badge',
+        'Enhanced credibility with tenants',
+        'One-time verification',
+        'Unlimited property listings per month',
+        'All features of Standard & Featured Listing',
+        'Premium priority support'
+      ]
     }
   ]);
 
-  const [currentPlan] = useState(subscriptionPlans[1]); // Professional plan
+  const [currentPlan] = useState(subscriptionPlans[1]); // Featured Listing as default
 
   const [paymentMethods, setPaymentMethods] = useLocalStorage('landlord_payment_methods', [
     {
@@ -1242,82 +1210,65 @@ const LandlordPayment = () => {
 
   const paymentHistory = useMemo(() => {
     if (!properties || properties.length === 0) return [];
-    
-    // Generate subscription fee items dynamically based on the landlord's actual properties
+
     return properties.map((prop, idx) => ({
       id: idx + 1,
       description: `Platform Subscription Fee - ${prop.title || 'Property'}`,
-      amount: 50,
+      amount: currentPlan?.price || 499,
       date: `${getCurrentYear()}-08-01`,
       status: prop.status === 'Occupied' ? 'completed' : 'pending',
       method: 'Bank Transfer',
       invoiceId: `INV-${getCurrentYear()}-${1000 + idx}`
     }));
-  }, [properties]);
+  }, [properties, currentPlan]);
 
   const billingSummary = useMemo(() => {
+    const planPrice = currentPlan?.price || 499;
+    const tax = planPrice * 0.18; // 18% GST
     return {
-      planName: 'Platform Subscription',
+      planName: currentPlan?.name || 'Standard Listing',
       propertiesCount: properties.length,
-      subscriptionFee: properties.length * 50, // say ₹50 per property fee to platform
+      subscriptionFee: planPrice,
       additionalFees: 0,
       discount: 0,
-      tax: (properties.length * 50) * 0.1, // 10% tax
-      totalAmount: (properties.length * 50) * 1.1,
+      tax: parseFloat(tax.toFixed(2)),
+      totalAmount: parseFloat((planPrice + tax).toFixed(2)),
       dueDate: `${getCurrentYear()}-09-01`
     };
-  }, [properties]);
+  }, [properties, currentPlan]);
 
   // Calculate stats
-  const stats = useMemo(() => {
-    const totalPaid = paymentHistory
+  const totalPaid = useMemo(() => {
+    return paymentHistory
       .filter(p => p.status === 'completed')
       .reduce((sum, p) => sum + p.amount, 0);
+  }, [paymentHistory]);
 
-    const avgMonthlySpend = totalPaid / Math.max(paymentHistory.length, 1);
-    const nextPaymentDate = new Date(billingSummary.dueDate);
-    const daysUntilPayment = Math.ceil((nextPaymentDate - new Date()) / (1000 * 60 * 60 * 24));
+  const avgMonthlySpend = useMemo(() => {
+    return totalPaid / Math.max(paymentHistory.length, 1);
+  }, [totalPaid, paymentHistory]);
 
-    return {
-      totalPaid,
-      avgMonthlySpend,
-      nextPaymentDate: nextPaymentDate.toLocaleDateString(),
-      daysUntilPayment,
-      activeSubscription: currentPlan?.name || 'None'
-    };
-  }, [paymentHistory, billingSummary, currentPlan]);
+  const daysUntilPayment = useMemo(() => {
+    return Math.ceil((new Date(billingSummary.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
+  }, [billingSummary]);
+
+  // Animated counters — called at top-level (Rules of Hooks)
+  const animatedTotalPaid = useCountUp(totalPaid, 2000, 0);
+  const animatedAvgSpend = useCountUp(avgMonthlySpend, 2000, 0);
 
   // Event handlers
   const handleSelectPlan = (plan) => {
-    if (plan.isCustomPricing) {
-      addNotification({
-        type: 'info',
-        title: 'Contact Sales',
-        message: `Please contact our sales team to discuss custom pricing for the ${plan.name} plan.`
-      });
-      return;
-    }
-    setPaymentAmount(plan.monthlyPrice);
+    setPaymentAmount(plan.price);
     setShowPaymentModal(true);
   };
 
   const handleUpgradePlan = (plan) => {
-    if (plan.isCustomPricing) {
-      addNotification({
-        type: 'info',
-        title: 'Contact Sales',
-        message: `Please contact our sales team to upgrade to the ${plan.name} plan.`
-      });
-      return;
-    }
-    const upgradeCost = plan.monthlyPrice - (currentPlan?.monthlyPrice || 0);
-
+    const upgradeCost = plan.price - (currentPlan?.price || 0);
     addNotification({
       type: 'info',
       title: 'Plan Upgrade',
       message: `Upgrading to ${plan.name} will cost an additional ₹${upgradeCost.toFixed(2)}`
     });
-
     setPaymentAmount(upgradeCost);
     setShowPaymentModal(true);
   };
@@ -1357,7 +1308,7 @@ const LandlordPayment = () => {
       ...method,
       isDefault: false
     };
-    if (method.type === 'visa') { // or other card types
+    if (method.type === 'visa') {
       newMethod.last4 = method.number.slice(-4);
       newMethod.holderName = method.name;
       newMethod.expiryDate = method.expiry;
@@ -1449,7 +1400,7 @@ const LandlordPayment = () => {
                   <IndianRupee className="w-6 h-6 text-white" />
                 </motion.div>
                 <div className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>
-                  ₹{Math.round(useCountUp(stats.totalPaid, 2000, 0))}
+                  ₹{Math.round(animatedTotalPaid)}
                 </div>
                 <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Total Paid</div>
               </AnimatedCard>
@@ -1469,7 +1420,7 @@ const LandlordPayment = () => {
                   <TrendingUp className="w-6 h-6 text-white" />
                 </motion.div>
                 <div className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>
-                  ₹{Math.round(useCountUp(stats.avgMonthlySpend, 2000, 0))}
+                  ₹{Math.round(animatedAvgSpend)}
                 </div>
                 <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Avg Monthly</div>
               </AnimatedCard>
@@ -1491,7 +1442,7 @@ const LandlordPayment = () => {
                 >
                   <Crown className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className={`text-lg font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>{stats.activeSubscription}</div>
+                <div className={`text-lg font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>{currentPlan?.name || 'None'}</div>
                 <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Current Plan</div>
               </AnimatedCard>
 
@@ -1509,7 +1460,7 @@ const LandlordPayment = () => {
                 >
                   <Calendar className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>{stats.daysUntilPayment}</div>
+                <div className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>{daysUntilPayment}</div>
                 <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Days to Payment</div>
               </AnimatedCard>
 
@@ -1645,67 +1596,35 @@ const LandlordPayment = () => {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <AnimatedCard darkMode={darkMode}>
-                    <div className="text-center mb-12">
-                      <h2 className={`text-3xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-4`}>Choose Your Plan</h2>
-                      <p className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} max-w-2xl mx-auto`}>
-                        Select the perfect plan for your property management needs
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {subscriptionPlans.map((plan, index) => (
+                      <SubscriptionPlanCard
+                        key={plan.id}
+                        plan={plan}
+                        currentPlan={currentPlan}
+                        onSelect={handleSelectPlan}
+                        onUpgrade={handleUpgradePlan}
+                        popular={index === 1}
+                        darkMode={darkMode}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Plan comparison note */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                    className={`mt-8 p-6 rounded-2xl ${darkMode ? 'bg-slate-800/50 border border-slate-700' : 'bg-indigo-50/50 border border-indigo-200'}`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <Info className={`w-5 h-5 ${darkMode ? 'text-cyan-400' : 'text-indigo-500'} flex-shrink-0`} />
+                      <p className={`text-sm ${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>
+                        All plans include access to the Ghar_Nishchit dashboard. Prices are inclusive of 18% GST.
+                        Upgrade or downgrade your plan at any time. The <strong>Verified Badge</strong> plan includes a one-time identity verification.
                       </p>
                     </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                      {subscriptionPlans.map((plan, index) => (
-                        <SubscriptionPlanCard
-                          key={plan.id}
-                          plan={plan}
-                          currentPlan={currentPlan}
-                          onSelect={handleSelectPlan}
-                          onUpgrade={handleUpgradePlan}
-                          popular={index === 1}
-                          darkMode={darkMode}
-                        />
-                      ))}
-                    </div>
-
-                    {/* Plan Comparison */}
-                    <div className="mt-16">
-                      <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-8 text-center`}>Feature Comparison</h3>
-
-                      <div className="overflow-x-auto">
-                        <table className="w-full">
-                          <thead>
-                            <tr className={`border-b ${darkMode ? 'border-slate-700' : 'border-indigo-200'}`}>
-                              <th className={`text-left py-4 ${darkMode ? 'text-blue-200' : 'text-gray-600'} font-semibold`}>Feature</th>
-                              {subscriptionPlans.map((plan) => (
-                                <th key={plan.id} className={`text-center py-4 ${darkMode ? 'text-blue-200' : 'text-gray-600'} font-semibold`}>
-                                  {plan.name}
-                                </th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {[
-                              { feature: 'Properties', values: ['1-5', '6-25', '50+'] },
-                              { feature: 'Storage', values: ['1GB', '10GB', '100GB'] },
-                              { feature: 'Support', values: ['Email', 'Priority', 'Account Manager'] },
-                              { feature: 'Analytics', values: ['Basic', 'Advanced', 'Custom'] },
-                              { feature: 'Bulk Onboarding', values: ['❌', '❌', '✅'] },
-                              { feature: 'Team Access', values: ['❌', '❌', '✅'] }
-                            ].map((row, index) => (
-                              <tr key={index} className={`border-b ${darkMode ? 'border-slate-800 hover:bg-slate-800/50' : 'border-indigo-100 hover:bg-indigo-50/50'}`}>
-                                <td className={`py-4 ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-medium`}>{row.feature}</td>
-                                {row.values.map((value, valueIndex) => (
-                                  <td key={valueIndex} className={`py-4 text-center ${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>
-                                    {value}
-                                  </td>
-                                ))}
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </AnimatedCard>
+                  </motion.div>
                 </motion.div>
               )}
 
@@ -1716,55 +1635,40 @@ const LandlordPayment = () => {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.5 }}
+                  className="space-y-6"
                 >
-                  <AnimatedCard darkMode={darkMode}>
-                    <div className="flex justify-between items-center mb-8">
-                      <div>
-                        <h2 className={`text-3xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-2`}>Payment Methods</h2>
-                        <p className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Manage your saved payment methods</p>
-                      </div>
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'}`}>Saved Payment Methods</h3>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setShowAddPaymentModal(true)}
+                      className={`flex items-center space-x-2 px-4 py-2 ${darkMode
+                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white'
+                        : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white'
+                        } rounded-xl font-semibold`}
+                    >
+                      <Plus className="w-5 h-5" />
+                      <span>Add Method</span>
+                    </motion.button>
+                  </div>
 
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => setShowAddPaymentModal(true)}
-                        className={`px-6 py-3 ${darkMode
-                          ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700'
-                          : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700'
-                          } text-white rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2`}
-                      >
-                        <Plus className="w-5 h-5" />
-                        <span>Add Payment Method</span>
-                      </motion.button>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {paymentMethods.map((method) => (
-                        <PaymentMethodCard
-                          key={method.id}
-                          method={method}
-                          isSelected={selectedPaymentMethod === method.id}
-                          onSelect={setSelectedPaymentMethod}
-                          onEdit={(method) => {
-                            addNotification({
-                              type: 'info',
-                              title: 'Edit Payment Method',
-                              message: `Editing ${method.type} ending in ${method.last4 || ''}`
-                            });
-                          }}
-                          onDelete={(methodId) => {
-                            setPaymentMethods(prev => prev.filter(m => m.id !== methodId));
-                            addNotification({
-                              type: 'success',
-                              title: 'Payment Method Deleted',
-                              message: 'Payment method has been removed successfully'
-                            });
-                          }}
-                          darkMode={darkMode}
-                        />
-                      ))}
-                    </div>
-                  </AnimatedCard>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {paymentMethods.map((method) => (
+                      <PaymentMethodCard
+                        key={method.id}
+                        method={method}
+                        isSelected={selectedPaymentMethod === method.id}
+                        onSelect={setSelectedPaymentMethod}
+                        onEdit={(m) => addNotification({ type: 'info', title: 'Edit Method', message: `Editing ${m.type} ending in ${m.last4 || m.id}` })}
+                        onDelete={(id) => {
+                          setPaymentMethods(prev => prev.filter(m => m.id !== id));
+                          addNotification({ type: 'success', title: 'Method Removed', message: 'Payment method removed successfully' });
+                        }}
+                        darkMode={darkMode}
+                      />
+                    ))}
+                  </div>
                 </motion.div>
               )}
 
@@ -1775,56 +1679,27 @@ const LandlordPayment = () => {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.5 }}
+                  className="space-y-4"
                 >
-                  <AnimatedCard darkMode={darkMode}>
-                    <div className="flex justify-between items-center mb-8">
-                      <div>
-                        <h2 className={`text-3xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-2`}>Payment History</h2>
-                        <p className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>View all your past transactions</p>
-                      </div>
+                  <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-6`}>Payment History</h3>
 
-                      <div className="flex space-x-4">
-                        <div className="relative">
-                          <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${darkMode ? 'text-blue-300' : 'text-gray-500'}`} />
-                          <input
-                            type="text"
-                            placeholder="Search payments..."
-                            className={`pl-10 pr-4 py-2 ${darkMode
-                              ? 'bg-slate-700/50 border border-slate-600 text-cyan-100 placeholder-blue-300'
-                              : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700 placeholder-gray-500'
-                              } rounded-lg focus:${darkMode ? 'border-cyan-400' : 'border-indigo-500'} focus:outline-none`}
-                          />
-                        </div>
-
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 transition-colors flex items-center space-x-2"
-                        >
-                          <Download className="w-4 h-4" />
-                          <span>Export</span>
-                        </motion.button>
-                      </div>
+                  {paymentHistory.length === 0 ? (
+                    <div className={`text-center py-16 ${darkMode ? 'text-blue-200' : 'text-gray-500'}`}>
+                      <Receipt className="w-12 h-12 mx-auto mb-4 opacity-40" />
+                      <p className="text-lg">No payment history yet.</p>
+                      <p className="text-sm mt-2">Your transaction history will appear here once you have active properties.</p>
                     </div>
-
-                    <div className="space-y-4">
-                      {paymentHistory.map((payment, index) => (
-                        <motion.div
-                          key={payment.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                        >
-                          <PaymentHistoryItem
-                            payment={payment}
-                            onDownloadReceipt={handleDownloadReceipt}
-                            onViewDetails={handleViewDetails}
-                            darkMode={darkMode}
-                          />
-                        </motion.div>
-                      ))}
-                    </div>
-                  </AnimatedCard>
+                  ) : (
+                    paymentHistory.map((payment) => (
+                      <PaymentHistoryItem
+                        key={payment.id}
+                        payment={payment}
+                        onDownloadReceipt={handleDownloadReceipt}
+                        onViewDetails={handleViewDetails}
+                        darkMode={darkMode}
+                      />
+                    ))
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -1832,7 +1707,7 @@ const LandlordPayment = () => {
         </main>
       </div>
 
-      {/* Payment Modal */}
+      {/* Modals */}
       <AnimatePresence>
         {showPaymentModal && (
           <PaymentModal
@@ -1845,7 +1720,6 @@ const LandlordPayment = () => {
         )}
       </AnimatePresence>
 
-      {/* Add Payment Method Modal */}
       <AnimatePresence>
         {showAddPaymentModal && (
           <AddPaymentMethodModal
@@ -1857,7 +1731,7 @@ const LandlordPayment = () => {
         )}
       </AnimatePresence>
 
-      {/* Notifications */}
+      {/* Notification Toast */}
       <NotificationToast
         notifications={notifications}
         onRemove={removeNotification}
