@@ -1,8 +1,14 @@
 // Minimal API service for frontend to call backend endpoints
-// Resolve base URL in browser-safe way. Priority: window.__env.REACT_APP_API_BASE -> VITE_API_BASE -> localhost:3000/api
+// Resolve base URL in browser-safe way. Priority:
+//   window.__env.REACT_APP_API_BASE -> VITE_API_BASE -> dev: same-origin `/api` (Vite proxy) -> prod: http://localhost:5000
+const isViteDev =
+    typeof import.meta !== 'undefined' &&
+    import.meta.env &&
+    import.meta.env.DEV === true;
+
 const RAW_BASE = (typeof window !== 'undefined' && window.__env && window.__env.REACT_APP_API_BASE)
     || (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE)
-    || 'http://localhost:3000/api';
+    || (isViteDev ? '' : 'http://localhost:5000');
 
 // Normalize base to always include /api at the end, and no trailing slash
 const BASE = (() => {

@@ -28,7 +28,14 @@ export default defineConfig(({ mode }) => {
     server: {
       fs: {
         allow: ['../..']
-      }
+      },
+      // Dev: browser calls same origin `/api/*`; Vite forwards to the Express app (default port 5000).
+      proxy: {
+        '/api': {
+          target: 'http://localhost:5000',
+          changeOrigin: true,
+        },
+      },
     },
     build: {
       rollupOptions: {
