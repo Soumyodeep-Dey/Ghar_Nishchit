@@ -30,6 +30,7 @@ app.use(
 // Razorpay webhook MUST receive a raw Buffer for HMAC verification.
 // Keep this route BEFORE express.json(), but mount all other payment routes AFTER.
 app.post('/api/payments/webhook', express.raw({ type: 'application/json' }), handleWebhook);
+app.post('/api/landlord-payments/webhook', express.raw({ type: 'application/json' }), handleLandlordWebhook);
 
 // Global JSON + URL-encoded body parsing for all other routes
 app.use(express.json({ limit: '50mb' }));
