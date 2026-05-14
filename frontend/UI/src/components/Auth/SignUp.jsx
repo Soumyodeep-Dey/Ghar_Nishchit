@@ -90,7 +90,11 @@ export default function SignUp() {
         body: JSON.stringify(formData),
       });
 
-      if (!response.ok) throw new Error("Registration failed.");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Registration failed.");
+      }
+      
       const data = await response.json();
       const { token, user } = data;
       localStorage.setItem("token", token);
@@ -104,7 +108,7 @@ export default function SignUp() {
       }, 1000);
     } catch (err) {
       console.error(err);
-      showErrorToast("Error during registration.");
+      showErrorToast(err.message || "Error during registration.");
     } finally {
       setLoading(false);
     }
