@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react';
-import p1 from '../../assets/p1.jpg';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowLeft, Home, Sparkles } from 'lucide-react';
 import { useDarkMode } from '../../useDarkMode.js';
 import { signInWithGoogle, handleGoogleRedirectResult } from '../../firebase.js';
 import { showSuccessToast, showErrorToast } from '../../utils/toast.jsx';
 
 const GoogleIcon = () => (
   <span
-    className="bg-white rounded-full flex items-center justify-center"
-    style={{ width: 26, height: 26, boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}
+    className="bg-white rounded-full flex items-center justify-center p-1 shadow-sm"
+    style={{ width: 24, height: 24 }}
   >
-    <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+    <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
       <g>
         <path fill="#4285F4" d="M43.6 20.5h-1.9V20H24v8h11.3c-1.6 4.3-5.7 7-11.3 7-6.6 0-12-5.4-12-12s5.4-12 12-12c2.7 0 5.2.9 7.2 2.5l6-6C34.1 5.1 29.3 3 24 3 12.9 3 4 11.9 4 23s8.9 20 20 20c11 0 19.7-8 19.7-20 0-1.3-.1-2.7-.3-4z" />
         <path fill="#34A853" d="M6.3 14.7l6.6 4.8C14.3 16.1 18.7 13 24 13c2.7 0 5.2.9 7.2 2.5l6-6C34.1 5.1 29.3 3 24 3 15.3 3 7.9 8.6 6.3 14.7z" />
@@ -27,12 +26,13 @@ export default function Login() {
   const { darkMode } = useDarkMode();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const [loading, setLoading] = useState(false);
 
   // Welcome overlay animation state
   const [welcomeOut, setWelcomeOut] = useState(false);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setWelcomeOut(true), 900);
+    const timeout = setTimeout(() => setWelcomeOut(true), 1200);
     return () => clearTimeout(timeout);
   }, []);
 
@@ -41,7 +41,6 @@ export default function Login() {
       const user = await handleGoogleRedirectResult();
       if (user) {
         showSuccessToast(`Welcome back, ${user.displayName || user.email}!`);
-        // Check user role and redirect accordingly
         const userRole = (user && (user.role || (user.roles && user.roles[0]))) || '';
         if (userRole.toLowerCase() === 'tenant') {
           navigate('/tenant');
@@ -59,258 +58,221 @@ export default function Login() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     const { email, password } = formData;
+
     if (!email || !password) {
-      showErrorToast('Please fill in all fields.');
+      showErrorToast("Please fill in all fields.");
       return;
     }
-    try {
-      const apiUrl = `${import.meta.env.VITE_BACKEND_URL}/api/auth/login`;
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      if (!response.ok) throw new Error('Login failed');
-      const { token, user } = await response.json();
-      console.log('Login response user:', user);
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      showSuccessToast('Login successful! Redirecting...');
-      const userRole = (user && (user.role || (user.roles && user.roles[0]))) || '';
-      setTimeout(() => {
-        if (userRole.toLowerCase() === 'tenant') {
-          navigate('/tenant');
-        } else if (userRole.toLowerCase() === 'landlord') {
-          navigate('/landlord');
-        } else {
-          navigate('/'); // or other route for non-tenants
+
+    setLoading(true);
+    const apiUrl = `${import.meta.env.VITE_BACKEND_URL}/api/auth/login`;
+
+    // EXACT mirror of original logic to ensure backend compatibility
+    fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Login failed.");
         }
-      }, 1000);
-    } catch (err) {
-      console.error(err);
-      showErrorToast('Invalid credentials.');
-    }
+        return response.json();
+      })
+      .then((data) => {
+        const { token, user } = data;
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+        showSuccessToast("Login successful!");
+        const userRole = user.role || (user.roles && user.roles[0]) || '';
+        setTimeout(() => {
+          if (userRole.toLowerCase() === 'tenant') {
+            navigate('/tenant');
+          } else if (userRole.toLowerCase() === 'landlord') {
+            navigate('/landlord');
+          } else {
+            navigate('/');
+          }
+        }, 1000);
+      })
+      .catch((err) => {
+        console.error("Login Error Details:", err);
+        showErrorToast("Error during login. Please check credentials.");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   return (
-    <div
-      className={`min-h-screen flex items-center justify-center px-2 sm:px-4 ${darkMode
-        ? 'bg-gray-950'
-        : 'bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100'
-        }`}
-    >
-      <div
-        className={`relative flex flex-col md:flex-row rounded-2xl shadow-2xl overflow-hidden max-w-lg sm:max-w-xl md:max-w-3xl w-full transition-colors duration-300
-        ${darkMode ? 'bg-gray-900' : 'bg-white'}
-        `}
-      >
-        {/* Overlay: Always shown, covering whole UI at first */}
-        <div
-          className={`
-            absolute inset-0 z-30 flex flex-col justify-center items-center
-            bg-gradient-to-br from-indigo-600 to-pink-500 text-white
-            transition-all duration-700 ease-in-out
-            ${welcomeOut ? '-translate-x-full opacity-0 pointer-events-none' : 'translate-x-0 opacity-100'}
-            rounded-2xl
-          `}
-          style={{
-            boxShadow: welcomeOut ? 'none' : '0 10px 40px rgba(0,0,0,0.2)',
-          }}
-        >
-          <h2 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-4">Welcome Back!</h2>
-          <p className="mb-2 text-sm sm:mb-4 sm:text-base">Trusted by 10,000+ users</p>
-          <img src={p1} alt="Login" className="rounded-xl shadow-lg w-40 h-28 sm:w-48 sm:h-32 object-cover mt-2 sm:mt-4" />
-        </div>
+    <div className={`min-h-screen flex items-center justify-center relative overflow-hidden transition-colors duration-500 ${darkMode ? 'bg-slate-950' : 'bg-[#fafaf9]'}`}>
+      {/* Decorative Background Elements */}
+      <div className="absolute inset-0 opacity-[0.4] dark:opacity-[0.15]" style={{ backgroundImage: 'radial-gradient(#d97706 0.5px, transparent 0.5px)', backgroundSize: '24px 24px' }}></div>
+      <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-amber-400/20 rounded-full blur-[120px] pointer-events-none animate-pulse"></div>
+      <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-600/10 rounded-full blur-[100px] pointer-events-none"></div>
 
-        {/* Back to Landing Page Button */}
-        <Link
-          to="/"
-          className={`absolute top-4 left-4 z-40 flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full font-semibold shadow transition-all duration-300 hover:scale-105 ${darkMode
-            ? 'bg-slate-800 text-cyan-400 hover:bg-slate-700'
-            : 'bg-white text-indigo-600 hover:bg-indigo-50'
-            }`}
-          aria-label="Back to Landing Page"
-        >
-          <ArrowLeft size={18} />
-          <span className="hidden sm:inline">Back</span>
-        </Link>
+      <div className="container max-w-5xl mx-auto px-4 relative z-10 py-12">
+        <div className={`flex flex-col lg:flex-row rounded-[2.5rem] shadow-[0_40px_100px_rgba(0,0,0,0.1)] overflow-hidden transition-all duration-500 border ${darkMode ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-100'}`}>
+          
+          {/* Left Panel: Brand & Welcome */}
+          <div className={`lg:w-5/12 relative p-12 flex flex-col justify-between overflow-hidden ${darkMode ? 'bg-slate-800' : 'bg-[#fafaf9]'}`}>
+            <div className="absolute inset-0 opacity-[0.2]" style={{ backgroundImage: 'radial-gradient(#d97706 1px, transparent 1px)', backgroundSize: '16px 16px' }}></div>
+            
+            {/* Back Button */}
+            <Link to="/" className={`relative z-10 flex items-center gap-2 group transition-colors ${darkMode ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}>
+              <div className={`p-2 rounded-xl transition-colors ${darkMode ? 'bg-slate-700' : 'bg-white shadow-sm'}`}>
+                <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+              </div>
+              <span className="font-black text-xs uppercase tracking-widest">Back to Home</span>
+            </Link>
 
-        {/* WELCOME/TRUST BANNER (always visible, position varies) */}
-        {/* MOBILE: On top. DESKTOP: On left */}
-        <div
-          className={`flex md:flex-col items-center justify-center w-full md:w-1/2
-           px-6 py-7 sm:p-10 gap-3 sm:gap-4
-           bg-gradient-to-br from-indigo-600 to-pink-500 text-white
-           ${darkMode ? '' : ''}
-           md:rounded-none md:rounded-l-2xl
-           ${/* Show for mobile (block), hide for md+ since welcome info is in left */''}
-           md:flex
-           ${/* On mobile, only show above login form when overlay gone */''}
-           ${welcomeOut ? 'flex md:flex' : 'hidden md:flex'}
-           md:relative md:z-0 md:translate-x-0 md:opacity-100
-           md:shadow-none
-           rounded-t-2xl md:rounded-2xl
-          `}
-        >
-          {/* Only show in mobile mode when overlay gone */}
-          <div className="flex flex-col items-center w-full">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold">Welcome Back!</h2>
-            <p className="mb-2 text-xs sm:text-base">Trusted by 10,000+ users</p>
-            <img src={p1} alt="Login" className="rounded-xl shadow-lg w-32 h-20 sm:w-48 sm:h-32 object-cover mt-2" />
-          </div>
-        </div>
-
-        {/* LOGIN FORM */}
-        <div
-          className="w-full md:w-1/2 p-6 sm:p-8 flex flex-col justify-center"
-        >
-          {/* Mobile only: add top gap below trust */}
-          <div className="block md:hidden h-4" />
-          <h2
-            className={`text-xl sm:text-2xl font-bold mb-2 ${darkMode ? 'text-gray-200' : 'text-indigo-700'
-              }`}
-          >
-            Login to Your Account
-          </h2>
-          <p
-            className={`mb-4 sm:mb-6 ${darkMode ? 'text-gray-400' : 'text-gray-500'
-              }`}
-          >
-            Access your dashboard and manage your rentals.
-          </p>
-
-          {/* Social Login */}
-          <button
-            className={`w-full flex items-center justify-center gap-2 py-2 rounded mb-3 sm:mb-4 font-semibold text-sm sm:text-base transition-transform duration-300 hover:scale-105 hover:shadow-lg
-    ${darkMode
-                ? 'bg-white text-gray-800 hover:bg-gray-100 border border-cyan-700'
-                : 'bg-white text-gray-800 hover:bg-gray-100 border border-gray-200'
-              }`}
-            type="button"
-            onClick={signInWithGoogle}
-          >
-            <GoogleIcon />
-            <span>Login with Google</span>
-          </button>
-          <div className="flex items-center my-2 sm:my-4">
-            <hr
-              className={`flex-grow ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}
-            />
-            <span className={`mx-2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>or</span>
-            <hr
-              className={`flex-grow ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}
-            />
-          </div>
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div>
-              <label
-                htmlFor="email"
-                className={`flex items-center gap-1 font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'
-                  }`}
-              >
-                <Mail size={18} /> Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                autoComplete="email"
-                value={formData.email}
-                onChange={handleChange}
-                className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-sm transition-shadow duration-300 hover:shadow-lg ${darkMode
-                  ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-400'
-                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                  }`}
-                placeholder="you@example.com"
-                required
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="password"
-                className={`flex items-center gap-1 font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'
-                  }`}
-              >
-                <Lock size={18} /> Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  id="password"
-                  name="password"
-                  autoComplete="current-password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-sm transition-shadow duration-300 hover:shadow-lg ${darkMode
-                    ? 'bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-400'
-                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                    }`}
-                  placeholder="********"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${darkMode
-                    ? 'text-gray-400 hover:text-gray-200'
-                    : 'text-gray-400 hover:text-gray-700'
-                    }`}
-                  tabIndex={-1}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
+            {/* Brand Logo Section */}
+            <div className="relative z-10 space-y-6">
+              <div className="group flex items-center gap-3 select-none">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-amber-500 blur-lg opacity-40"></div>
+                  <div className="relative bg-gradient-to-br from-amber-400 to-amber-600 p-2.5 rounded-[14px] text-white shadow-lg">
+                    <Home size={28} strokeWidth={2.5} />
+                  </div>
+                </div>
+                <div className="flex flex-col -space-y-1">
+                  <span className={`text-2xl font-black tracking-tighter ${darkMode ? 'text-white' : 'text-slate-900'}`}>Ghar<span className="text-amber-500">.</span>Nishchit</span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.5em] text-amber-600">Premium Living</span>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <h2 className={`text-4xl font-black tracking-tight leading-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+                  Access Your <br />
+                  <span className="text-amber-500">Premium</span> Dashboard.
+                </h2>
+                <p className={`font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                  Join over 10,000+ landlords and tenants experiencing the next generation of property management.
+                </p>
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <label
-                className={`flex items-center gap-2 ${darkMode ? 'text-gray-300' : 'text-gray-600'
-                  }`}
-              >
-                <input type="checkbox" className="form-checkbox text-indigo-600" />
-                <span className="text-xs sm:text-sm">Remember Me</span>
-              </label>
-              <a
-                href="/forgot-password"
-                className={`text-xs sm:text-sm ${darkMode
-                  ? 'text-indigo-400 hover:text-indigo-300'
-                  : 'text-indigo-600 hover:underline'
-                  }`}
-              >
-                Forgot Password?
-              </a>
+
+            {/* Trust Badges */}
+            <div className="relative z-10 flex items-center gap-4">
+              <div className="flex -space-x-3">
+                {[1, 2, 3, 4].map(i => (
+                  <img key={i} src={`https://randomuser.me/api/portraits/men/${i + 10}.jpg`} className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800 shadow-md" alt="User" />
+                ))}
+              </div>
+              <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                Trusted by <span className="text-amber-600">10k+</span> users
+              </div>
             </div>
-            <button
-              type="submit"
-              className="w-full bg-indigo-600 text-white py-2 sm:py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors duration-300 hover:shadow-xl hover:scale-105 text-sm sm:text-base"
-            >
-              Login
-            </button>
-          </form>
-          <p
-            className={`mt-3 text-xs sm:text-sm text-center ${darkMode ? 'text-gray-400' : 'text-gray-500'
-              }`}
-          >
-            Don't have an account?{' '}
-            <Link
-              to="/signup"
-              className={`${darkMode
-                ? 'text-indigo-400 hover:text-indigo-300'
-                : 'text-indigo-600 hover:underline'
-                }`}
-            >
-              Sign Up
-            </Link>
-          </p>
-          <p
-            className={`mt-2 text-xs text-center ${darkMode ? 'text-gray-500' : 'text-gray-400'
-              }`}
-          >
-            We respect your privacy. No spam ever.
-          </p>
+          </div>
+
+          {/* Right Panel: Login Form */}
+          <div className="lg:w-7/12 p-12 lg:p-16 flex flex-col justify-center max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div className="max-w-md mx-auto w-full space-y-10">
+              <div>
+                <h3 className={`text-3xl font-black mb-2 ${darkMode ? 'text-white' : 'text-slate-900'}`}>Sign In</h3>
+                <p className={`font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Welcome back! Please enter your details.</p>
+              </div>
+
+              {/* Social Login */}
+              <button
+                onClick={signInWithGoogle}
+                className={`w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-md active:scale-95 border ${darkMode ? 'bg-white text-slate-900 hover:bg-slate-100 border-transparent' : 'bg-white text-slate-900 hover:bg-slate-50 border-slate-100'}`}
+                type="button"
+              >
+                <GoogleIcon />
+                Login with Google
+              </button>
+
+              <div className="flex items-center gap-4">
+                <div className={`h-px flex-grow ${darkMode ? 'bg-slate-800' : 'bg-slate-100'}`}></div>
+                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">or</span>
+                <div className={`h-px flex-grow ${darkMode ? 'bg-slate-800' : 'bg-slate-100'}`}></div>
+              </div>
+
+              {/* Email Form */}
+              <form className="space-y-6" onSubmit={handleSubmit}>
+                <div className="space-y-2">
+                  <label className={`text-xs font-black uppercase tracking-[0.2em] ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Email Address</label>
+                  <div className="relative group">
+                    <Mail size={18} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${darkMode ? 'text-slate-600 group-focus-within:text-amber-500' : 'text-slate-400 group-focus-within:text-amber-500'}`} />
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 transition-all outline-none font-bold ${darkMode ? 'bg-slate-800/50 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
+                      placeholder="you@example.com"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className={`text-xs font-black uppercase tracking-[0.2em] ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Password</label>
+                    <Link to="/forgot-password" className="text-[10px] font-black uppercase tracking-widest text-amber-600 hover:text-amber-500">Forgot Password?</Link>
+                  </div>
+                  <div className="relative group">
+                    <Lock size={18} className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${darkMode ? 'text-slate-600 group-focus-within:text-amber-500' : 'text-slate-400 group-focus-within:text-amber-500'}`} />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className={`w-full pl-12 pr-12 py-4 rounded-2xl border-2 transition-all outline-none font-bold ${darkMode ? 'bg-slate-800/50 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
+                      placeholder="••••••••"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className={`absolute right-4 top-1/2 -translate-y-1/2 transition-colors ${darkMode ? 'text-slate-600 hover:text-white' : 'text-slate-400 hover:text-slate-900'}`}
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <input type="checkbox" id="remember" className="w-4 h-4 rounded border-2 border-slate-200 accent-amber-500" />
+                  <label htmlFor="remember" className={`text-xs font-black uppercase tracking-widest cursor-pointer ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Remember Me</label>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={`w-full py-5 rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-[0_20px_50px_rgba(245,158,11,0.3)] transition-all hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 ${darkMode ? 'bg-amber-500 text-slate-950 hover:bg-amber-400' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
+                >
+                  {loading ? 'Processing...' : 'Sign In Now'} <Sparkles size={18} />
+                </button>
+              </form>
+
+              <p className={`text-center font-bold text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                Don't have an account? <Link to="/signup" className="text-amber-600 hover:text-amber-500 underline underline-offset-4">Sign Up</Link>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Animation Overlay */}
+      <div className={`fixed inset-0 z-[100] flex items-center justify-center bg-slate-950 transition-all duration-1000 ease-in-out ${welcomeOut ? 'translate-y-full' : 'translate-y-0'}`}>
+        <div className="flex flex-col items-center space-y-6">
+          <div className="relative">
+            <div className="absolute inset-0 bg-amber-500 blur-2xl opacity-40 animate-pulse"></div>
+            <div className="relative bg-gradient-to-br from-amber-400 to-amber-600 p-6 rounded-[2rem] text-white shadow-2xl">
+              <Home size={60} strokeWidth={2.5} />
+            </div>
+          </div>
+          <div className="text-center">
+            <h1 className="text-4xl font-black text-white tracking-tighter mb-2 italic">Ghar.Nishchit</h1>
+            <div className="h-1 w-24 bg-amber-500 mx-auto rounded-full"></div>
+          </div>
         </div>
       </div>
     </div>
