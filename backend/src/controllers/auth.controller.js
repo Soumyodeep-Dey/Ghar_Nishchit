@@ -67,7 +67,6 @@ export const registerUser = async (req, res) => {
 
     // Dual-write: sync to NeonDB (non-blocking)
     await syncUserToNeon(newUser);
-
     // Generate JWT token
     const token = jwt.sign({ userId: newUser._id, role: newUser.role }, JWT_SECRET, { expiresIn: "7d" });
 

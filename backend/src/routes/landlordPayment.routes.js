@@ -1,3 +1,22 @@
+/**
+ * landlordPayment.routes.js
+ * --------------------------
+ * All routes here are JWT-protected (verifyToken middleware).
+ *
+ * IMPORTANT — register this file in app.js:
+ *
+ *   // 1. Webhook BEFORE express.json() so raw body is available
+ *   import { handleLandlordWebhook } from './controllers/landlordPayment.controller.js';
+ *   app.post(
+ *     '/api/landlord-payments/webhook',
+ *     express.raw({ type: 'application/json' }),
+ *     handleLandlordWebhook
+ *   );
+ *
+ *   // 2. Then the rest of the routes (after express.json())
+ *   import landlordPaymentRouter from './routes/landlordPayment.routes.js';
+ *   app.use('/api/landlord-payments', landlordPaymentRouter);
+ */
 import express from 'express';
 import { verifyToken } from '../middlewares/auth.middleware.js';
 import {

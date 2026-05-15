@@ -1,3 +1,18 @@
+/**
+ * landlordPayment.controller.js
+ * ------------------------------
+ * Handles Razorpay subscription payments for landlords.
+ * Mirrors the existing payment.controller.js (tenant) but uses the
+ * LandlordPayment model and stores plan-level metadata.
+ *
+ * Routes (see landlordPayment.routes.js):
+ *   POST /api/landlord-payments/create-order  → createLandlordOrder
+ *   POST /api/landlord-payments/verify        → verifyLandlordPayment
+ *   GET  /api/landlord-payments               → getLandlordPayments
+ *   GET  /api/landlord-payments/stats         → getLandlordPaymentStats
+ *   POST /api/landlord-payments/webhook       → handleLandlordWebhook
+ *     (webhook is mounted BEFORE express.json() in app.js — see NOTE below)
+ */
 import Razorpay         from 'razorpay';
 import crypto           from 'crypto';
 import LandlordPayment  from '../models/landlordPayment.model.js';
@@ -155,6 +170,13 @@ export const verifyLandlordPayment = async (req, res) => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WEBHOOK → POST /api/landlord-payments/webhook
+// NOTE: Mount this BEFORE express.json() in app.js so the raw body is intact.
+// Example in app.js:
+//   import landlordPaymentRouter from './routes/landlordPayment.routes.js';
+//   app.post('/api/landlord-payments/webhook',
+//     express.raw({ type: 'application/json' }),
+//     handleLandlordWebhook
+//   );
 // ─────────────────────────────────────────────────────────────────────────────
 export const handleLandlordWebhook = async (req, res) => {
   try {
