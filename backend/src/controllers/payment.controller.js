@@ -2,6 +2,45 @@ import Razorpay from 'razorpay';
 import crypto  from 'crypto';
 import Payment from '../models/payment.model.js';
 import mongoose from 'mongoose';
+import { query as neonQuery } from '../db/neon.js';
+
+// ── NeonDB Sync Helper ────────────────────────────────────────────────────────
+const syncPaymentToNeon = async (p) => {
+  try {
+    await neonQuery(
+      `INSERT INTO payments (
+         id, tenant_id, property_id, amount, status, payment_method,
+         due_date, paid_at, note, razorpay_order_id, razorpay_payment_id,
+         created_at, updated_at
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+       ON CONFLICT (id) DO UPDATE SET
+         status              = EXCLUDED.status,
+         payment_method      = EXCLUDED.payment_method,
+         paid_at             = EXCLUDED.paid_at,
+         razorpay_order_id   = EXCLUDED.razorpay_order_id,
+         razorpay_payment_id = EXCLUDED.razorpay_payment_id,
+         updated_at          = NOW()`,
+      [
+        p._id.toString(),
+        p.tenantId?.toString() || null,
+        p.propertyId?.toString() || null,
+        Number(p.amount),
+        p.status || 'Pending',
+        p.paymentMethod || 'Razorpay',
+        p.dueDate  ? new Date(p.dueDate).toISOString()  : null,
+        p.paidAt   ? new Date(p.paidAt).toISOString()   : null,
+        p.note || '',
+        p.razorpayOrderId   || null,
+        p.razorpayPaymentId || null,
+        p.createdAt ? new Date(p.createdAt).toISOString() : new Date().toISOString(),
+        p.updatedAt ? new Date(p.updatedAt).toISOString() : new Date().toISOString(),
+      ]
+    );
+  } catch (e) {
+    console.warn('[NeonDB] payment sync warning:', e.message);
+  }
+};
+
 
 // ── Razorpay client ──────────────────────────────────────────────────────────
 let razorpay;
@@ -86,6 +125,9 @@ export const createOrder = async (req, res) => {
 
     const payment = await Payment.create(paymentDoc);
 
+    // Dual-write to NeonDB
+    await syncPaymentToNeon(payment);
+
     return res.status(201).json({
       orderId:   rzpOrder.id,
       amount:    rzpOrder.amount,
@@ -143,6 +185,10 @@ export const verifyPayment = async (req, res) => {
     );
 
     if (!updated) return res.status(404).json({ message: 'Payment record not found' });
+
+    // Dual-write to NeonDB
+    await syncPaymentToNeon(updated);
+
     return res.status(200).json({ message: 'Payment verified and recorded', payment: updated });
 
   } catch (err) {
@@ -173,14 +219,21 @@ export const handleWebhook = async (req, res) => {
 
     if (event.event === 'payment.captured') {
       const rp = event.payload.payment.entity;
-      await Payment.findOneAndUpdate(
+      const captured = await Payment.findOneAndUpdate(
         { razorpayOrderId: rp.order_id },
-        { status: 'Paid', paidAt: new Date(rp.created_at * 1000), razorpayPaymentId: rp.id }
+        { status: 'Paid', paidAt: new Date(rp.created_at * 1000), razorpayPaymentId: rp.id },
+        { new: true }
       );
+      if (captured) await syncPaymentToNeon(captured);
     }
     if (event.event === 'payment.failed') {
       const rp = event.payload.payment.entity;
-      await Payment.findOneAndUpdate({ razorpayOrderId: rp.order_id }, { status: 'Failed' });
+      const failed = await Payment.findOneAndUpdate(
+        { razorpayOrderId: rp.order_id },
+        { status: 'Failed' },
+        { new: true }
+      );
+      if (failed) await syncPaymentToNeon(failed);
     }
 
     return res.status(200).json({ received: true });
@@ -236,6 +289,10 @@ export const createPayment = async (req, res) => {
       note,
       paidAt: status === 'Paid' ? new Date() : undefined,
     });
+
+    // Dual-write to NeonDB
+    await syncPaymentToNeon(payment);
+
     return res.status(201).json(payment);
   } catch (err) {
     console.error('[createPayment] ERROR:', err.message);
@@ -255,6 +312,10 @@ export const updatePaymentStatus = async (req, res) => {
       { new: true }
     );
     if (!payment) return res.status(404).json({ message: 'Payment not found' });
+
+    // Dual-write to NeonDB
+    await syncPaymentToNeon(payment);
+
     return res.status(200).json(payment);
   } catch (err) {
     console.error('[updatePaymentStatus] ERROR:', err.message);

@@ -1,10 +1,41 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
+import { query as neonQuery } from "../db/neon.js";
 import dotenv from "dotenv";
 
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key";
+
+// ── NeonDB Sync Helpers ───────────────────────────────────────────────────────
+// Silently syncs a user upsert to NeonDB; never throws — MongoDB is primary.
+const syncUserToNeon = async (user) => {
+  try {
+    await neonQuery(
+      `INSERT INTO users (id, name, phone, email, role, password, profile_picture, created_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+       ON CONFLICT (id) DO UPDATE SET
+         name            = EXCLUDED.name,
+         phone           = EXCLUDED.phone,
+         email           = EXCLUDED.email,
+         password        = EXCLUDED.password,
+         profile_picture = EXCLUDED.profile_picture`,
+      [
+        user._id.toString(),
+        user.name,
+        user.phone,
+        user.email || null,
+        user.role,
+        user.password,
+        user.profilePicture || '',
+        user.createdAt ? new Date(user.createdAt).toISOString() : new Date().toISOString(),
+      ]
+    );
+  } catch (e) {
+    // Log but never crash — MongoDB is source of truth during dual-write phase
+    console.warn('[NeonDB] user sync warning:', e.message);
+  }
+};
 
 // Register a New User
 export const registerUser = async (req, res) => {
@@ -30,10 +61,12 @@ export const registerUser = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Save user to DB
+    // Save user to MongoDB
     const newUser = new User({ name, phone, email, role, password: hashedPassword });
     await newUser.save();
 
+    // Dual-write: sync to NeonDB (non-blocking)
+    await syncUserToNeon(newUser);
     // Generate JWT token
     const token = jwt.sign({ userId: newUser._id, role: newUser.role }, JWT_SECRET, { expiresIn: "7d" });
 
@@ -49,7 +82,7 @@ export const registerUser = async (req, res) => {
     res.status(201).json({ 
       message: "User registered successfully",
       token,
-      user: userData 
+      user: userData
     });
   } catch (error) {
     console.error("Error in user registration:", error);
@@ -165,12 +198,16 @@ export const updateProfile = async (req, res) => {
       updateData.password = await bcrypt.hash(password, 10);
     }
 
-    // Update user
+    // Update user in MongoDB
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       updateData,
       { new: true, runValidators: true }
     ).select("-password");
+
+    // Dual-write: sync full user (re-fetch with password for NeonDB)
+    const fullUser = await User.findById(userId);
+    if (fullUser) await syncUserToNeon(fullUser);
 
     res.status(200).json({
       message: "Profile updated successfully",
@@ -204,6 +241,9 @@ export const changePassword = async (req, res) => {
     const hashed = await bcrypt.hash(newPassword, 10);
     user.password = hashed;
     await user.save();
+
+    // Dual-write: sync updated password to NeonDB
+    await syncUserToNeon(user);
 
     return res.status(200).json({ message: "Password changed successfully" });
   } catch (error) {

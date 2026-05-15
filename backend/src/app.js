@@ -12,6 +12,7 @@ import notificationRoutes       from './routes/notification.routes.js';
 import paymentRoutes            from './routes/payment.routes.js';
 import landlordPaymentRoutes    from './routes/landlordPayment.routes.js';
 import visitRoutes              from './routes/visit.routes.js';
+import adminRoutes              from './routes/admin.routes.js';
 import contractRoutes           from './routes/contract.routes.js';
 import { handleWebhook }        from './controllers/payment.controller.js';
 import { handleLandlordWebhook } from './controllers/landlordPayment.controller.js';
@@ -32,6 +33,7 @@ app.use(
 
 // Tenant rent payment webhook
 app.post('/api/payments/webhook', express.raw({ type: 'application/json' }), handleWebhook);
+app.post('/api/landlord-payments/webhook', express.raw({ type: 'application/json' }), handleLandlordWebhook);
 
 // Landlord subscription payment webhook
 app.post('/api/landlord-payments/webhook', express.raw({ type: 'application/json' }), handleLandlordWebhook);
@@ -56,6 +58,7 @@ app.use('/api/notifications',     notificationRoutes);
 app.use('/api/payments',          paymentRoutes);           // tenant rent payments
 app.use('/api/landlord-payments', landlordPaymentRoutes);   // landlord subscription payments
 app.use('/api/visits',            visitRoutes);
+app.use('/api/admin',         adminRoutes);
 app.use('/api/contracts',         contractRoutes);
 
 app.use((err, _req, res, _next) => {
