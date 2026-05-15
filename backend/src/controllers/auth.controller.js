@@ -68,7 +68,23 @@ export const registerUser = async (req, res) => {
     // Dual-write: sync to NeonDB (non-blocking)
     await syncUserToNeon(newUser);
 
-    res.status(201).json({ message: "User registered successfully" });
+    // Generate JWT token
+    const token = jwt.sign({ userId: newUser._id, role: newUser.role }, JWT_SECRET, { expiresIn: "7d" });
+
+    // Return user data without password
+    const userData = {
+      _id: newUser._id,
+      name: newUser.name,
+      email: newUser.email,
+      phone: newUser.phone,
+      role: newUser.role
+    };
+
+    res.status(201).json({ 
+      message: "User registered successfully",
+      token,
+      user: userData
+    });
   } catch (error) {
     console.error("Error in user registration:", error);
     res.status(500).json({ error: "Internal Server Error" });

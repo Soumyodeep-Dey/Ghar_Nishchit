@@ -150,11 +150,12 @@ export default function SignUp() {
       },
       body: JSON.stringify(formData),
     })
-      .then((response) => {
+      .then(async (response) => {
+        const data = await response.json();
         if (!response.ok) {
-          throw new Error("Registration failed.");
+          throw new Error(data.error || "Registration failed.");
         }
-        return response.json();
+        return data;
       })
       .then((data) => {
         const { token, user } = data;
@@ -175,7 +176,7 @@ export default function SignUp() {
       })
       .catch((err) => {
         console.error(err);
-        showErrorToast("Error during registration.");
+        showErrorToast(err.message || "Error during registration.");
       });
   };
 
