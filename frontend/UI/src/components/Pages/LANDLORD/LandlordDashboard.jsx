@@ -10,6 +10,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../../../useDarkMode.js';
 import api from '../../../services/api.js';
+import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 
 // Simplified Animated Card Wrapper (no framer-motion)
 const AnimatedCard = React.memo(({ children, className = '', ...props }) => {
@@ -87,6 +88,7 @@ const StatCard = React.memo(({ icon: Icon, title, value, change, trend, color, p
 });
 
 const LandlordDashboard = () => {
+  const { t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,24rem)]';
@@ -326,7 +328,7 @@ const LandlordDashboard = () => {
       <div className={`min-h-screen bg-gradient-to-br ${themeConfig.loadingBg} flex items-center justify-center`}>
         <div className="text-center">
           <div className={`w-12 h-12 border-4 ${themeConfig.spinnerBorder} rounded-full mx-auto mb-4 animate-spin`} />
-          <h2 className={`text-xl font-bold ${themeConfig.textPrimary} mb-1`}>Loading Dashboard...</h2>
+          <h2 className={`text-xl font-bold ${themeConfig.textPrimary} mb-1`}>{t('pages.loadingDashboard')}</h2>
           <p className={`${themeConfig.loadingText} text-sm`}>Preparing your property insights</p>
         </div>
       </div>
@@ -346,7 +348,7 @@ const LandlordDashboard = () => {
             {/* Header Section - simplified */}
             <div className="text-center mb-12">
               <h1 className={`text-4xl font-bold ${themeConfig.textPrimary} mb-4 bg-gradient-to-r ${themeConfig.headerGradient} bg-clip-text text-transparent`}>
-                Welcome Back, Landlord!
+                {t('landlord.welcomeBackLandlord')}
               </h1>
               <p className={`text-lg ${themeConfig.textSecondary} max-w-2xl mx-auto leading-relaxed`}>
                 Your comprehensive property management dashboard with real-time insights and advanced analytics

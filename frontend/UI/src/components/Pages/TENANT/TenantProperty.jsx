@@ -5,6 +5,7 @@ import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
 import api from '../../../services/api.js';
 import { showErrorToast, showSuccessToast } from '../../../utils/toast.jsx';
+import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import {
   BuildingOfficeIcon, HeartIcon, EyeIcon, MapPinIcon, CurrencyDollarIcon, XMarkIcon, MagnifyingGlassIcon, CalendarIcon, HomeIcon, SparklesIcon, ClockIcon, UserIcon, PhoneIcon, ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
@@ -578,27 +579,27 @@ const PropertyModal = ({ property, isOpen, onClose, onToggleFavorite, onContactL
 };
 
 const PROPERTY_TYPE_OPTIONS = [
-  { value: 'all', label: 'All types' },
-  { value: 'apartment', label: 'Apartment' },
-  { value: 'house', label: 'House' },
-  { value: 'studio', label: 'Studio' },
-  { value: 'room', label: 'Room' },
-  { value: 'commercial', label: 'Commercial' },
+  { value: 'all', labelKey: 'filters.allTypes' },
+  { value: 'apartment', labelKey: 'filters.apartment' },
+  { value: 'house', labelKey: 'filters.house' },
+  { value: 'studio', labelKey: 'filters.studio' },
+  { value: 'room', labelKey: 'filters.room' },
+  { value: 'commercial', labelKey: 'filters.commercial' },
 ];
 
 const BEDROOM_OPTIONS = [
-  { value: '0', label: 'Any beds' },
-  { value: '1', label: '1+ bed' },
-  { value: '2', label: '2+ beds' },
-  { value: '3', label: '3+ beds' },
-  { value: '4', label: '4+ beds' },
+  { value: '0', labelKey: 'filters.anyBeds' },
+  { value: '1', labelKey: 'filters.bed1' },
+  { value: '2', labelKey: 'filters.bed2' },
+  { value: '3', labelKey: 'filters.bed3' },
+  { value: '4', labelKey: 'filters.bed4' },
 ];
 
 const BATHROOM_OPTIONS = [
-  { value: '0', label: 'Any baths' },
-  { value: '1', label: '1+ bath' },
-  { value: '2', label: '2+ baths' },
-  { value: '3', label: '3+ baths' },
+  { value: '0', labelKey: 'filters.anyBaths' },
+  { value: '1', labelKey: 'filters.bath1' },
+  { value: '2', labelKey: 'filters.bath2' },
+  { value: '3', labelKey: 'filters.bath3' },
 ];
 
 const propertySearchText = (property) =>
@@ -628,6 +629,7 @@ const hasNearTransit = (property) => {
 
 const TenantProperty = () => {
   const { darkMode } = useDarkMode();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [properties, setProperties] = useState([]);
@@ -913,10 +915,10 @@ const TenantProperty = () => {
           <div className="mb-8 animate-fadeIn">
             <div className="text-center mb-6">
               <h1 className={`text-4xl font-bold mb-2 animate-slideDown ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>
-                Find Your Perfect Home
+                {t('tenant.findPerfectHome')}
               </h1>
               <p className={`text-lg animate-slideUp ${darkMode ? 'text-slate-200' : 'text-gray-600'}`}>
-                Discover amazing properties tailored to your lifestyle
+                {t('tenant.discoverProperties')}
               </p>
             </div>
           </div>
@@ -927,7 +929,7 @@ const TenantProperty = () => {
                 <div className="relative">
                   <input
                     type="text"
-                    placeholder="Search properties by name or location..."
+                    placeholder={t('tenant.searchByNameLocation')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className={`w-full border-2 rounded-xl px-6 py-4 focus:outline-none focus:ring-4 transition-all duration-300 pl-12 text-lg ${darkMode ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:ring-cyan-500/20 focus:border-cyan-500' : 'bg-white border-gray-200 text-gray-800 placeholder-gray-500 focus:ring-blue-500/20 focus:border-blue-500'}`}
@@ -942,26 +944,26 @@ const TenantProperty = () => {
                   onChange={(e) => setSortBy(e.target.value)}
                   className={`border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-cyan-500/20 focus:border-cyan-500' : 'bg-white border-gray-200 text-gray-800 focus:ring-blue-500/20 focus:border-blue-500'}`}
                 >
-                  <option value="title">Sort by Name</option>
-                  <option value="price">Price: Low to High</option>
-                  <option value="price-desc">Price: High to Low</option>
-                  <option value="bedrooms">Most Bedrooms</option>
-                  <option value="area">Largest Area</option>
-                  <option value="rating">Highest Rated</option>
+                  <option value="title">{t('tenant.sortByName')}</option>
+                  <option value="price">{t('tenant.sortPriceLow')}</option>
+                  <option value="price-desc">{t('tenant.sortPriceHigh')}</option>
+                  <option value="bedrooms">{t('tenant.sortBedrooms')}</option>
+                  <option value="area">{t('tenant.sortArea')}</option>
+                  <option value="rating">{t('tenant.sortRating')}</option>
                 </select>
 
                 <button
                   onClick={() => setFilter('all')}
                   className={`px-6 py-3 rounded-xl transition-all duration-300 ${filter === 'all' ? `${darkMode ? 'bg-cyan-600' : 'bg-blue-600'} text-white shadow-lg scale-105` : darkMode ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:scale-105' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105'}`}
                 >
-                  All Properties
+                  {t('common.allProperties')}
                 </button>
                 <button
                   onClick={() => setFilter('favorite')}
                   className={`px-6 py-3 rounded-xl flex items-center transition-all duration-300 ${filter === 'favorite' ? 'bg-red-600 text-white shadow-lg scale-105' : darkMode ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:scale-105' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105'}`}
                 >
                   <HeartSolidIcon className="h-5 w-5 mr-2" />
-                  Favorites
+                  {t('common.favorites')}
                 </button>
               </div>
             </div>
@@ -972,7 +974,7 @@ const TenantProperty = () => {
                 onClick={() => setShowAdvancedFilters(v => !v)}
                 className={`text-sm font-semibold flex items-center gap-2 ${darkMode ? 'text-cyan-400 hover:text-cyan-300' : 'text-blue-600 hover:text-blue-800'}`}
               >
-                {showAdvancedFilters ? 'Hide' : 'Show'} filters
+                {showAdvancedFilters ? t('common.hideFilters') : t('common.showFilters')}
                 {activeFilterCount > 0 && (
                   <span className={`px-2 py-0.5 rounded-full text-xs ${darkMode ? 'bg-cyan-600 text-white' : 'bg-blue-600 text-white'}`}>
                     {activeFilterCount}
@@ -985,7 +987,7 @@ const TenantProperty = () => {
                   onClick={resetAllFilters}
                   className={`text-sm font-medium ${darkMode ? 'text-slate-400 hover:text-slate-200' : 'text-gray-500 hover:text-gray-800'}`}
                 >
-                  Clear all filters
+                  {t('common.clearAllFilters')}
                 </button>
               )}
             </div>
@@ -994,33 +996,33 @@ const TenantProperty = () => {
               <div className={`mt-4 pt-4 border-t border-dashed space-y-5 animate-fadeIn ${darkMode ? 'border-slate-600' : 'border-gray-200'}`}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
-                    <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>Property type</label>
+                    <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>{t('filters.propertyType')}</label>
                     <select value={propertyTypeFilter} onChange={(e) => setPropertyTypeFilter(e.target.value)} className={`w-full border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all ${selectCls}`}>
                       {PROPERTY_TYPE_OPTIONS.map(opt => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>Bedrooms</label>
+                    <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>{t('filters.bedrooms')}</label>
                     <select value={minBedrooms} onChange={(e) => setMinBedrooms(e.target.value)} className={`w-full border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all ${selectCls}`}>
                       {BEDROOM_OPTIONS.map(opt => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>Bathrooms</label>
+                    <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>{t('filters.bathrooms')}</label>
                     <select value={minBathrooms} onChange={(e) => setMinBathrooms(e.target.value)} className={`w-full border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all ${selectCls}`}>
                       {BATHROOM_OPTIONS.map(opt => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>City</label>
+                    <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>{t('filters.city')}</label>
                     <select value={cityFilter} onChange={(e) => setCityFilter(e.target.value)} className={`w-full border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all ${selectCls}`}>
-                      <option value="all">All cities</option>
+                      <option value="all">{t('filters.allCities')}</option>
                       {cityOptions.map(city => (
                         <option key={city} value={city}>{city}</option>
                       ))}
@@ -1030,11 +1032,11 @@ const TenantProperty = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
-                    <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>Min area (sq ft)</label>
+                    <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>{t('filters.minArea')}</label>
                     <input
                       type="number"
                       min="0"
-                      placeholder="e.g. 500"
+                      placeholder={t('filters.minAreaPlaceholder')}
                       value={minArea}
                       onChange={(e) => setMinArea(e.target.value)}
                       className={`w-full border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all ${selectCls}`}
@@ -1043,27 +1045,27 @@ const TenantProperty = () => {
                   <div className="flex flex-wrap items-end gap-4 sm:col-span-2">
                     <label className={`flex items-center gap-2 cursor-pointer ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                       <input type="checkbox" checked={petFriendlyOnly} onChange={(e) => setPetFriendlyOnly(e.target.checked)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4" />
-                      <span className="text-sm font-medium">Pet friendly</span>
+                      <span className="text-sm font-medium">{t('filters.petFriendly')}</span>
                     </label>
                     <label className={`flex items-center gap-2 cursor-pointer ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                       <input type="checkbox" checked={furnishedOnly} onChange={(e) => setFurnishedOnly(e.target.checked)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4" />
-                      <span className="text-sm font-medium">Furnished</span>
+                      <span className="text-sm font-medium">{t('filters.furnished')}</span>
                     </label>
                     <label className={`flex items-center gap-2 cursor-pointer ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                       <input type="checkbox" checked={swimmingPoolOnly} onChange={(e) => setSwimmingPoolOnly(e.target.checked)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4" />
-                      <span className="text-sm font-medium">Swimming pool</span>
+                      <span className="text-sm font-medium">{t('filters.swimmingPool')}</span>
                     </label>
                     <label className={`flex items-center gap-2 cursor-pointer ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                       <input type="checkbox" checked={gardenOnly} onChange={(e) => setGardenOnly(e.target.checked)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4" />
-                      <span className="text-sm font-medium">Garden</span>
+                      <span className="text-sm font-medium">{t('filters.garden')}</span>
                     </label>
                     <label className={`flex items-center gap-2 cursor-pointer ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                       <input type="checkbox" checked={nearTransitOnly} onChange={(e) => setNearTransitOnly(e.target.checked)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4" />
-                      <span className="text-sm font-medium">Near railway / metro</span>
+                      <span className="text-sm font-medium">{t('filters.nearTransit')}</span>
                     </label>
                     <label className={`flex items-center gap-2 cursor-pointer ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
                       <input type="checkbox" checked={availableOnly} onChange={(e) => setAvailableOnly(e.target.checked)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4" />
-                      <span className="text-sm font-medium">Available only</span>
+                      <span className="text-sm font-medium">{t('filters.availableOnly')}</span>
                     </label>
                   </div>
                 </div>
@@ -1071,7 +1073,7 @@ const TenantProperty = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
-                      Min price: ₹{priceRange[0].toLocaleString('en-IN')}
+                      {t('filters.minPrice')}: ₹{priceRange[0].toLocaleString('en-IN')}
                     </label>
                     <input
                       type="range"
@@ -1088,7 +1090,7 @@ const TenantProperty = () => {
                   </div>
                   <div>
                     <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
-                      Max price: ₹{priceRange[1].toLocaleString('en-IN')}
+                      {t('filters.maxPrice')}: ₹{priceRange[1].toLocaleString('en-IN')}
                     </label>
                     <input
                       type="range"
@@ -1105,7 +1107,7 @@ const TenantProperty = () => {
                   </div>
                 </div>
                 <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
-                  Showing {filteredAndSortedProperties.length} of {properties.length} properties
+                  {t('common.showingCount', { shown: filteredAndSortedProperties.length, total: properties.length })}
                 </p>
               </div>
             )}
@@ -1116,15 +1118,15 @@ const TenantProperty = () => {
               <div className="col-span-full text-center py-16 animate-fadeIn">
                 <div className="max-w-md mx-auto">
                   <BuildingOfficeIcon className={`h-24 w-24 mx-auto mb-6 animate-bounce ${darkMode ? 'text-slate-500' : 'text-gray-400'}`} />
-                  <h3 className={`text-2xl font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>No properties found</h3>
+                  <h3 className={`text-2xl font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>{t('common.noPropertiesFound')}</h3>
                   <p className={`text-lg mb-6 ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>
-                    Try adjusting your search criteria or browse all available properties
+                    {t('common.tryAdjustingSearch')}
                   </p>
                   <button
                     onClick={resetAllFilters}
                     className={`${darkMode ? 'bg-cyan-600 hover:bg-cyan-700' : 'bg-blue-600 hover:bg-blue-700'} text-white px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105`}
                   >
-                    Reset Filters
+                    {t('common.resetFilters')}
                   </button>
                 </div>
               </div>

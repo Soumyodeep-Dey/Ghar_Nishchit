@@ -6,6 +6,7 @@ import TenantNavBar from './TenantNavBar';
 import RazorpayCheckout from './RazorpayCheckout';
 import { showSuccessToast, showErrorToast } from '../../../utils/toast.jsx';
 import api from '../../../services/api.js';
+import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import {
   CreditCard, Banknote, Download, Calendar, CheckCircle, Clock, AlertTriangle,
   IndianRupee, FileText, ShieldCheck, Star, Trophy, BarChart3, X
@@ -130,6 +131,7 @@ const PaymentHistoryRow = ({ payment, onDownloadReceipt }) => {
 
 const TenantPayment = () => {
   const { darkMode } = useDarkMode();
+  const { t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const leaseRedirectHandled = useRef(false);
@@ -342,7 +344,7 @@ const TenantPayment = () => {
 
           {/* Header */}
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Payment Center</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('pages.paymentCenter')}</h1>
             <p className="text-gray-600">Manage your payments with ease and security</p>
           </div>
 
@@ -421,7 +423,7 @@ const TenantPayment = () => {
                 <CreditCard className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h2 className={`text-2xl font-bold ${textHead}`}>Make Payment</h2>
+                <h2 className={`text-2xl font-bold ${textHead}`}>{t('pages.makePayment')}</h2>
                 <p className={textSub}>Quick and secure payment processing</p>
               </div>
             </div>
@@ -496,7 +498,7 @@ const TenantPayment = () => {
                     <BarChart3 className="h-8 w-8 text-white" />
                   </div>
                   <div>
-                    <h2 className={`text-2xl font-bold ${textHead}`}>Payment History</h2>
+                    <h2 className={`text-2xl font-bold ${textHead}`}>{t('pages.paymentHistory')}</h2>
                     <p className={textSub}>Track all your payment transactions</p>
                   </div>
                 </div>

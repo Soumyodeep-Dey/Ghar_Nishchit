@@ -4,6 +4,7 @@ import TenantSideBar from './TenantSideBar.jsx';
 import TenantNavBar from './TenantNavBar.jsx';
 import api from '../../../services/api.js';
 import { showErrorToast } from '../../../utils/toast.jsx';
+import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Wrench, BarChart3, TrendingUp, TrendingDown, Building2, Heart,
@@ -253,6 +254,7 @@ const ErrorBanner = ({ message, onRetry, isDark }) => (
 // ---------------------------------------------------------------------------
 const TenantDashboard = () => {
   const { darkMode } = useDarkMode();
+  const { t } = useLanguage();
   const navigate  = useNavigate();
   const location  = useLocation();
 
@@ -318,52 +320,52 @@ const TenantDashboard = () => {
   // -------------------------------------------------------------------------
   const stats = useMemo(() => [
     {
-      icon: Heart, title: 'Favourite Properties',
+      icon: Heart, title: t('tenant.favouriteProperties'),
       value: favouriteProperties.length,
       change: favouriteProperties.length > 0 ? `+${favouriteProperties.length}` : '0',
       trend: favouriteProperties.length > 0 ? 'up' : 'down',
       color: darkMode ? 'from-cyan-500 to-indigo-600' : 'from-indigo-500 to-purple-600',
     },
     {
-      icon: Bell, title: 'Unread Notifications',
+      icon: Bell, title: t('tenant.unreadNotifications'),
       value: notifications.filter(n => !n.read).length,
       change: String(notifications.filter(n => !n.read).length),
       trend: 'up',
       color: darkMode ? 'from-indigo-500 to-purple-600' : 'from-purple-500 to-pink-500',
     },
     {
-      icon: Wrench, title: 'Maintenance Requests',
+      icon: Wrench, title: t('tenant.maintenanceRequests'),
       value: maintenanceRequests.length,
       change: String(maintenanceRequests.length),
       trend: maintenanceRequests.length > 0 ? 'down' : 'up',
       color: darkMode ? 'from-purple-500 to-pink-600' : 'from-pink-400 to-rose-500',
     },
     {
-      icon: CreditCard, title: 'Payments Made',
+      icon: CreditCard, title: t('tenant.paymentsMade'),
       value: paymentHistory.filter(p => p.status === 'Paid' || p.status === 'paid').length,
       change: String(paymentHistory.filter(p => p.status === 'Paid' || p.status === 'paid').length),
       trend: 'up',
       color: darkMode ? 'from-pink-500 to-rose-600' : 'from-rose-400 to-pink-500',
     },
-  ], [darkMode, favouriteProperties, notifications, maintenanceRequests, paymentHistory]);
+  ], [darkMode, favouriteProperties, notifications, maintenanceRequests, paymentHistory, t]);
 
   const activityMetrics = useMemo(() => [
     {
       value: notifications.filter(n => !n.read).length,
-      label: 'Unread Notifications',
+      label: t('tenant.unreadNotifications'),
       color: darkMode ? 'text-cyan-400'   : 'text-indigo-600',
     },
     {
       value: maintenanceRequests.length,
-      label: 'Total Requests',
+      label: t('tenant.totalRequests'),
       color: darkMode ? 'text-indigo-400' : 'text-purple-600',
     },
     {
       value: favouriteProperties.length,
-      label: 'Saved Properties',
+      label: t('tenant.savedProperties'),
       color: darkMode ? 'text-purple-400' : 'text-pink-600',
     },
-  ], [darkMode, notifications, maintenanceRequests, favouriteProperties]);
+  ], [darkMode, notifications, maintenanceRequests, favouriteProperties, t]);
 
   // -------------------------------------------------------------------------
   // Theme config
@@ -444,10 +446,10 @@ const TenantDashboard = () => {
             {/* Header — no animate-pulse on text */}
             <div className="text-center mb-12">
               <h1 className={`text-4xl font-bold bg-gradient-to-r ${tc.headerGradient} bg-clip-text text-transparent mb-4`}>
-                Welcome Back{profile?.name ? `, ${profile.name.split(' ')[0]}` : ''}!
+                {t('tenant.welcomeBack')}{profile?.name ? `, ${profile.name.split(' ')[0]}` : ''}!
               </h1>
               <p className={`text-lg ${tc.textSecondary} max-w-2xl mx-auto leading-relaxed`}>
-                Your comprehensive rental management dashboard with real-time insights and property management tools.
+                {t('tenant.dashboardSubtitle')}
               </p>
             </div>
 
@@ -461,10 +463,10 @@ const TenantDashboard = () => {
             {/* Tab Navigation */}
             <div className={`flex flex-wrap gap-4 mb-8 ${tc.tabBg} p-3 rounded-3xl backdrop-blur-xl border ${tc.tabBorder}`}>
               {[
-                { key: 'overview',    label: 'Overview',    icon: BarChart3, action: 'tab' },
-                { key: 'properties',  label: 'Properties',  icon: Building2, action: 'navigate', route: '/tenant/properties' },
-                { key: 'maintenance', label: 'Maintenance', icon: Wrench,    action: 'navigate', route: '/tenant/maintenance' },
-              ].map(({ key, label, icon: Icon, action, route }) => (
+                { key: 'overview',    labelKey: 'tenant.overview',    icon: BarChart3, action: 'tab' },
+                { key: 'properties',  labelKey: 'sidebar.properties',  icon: Building2, action: 'navigate', route: '/tenant/properties' },
+                { key: 'maintenance', labelKey: 'sidebar.maintenance', icon: Wrench,    action: 'navigate', route: '/tenant/maintenance' },
+              ].map(({ key, labelKey, icon: Icon, action, route }) => (
                 <button
                   key={key}
                   onClick={() => {
@@ -479,7 +481,7 @@ const TenantDashboard = () => {
                   }`}
                 >
                   {Icon && <Icon className="w-5 h-5" />}
-                  <span className="font-semibold">{label}</span>
+                  <span className="font-semibold">{t(labelKey)}</span>
                 </button>
               ))}
             </div>
@@ -490,19 +492,19 @@ const TenantDashboard = () => {
 
                 {/* Quick Actions */}
                 <div className={`${tc.cardBg} backdrop-blur-xl border ${tc.cardBorder} rounded-3xl p-8`}>
-                  <h2 className={`text-3xl font-bold ${tc.textPrimary} mb-8`}>Quick Actions</h2>
+                  <h2 className={`text-3xl font-bold ${tc.textPrimary} mb-8`}>{t('tenant.quickActions')}</h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {[
-                      { label: 'View Properties',     icon: Building2, color: tc.buttonPrimary,   onClick: () => navigate('/tenant/properties'),     description: 'Browse available rentals' },
-                      { label: 'Request Maintenance', icon: Wrench,    color: tc.buttonPrimary,   onClick: () => navigate('/tenant/maintenance'),    description: 'Report issues' },
-                      { label: 'View Notifications',  icon: Bell,      color: tc.buttonSecondary, onClick: () => setCurrentSection('Notifications'), description: 'Check alerts' },
+                      { id: 'viewProps', labelKey: 'tenant.viewProperties', descKey: 'tenant.browseRentals', icon: Building2, color: tc.buttonPrimary,   onClick: () => navigate('/tenant/properties') },
+                      { id: 'maint', labelKey: 'tenant.requestMaintenance', descKey: 'tenant.reportIssues', icon: Wrench, color: tc.buttonPrimary, onClick: () => navigate('/tenant/maintenance') },
+                      { id: 'notif', labelKey: 'tenant.viewNotifications', descKey: 'tenant.checkAlerts', icon: Bell, color: tc.buttonSecondary, onClick: () => setCurrentSection('Notifications') },
                     ].map((action) => (
-                      <button key={action.label} onClick={action.onClick}
+                      <button key={action.id} onClick={action.onClick}
                         className={`group relative p-8 bg-gradient-to-br ${action.color} rounded-2xl text-white font-bold shadow-sm text-base hover:opacity-95`}
                       >
                         <div className="mb-4"><action.icon className="w-8 h-8 mx-auto" /></div>
-                        <div className="text-lg font-bold mb-2">{action.label}</div>
-                        <div className="text-sm opacity-90 font-medium">{action.description}</div>
+                        <div className="text-lg font-bold mb-2">{t(action.labelKey)}</div>
+                        <div className="text-sm opacity-90 font-medium">{t(action.descKey)}</div>
                       </button>
                     ))}
                   </div>
@@ -512,7 +514,7 @@ const TenantDashboard = () => {
                 <div className={`${tc.cardBg} backdrop-blur-xl border ${tc.cardBorder} rounded-3xl p-8`}>
                   <h2 className={`text-3xl font-bold ${tc.textPrimary} mb-8 flex items-center space-x-4`}>
                     <TrendingUp className={`w-8 h-8 ${tc.iconTrend}`} />
-                    <span>Recent Activity</span>
+                    <span>{t('tenant.recentActivity')}</span>
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {activityMetrics.map((metric) => (
