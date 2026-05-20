@@ -211,9 +211,16 @@ export const getTenantStats = async (req, res) => {
         const inquiries = await Inquiry.find({ property: { $in: propertyIds } }).select('seeker');
         const uniqueInquiryUserIds = new Set(inquiries.map(i => i.seeker?.toString()).filter(Boolean));
 
-        // Contract-based tenant counts
-        const activeContracts  = await Contract.countDocuments({ landlord: authUserId, status: 'active' });
+        // Contract-based tenant counts and monthly revenue (sum of active lease rent)
+        const activeContractDocs = await Contract.find({ landlord: authUserId, status: 'active' })
+            .select('rentAmount')
+            .lean();
+        const activeContracts = activeContractDocs.length;
         const pendingContracts = await Contract.countDocuments({ landlord: authUserId, status: 'pending' });
+        const monthlyRevenue = activeContractDocs.reduce(
+            (sum, c) => sum + (Number(c.rentAmount) || 0),
+            0
+        );
 
         const stats = {
             totalProperties:  myProperties.length,
@@ -221,7 +228,8 @@ export const getTenantStats = async (req, res) => {
             totalProspects:   uniqueInquiryUserIds.size,   // inquiry senders
             activeTenants:    activeContracts,              // signed lease
             pendingContracts: pendingContracts,             // sent but not yet signed
-            overduePayments:  0
+            overduePayments:  0,
+            monthlyRevenue,
         };
 
         res.status(200).json(stats);

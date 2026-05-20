@@ -2,8 +2,14 @@ import Razorpay from 'razorpay';
 import crypto  from 'crypto';
 import Payment from '../models/payment.model.js';
 import Property from '../models/property.model.js';
+import Contract from '../models/contract.model.js';
 import mongoose from 'mongoose';
 import { query as neonQuery } from '../db/neon.js';
+
+const resolveUserId = (user) => {
+  if (!user) return null;
+  return user._id || user.id || user.userId || null;
+};
 
 // ── NeonDB Sync Helper ────────────────────────────────────────────────────────
 const syncPaymentToNeon = async (p) => {
@@ -349,42 +355,64 @@ export const getPaymentStats = async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 export const getLandlordRevenue = async (req, res) => {
   try {
-    const landlordId = req.user?.userId;
+    const landlordId = resolveUserId(req.user);
     if (!landlordId) {
       return res.status(401).json({ message: 'Unauthorised — userId missing from token' });
     }
 
-    // Get all properties owned by this landlord
     const properties = await Property.find({ postedBy: landlordId }).select('_id').lean();
     const propertyIds = properties.map(p => p._id);
 
-    if (propertyIds.length === 0) {
+    // Active lease rent — matches LandlordTenant monthly revenue card
+    const activeContracts = await Contract.find({ landlord: landlordId, status: 'active' })
+      .select('rentAmount')
+      .lean();
+    const contractMonthlyRevenue = activeContracts.reduce(
+      (sum, c) => sum + (Number(c.rentAmount) || 0),
+      0
+    );
+
+    // Tenants with any contract on this landlord's properties (covers payments without propertyId)
+    const landlordContracts = await Contract.find({ landlord: landlordId })
+      .select('tenant')
+      .lean();
+    const tenantIds = [...new Set(
+      landlordContracts.map(c => c.tenant?.toString()).filter(Boolean)
+    )];
+
+    const paidQuery = {
+      status: 'Paid',
+      $or: [
+        ...(propertyIds.length > 0 ? [{ propertyId: { $in: propertyIds } }] : []),
+        ...(tenantIds.length > 0 ? [{ tenantId: { $in: tenantIds } }] : []),
+      ],
+    };
+    if (paidQuery.$or.length === 0) {
       return res.status(200).json({
-        totalMonthlyRevenue: 0,
+        totalMonthlyRevenue: contractMonthlyRevenue,
         totalRevenue: 0,
+        contractMonthlyRevenue,
         paidPayments: 0,
         pendingPayments: 0,
+        pendingAmount: 0,
       });
     }
 
-    // Get all payments for the landlord's properties that are marked as Paid
-    const paidPayments = await Payment.find({
-      propertyId: { $in: propertyIds },
-      status: 'Paid'
-    }).lean();
+    const paidPayments = await Payment.find(paidQuery).lean();
 
-    // Get pending payments
-    const pendingPayments = await Payment.find({
-      propertyId: { $in: propertyIds },
-      status: 'Pending'
-    }).lean();
+    const pendingQuery = {
+      status: 'Pending',
+      $or: paidQuery.$or,
+    };
+    const pendingPayments = await Payment.find(pendingQuery).lean();
 
     const totalRevenue = paidPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
     const pendingAmount = pendingPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
 
     return res.status(200).json({
-      totalMonthlyRevenue: totalRevenue,
+      totalMonthlyRevenue: contractMonthlyRevenue,
       totalRevenue,
+      contractMonthlyRevenue,
       paidPayments: paidPayments.length,
       pendingPayments: pendingPayments.length,
       pendingAmount,

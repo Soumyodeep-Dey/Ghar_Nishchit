@@ -103,7 +103,7 @@ const LandlordDashboard = () => {
     activeTenants: 0,
     pendingContracts: 0
   });
-  // Real payment revenue fetched from /payments/stats
+  // Monthly revenue from active lease contracts (via /tenants/stats)
   const [monthlyRevenue, setMonthlyRevenue] = useState(null);
 
   const updateSection = useCallback((path) => {
@@ -201,6 +201,9 @@ const LandlordDashboard = () => {
                 activeTenants: Number(stats.activeTenants || 0),
                 pendingContracts: Number(stats.pendingContracts || 0)
               });
+              if (stats.monthlyRevenue != null) {
+                setMonthlyRevenue(Number(stats.monthlyRevenue));
+              }
             }
           } catch (statsErr) {
             console.warn('Could not load tenant stats:', statsErr);
@@ -221,19 +224,6 @@ const LandlordDashboard = () => {
           setProperties(normalized);
         }
 
-        // Fetch real payment revenue from /payments/landlord-revenue (tenant payments to landlord's properties)
-        try {
-          const revenueStats = await api.getLandlordRevenue();
-          if (mounted && revenueStats) {
-            // Get the actual tenant payments received (not just subscription fees)
-            const revenue = revenueStats.totalMonthlyRevenue ?? revenueStats.totalRevenue ?? null;
-            if (revenue !== null) {
-              setMonthlyRevenue(Number(revenue));
-            }
-          }
-        } catch (revenueErr) {
-          console.warn('Could not load landlord revenue, using rent-based fallback:', revenueErr);
-        }
       } catch (err) {
         console.warn('Dashboard: failed to load properties from API', err.message || err);
       }
@@ -308,27 +298,23 @@ const LandlordDashboard = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Periodically refresh landlord revenue to pick up new tenant payments
+  // Refresh monthly revenue from active leases (same source as LandlordTenant)
   useEffect(() => {
     let mounted = true;
     const fetchRevenue = async () => {
       try {
-        const revenueStats = await api.getLandlordRevenue();
-        if (mounted && revenueStats) {
-          const revenue = revenueStats.totalMonthlyRevenue ?? revenueStats.totalRevenue ?? null;
-          if (revenue !== null) {
-            setMonthlyRevenue(Number(revenue));
-          }
+        const stats = await api.getTenantStats();
+        if (mounted && stats?.monthlyRevenue != null) {
+          setMonthlyRevenue(Number(stats.monthlyRevenue));
         }
       } catch (err) {
-        console.warn('Could not refresh landlord revenue:', err);
+        console.warn('Could not refresh monthly revenue:', err);
       }
     };
-    
-    // Fetch immediately and then every 30 seconds
+
     fetchRevenue();
     const interval = setInterval(fetchRevenue, 30000);
-    
+
     return () => {
       mounted = false;
       clearInterval(interval);

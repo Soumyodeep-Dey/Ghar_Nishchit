@@ -891,28 +891,24 @@ const LandlordProperty = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Fetch actual tenant payment revenue
+  // Monthly revenue from active leases (same calculation as LandlordTenant)
   useEffect(() => {
     let mounted = true;
     const fetchRevenue = async () => {
       try {
-        const revenueStats = await api.getLandlordRevenue();
-        if (mounted && revenueStats) {
-          const revenue = revenueStats.totalMonthlyRevenue ?? revenueStats.totalRevenue ?? 0;
-          setMonthlyRevenue(Number(revenue));
+        const stats = await api.getTenantStats();
+        if (mounted && stats?.monthlyRevenue != null) {
+          setMonthlyRevenue(Number(stats.monthlyRevenue));
         }
       } catch (err) {
-        console.warn('Could not load landlord revenue:', err);
+        console.warn('Could not load monthly revenue:', err);
       }
     };
-    
-    // Fetch immediately on mount
+
     fetchRevenue();
-    
-    // Refetch every 30 seconds to stay updated with new payments
     const interval = setInterval(fetchRevenue, 30000);
-    
-    return () => { 
+
+    return () => {
       mounted = false;
       clearInterval(interval);
     };
