@@ -11,67 +11,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../../../useDarkMode.js';
 import api from '../../../services/api.js';
 
-// Enhanced Custom Hooks with better performance - commented out as they are not used
-// const useIntersectionObserver = (options = {}) => {
-//   const [isIntersecting, setIsIntersecting] = useState(false);
-//   const [element, setElement] = useState(null);
-//   const observerRef = useRef(null);
-
-//   useEffect(() => {
-//     if (!element) return;
-
-//     if (!observerRef.current) {
-//       observerRef.current = new IntersectionObserver(([entry]) => {
-//         setIsIntersecting(entry.isIntersecting);
-//       }, { threshold: 0.1, rootMargin: '50px', ...options });
-//     }
-
-//     observerRef.current.observe(element);
-
-//     return () => {
-//       if (observerRef.current && element) {
-//         observerRef.current.unobserve(element);
-//       }
-//     };
-//   }, [element, options]);
-
-//   return [setElement, isIntersecting];
-// };
-
-// const useCountUp = (end, duration = 2000, start = 0, shouldStart = true) => {
-//   const [count, setCount] = useState(start);
-//   const animationRef = useRef();
-
-//   useEffect(() => {
-//     if (!shouldStart) return;
-
-//     const startTime = Date.now();
-//     const animate = () => {
-//       const elapsed = Date.now() - startTime;
-//       const progress = Math.min(elapsed / duration, 1);
-
-//       const easeOutExpo = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-//       const currentCount = Math.floor(start + (end - start) * easeOutExpo);
-
-//       setCount(currentCount);
-
-//       if (progress < 1) {
-//         animationRef.current = requestAnimationFrame(animate);
-//       }
-//     };
-
-//     animationRef.current = requestAnimationFrame(animate);
-
-//     return () => {
-//       if (animationRef.current) {
-//         cancelAnimationFrame(animationRef.current);
-//       }
-//     };
-//   }, [end, duration, start, shouldStart]);
-
-//   return count;
-// };
-
 // Simplified Animated Card Wrapper (no framer-motion)
 const AnimatedCard = React.memo(({ children, className = '', ...props }) => {
   return (
@@ -164,6 +103,8 @@ const LandlordDashboard = () => {
     activeTenants: 0,
     pendingContracts: 0
   });
+  // Real payment revenue fetched from /payments/stats
+  const [monthlyRevenue, setMonthlyRevenue] = useState(null);
 
   const updateSection = useCallback((path) => {
     if (path === '/landlord' || path === '/landlord/') {
@@ -185,41 +126,50 @@ const LandlordDashboard = () => {
     updateSection(location.pathname);
   }, [location.pathname, updateSection]);
 
-  const stats = useMemo(() => [
-    {
-      icon: Building2,
-      title: 'Total Properties',
-      value: properties.length || 0,
-      change: '+0%',
-      trend: properties.length > 0 ? 'up' : 'down',
-      color: isDarkMode ? 'from-cyan-500 to-indigo-600' : 'from-indigo-500 to-purple-600'
-    },
-    {
-      icon: IndianRupee,
-      title: 'Monthly Revenue',
-      value: properties.reduce((acc, p) => acc + (p.status === 'Occupied' ? Number(p.rent || p.price || 0) : 0), 0) || 0,
-      change: '+0%',
-      trend: 'up',
-      color: isDarkMode ? 'from-indigo-500 to-purple-600' : 'from-purple-500 to-pink-500',
-      prefix: '₹'
-    },
-    {
-      icon: Users,
-      title: 'Active Tenants',
-      value: tenantStats.activeTenants || 0,
-      change: '+0%',
-      trend: 'up',
-      color: isDarkMode ? 'from-purple-500 to-pink-600' : 'from-pink-400 to-rose-500'
-    },
-    {
-      icon: Wrench,
-      title: 'Maintenance Requests',
-      value: properties.reduce((acc, p) => acc + (p.maintenanceRequests || 0), 0) || 0,
-      change: '-0%',
-      trend: 'down',
-      color: isDarkMode ? 'from-pink-500 to-rose-600' : 'from-rose-400 to-pink-500'
-    }
-  ], [isDarkMode, properties, tenantStats.activeTenants]);
+  const stats = useMemo(() => {
+    // Fallback: sum rent of Occupied properties if real payment stats not yet loaded
+    const occupiedRentTotal = properties.reduce(
+      (acc, p) => acc + (p.status === 'Occupied' ? Number(p.rent || p.price || 0) : 0),
+      0
+    );
+    const revenueValue = monthlyRevenue !== null ? monthlyRevenue : occupiedRentTotal;
+
+    return [
+      {
+        icon: Building2,
+        title: 'Total Properties',
+        value: properties.length || 0,
+        change: '+0%',
+        trend: properties.length > 0 ? 'up' : 'down',
+        color: isDarkMode ? 'from-cyan-500 to-indigo-600' : 'from-indigo-500 to-purple-600'
+      },
+      {
+        icon: IndianRupee,
+        title: 'Monthly Revenue',
+        value: revenueValue,
+        change: '+0%',
+        trend: revenueValue > 0 ? 'up' : 'down',
+        color: isDarkMode ? 'from-indigo-500 to-purple-600' : 'from-purple-500 to-pink-500',
+        prefix: '₹'
+      },
+      {
+        icon: Users,
+        title: 'Active Tenants',
+        value: tenantStats.activeTenants || 0,
+        change: '+0%',
+        trend: 'up',
+        color: isDarkMode ? 'from-purple-500 to-pink-600' : 'from-pink-400 to-rose-500'
+      },
+      {
+        icon: Wrench,
+        title: 'Maintenance Requests',
+        value: properties.reduce((acc, p) => acc + (p.maintenanceRequests || 0), 0) || 0,
+        change: '-0%',
+        trend: 'down',
+        color: isDarkMode ? 'from-pink-500 to-rose-600' : 'from-rose-400 to-pink-500'
+      }
+    ];
+  }, [isDarkMode, properties, tenantStats.activeTenants, monthlyRevenue]);
 
   // Load properties on mount
   useEffect(() => {
@@ -269,6 +219,25 @@ const LandlordDashboard = () => {
             maintenanceRequests: r.maintenanceRequests || 0
           }));
           setProperties(normalized);
+        }
+
+        // Fetch real payment revenue from /payments/stats
+        try {
+          const paymentStats = await api.getPaymentStats();
+          if (mounted && paymentStats) {
+            // Support multiple possible field names from the backend
+            const revenue =
+              paymentStats.totalRevenue ??
+              paymentStats.totalPaid ??
+              paymentStats.totalAmount ??
+              paymentStats.monthlyRevenue ??
+              null;
+            if (revenue !== null) {
+              setMonthlyRevenue(Number(revenue));
+            }
+          }
+        } catch (payErr) {
+          console.warn('Could not load payment stats, using rent-based fallback:', payErr);
         }
       } catch (err) {
         console.warn('Dashboard: failed to load properties from API', err.message || err);
@@ -555,12 +524,11 @@ const LandlordDashboard = () => {
 const ScheduleInspectionModal = ({ isOpen, onClose, isDark }) => {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
-  const [type, setType] = useState('in-person'); // 'in-person' or 'virtual'
+  const [type, setType] = useState('in-person');
 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Scheduling inspection:', { date, time, type });
-    // In a real app, you'd send this data to a backend
     onClose();
   };
 
