@@ -848,6 +848,36 @@ const AddPaymentMethodModal = ({ isOpen, onClose, onAdd, darkMode }) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * normaliseAmount
+ * ---------------
+ * Razorpay always stores/returns amounts in paise (smallest currency unit).
+ * e.g. ₹1,179 is stored as 117900.
+ *
+ * However, some legacy records or certain API responses may already be in
+ * rupees (e.g. a direct DB insert that stored 1179 instead of 117900).
+ *
+ * Rule:
+ *   - If the raw value is an integer AND >= 100 we assume paise → divide by 100
+ *   - If the raw value already has decimal places (e.g. 1179.00 stored as float)
+ *     or is < 100, treat as already in rupees
+ *
+ * This covers ₹499 (49900 paise), ₹999 (99900), ₹1179 (117900) correctly.
+ */
+function normaliseAmount(raw) {
+  const n = typeof raw === 'number' ? raw : parseFloat(raw);
+  if (isNaN(n) || n === 0) return 0;
+  // If it's a whole number >= 100 → assume paise
+  if (Number.isInteger(n) && n >= 100) return parseFloat((n / 100).toFixed(2));
+  // Already in rupees (e.g. 1179.00 or small amounts like 9.99)
+  return parseFloat(n.toFixed(2));
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Main Component
 // ─────────────────────────────────────────────────────────────────────────────
 const LandlordPayment = () => {
@@ -969,8 +999,8 @@ const LandlordPayment = () => {
   /**
    * fetchPaymentHistory
    * Calls GET /landlord-payments and maps each DB record to the UI shape.
-   * Called on mount AND after every successful Razorpay payment so history
-   * is always up-to-date without a full page reload.
+   * Amount is ALWAYS stored in paise by Razorpay — use normaliseAmount() to
+   * convert to rupees correctly regardless of the value's magnitude.
    */
   const fetchPaymentHistory = useCallback(async () => {
     setHistoryLoading(true);
@@ -983,7 +1013,8 @@ const LandlordPayment = () => {
         description: p.planName
           ? `Subscription — ${p.planName}`
           : p.description || 'Platform Subscription Fee',
-        amount: typeof p.amount === 'number' ? p.amount / 100 : parseFloat(p.amount) || 0,
+        // FIX: always use normaliseAmount — Razorpay stores in paise
+        amount: normaliseAmount(p.amount),
         date: p.createdAt || p.paidAt || p.date || new Date().toISOString(),
         status: p.status || 'pending',
         method: p.paymentMethod || p.method || 'Razorpay',
@@ -1001,16 +1032,16 @@ const LandlordPayment = () => {
   /**
    * fetchStats
    * Calls GET /landlord-payments/stats to populate the summary cards.
+   * FIX: always use normaliseAmount — remove the unreliable > 10000 heuristic.
    */
   const fetchStats = useCallback(async () => {
     try {
       const stats = await api.getLandlordSubscriptionStats();
       if (stats) {
-        // Backend may return amounts in paise (Razorpay) — normalise to rupees
         const rawTotal = stats.totalPaid ?? stats.total_paid ?? 0;
         const rawAvg   = stats.avgMonthlySpend ?? stats.avg_monthly_spend ?? 0;
-        setTotalPaid(rawTotal > 10000 ? rawTotal / 100 : rawTotal);
-        setAvgMonthlySpend(rawAvg > 10000 ? rawAvg / 100 : rawAvg);
+        setTotalPaid(normaliseAmount(rawTotal));
+        setAvgMonthlySpend(normaliseAmount(rawAvg));
       }
     } catch (err) {
       // Silently fall back to computing from local history
@@ -1247,7 +1278,7 @@ const LandlordPayment = () => {
                   <IndianRupee className="w-6 h-6 text-white" />
                 </motion.div>
                 <div className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>
-                  ₹{Math.round(animatedTotalPaid)}
+                  ₹{Math.round(animatedTotalPaid).toLocaleString('en-IN')}
                 </div>
                 <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Total Paid</div>
               </AnimatedCard>
@@ -1267,7 +1298,7 @@ const LandlordPayment = () => {
                   <TrendingUp className="w-6 h-6 text-white" />
                 </motion.div>
                 <div className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>
-                  ₹{Math.round(animatedAvgSpend)}
+                  ₹{Math.round(animatedAvgSpend).toLocaleString('en-IN')}
                 </div>
                 <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Avg Monthly</div>
               </AnimatedCard>
