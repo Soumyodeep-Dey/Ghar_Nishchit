@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
@@ -129,8 +130,12 @@ const PaymentHistoryRow = ({ payment, onDownloadReceipt }) => {
 
 const TenantPayment = () => {
   const { darkMode } = useDarkMode();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const leaseRedirectHandled = useRef(false);
 
   const [paymentHistory,   setPaymentHistory]   = useState([]);
+  const [leaseCheckout,    setLeaseCheckout]    = useState(null);
   const [upcomingPayments, setUpcomingPayments] = useState([]);
   const [isLoading,        setIsLoading]        = useState(true);
   const [currentUser,      setCurrentUser]      = useState({});
@@ -178,6 +183,33 @@ const TenantPayment = () => {
     return () => { cancelled = true; };
   }, [fetchPayments]);
 
+  // After accepting a lease, open move-in payment with rent + deposit pre-filled
+  useEffect(() => {
+    const lp = location.state?.leasePayment;
+    if (!lp || leaseRedirectHandled.current) return;
+    leaseRedirectHandled.current = true;
+
+    const rent = Number(lp.rentAmount || 0);
+    const deposit = Number(lp.securityDeposit || 0);
+    const total = Number(lp.totalAmount || rent + deposit);
+
+    setLeaseCheckout(lp);
+    setSelectedPayment({
+      id: `lease-${lp.contractId}`,
+      propertyId: lp.propertyId,
+      amount: total,
+      rentAmount: rent,
+      securityDeposit: deposit,
+      propertyTitle: lp.propertyTitle,
+      landlordName: lp.landlordName,
+      type: 'Move-in Payment',
+      dueDate: new Date().toISOString(),
+      contractId: lp.contractId,
+    });
+    setShowPaymentModal(true);
+    navigate(location.pathname, { replace: true, state: {} });
+  }, [location.state, location.pathname, navigate]);
+
   // ── Memoised stats ───────────────────────────────────────────────
   const calculations = useMemo(() => {
     const paidPayments  = paymentHistory.filter(p => p.status === 'Paid');
@@ -209,11 +241,17 @@ const TenantPayment = () => {
     setManualReady(false);
   }, []);
 
-  const handlePaymentSuccess = useCallback(async (payment) => {
+  const handlePaymentSuccess = useCallback(async () => {
+    const wasLease = !!leaseCheckout;
     closeModal();
-    showSuccessToast('✅ Rent paid successfully!');
+    setLeaseCheckout(null);
+    showSuccessToast(
+      wasLease
+        ? '✅ Move-in payment complete! Your landlord has been notified.'
+        : '✅ Rent paid successfully!'
+    );
     await fetchPayments();
-  }, [closeModal, fetchPayments]);
+  }, [closeModal, fetchPayments, leaseCheckout]);
 
   const handlePaymentFailure = useCallback((msg) => {
     showErrorToast(msg || 'Payment failed. Please try again.');
@@ -251,7 +289,9 @@ const TenantPayment = () => {
         propertyId: selectedPayment.propertyId || selectedPayment.property?._id || undefined,
         amount:     selectedPayment.amount,
         dueDate:    selectedPayment.dueDate || selectedPayment.date,
-        note:       `Rent — ${selectedPayment.type || 'Rent'}`,
+        note:       selectedPayment.contractId
+          ? `Move-in: rent ₹${selectedPayment.rentAmount || 0} + deposit ₹${selectedPayment.securityDeposit || 0} | contract:${selectedPayment.contractId}`
+          : `Rent — ${selectedPayment.type || 'Rent'}`,
       }
     : {
         propertyId: undefined,   // optional — backend handles null gracefully
@@ -305,6 +345,60 @@ const TenantPayment = () => {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Payment Center</h1>
             <p className="text-gray-600">Manage your payments with ease and security</p>
           </div>
+
+          {/* Move-in payment banner (after lease acceptance) */}
+          {leaseCheckout && (
+            <div className={`${cardBg} backdrop-blur-sm rounded-3xl shadow-xl p-6 mb-8 border-2 border-green-400/50`}>
+              <h2 className={`text-xl font-bold mb-4 ${textHead}`}>Complete Move-in Payment</h2>
+              <p className={`${textSub} mb-4`}>
+                Pay your first month&apos;s rent and security deposit for the property you just signed.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className={`p-4 rounded-xl ${darkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                  <p className={`text-xs uppercase tracking-wide ${textSub}`}>Apartment</p>
+                  <p className={`font-semibold ${textHead}`}>{leaseCheckout.propertyTitle}</p>
+                </div>
+                <div className={`p-4 rounded-xl ${darkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                  <p className={`text-xs uppercase tracking-wide ${textSub}`}>Landlord</p>
+                  <p className={`font-semibold ${textHead}`}>{leaseCheckout.landlordName}</p>
+                </div>
+                <div className={`p-4 rounded-xl ${darkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                  <p className={`text-xs uppercase tracking-wide ${textSub}`}>Monthly Rent</p>
+                  <p className={`font-bold text-lg ${textHead}`}>₹{Number(leaseCheckout.rentAmount || 0).toLocaleString('en-IN')}</p>
+                </div>
+                <div className={`p-4 rounded-xl ${darkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                  <p className={`text-xs uppercase tracking-wide ${textSub}`}>Security Deposit</p>
+                  <p className={`font-bold text-lg ${textHead}`}>₹{Number(leaseCheckout.securityDeposit || 0).toLocaleString('en-IN')}</p>
+                </div>
+              </div>
+              <div className={`flex items-center justify-between p-4 rounded-xl ${darkMode ? 'bg-green-900/30' : 'bg-green-50'}`}>
+                <span className={`font-semibold ${textHead}`}>Total Due Now</span>
+                <span className="text-2xl font-bold text-green-600">
+                  ₹{Number(leaseCheckout.totalAmount || 0).toLocaleString('en-IN')}
+                </span>
+              </div>
+              <button
+                onClick={() => {
+                  const lp = leaseCheckout;
+                  openModal({
+                    id: `lease-${lp.contractId}`,
+                    propertyId: lp.propertyId,
+                    amount: Number(lp.totalAmount || 0),
+                    rentAmount: lp.rentAmount,
+                    securityDeposit: lp.securityDeposit,
+                    propertyTitle: lp.propertyTitle,
+                    landlordName: lp.landlordName,
+                    type: 'Move-in Payment',
+                    dueDate: new Date().toISOString(),
+                    contractId: lp.contractId,
+                  });
+                }}
+                className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold"
+              >
+                Pay Move-in Amount
+              </button>
+            </div>
+          )}
 
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -446,7 +540,9 @@ const TenantPayment = () => {
 
             {/* Modal header */}
             <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-gray-800">Pay Rent</h3>
+              <h3 className="text-xl font-bold text-gray-800">
+                {selectedPayment?.type === 'Move-in Payment' ? 'Pay Move-in' : 'Pay Rent'}
+              </h3>
               <button onClick={closeModal} className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                 aria-label="Close">
                 <X className="h-6 w-6 text-gray-500" />
@@ -457,6 +553,20 @@ const TenantPayment = () => {
               {/* MODE A: pre-filled from upcoming payment */}
               {selectedPayment ? (
                 <>
+                  {selectedPayment.propertyTitle && (
+                    <div className="mb-4 p-4 bg-gray-50 rounded-xl text-sm space-y-1">
+                      <p><span className="text-gray-500">Apartment:</span> <strong>{selectedPayment.propertyTitle}</strong></p>
+                      {selectedPayment.landlordName && (
+                        <p><span className="text-gray-500">Landlord:</span> <strong>{selectedPayment.landlordName}</strong></p>
+                      )}
+                      {selectedPayment.rentAmount != null && (
+                        <p><span className="text-gray-500">Rent:</span> ₹{Number(selectedPayment.rentAmount).toLocaleString('en-IN')}</p>
+                      )}
+                      {selectedPayment.securityDeposit != null && (
+                        <p><span className="text-gray-500">Deposit:</span> ₹{Number(selectedPayment.securityDeposit).toLocaleString('en-IN')}</p>
+                      )}
+                    </div>
+                  )}
                   <div className="text-center mb-6">
                     <div className="p-4 bg-blue-100 rounded-2xl w-fit mx-auto mb-4">
                       <IndianRupee className="h-12 w-12 text-blue-600" />

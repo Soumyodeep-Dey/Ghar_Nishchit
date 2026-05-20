@@ -3,6 +3,7 @@ import Inquiry from '../models/inquiry.model.js';
 import User from '../models/user.model.js';
 import Contract from '../models/contract.model.js';
 import Visit from '../models/visit.model.js';
+import Payment from '../models/payment.model.js';
 import mongoose from 'mongoose';
 
 // Helper to resolve user id
@@ -262,10 +263,36 @@ export const getTenantStats = async (req, res) => {
             .lean();
         const activeContracts = activeContractDocs.length;
         const pendingContracts = await Contract.countDocuments({ landlord: authUserId, status: 'pending' });
-        const monthlyRevenue = activeContractDocs.reduce(
+        const contractMonthlyRevenue = activeContractDocs.reduce(
             (sum, c) => sum + (Number(c.rentAmount) || 0),
             0
         );
+
+        const landlordContracts = await Contract.find({ landlord: authUserId }).select('tenant').lean();
+        const tenantIds = [...new Set(
+            landlordContracts.map(c => c.tenant?.toString()).filter(Boolean)
+        )];
+
+        const monthStart = new Date();
+        monthStart.setDate(1);
+        monthStart.setHours(0, 0, 0, 0);
+
+        const paidQuery = {
+            status: 'Paid',
+            paidAt: { $gte: monthStart },
+            $or: [
+                ...(propertyIds.length > 0 ? [{ propertyId: { $in: propertyIds } }] : []),
+                ...(tenantIds.length > 0 ? [{ tenantId: { $in: tenantIds } }] : []),
+            ],
+        };
+
+        let collectedThisMonth = 0;
+        if (paidQuery.$or.length > 0) {
+            const paidThisMonth = await Payment.find(paidQuery).select('amount').lean();
+            collectedThisMonth = paidThisMonth.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+        }
+
+        const monthlyRevenue = contractMonthlyRevenue + collectedThisMonth;
 
         const stats = {
             totalProperties:  myProperties.length,
@@ -275,6 +302,8 @@ export const getTenantStats = async (req, res) => {
             pendingContracts: pendingContracts,             // sent but not yet signed
             overduePayments:  0,
             monthlyRevenue,
+            contractMonthlyRevenue,
+            collectedThisMonth,
         };
 
         res.status(200).json(stats);

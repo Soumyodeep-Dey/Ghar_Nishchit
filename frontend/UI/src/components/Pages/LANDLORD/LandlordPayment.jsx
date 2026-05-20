@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import { getCurrentYear } from '../../../utils/dateUtils.js';
@@ -995,6 +996,10 @@ const LandlordPayment = () => {
   // ─── Real stats from backend ────────────────────────────────────────────────
   const [totalPaid, setTotalPaid] = useState(0);
   const [avgMonthlySpend, setAvgMonthlySpend] = useState(0);
+  const [tenantRentPayments, setTenantRentPayments] = useState([]);
+  const [tenantRentLoading, setTenantRentLoading] = useState(false);
+
+  const location = useLocation();
 
   /**
    * fetchPaymentHistory
@@ -1064,6 +1069,24 @@ const LandlordPayment = () => {
     }
   }, []);
 
+  const fetchTenantRentPayments = useCallback(async () => {
+    setTenantRentLoading(true);
+    try {
+      const data = await api.getLandlordTenantPayments();
+      setTenantRentPayments(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.warn('Could not fetch tenant rent payments:', err);
+    } finally {
+      setTenantRentLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (location.state?.highlightTenantPayments) {
+      setActiveTab('tenant-rent');
+    }
+  }, [location.state]);
+
   // Load user profile, properties, history and stats on mount
   useEffect(() => {
     let mounted = true;
@@ -1087,8 +1110,9 @@ const LandlordPayment = () => {
     load();
     fetchPaymentHistory();
     fetchStats();
+    fetchTenantRentPayments();
     return () => { mounted = false; };
-  }, [fetchPaymentHistory, fetchStats]);
+  }, [fetchPaymentHistory, fetchStats, fetchTenantRentPayments]);
 
   // Derive totalPaid / avgMonthlySpend from local history as fallback when
   // the stats endpoint hasn't populated the state values yet.
@@ -1393,6 +1417,7 @@ const LandlordPayment = () => {
                 { key: 'billing', label: 'Current Bill', icon: Receipt },
                 { key: 'plans', label: 'Subscription Plans', icon: Crown },
                 { key: 'methods', label: 'Payment Methods', icon: CreditCard },
+                { key: 'tenant-rent', label: 'Tenant Rent', icon: Users },
                 { key: 'history', label: 'Payment History', icon: Clock }
               ].map(({ key, label, icon }) => (
                 <motion.button
@@ -1534,6 +1559,78 @@ const LandlordPayment = () => {
                       />
                     ))}
                   </div>
+                </motion.div>
+              )}
+
+              {activeTab === 'tenant-rent' && (
+                <motion.div
+                  key="tenant-rent"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.5 }}
+                  className="space-y-4"
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'}`}>
+                      Rent Received from Tenants
+                    </h3>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={fetchTenantRentPayments}
+                      className={`flex items-center space-x-2 px-4 py-2 ${
+                        darkMode ? 'bg-slate-700 text-cyan-300 hover:bg-slate-600' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
+                      } rounded-xl text-sm font-semibold transition-colors`}
+                    >
+                      <RotateCcw className={`w-4 h-4 ${tenantRentLoading ? 'animate-spin' : ''}`} />
+                      <span>Refresh</span>
+                    </motion.button>
+                  </div>
+
+                  {tenantRentLoading ? (
+                    <div className={`text-center py-12 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                      <Loader className="w-8 h-8 animate-spin mx-auto mb-3" />
+                      Loading tenant payments…
+                    </div>
+                  ) : tenantRentPayments.length === 0 ? (
+                    <div className={`text-center py-12 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                      No tenant rent payments recorded yet.
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {tenantRentPayments.map((p) => (
+                        <div
+                          key={p.id}
+                          className={`flex flex-wrap items-center justify-between gap-4 p-5 rounded-2xl border ${
+                            darkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-white/80 border-indigo-100'
+                          }`}
+                        >
+                          <div>
+                            <p className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                              {p.tenantName} — {p.propertyTitle}
+                            </p>
+                            <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                              {p.type} · {p.paymentMethod || 'Razorpay'}
+                              {p.paidAt && ` · ${new Date(p.paidAt).toLocaleString()}`}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className={`text-xl font-bold ${darkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                              ₹{Number(p.amount).toLocaleString('en-IN')}
+                            </p>
+                            <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                              p.status === 'Paid'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              {p.status}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </motion.div>
               )}
 

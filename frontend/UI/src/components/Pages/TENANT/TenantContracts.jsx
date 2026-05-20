@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
@@ -289,6 +290,7 @@ const EmptyState = ({ darkMode }) => (
 // ─── Main Component ───────────────────────────────────────────────────────────
 const TenantContracts = () => {
   const { darkMode } = useDarkMode();
+  const navigate = useNavigate();
 
   const [contracts, setContracts]           = useState([]);
   const [isLoading, setIsLoading]           = useState(true);
@@ -316,22 +318,45 @@ const TenantContracts = () => {
 
   useEffect(() => { fetchContracts(); }, [fetchContracts]);
 
-  // Accept a contract
+  // Accept a contract → redirect to payment with rent + deposit pre-filled
   const handleAccept = useCallback(async (contractId) => {
     try {
       setAccepting(true);
+      const contract =
+        contracts.find(c => String(c._id || c.id) === String(contractId)) ||
+        selectedContract;
+
       await api.updateContractStatus(contractId, 'active');
 
-      // Refetch to clear deleted duplicate contracts
-      await fetchContracts();
+      const propertyId =
+        contract?.property?._id ||
+        contract?.propertyId ||
+        (typeof contract?.property === 'string' ? contract.property : null);
+      const rentAmount = Number(contract?.rentAmount || 0);
+      const securityDeposit = Number(contract?.securityDeposit || 0);
 
-      showSuccessToast('🎉 Lease accepted! You are now an active tenant.');
+      setSelectedContract(null);
+      showSuccessToast('🎉 Lease accepted! Complete your move-in payment.');
+
+      navigate('/tenant/payment', {
+        state: {
+          leasePayment: {
+            contractId,
+            propertyId,
+            propertyTitle: contract?.property?.title || 'Your apartment',
+            landlordName: contract?.landlord?.name || 'Landlord',
+            rentAmount,
+            securityDeposit,
+            totalAmount: rentAmount + securityDeposit,
+          },
+        },
+      });
     } catch (err) {
       showErrorToast(err.message || 'Failed to accept contract. Please try again.');
     } finally {
       setAccepting(false);
     }
-  }, []);
+  }, [contracts, selectedContract, navigate]);
 
   // Decline a contract
   const handleDecline = useCallback(async () => {

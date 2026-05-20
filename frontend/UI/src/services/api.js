@@ -123,6 +123,7 @@ const api = {
     getTenantPaymentHistory: (_tenantId) => request('/payments', { method: 'GET' }),
     getPaymentStats:         ()          => request('/payments/stats', { method: 'GET' }),
     getLandlordRevenue:      ()          => request('/payments/landlord-revenue', { method: 'GET' }),
+    getLandlordTenantPayments: ()        => request('/payments/landlord-tenant-payments', { method: 'GET' }),
 
     // -------------------------------------------------------------------------
     // Payments — Tenant Razorpay Gateway

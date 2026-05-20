@@ -158,6 +158,8 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
     // Redirect logic
     if (notification.type === 'inquiry' || notification.type === 'message') {
       navigate('/landlord/messages', { state: { activeInquiryId: notification.relatedId } });
+    } else if (notification.type === 'payment') {
+      navigate('/landlord/payment', { state: { highlightTenantPayments: true } });
     }
   };
 
