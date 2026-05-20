@@ -103,11 +103,56 @@ export const getMyTenants = async (req, res) => {
             };
         });
 
-        console.log('Returning contract-based tenants:', result.length);
-        res.status(200).json(result);
+        // Hide tenants whose leases were removed (all contracts cancelled/completed)
+        const visibleTenants = result.filter(t =>
+            t.contracts.some(c => c.status === 'active' || c.status === 'pending')
+        );
+
+        console.log('Returning contract-based tenants:', visibleTenants.length);
+        res.status(200).json(visibleTenants);
     } catch (error) {
         console.error('Error fetching tenants:', error);
         res.status(500).json({ message: error.message, error: error.toString() });
+    }
+};
+
+/**
+ * Remove a tenant from the landlord's list by cancelling all their contracts.
+ */
+export const removeTenant = async (req, res) => {
+    try {
+        const authUserId = resolveUserId(req.user);
+        if (!authUserId) {
+            return res.status(401).json({ message: 'Authentication required' });
+        }
+
+        const { tenantId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(tenantId)) {
+            return res.status(400).json({ message: 'Invalid tenant ID' });
+        }
+
+        const result = await Contract.updateMany(
+            {
+                landlord: authUserId,
+                tenant: tenantId,
+                status: { $ne: 'cancelled' },
+            },
+            { $set: { status: 'cancelled' } }
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({
+                message: 'Tenant not found or already removed',
+            });
+        }
+
+        res.status(200).json({
+            message: 'Tenant removed successfully',
+            cancelledContracts: result.modifiedCount,
+        });
+    } catch (error) {
+        console.error('Error removing tenant:', error);
+        res.status(500).json({ message: error.message });
     }
 };
 

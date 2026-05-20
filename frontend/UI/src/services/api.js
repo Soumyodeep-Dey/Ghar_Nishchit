@@ -106,6 +106,7 @@ const api = {
     getMyTenants:    ()         => request('/tenants', { method: 'GET' }),
     getTenantById:   (tenantId) => request(`/tenants/${tenantId}`, { method: 'GET' }),
     getTenantStats:  ()         => request('/tenants/stats', { method: 'GET' }),
+    removeTenant:    (tenantId) => request(`/tenants/${tenantId}`, { method: 'DELETE' }),
 
     // -------------------------------------------------------------------------
     // Notifications (Tenant)

@@ -1350,13 +1350,23 @@ const LandlordTenant = () => {
   const handleDeleteTenant = (tenantId) => {
     showConfirmToast(
       'Are you sure you want to remove this tenant?',
-      () => {
-        setTenants(prev => prev.filter(t => t.id !== tenantId));
-        addNotification({
-          type: 'success',
-          title: 'Tenant Removed',
-          message: 'Tenant has been successfully removed from your list.'
-        });
+      async () => {
+        try {
+          await api.removeTenant(tenantId);
+          setTenants(prev => prev.filter(t => String(t.id) !== String(tenantId)));
+          addNotification({
+            type: 'success',
+            title: 'Tenant Removed',
+            message: 'Tenant has been successfully removed from your list.'
+          });
+        } catch (error) {
+          console.error('Failed to remove tenant:', error);
+          addNotification({
+            type: 'error',
+            title: 'Remove Failed',
+            message: error.message || 'Could not remove tenant. Please try again.'
+          });
+        }
       }
     );
   };
