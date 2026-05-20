@@ -789,6 +789,7 @@ const LandlordProperty = () => {
   const [modalMode, setModalMode] = useState('add');
   const [detailsProperty, setDetailsProperty] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [monthlyRevenue, setMonthlyRevenue] = useState(null);
   // isLoading state removed — not used
 
   // Filter and sort properties
@@ -888,6 +889,29 @@ const LandlordProperty = () => {
     load();
     return () => { mounted = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Monthly revenue from active leases (same calculation as LandlordTenant)
+  useEffect(() => {
+    let mounted = true;
+    const fetchRevenue = async () => {
+      try {
+        const stats = await api.getTenantStats();
+        if (mounted && stats?.monthlyRevenue != null) {
+          setMonthlyRevenue(Number(stats.monthlyRevenue));
+        }
+      } catch (err) {
+        console.warn('Could not load monthly revenue:', err);
+      }
+    };
+
+    fetchRevenue();
+    const interval = setInterval(fetchRevenue, 30000);
+
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const handleAddProperty = () => {
@@ -1017,7 +1041,8 @@ const LandlordProperty = () => {
     available: properties.filter(p => p.status === 'Available').length,
     occupied: properties.filter(p => p.status === 'Occupied').length,
     maintenance: properties.filter(p => p.status === 'Maintenance').length,
-    totalRevenue: properties.reduce((sum, p) => sum + (p.status === 'Occupied' ? parseInt(p.rent) : 0), 0)
+    // Use actual tenant payment revenue if available, otherwise fall back to occupied property rent
+    totalRevenue: monthlyRevenue !== null ? monthlyRevenue : properties.reduce((sum, p) => sum + (p.status === 'Occupied' ? parseInt(p.rent) : 0), 0)
   };
 
   return (

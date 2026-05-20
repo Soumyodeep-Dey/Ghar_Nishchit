@@ -4,6 +4,7 @@ import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
 import api from '../../../services/api.js';
+import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import { showErrorToast, showSuccessToast } from '../../../utils/toast.jsx';
 import {
   ChatBubbleLeftRightIcon, PaperAirplaneIcon, PaperClipIcon,
@@ -272,6 +273,7 @@ const ContractModal = ({ contract, onClose, onAccept, onDecline, accepting }) =>
 
 const TenantMessage = () => {
   const { darkMode } = useDarkMode();
+  const { t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -520,7 +522,7 @@ const TenantMessage = () => {
                 <div className={`w-20 h-20 border-4 ${darkMode ? 'border-blue-900' : 'border-blue-200'} rounded-full animate-spin`} />
                 <div className={`absolute inset-0 w-20 h-20 border-4 ${darkMode ? 'border-t-cyan-500' : 'border-t-blue-600'} rounded-full animate-spin`} />
               </div>
-              <h2 className={`text-xl font-bold ${darkMode ? 'text-slate-100' : 'text-gray-800'} mt-6 animate-pulse`}>Loading Messages...</h2>
+              <h2 className={`text-xl font-bold ${darkMode ? 'text-slate-100' : 'text-gray-800'} mt-6 animate-pulse`}>{t('pages.loadingMessages')}</h2>
               <p className={`${darkMode ? 'text-slate-300' : 'text-gray-600'} mt-2`}>Connecting to your conversations</p>
             </div>
           </main>
@@ -707,7 +709,7 @@ const TenantMessage = () => {
             ) : (
               <div className={`flex-1 flex flex-col items-center justify-center ${darkMode ? 'bg-gradient-to-b from-gray-900 to-gray-800' : 'bg-gradient-to-b from-gray-50 to-white'}`}>
                 <ChatBubbleLeftRightIcon className={`h-24 w-24 ${darkMode ? 'text-gray-700' : 'text-gray-300'} mb-6`} />
-                <h2 className={`text-2xl font-bold ${darkMode ? 'text-gray-200' : 'text-gray-700'} mb-2`}>No conversation selected</h2>
+                <h2 className={`text-2xl font-bold ${darkMode ? 'text-gray-200' : 'text-gray-700'} mb-2`}>{t('pages.noConversation')}</h2>
                 <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-center max-w-md`}>
                   Select a conversation from the list, or go to Properties and click "Contact Landlord" to start one.
                 </p>

@@ -4,6 +4,7 @@ import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
 import api from '../../../services/api.js';
 import { showErrorToast, showSuccessToast, showInfoToast } from '../../../utils/toast.jsx';
+import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import {
   WrenchScrewdriverIcon, PlusIcon, TrashIcon, PencilIcon, CheckCircleIcon, ClockIcon, ExclamationTriangleIcon, DocumentTextIcon, CalendarIcon, MagnifyingGlassIcon, ChartBarIcon, PaperClipIcon, XMarkIcon
 } from '@heroicons/react/24/outline';
@@ -319,6 +320,7 @@ const StatsCard = ({ title, value, icon, gradient, delay = 0 }) => {
 
 const TenantMaintenance = () => {
   const { darkMode } = useDarkMode();
+  const { t } = useLanguage();
   const [requests, setRequests] = useState([]);
   const [newRequest, setNewRequest] = useState({
     title: '',
@@ -510,7 +512,7 @@ const TenantMaintenance = () => {
                 <div className="w-20 h-20 border-4 border-orange-200 rounded-full animate-spin"></div>
                 <div className="absolute inset-0 w-20 h-20 border-4 border-t-orange-600 rounded-full animate-spin"></div>
               </div>
-              <h2 className="text-xl font-bold text-gray-800 mt-6 animate-pulse">Loading Maintenance...</h2>
+              <h2 className="text-xl font-bold text-gray-800 mt-6 animate-pulse">{t('pages.loadingMaintenance')}</h2>
               <p className="text-gray-600 mt-2">Preparing your requests</p>
             </div>
           </main>
@@ -532,7 +534,7 @@ const TenantMaintenance = () => {
                   <WrenchScrewdriverIcon className="h-10 w-10" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold mb-2 animate-slideDown">Maintenance Requests</h1>
+                  <h1 className="text-4xl font-bold mb-2 animate-slideDown">{t('pages.maintenanceRequests')}</h1>
                   <p className="text-orange-100 text-lg animate-slideUp">Track and manage all your maintenance needs</p>
                 </div>
               </div>
@@ -694,7 +696,7 @@ const TenantMaintenance = () => {
                   <ChartBarIcon className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Your Requests</h2>
+                  <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{t('pages.yourRequests')}</h2>
                   <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Track and manage your maintenance requests</p>
                 </div>
               </div>
