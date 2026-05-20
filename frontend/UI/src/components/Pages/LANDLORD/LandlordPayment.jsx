@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import { getCurrentYear } from '../../../utils/dateUtils.js';
@@ -847,20 +847,23 @@ const AddPaymentMethodModal = ({ isOpen, onClose, onAdd, darkMode }) => {
 };
 
 
+// ─────────────────────────────────────────────────────────────────────────────
 // Main Component
+// ─────────────────────────────────────────────────────────────────────────────
 const LandlordPayment = () => {
   const [currentSection] = useState('Payments');
   const [activeTab, setActiveTab] = useState('billing');
   const [showRazorpay, setShowRazorpay] = useState(false);
   const [showAddPaymentModal, setShowAddPaymentModal] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState(0);
+  // Track which plan is being purchased so LandlordRazorpayCheckout gets full context
+  const [checkoutPlan, setCheckoutPlan] = useState(null);
 
   const { darkMode } = useDarkMode();
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
   const { notifications, addNotification, removeNotification } = useNotification();
 
   // ─── Subscription Plans (synced with landing page pricing) ─────────────────────
-  // Source: frontend/UI/src/components/landing.jsx  →  "For Landlords" section
   const [subscriptionPlans] = useState([
     {
       id: 1,
@@ -950,10 +953,72 @@ const LandlordPayment = () => {
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(paymentMethods[0]?.id);
 
-  // Load dynamic logic for user to only see their property rents
+  // ─── User & Properties ──────────────────────────────────────────────────────
   const [currentUser, setCurrentUser] = useState(null);
   const [properties, setProperties] = useState([]);
 
+  // ─── Real payment history from backend ─────────────────────────────────────
+  const [paymentHistory, setPaymentHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState(null);
+
+  // ─── Real stats from backend ────────────────────────────────────────────────
+  const [totalPaid, setTotalPaid] = useState(0);
+  const [avgMonthlySpend, setAvgMonthlySpend] = useState(0);
+
+  /**
+   * fetchPaymentHistory
+   * Calls GET /landlord-payments and maps each DB record to the UI shape.
+   * Called on mount AND after every successful Razorpay payment so history
+   * is always up-to-date without a full page reload.
+   */
+  const fetchPaymentHistory = useCallback(async () => {
+    setHistoryLoading(true);
+    setHistoryError(null);
+    try {
+      const data = await api.getLandlordSubscriptionPayments();
+      const records = Array.isArray(data) ? data : (data?.payments ?? []);
+      const mapped = records.map((p, idx) => ({
+        id: p._id || p.id || idx + 1,
+        description: p.planName
+          ? `Subscription — ${p.planName}`
+          : p.description || 'Platform Subscription Fee',
+        amount: typeof p.amount === 'number' ? p.amount / 100 : parseFloat(p.amount) || 0,
+        date: p.createdAt || p.paidAt || p.date || new Date().toISOString(),
+        status: p.status || 'pending',
+        method: p.paymentMethod || p.method || 'Razorpay',
+        invoiceId: p.invoiceId || p.razorpay_order_id || `INV-${p._id?.slice(-6) || idx + 1}`,
+      }));
+      setPaymentHistory(mapped);
+    } catch (err) {
+      console.warn('Could not fetch landlord payment history:', err);
+      setHistoryError('Unable to load payment history. Please refresh.');
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
+
+  /**
+   * fetchStats
+   * Calls GET /landlord-payments/stats to populate the summary cards.
+   */
+  const fetchStats = useCallback(async () => {
+    try {
+      const stats = await api.getLandlordSubscriptionStats();
+      if (stats) {
+        // Backend may return amounts in paise (Razorpay) — normalise to rupees
+        const rawTotal = stats.totalPaid ?? stats.total_paid ?? 0;
+        const rawAvg   = stats.avgMonthlySpend ?? stats.avg_monthly_spend ?? 0;
+        setTotalPaid(rawTotal > 10000 ? rawTotal / 100 : rawTotal);
+        setAvgMonthlySpend(rawAvg > 10000 ? rawAvg / 100 : rawAvg);
+      }
+    } catch (err) {
+      // Silently fall back to computing from local history
+      console.warn('Could not fetch landlord stats:', err);
+    }
+  }, []);
+
+  // Load user profile, properties, history and stats on mount
   useEffect(() => {
     let mounted = true;
     const load = async () => {
@@ -974,26 +1039,26 @@ const LandlordPayment = () => {
       }
     };
     load();
+    fetchPaymentHistory();
+    fetchStats();
     return () => { mounted = false; };
-  }, []);
+  }, [fetchPaymentHistory, fetchStats]);
 
-  const paymentHistory = useMemo(() => {
-    if (!properties || properties.length === 0) return [];
-
-    return properties.map((prop, idx) => ({
-      id: idx + 1,
-      description: `Platform Subscription Fee - ${prop.title || 'Property'}`,
-      amount: currentPlan?.price || 499,
-      date: `${getCurrentYear()}-08-01`,
-      status: prop.status === 'Occupied' ? 'completed' : 'pending',
-      method: 'Bank Transfer',
-      invoiceId: `INV-${getCurrentYear()}-${1000 + idx}`
-    }));
-  }, [properties, currentPlan]);
+  // Derive totalPaid / avgMonthlySpend from local history as fallback when
+  // the stats endpoint hasn't populated the state values yet.
+  useEffect(() => {
+    if (totalPaid === 0 && paymentHistory.length > 0) {
+      const computed = paymentHistory
+        .filter(p => p.status === 'completed')
+        .reduce((sum, p) => sum + p.amount, 0);
+      setTotalPaid(computed);
+      setAvgMonthlySpend(computed / Math.max(paymentHistory.length, 1));
+    }
+  }, [paymentHistory, totalPaid]);
 
   const billingSummary = useMemo(() => {
     const planPrice = currentPlan?.price || 499;
-    const tax = planPrice * 0.18; // 18% GST
+    const tax = planPrice * 0.18;
     return {
       planName: currentPlan?.name || 'Standard Listing',
       propertiesCount: properties.length,
@@ -1006,27 +1071,18 @@ const LandlordPayment = () => {
     };
   }, [properties, currentPlan]);
 
-  // Calculate stats
-  const totalPaid = useMemo(() => {
-    return paymentHistory
-      .filter(p => p.status === 'completed')
-      .reduce((sum, p) => sum + p.amount, 0);
-  }, [paymentHistory]);
-
-  const avgMonthlySpend = useMemo(() => {
-    return totalPaid / Math.max(paymentHistory.length, 1);
-  }, [totalPaid, paymentHistory]);
-
   const daysUntilPayment = useMemo(() => {
     return Math.ceil((new Date(billingSummary.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
   }, [billingSummary]);
 
   // Animated counters — called at top-level (Rules of Hooks)
   const animatedTotalPaid = useCountUp(totalPaid, 2000, 0);
-  const animatedAvgSpend = useCountUp(avgMonthlySpend, 2000, 0);
+  const animatedAvgSpend  = useCountUp(avgMonthlySpend, 2000, 0);
 
-  // Event handlers
+  // ─── Event Handlers ─────────────────────────────────────────────────────────
+
   const handleSelectPlan = (plan) => {
+    setCheckoutPlan(plan);
     setPaymentAmount(plan.price);
     setShowRazorpay(true);
   };
@@ -1038,16 +1094,20 @@ const LandlordPayment = () => {
       title: 'Plan Upgrade',
       message: `Upgrading to ${plan.name} will cost an additional ₹${upgradeCost.toFixed(2)}`
     });
+    const upgradePlan = { ...plan, price: upgradeCost };
+    setCheckoutPlan(upgradePlan);
     setPaymentAmount(upgradeCost);
     setShowRazorpay(true);
   };
 
   const handlePayNow = () => {
+    // Pay current bill — use the current plan as context
+    setCheckoutPlan(currentPlan);
     setPaymentAmount(billingSummary.totalAmount);
     setShowRazorpay(true);
   };
 
-  // ── Real Razorpay callbacks ────────────────────────────────────────────
+  // ── Real Razorpay callbacks ────────────────────────────────────────────────
   const handleRazorpaySuccess = (payment) => {
     setShowRazorpay(false);
     addNotification({
@@ -1056,6 +1116,11 @@ const LandlordPayment = () => {
       message: `Subscription activated! Payment ID: ${payment?.razorpay_payment_id ?? payment?.id ?? '—'}`,
       duration: 7000,
     });
+    // ✅ Refresh history and stats from backend so new record appears immediately
+    fetchPaymentHistory();
+    fetchStats();
+    // Switch to history tab so landlord can see the new entry
+    setActiveTab('history');
   };
 
   const handleRazorpayFailure = (msg) => {
@@ -1151,7 +1216,7 @@ const LandlordPayment = () => {
                   : 'bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent'
                   }`}
               >
-                Payment & Billing
+                Payment &amp; Billing
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0 }}
@@ -1392,12 +1457,12 @@ const LandlordPayment = () => {
                   className="space-y-6"
                 >
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'}`}>Payment Methods</h3>
+                    <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'}`}>Saved Payment Methods</h3>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setShowAddPaymentModal(true)}
-                      className={`flex items-center space-x-2 px-6 py-3 ${darkMode
+                      className={`flex items-center space-x-2 px-4 py-2 ${darkMode
                         ? 'bg-gradient-to-r from-cyan-500 to-blue-600'
                         : 'bg-gradient-to-r from-indigo-500 to-purple-600'
                         } text-white rounded-xl font-semibold`}
@@ -1407,17 +1472,17 @@ const LandlordPayment = () => {
                     </motion.button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {paymentMethods.map(method => (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {paymentMethods.map((method) => (
                       <PaymentMethodCard
                         key={method.id}
                         method={method}
                         isSelected={selectedPaymentMethod === method.id}
                         onSelect={setSelectedPaymentMethod}
-                        onEdit={(m) => addNotification({ type: 'info', title: 'Edit Payment Method', message: `Editing ${m.type} card` })}
+                        onEdit={(m) => addNotification({ type: 'info', title: 'Edit Method', message: `Editing ${m.type} payment method` })}
                         onDelete={(id) => {
                           setPaymentMethods(prev => prev.filter(m => m.id !== id));
-                          addNotification({ type: 'success', title: 'Payment Method Removed', message: 'Payment method has been deleted' });
+                          addNotification({ type: 'success', title: 'Method Removed', message: 'Payment method deleted successfully' });
                         }}
                         darkMode={darkMode}
                       />
@@ -1436,37 +1501,53 @@ const LandlordPayment = () => {
                   className="space-y-4"
                 >
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'}`}>Payment History</h3>
-                    <div className={`flex items-center space-x-3 px-4 py-2 ${darkMode
-                      ? 'bg-slate-800/50 border border-slate-700'
-                      : 'bg-white/50 border border-indigo-200'
-                      } rounded-xl`}>
-                      <Search className={`w-5 h-5 ${darkMode ? 'text-cyan-300' : 'text-indigo-500'}`} />
-                      <input
-                        type="text"
-                        placeholder="Search transactions..."
-                        className={`bg-transparent outline-none ${darkMode ? 'text-cyan-100 placeholder-blue-300' : 'text-indigo-700 placeholder-gray-400'} text-sm`}
-                      />
-                    </div>
+                    <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'}`}>
+                      Payment History
+                    </h3>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => { fetchPaymentHistory(); fetchStats(); }}
+                      className={`flex items-center space-x-2 px-4 py-2 ${
+                        darkMode ? 'bg-slate-700 text-cyan-300 hover:bg-slate-600' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
+                      } rounded-xl text-sm font-semibold transition-colors`}
+                    >
+                      <RotateCcw className={`w-4 h-4 ${historyLoading ? 'animate-spin' : ''}`} />
+                      <span>Refresh</span>
+                    </motion.button>
                   </div>
 
-                  {paymentHistory.length === 0 ? (
-                    <div className={`text-center py-16 ${darkMode ? 'text-blue-200' : 'text-gray-500'}`}>
-                      <Database className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                      <p className="text-lg">No payment history yet</p>
-                      <p className="text-sm mt-2">Your transactions will appear here once you make a payment</p>
+                  {historyLoading && (
+                    <div className={`text-center py-12 ${darkMode ? 'text-blue-200' : 'text-gray-500'}`}>
+                      <Loader className="w-8 h-8 mx-auto mb-3 animate-spin" />
+                      <p>Loading payment history…</p>
                     </div>
-                  ) : (
-                    paymentHistory.map(payment => (
-                      <PaymentHistoryItem
-                        key={payment.id}
-                        payment={payment}
-                        onDownloadReceipt={handleDownloadReceipt}
-                        onViewDetails={handleViewDetails}
-                        darkMode={darkMode}
-                      />
-                    ))
                   )}
+
+                  {!historyLoading && historyError && (
+                    <div className="text-center py-12 text-red-400">
+                      <XCircle className="w-8 h-8 mx-auto mb-3" />
+                      <p>{historyError}</p>
+                    </div>
+                  )}
+
+                  {!historyLoading && !historyError && paymentHistory.length === 0 && (
+                    <div className={`text-center py-16 ${darkMode ? 'text-blue-200' : 'text-gray-500'}`}>
+                      <Receipt className="w-12 h-12 mx-auto mb-4 opacity-40" />
+                      <p className="text-lg font-medium">No payment history yet</p>
+                      <p className="text-sm mt-1">Your subscription payments will appear here once processed.</p>
+                    </div>
+                  )}
+
+                  {!historyLoading && !historyError && paymentHistory.length > 0 && paymentHistory.map((payment) => (
+                    <PaymentHistoryItem
+                      key={payment.id}
+                      payment={payment}
+                      onDownloadReceipt={handleDownloadReceipt}
+                      onViewDetails={handleViewDetails}
+                      darkMode={darkMode}
+                    />
+                  ))}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -1474,12 +1555,64 @@ const LandlordPayment = () => {
         </main>
       </div>
 
-      {/* Notifications */}
-      <NotificationToast
-        notifications={notifications}
-        onRemove={removeNotification}
-        darkMode={darkMode}
-      />
+      {/* ── Razorpay Checkout Modal ─────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showRazorpay && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={() => setShowRazorpay(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className={`${
+                darkMode
+                  ? 'bg-slate-800/95 border border-slate-700'
+                  : 'bg-white/95 border border-indigo-200'
+              } rounded-2xl w-full max-w-md overflow-hidden shadow-2xl`}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Modal header */}
+              <div className={`flex items-center justify-between p-5 border-b ${
+                darkMode ? 'border-slate-700' : 'border-indigo-100'
+              }`}>
+                <h2 className={`text-xl font-bold ${
+                  darkMode ? 'text-cyan-100' : 'text-indigo-700'
+                }`}>
+                  Complete Payment
+                </h2>
+                <button
+                  onClick={() => setShowRazorpay(false)}
+                  className={`p-2 rounded-lg transition-colors ${
+                    darkMode ? 'hover:bg-slate-700 text-slate-300' : 'hover:bg-indigo-50 text-gray-500'
+                  }`}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Razorpay checkout — passes all required plan context */}
+              <div className="p-5">
+                <LandlordRazorpayCheckout
+                  planId={checkoutPlan?.id ?? currentPlan?.id ?? 1}
+                  planName={checkoutPlan?.name ?? currentPlan?.name ?? 'Subscription Plan'}
+                  planPrice={checkoutPlan?.price ?? paymentAmount}
+                  planValidity={checkoutPlan?.validity ?? ''}
+                  landlordName={currentUser?.name ?? currentUser?.fullName ?? ''}
+                  landlordEmail={currentUser?.email ?? ''}
+                  landlordPhone={currentUser?.phone ?? currentUser?.mobile ?? ''}
+                  onSuccess={handleRazorpaySuccess}
+                  onFailure={handleRazorpayFailure}
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Add Payment Method Modal */}
       <AnimatePresence>
@@ -1493,61 +1626,12 @@ const LandlordPayment = () => {
         )}
       </AnimatePresence>
 
-      {/* ── Real Razorpay Checkout Modal ── */}
-      <AnimatePresence>
-        {showRazorpay && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-            onClick={() => setShowRazorpay(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className={`${
-                darkMode
-                  ? 'bg-slate-800/95 backdrop-blur-xl border border-slate-700'
-                  : 'bg-white/95 backdrop-blur-xl border border-indigo-200'
-              } rounded-2xl w-full max-w-md overflow-hidden`}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Modal Header */}
-              <div className={`p-6 border-b ${darkMode ? 'border-slate-700' : 'border-indigo-200'} flex items-center justify-between`}>
-                <h2 className={`text-xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'}`}>
-                  Complete Subscription Payment
-                </h2>
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => setShowRazorpay(false)}
-                  className={`p-2 rounded-lg ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-indigo-100'} transition-colors`}
-                >
-                  <X className={`w-5 h-5 ${darkMode ? 'text-cyan-300' : 'text-indigo-600'}`} />
-                </motion.button>
-              </div>
-
-              {/* LandlordRazorpayCheckout drop-in */}
-              <div className="p-6">
-                <LandlordRazorpayCheckout
-                  planId={currentPlan?.id}
-                  planName={currentPlan?.name ?? 'Subscription Plan'}
-                  planPrice={paymentAmount}
-                  planValidity={currentPlan?.validity ?? ''}
-                  landlordName={currentUser?.name ?? currentUser?.fullName ?? ''}
-                  landlordEmail={currentUser?.email ?? ''}
-                  landlordPhone={currentUser?.phone ?? currentUser?.mobile ?? ''}
-                  onSuccess={handleRazorpaySuccess}
-                  onFailure={handleRazorpayFailure}
-                />
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
+      {/* Notification Toasts */}
+      <NotificationToast
+        notifications={notifications}
+        onRemove={removeNotification}
+        darkMode={darkMode}
+      />
     </div>
   );
 };
