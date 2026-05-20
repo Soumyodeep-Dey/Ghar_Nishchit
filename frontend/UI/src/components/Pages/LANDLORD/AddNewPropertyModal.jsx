@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { X, Building, Home, IndianRupee, Image, Upload, MapPin, Bed, Bath } from 'lucide-react';
+import { X, Building, Home, IndianRupee, Image, Upload, MapPin, Bed, Bath, Maximize2 } from 'lucide-react';
 
 // Accept mode='add'|'edit', property to edit, and onSave callback
 const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property = null, onSave = null }) => {
@@ -17,6 +17,7 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
     price: '',
     bedrooms: 1,
     bathrooms: 1,
+    area: '',
     images: [],
     available: true,
   });
@@ -34,6 +35,7 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
         price: property.rent || property.price || prev.price,
         bedrooms: property.bedrooms ?? prev.bedrooms,
         bathrooms: property.bathrooms ?? prev.bathrooms,
+        area: property.area || '',
         images: property.images || prev.images,
         available: property.status ? property.status === 'Available' : prev.available,
       }));
@@ -84,7 +86,7 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
       price: parseFloat(propertyData.price) || 0,
       bedrooms: parseInt(propertyData.bedrooms) || 0,
       bathrooms: parseInt(propertyData.bathrooms) || 0,
-      area: 0, // Default area - can be added to form later
+      area: parseFloat(propertyData.area) || 0,
       images: resolvedImages, // Using base64 strings
       amenities: [], // Default empty - can be added to form later
       available: propertyData.available,
@@ -255,7 +257,7 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className={`block text-sm font-medium mb-2 ${modalTheme.text}`}>Price (₹)</label>
               <div className="relative">
@@ -268,6 +270,21 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
                   className={`w-full p-3 pl-10 rounded-lg ${modalTheme.inputBg} ${modalTheme.inputBorder} border ${modalTheme.text} ${modalTheme.inputPlaceholder} ${modalTheme.focusBorder} focus:outline-none transition-colors`}
                   placeholder="e.g., 2500"
                   required
+                  min="0"
+                />
+              </div>
+            </div>
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${modalTheme.text}`}>Area (sq ft)</label>
+              <div className="relative">
+                <Maximize2 className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 ${modalTheme.text}`} />
+                <input
+                  type="number"
+                  name="area"
+                  value={propertyData.area}
+                  onChange={handleChange}
+                  className={`w-full p-3 pl-10 rounded-lg ${modalTheme.inputBg} ${modalTheme.inputBorder} border ${modalTheme.text} ${modalTheme.inputPlaceholder} ${modalTheme.focusBorder} focus:outline-none transition-colors`}
+                  placeholder="e.g., 850"
                   min="0"
                 />
               </div>
