@@ -5,6 +5,7 @@ import {
   createPayment,
   updatePaymentStatus,
   getPaymentStats,
+  getLandlordRevenue,
   createOrder,
   verifyPayment,
 } from '../controllers/payment.controller.js';
@@ -16,6 +17,7 @@ const router = express.Router();
 router.use(verifyToken);
 
 // Existing routes (unchanged)
+router.get('/landlord-revenue', getLandlordRevenue); // GET  /api/payments/landlord-revenue
 router.get('/',             getPayments);         // GET  /api/payments
 router.get('/stats',        getPaymentStats);     // GET  /api/payments/stats
 router.post('/',            createPayment);       // POST /api/payments  (manual entry)

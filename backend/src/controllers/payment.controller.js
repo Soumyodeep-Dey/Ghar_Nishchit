@@ -1,6 +1,7 @@
 import Razorpay from 'razorpay';
 import crypto  from 'crypto';
 import Payment from '../models/payment.model.js';
+import Property from '../models/property.model.js';
 import mongoose from 'mongoose';
 import { query as neonQuery } from '../db/neon.js';
 
@@ -339,5 +340,57 @@ export const getPaymentStats = async (req, res) => {
   } catch (err) {
     console.error('[getPaymentStats] ERROR:', err.message);
     return res.status(500).json({ message: 'Failed to fetch payment stats' });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/payments/landlord-revenue
+// Returns the landlord's total revenue from tenant payments for their properties
+// ─────────────────────────────────────────────────────────────────────────────
+export const getLandlordRevenue = async (req, res) => {
+  try {
+    const landlordId = req.user?.userId;
+    if (!landlordId) {
+      return res.status(401).json({ message: 'Unauthorised — userId missing from token' });
+    }
+
+    // Get all properties owned by this landlord
+    const properties = await Property.find({ postedBy: landlordId }).select('_id').lean();
+    const propertyIds = properties.map(p => p._id);
+
+    if (propertyIds.length === 0) {
+      return res.status(200).json({
+        totalMonthlyRevenue: 0,
+        totalRevenue: 0,
+        paidPayments: 0,
+        pendingPayments: 0,
+      });
+    }
+
+    // Get all payments for the landlord's properties that are marked as Paid
+    const paidPayments = await Payment.find({
+      propertyId: { $in: propertyIds },
+      status: 'Paid'
+    }).lean();
+
+    // Get pending payments
+    const pendingPayments = await Payment.find({
+      propertyId: { $in: propertyIds },
+      status: 'Pending'
+    }).lean();
+
+    const totalRevenue = paidPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+    const pendingAmount = pendingPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+
+    return res.status(200).json({
+      totalMonthlyRevenue: totalRevenue,
+      totalRevenue,
+      paidPayments: paidPayments.length,
+      pendingPayments: pendingPayments.length,
+      pendingAmount,
+    });
+  } catch (err) {
+    console.error('[getLandlordRevenue] ERROR:', err.message);
+    return res.status(500).json({ message: 'Failed to fetch landlord revenue' });
   }
 };

@@ -221,23 +221,18 @@ const LandlordDashboard = () => {
           setProperties(normalized);
         }
 
-        // Fetch real payment revenue from /payments/stats
+        // Fetch real payment revenue from /payments/landlord-revenue (tenant payments to landlord's properties)
         try {
-          const paymentStats = await api.getPaymentStats();
-          if (mounted && paymentStats) {
-            // Support multiple possible field names from the backend
-            const revenue =
-              paymentStats.totalRevenue ??
-              paymentStats.totalPaid ??
-              paymentStats.totalAmount ??
-              paymentStats.monthlyRevenue ??
-              null;
+          const revenueStats = await api.getLandlordRevenue();
+          if (mounted && revenueStats) {
+            // Get the actual tenant payments received (not just subscription fees)
+            const revenue = revenueStats.totalMonthlyRevenue ?? revenueStats.totalRevenue ?? null;
             if (revenue !== null) {
               setMonthlyRevenue(Number(revenue));
             }
           }
-        } catch (payErr) {
-          console.warn('Could not load payment stats, using rent-based fallback:', payErr);
+        } catch (revenueErr) {
+          console.warn('Could not load landlord revenue, using rent-based fallback:', revenueErr);
         }
       } catch (err) {
         console.warn('Dashboard: failed to load properties from API', err.message || err);
@@ -311,6 +306,33 @@ const LandlordDashboard = () => {
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 800);
     return () => clearTimeout(timer);
+  }, []);
+
+  // Periodically refresh landlord revenue to pick up new tenant payments
+  useEffect(() => {
+    let mounted = true;
+    const fetchRevenue = async () => {
+      try {
+        const revenueStats = await api.getLandlordRevenue();
+        if (mounted && revenueStats) {
+          const revenue = revenueStats.totalMonthlyRevenue ?? revenueStats.totalRevenue ?? null;
+          if (revenue !== null) {
+            setMonthlyRevenue(Number(revenue));
+          }
+        }
+      } catch (err) {
+        console.warn('Could not refresh landlord revenue:', err);
+      }
+    };
+    
+    // Fetch immediately and then every 30 seconds
+    fetchRevenue();
+    const interval = setInterval(fetchRevenue, 30000);
+    
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   if (isLoading) {
