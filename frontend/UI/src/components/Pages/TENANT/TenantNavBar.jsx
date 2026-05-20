@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Search, Bell, Sun, Moon, User, Settings, HelpCircle, LogOut, ChevronDown, X, MessageSquare, Wrench, CreditCard, Home, Building2, Heart } from 'lucide-react';
+import { Search, Bell, Sun, Moon, User, Settings, Languages, LogOut, ChevronDown, X, MessageSquare, Wrench, CreditCard, Home, Building2, Heart } from 'lucide-react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../../services/api.js';
@@ -171,9 +171,9 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
     navigate('/');
   };
 
-  const handleHelpSupport = () => {
+  const handleLanguages = () => {
     setIsProfileDropdownOpen(false);
-    navigate('/tenant/support');
+    navigate('/tenant/languages');
   };
 
   const CurrentSectionIcon = getCurrentSectionIcon();
@@ -403,13 +403,13 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
                     </Link>
 
                     <button
-                      onClick={handleHelpSupport}
+                      onClick={handleLanguages}
                       className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
                     >
                       <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
-                        <HelpCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                        <Languages className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
                       </div>
-                      <span className="font-medium">Help & Support</span>
+                      <span className="font-medium">Languages</span>
                     </button>
 
                     <hr className="my-2 border-gray-200 dark:border-gray-700" />
