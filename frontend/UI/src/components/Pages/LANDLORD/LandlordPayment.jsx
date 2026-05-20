@@ -1008,15 +1008,28 @@ const LandlordPayment = () => {
     try {
       const data = await api.getLandlordSubscriptionPayments();
       const records = Array.isArray(data) ? data : (data?.payments ?? []);
+      
+      // Map backend status values to frontend status values
+      const mapStatus = (backendStatus) => {
+        const statusMap = {
+          'Paid': 'completed',
+          'Pending': 'pending',
+          'Failed': 'failed',
+          'Refunded': 'refunded',
+        };
+        return statusMap[backendStatus] || backendStatus.toLowerCase();
+      };
+      
       const mapped = records.map((p, idx) => ({
         id: p._id || p.id || idx + 1,
         description: p.planName
           ? `Subscription — ${p.planName}`
           : p.description || 'Platform Subscription Fee',
-        // FIX: always use normaliseAmount — Razorpay stores in paise
-        amount: normaliseAmount(p.amount),
+        // FIX: Use totalAmount (actual amount paid with GST) which is already in rupees
+        // Fallback to amount normalized for legacy records stored in paise
+        amount: p.totalAmount ? parseFloat(p.totalAmount) : normaliseAmount(p.amount),
         date: p.createdAt || p.paidAt || p.date || new Date().toISOString(),
-        status: p.status || 'pending',
+        status: mapStatus(p.status),
         method: p.paymentMethod || p.method || 'Razorpay',
         invoiceId: p.invoiceId || p.razorpay_order_id || `INV-${p._id?.slice(-6) || idx + 1}`,
       }));
@@ -1032,16 +1045,18 @@ const LandlordPayment = () => {
   /**
    * fetchStats
    * Calls GET /landlord-payments/stats to populate the summary cards.
-   * FIX: always use normaliseAmount — remove the unreliable > 10000 heuristic.
+   * FIX: totalAmountSpent is already in rupees (calculated with totalAmount), don't normalize
    */
   const fetchStats = useCallback(async () => {
     try {
       const stats = await api.getLandlordSubscriptionStats();
       if (stats) {
-        const rawTotal = stats.totalPaid ?? stats.total_paid ?? 0;
-        const rawAvg   = stats.avgMonthlySpend ?? stats.avg_monthly_spend ?? 0;
-        setTotalPaid(normaliseAmount(rawTotal));
-        setAvgMonthlySpend(normaliseAmount(rawAvg));
+        // totalAmountSpent is already in rupees, not paise
+        const rawTotal = stats.totalAmountSpent ?? stats.totalPaid ?? stats.total_paid ?? 0;
+        const paidCount = stats.paid ?? 0;
+        const rawAvg = paidCount > 0 ? rawTotal / paidCount : 0;
+        setTotalPaid(parseFloat(rawTotal));
+        setAvgMonthlySpend(parseFloat(rawAvg));
       }
     } catch (err) {
       // Silently fall back to computing from local history
