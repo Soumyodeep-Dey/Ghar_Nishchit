@@ -776,27 +776,6 @@ const TenantPayment = () => {
       `}</style>
     </div>
   );
-};← Edit amount
-                        </button>
-                      </div>
-                      <RazorpayCheckout
-                        {...checkoutProps}
-                        tenantName={currentUser.name  || currentUser.fullName  || ''}
-                        tenantEmail={currentUser.email || ''}
-                        tenantPhone={currentUser.phone || currentUser.contact  || ''}
-                        onSuccess={handlePaymentSuccess}
-                        onFailure={handlePaymentFailure}
-                      />
-                    </>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
 };
 
 export default TenantPayment;
