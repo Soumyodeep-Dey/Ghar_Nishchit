@@ -615,7 +615,6 @@ const TenantPayment = () => {
                     <div className={`p-4 rounded-2xl w-fit mx-auto mb-4 ${darkMode ? 'bg-slate-700/50 text-cyan-400' : 'bg-indigo-50 text-indigo-600'}`}>
                       <IndianRupee className="h-12 w-12" />
                     </div>
-                    </div>
                     <h4 className={`text-2xl font-bold ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>
                       ₹{Number(selectedPayment.amount).toLocaleString('en-IN')}
                     </h4>
