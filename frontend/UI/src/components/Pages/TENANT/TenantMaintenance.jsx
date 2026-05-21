@@ -78,6 +78,29 @@ const FloatingCard = ({ children, delay = 0, className = '' }) => (
   </div>
 );
 
+const StatsCard = ({ title, value, icon, delay = 0 }) => {
+  const { darkMode } = useDarkMode();
+  const cardBg = darkMode ? 'bg-slate-800/50 border-slate-700/50 shadow-black/30' : 'bg-white/60 border-indigo-200/50 shadow-indigo-100/40';
+  const textPrimary = darkMode ? 'text-slate-100' : 'text-gray-900';
+  const textSecondary = darkMode ? 'text-slate-400' : 'text-indigo-700/70';
+
+  return (
+    <FloatingCard delay={delay}>
+      <div className={`backdrop-blur-xl border rounded-2xl p-6 flex items-center justify-between shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-105 ${cardBg}`}>
+        <div>
+          <p className={`text-sm font-bold tracking-wide mb-1 ${textSecondary}`}>{title}</p>
+          <h3 className={`text-3xl font-extrabold tracking-tight ${textPrimary}`}>
+            <AnimatedCounter value={value} />
+          </h3>
+        </div>
+        <div className={`p-3 rounded-xl ${darkMode ? 'bg-slate-700/50' : 'bg-indigo-50'} flex items-center justify-center transform transition-transform duration-350 hover:rotate-12`}>
+          {icon}
+        </div>
+      </div>
+    </FloatingCard>
+  );
+};
+
 const GlowingButton = ({ children, onClick, className = '', glowColor = 'blue', disabled = false, type = 'button' }) => {
   const glowClasses = glowColor === 'blue'
     ? 'bg-gradient-to-r from-blue-500 to-purple-600'
