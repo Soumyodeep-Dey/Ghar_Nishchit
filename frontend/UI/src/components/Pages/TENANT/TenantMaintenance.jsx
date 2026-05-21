@@ -4,6 +4,7 @@ import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
 import api from '../../../services/api.js';
 import { showErrorToast, showSuccessToast, showInfoToast } from '../../../utils/toast.jsx';
+import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import {
   WrenchScrewdriverIcon, PlusIcon, TrashIcon, PencilIcon, CheckCircleIcon, ClockIcon, ExclamationTriangleIcon, DocumentTextIcon, CalendarIcon, MagnifyingGlassIcon, ChartBarIcon, PaperClipIcon, XMarkIcon
 } from '@heroicons/react/24/outline';
@@ -291,6 +292,7 @@ const RequestCard = React.memo(({ request, onEdit, onDelete, isEditing, editData
 
 const TenantMaintenance = () => {
   const { darkMode } = useDarkMode();
+  const { t } = useLanguage();
   const [requests, setRequests] = useState([]);
   const [newRequest, setNewRequest] = useState({ title: '', description: '', priority: 'Medium', attachments: [] });
   const [searchTerm, setSearchTerm] = useState('');
@@ -443,7 +445,7 @@ const TenantMaintenance = () => {
               <div className="relative mx-auto w-20 h-20">
                 <div className={`w-20 h-20 border-4 ${tc.spinnerBorder} rounded-full animate-spin`}></div>
               </div>
-              <h2 className={`text-xl font-bold ${tc.textPrimary} mt-6 animate-pulse`}>Loading Maintenance...</h2>
+              <h2 className={`text-xl font-bold ${tc.textPrimary} mt-6 animate-pulse`}>{t('pages.loadingMaintenance')}</h2>
               <p className={`${tc.textSecondary} mt-2`}>Preparing your requests</p>
             </div>
           </main>
@@ -465,7 +467,7 @@ const TenantMaintenance = () => {
                   <WrenchScrewdriverIcon className="h-10 w-10 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-4xl font-bold mb-2 animate-slideDown">Maintenance Requests</h1>
+                  <h1 className="text-4xl font-bold mb-2 animate-slideDown">{t('pages.maintenanceRequests')}</h1>
                   <p className="text-orange-100 text-lg animate-slideUp">Track and manage all your maintenance needs</p>
                 </div>
               </div>
@@ -627,7 +629,7 @@ const TenantMaintenance = () => {
                   <ChartBarIcon className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h2 className={`text-2xl font-bold bg-gradient-to-r ${tc.headerGradient} bg-clip-text text-transparent`}>Your Requests</h2>
+                  <h2 className={`text-2xl font-bold bg-gradient-to-r ${tc.headerGradient} bg-clip-text text-transparent`}>{t('pages.yourRequests')}</h2>
                   <p className={`${tc.textSecondary}`}>Track and manage your maintenance requests</p>
                 </div>
               </div>

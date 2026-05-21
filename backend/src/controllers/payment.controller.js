@@ -1,8 +1,63 @@
 import Razorpay from 'razorpay';
 import crypto  from 'crypto';
 import Payment from '../models/payment.model.js';
+import Property from '../models/property.model.js';
+import Contract from '../models/contract.model.js';
+import Notification from '../models/notification.model.js';
+import User from '../models/user.model.js';
 import mongoose from 'mongoose';
 import { query as neonQuery } from '../db/neon.js';
+
+const resolveUserId = (user) => {
+  if (!user) return null;
+  return user._id || user.id || user.userId || null;
+};
+
+/** Notify landlord when a tenant completes a rent payment */
+const notifyLandlordOnTenantPayment = async (payment) => {
+  try {
+    let landlordId = null;
+    let propertyTitle = 'your property';
+
+    if (payment.propertyId) {
+      const property = await Property.findById(payment.propertyId).select('postedBy title').lean();
+      if (property) {
+        landlordId = property.postedBy;
+        propertyTitle = property.title || propertyTitle;
+      }
+    }
+
+    if (!landlordId && payment.tenantId) {
+      const contract = await Contract.findOne({
+        tenant: payment.tenantId,
+        status: 'active',
+      })
+        .sort({ updatedAt: -1 })
+        .lean();
+      if (contract) landlordId = contract.landlord;
+      if (contract?.property) {
+        const prop = await Property.findById(contract.property).select('title').lean();
+        if (prop?.title) propertyTitle = prop.title;
+      }
+    }
+
+    if (!landlordId) return;
+
+    const tenant = await User.findById(payment.tenantId).select('name').lean();
+    const tenantName = tenant?.name || 'A tenant';
+    const amountStr = Number(payment.amount || 0).toLocaleString('en-IN');
+
+    await Notification.create({
+      userId: landlordId,
+      title: 'Rent Payment Received',
+      message: `${tenantName} paid ₹${amountStr} for ${propertyTitle}.`,
+      type: 'payment',
+      relatedId: payment._id,
+    });
+  } catch (e) {
+    console.warn('[Payment] landlord notification failed:', e.message);
+  }
+};
 
 // ── NeonDB Sync Helper ────────────────────────────────────────────────────────
 const syncPaymentToNeon = async (p) => {
@@ -188,6 +243,7 @@ export const verifyPayment = async (req, res) => {
 
     // Dual-write to NeonDB
     await syncPaymentToNeon(updated);
+    await notifyLandlordOnTenantPayment(updated);
 
     return res.status(200).json({ message: 'Payment verified and recorded', payment: updated });
 
@@ -224,7 +280,10 @@ export const handleWebhook = async (req, res) => {
         { status: 'Paid', paidAt: new Date(rp.created_at * 1000), razorpayPaymentId: rp.id },
         { new: true }
       );
-      if (captured) await syncPaymentToNeon(captured);
+      if (captured) {
+        await syncPaymentToNeon(captured);
+        await notifyLandlordOnTenantPayment(captured);
+      }
     }
     if (event.event === 'payment.failed') {
       const rp = event.payload.payment.entity;
@@ -339,5 +398,140 @@ export const getPaymentStats = async (req, res) => {
   } catch (err) {
     console.error('[getPaymentStats] ERROR:', err.message);
     return res.status(500).json({ message: 'Failed to fetch payment stats' });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/payments/landlord-revenue
+// Returns the landlord's total revenue from tenant payments for their properties
+// ─────────────────────────────────────────────────────────────────────────────
+export const getLandlordRevenue = async (req, res) => {
+  try {
+    const landlordId = resolveUserId(req.user);
+    if (!landlordId) {
+      return res.status(401).json({ message: 'Unauthorised — userId missing from token' });
+    }
+
+    const properties = await Property.find({ postedBy: landlordId }).select('_id').lean();
+    const propertyIds = properties.map(p => p._id);
+
+    // Active lease rent — matches LandlordTenant monthly revenue card
+    const activeContracts = await Contract.find({ landlord: landlordId, status: 'active' })
+      .select('rentAmount')
+      .lean();
+    const contractMonthlyRevenue = activeContracts.reduce(
+      (sum, c) => sum + (Number(c.rentAmount) || 0),
+      0
+    );
+
+    // Tenants with any contract on this landlord's properties (covers payments without propertyId)
+    const landlordContracts = await Contract.find({ landlord: landlordId })
+      .select('tenant')
+      .lean();
+    const tenantIds = [...new Set(
+      landlordContracts.map(c => c.tenant?.toString()).filter(Boolean)
+    )];
+
+    const paidQuery = {
+      status: 'Paid',
+      $or: [
+        ...(propertyIds.length > 0 ? [{ propertyId: { $in: propertyIds } }] : []),
+        ...(tenantIds.length > 0 ? [{ tenantId: { $in: tenantIds } }] : []),
+      ],
+    };
+    if (paidQuery.$or.length === 0) {
+      return res.status(200).json({
+        totalMonthlyRevenue: contractMonthlyRevenue,
+        totalRevenue: 0,
+        contractMonthlyRevenue,
+        paidPayments: 0,
+        pendingPayments: 0,
+        pendingAmount: 0,
+      });
+    }
+
+    const paidPayments = await Payment.find(paidQuery).lean();
+
+    const pendingQuery = {
+      status: 'Pending',
+      $or: paidQuery.$or,
+    };
+    const pendingPayments = await Payment.find(pendingQuery).lean();
+
+    const totalRevenue = paidPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+    const pendingAmount = pendingPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+
+    return res.status(200).json({
+      totalMonthlyRevenue: contractMonthlyRevenue,
+      totalRevenue,
+      contractMonthlyRevenue,
+      paidPayments: paidPayments.length,
+      pendingPayments: pendingPayments.length,
+      pendingAmount,
+    });
+  } catch (err) {
+    console.error('[getLandlordRevenue] ERROR:', err.message);
+    return res.status(500).json({ message: 'Failed to fetch landlord revenue' });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/payments/landlord-tenant-payments
+// Tenant rent payments received by the logged-in landlord
+// ─────────────────────────────────────────────────────────────────────────────
+export const getLandlordTenantPayments = async (req, res) => {
+  try {
+    const landlordId = resolveUserId(req.user);
+    if (!landlordId) {
+      return res.status(401).json({ message: 'Unauthorised — userId missing from token' });
+    }
+
+    const properties = await Property.find({ postedBy: landlordId }).select('_id title').lean();
+    const propertyIds = properties.map(p => p._id);
+    const propertyTitleById = Object.fromEntries(
+      properties.map(p => [p._id.toString(), p.title])
+    );
+
+    const landlordContracts = await Contract.find({ landlord: landlordId }).select('tenant').lean();
+    const tenantIds = [...new Set(
+      landlordContracts.map(c => c.tenant?.toString()).filter(Boolean)
+    )];
+
+    const queryOr = [];
+    if (propertyIds.length > 0) queryOr.push({ propertyId: { $in: propertyIds } });
+    if (tenantIds.length > 0) queryOr.push({ tenantId: { $in: tenantIds } });
+
+    if (queryOr.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    const payments = await Payment.find({ $or: queryOr })
+      .sort({ createdAt: -1 })
+      .populate('tenantId', 'name email')
+      .populate('propertyId', 'title')
+      .lean();
+
+    const shaped = payments.map((p) => ({
+      id: p._id,
+      amount: p.amount,
+      status: p.status,
+      paymentMethod: p.paymentMethod,
+      dueDate: p.dueDate,
+      paidAt: p.paidAt,
+      note: p.note,
+      createdAt: p.createdAt,
+      tenantName: p.tenantId?.name || 'Tenant',
+      tenantEmail: p.tenantId?.email || '',
+      propertyTitle:
+        p.propertyId?.title ||
+        propertyTitleById[p.propertyId?.toString()] ||
+        'Property',
+      type: p.note?.includes('Move-in') ? 'Move-in' : 'Rent',
+    }));
+
+    return res.status(200).json(shaped);
+  } catch (err) {
+    console.error('[getLandlordTenantPayments] ERROR:', err.message);
+    return res.status(500).json({ message: 'Failed to fetch tenant payments' });
   }
 };

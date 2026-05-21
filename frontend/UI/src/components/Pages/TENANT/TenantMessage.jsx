@@ -4,6 +4,7 @@ import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
 import api from '../../../services/api.js';
+import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import { showErrorToast, showSuccessToast } from '../../../utils/toast.jsx';
 import {
   ChatBubbleLeftRightIcon, PaperAirplaneIcon, PaperClipIcon,
@@ -272,6 +273,7 @@ const ContractModal = ({ contract, onClose, onAccept, onDecline, accepting }) =>
 
 const TenantMessage = () => {
   const { darkMode } = useDarkMode();
+  const { t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -551,7 +553,7 @@ const TenantMessage = () => {
               <div className="relative mx-auto w-20 h-20">
                 <div className={`w-20 h-20 border-4 ${tc.spinnerBorder} rounded-full animate-spin`}></div>
               </div>
-              <h2 className={`text-xl font-bold ${tc.textPrimary} mt-6 animate-pulse`}>Loading Messages...</h2>
+              <h2 className={`text-xl font-bold ${tc.textPrimary} mt-6 animate-pulse`}>{t('pages.loadingMessages')}</h2>
               <p className={`${tc.textSecondary} mt-2`}>Connecting to your conversations</p>
             </div>
           </main>
@@ -748,7 +750,7 @@ const TenantMessage = () => {
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center p-6">
                   <ChatBubbleLeftRightIcon className={`h-24 w-24 ${darkMode ? 'text-slate-700' : 'text-gray-300'} mb-6`} />
-                  <h2 className={`text-2xl font-bold ${darkMode ? 'text-slate-200' : 'text-gray-700'} mb-2`}>No conversation selected</h2>
+                  <h2 className={`text-2xl font-bold ${darkMode ? 'text-slate-200' : 'text-gray-700'} mb-2`}>{t('pages.noConversation')}</h2>
                   <p className={`${darkMode ? 'text-slate-400' : 'text-gray-500'} text-center max-w-md`}>
                     Select a conversation from the list, or go to Properties and click "Contact Landlord" to start one.
                   </p>

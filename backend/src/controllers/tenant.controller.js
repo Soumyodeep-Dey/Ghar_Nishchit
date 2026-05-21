@@ -3,6 +3,7 @@ import Inquiry from '../models/inquiry.model.js';
 import User from '../models/user.model.js';
 import Contract from '../models/contract.model.js';
 import Visit from '../models/visit.model.js';
+import Payment from '../models/payment.model.js';
 import mongoose from 'mongoose';
 
 // Helper to resolve user id
@@ -103,11 +104,56 @@ export const getMyTenants = async (req, res) => {
             };
         });
 
-        console.log('Returning contract-based tenants:', result.length);
-        res.status(200).json(result);
+        // Hide tenants whose leases were removed (all contracts cancelled/completed)
+        const visibleTenants = result.filter(t =>
+            t.contracts.some(c => c.status === 'active' || c.status === 'pending')
+        );
+
+        console.log('Returning contract-based tenants:', visibleTenants.length);
+        res.status(200).json(visibleTenants);
     } catch (error) {
         console.error('Error fetching tenants:', error);
         res.status(500).json({ message: error.message, error: error.toString() });
+    }
+};
+
+/**
+ * Remove a tenant from the landlord's list by cancelling all their contracts.
+ */
+export const removeTenant = async (req, res) => {
+    try {
+        const authUserId = resolveUserId(req.user);
+        if (!authUserId) {
+            return res.status(401).json({ message: 'Authentication required' });
+        }
+
+        const { tenantId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(tenantId)) {
+            return res.status(400).json({ message: 'Invalid tenant ID' });
+        }
+
+        const result = await Contract.updateMany(
+            {
+                landlord: authUserId,
+                tenant: tenantId,
+                status: { $ne: 'cancelled' },
+            },
+            { $set: { status: 'cancelled' } }
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({
+                message: 'Tenant not found or already removed',
+            });
+        }
+
+        res.status(200).json({
+            message: 'Tenant removed successfully',
+            cancelledContracts: result.modifiedCount,
+        });
+    } catch (error) {
+        console.error('Error removing tenant:', error);
+        res.status(500).json({ message: error.message });
     }
 };
 
@@ -211,9 +257,42 @@ export const getTenantStats = async (req, res) => {
         const inquiries = await Inquiry.find({ property: { $in: propertyIds } }).select('seeker');
         const uniqueInquiryUserIds = new Set(inquiries.map(i => i.seeker?.toString()).filter(Boolean));
 
-        // Contract-based tenant counts
-        const activeContracts  = await Contract.countDocuments({ landlord: authUserId, status: 'active' });
+        // Contract-based tenant counts and monthly revenue (sum of active lease rent)
+        const activeContractDocs = await Contract.find({ landlord: authUserId, status: 'active' })
+            .select('rentAmount')
+            .lean();
+        const activeContracts = activeContractDocs.length;
         const pendingContracts = await Contract.countDocuments({ landlord: authUserId, status: 'pending' });
+        const contractMonthlyRevenue = activeContractDocs.reduce(
+            (sum, c) => sum + (Number(c.rentAmount) || 0),
+            0
+        );
+
+        const landlordContracts = await Contract.find({ landlord: authUserId }).select('tenant').lean();
+        const tenantIds = [...new Set(
+            landlordContracts.map(c => c.tenant?.toString()).filter(Boolean)
+        )];
+
+        const monthStart = new Date();
+        monthStart.setDate(1);
+        monthStart.setHours(0, 0, 0, 0);
+
+        const paidQuery = {
+            status: 'Paid',
+            paidAt: { $gte: monthStart },
+            $or: [
+                ...(propertyIds.length > 0 ? [{ propertyId: { $in: propertyIds } }] : []),
+                ...(tenantIds.length > 0 ? [{ tenantId: { $in: tenantIds } }] : []),
+            ],
+        };
+
+        let collectedThisMonth = 0;
+        if (paidQuery.$or.length > 0) {
+            const paidThisMonth = await Payment.find(paidQuery).select('amount').lean();
+            collectedThisMonth = paidThisMonth.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+        }
+
+        const monthlyRevenue = contractMonthlyRevenue + collectedThisMonth;
 
         const stats = {
             totalProperties:  myProperties.length,
@@ -221,7 +300,10 @@ export const getTenantStats = async (req, res) => {
             totalProspects:   uniqueInquiryUserIds.size,   // inquiry senders
             activeTenants:    activeContracts,              // signed lease
             pendingContracts: pendingContracts,             // sent but not yet signed
-            overduePayments:  0
+            overduePayments:  0,
+            monthlyRevenue,
+            contractMonthlyRevenue,
+            collectedThisMonth,
         };
 
         res.status(200).json(stats);

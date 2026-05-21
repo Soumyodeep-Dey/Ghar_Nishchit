@@ -1,8 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Search, Bell, Sun, Moon, User, Settings, HelpCircle, LogOut, ChevronDown, X, MessageSquare, Wrench, CreditCard, Home, Building2, Heart } from 'lucide-react';
+import { Search, Bell, Sun, Moon, User, Settings, Languages, LogOut, ChevronDown, X, MessageSquare, Wrench, CreditCard, Home, Building2, Heart } from 'lucide-react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../../services/api.js';
+import { useLanguage } from '../../../i18n/LanguageContext.jsx';
+import LanguageDialog from '../../LanguageDialog.jsx';
+import { showConfirmToast } from '../../../utils/toast.jsx';
 
 // Safe user reader — returns null if localStorage is missing or malformed.
 const readUserFromStorage = () => {
@@ -17,11 +20,23 @@ const readUserFromStorage = () => {
   }
 };
 
+const SECTION_SUBTITLE_KEYS = {
+  Dashboard: 'sections.overviewAnalytics',
+  Properties: 'sections.browseProperties',
+  Favorites: 'sections.savedProperties',
+  Payments: 'sections.paymentHistory',
+  Maintenance: 'sections.serviceRequests',
+  Messages: 'sections.communicationHub',
+  Contracts: 'sections.leaseAgreements',
+};
+
 const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
   const { darkMode: isDarkMode, toggleDarkMode } = useDarkMode();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [languageDialogOpen, setLanguageDialogOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -147,33 +162,35 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
 
   // Search suggestions — each entry navigates on click.
   const searchSuggestions = [
-    { label: 'My Property',          route: '/tenant/properties' },
-    { label: 'Payment history',      route: '/tenant/payment' },
-    { label: 'Maintenance requests', route: '/tenant/maintenance' },
-    { label: 'Messages',             route: '/tenant/messages' },
-    { label: 'Rent receipt',         route: '/tenant/payment' },
+    { labelKey: 'search.myProperty',          route: '/tenant/properties' },
+    { labelKey: 'search.paymentHistory',      route: '/tenant/payment' },
+    { labelKey: 'search.maintenanceRequests', route: '/tenant/maintenance' },
+    { labelKey: 'search.messages',             route: '/tenant/messages' },
+    { labelKey: 'search.rentReceipt',         route: '/tenant/payment' },
   ];
 
   const filteredSuggestions = searchSuggestions.filter(s =>
-    s.label.toLowerCase().includes(searchQuery.toLowerCase()) && searchQuery.length > 0
+    t(s.labelKey).toLowerCase().includes(searchQuery.toLowerCase()) && searchQuery.length > 0
   );
 
   const handleSuggestionClick = (suggestion) => {
-    setSearchQuery(suggestion.label);
+    setSearchQuery(t(suggestion.labelKey));
     setIsSearchFocused(false);
     navigate(suggestion.route);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/');
+    showConfirmToast(t('common.logoutConfirm'), () => {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      navigate('/');
+    });
   };
 
-  const handleHelpSupport = () => {
+  const handleLanguages = () => {
     setIsProfileDropdownOpen(false);
-    navigate('/tenant/support');
+    setLanguageDialogOpen(true);
   };
 
   const CurrentSectionIcon = getCurrentSectionIcon();
@@ -191,14 +208,9 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
                 <CurrentSectionIcon className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">{currentSection}</h1>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">{t(`sections.${currentSection}`)}</h1>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {currentSection === 'Dashboard'   && 'Overview & Analytics'}
-                  {currentSection === 'Properties'  && 'Browse Properties'}
-                  {currentSection === 'Favorites'   && 'Saved Properties'}
-                  {currentSection === 'Payments'    && 'Payment History'}
-                  {currentSection === 'Maintenance' && 'Service Requests'}
-                  {currentSection === 'Messages'    && 'Communication Hub'}
+                  {t(SECTION_SUBTITLE_KEYS[currentSection] || 'sections.overviewAnalytics')}
                 </p>
               </div>
             </div>
@@ -217,7 +229,7 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-                placeholder="Search properties, payments, or requests..."
+                placeholder={t('common.searchProperties')}
                 className="w-full pl-11 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
               {searchQuery && (
@@ -236,8 +248,8 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
                       onClick={() => handleSuggestionClick(suggestion)}
                       className="w-full px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm flex items-center justify-between"
                     >
-                      <span>{suggestion.label}</span>
-                      <span className="text-xs text-gray-400 dark:text-gray-500">Go →</span>
+                      <span>{t(suggestion.labelKey)}</span>
+                      <span className="text-xs text-gray-400 dark:text-gray-500">{t('common.go')}</span>
                     </button>
                   ))}
                 </div>
@@ -271,14 +283,14 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
 
                   {/* Header */}
                   <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{t('common.notifications')}</h3>
                     <div className="flex items-center gap-3">
                       {unreadCount > 0 && (
                         <button
                           onClick={markAllAsRead}
                           className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
                         >
-                          Mark all read
+                          {t('common.markAllRead')}
                         </button>
                       )}
                       {/* Close button — keeps users on the same page */}
@@ -296,13 +308,13 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
                   <div className="max-h-[28rem] overflow-y-auto">
                     {notifLoading ? (
                       <div className="p-8 text-center text-gray-500 dark:text-gray-400 text-sm">
-                        Loading notifications...
+                        {t('common.loadingNotifications')}
                       </div>
                     ) : notifications.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
                         <Bell className="h-10 w-10 text-gray-300 dark:text-gray-600 mb-3" />
-                        <p className="text-gray-500 dark:text-gray-400 font-medium">You're all caught up!</p>
-                        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">No new notifications right now.</p>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium">{t('common.allCaughtUp')}</p>
+                        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">{t('common.noNotifications')}</p>
                       </div>
                     ) : (
                       notifications.map((notification) => {
@@ -399,17 +411,17 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
                       <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                         <Settings className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                       </div>
-                      <span className="font-medium">Update Profile</span>
+                      <span className="font-medium">{t('common.updateProfile')}</span>
                     </Link>
 
                     <button
-                      onClick={handleHelpSupport}
+                      onClick={handleLanguages}
                       className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
                     >
                       <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
-                        <HelpCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                        <Languages className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
                       </div>
-                      <span className="font-medium">Help & Support</span>
+                      <span className="font-medium">{t('common.languages')}</span>
                     </button>
 
                     <hr className="my-2 border-gray-200 dark:border-gray-700" />
@@ -421,7 +433,7 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
                       <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
                         <LogOut className="h-4 w-4" />
                       </div>
-                      <span className="font-medium">Logout</span>
+                      <span className="font-medium">{t('common.logout')}</span>
                     </button>
                   </div>
                 </div>
@@ -430,6 +442,8 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
           </div>
         </div>
       </div>
+
+      <LanguageDialog open={languageDialogOpen} onClose={() => setLanguageDialogOpen(false)} />
 
       {/* Mobile Search */}
       <div className="md:hidden px-4 pb-3">

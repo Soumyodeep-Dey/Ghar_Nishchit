@@ -1,5 +1,7 @@
 import Contract from '../models/contract.model.js';
 import Property from '../models/property.model.js';
+import Notification from '../models/notification.model.js';
+import User from '../models/user.model.js';
 import { query as neonQuery } from '../db/neon.js';
 
 // ── NeonDB Sync Helper ────────────────────────────────────────────────────────
@@ -246,6 +248,26 @@ export const updateContractStatus = async (req, res) => {
 
         // Dual-write to NeonDB
         await syncContractToNeon(contract);
+
+        if (status === 'active') {
+            try {
+                const [tenant, property] = await Promise.all([
+                    User.findById(contract.tenant).select('name').lean(),
+                    Property.findById(contract.property).select('title').lean(),
+                ]);
+                const tenantName = tenant?.name || 'A tenant';
+                const propertyTitle = property?.title || 'your property';
+                await Notification.create({
+                    userId: contract.landlord,
+                    title: 'Lease Signed',
+                    message: `${tenantName} accepted the lease for ${propertyTitle}. Move-in payment is pending.`,
+                    type: 'general',
+                    relatedId: contract._id,
+                });
+            } catch (notifErr) {
+                console.warn('[Contract] landlord accept notification failed:', notifErr.message);
+            }
+        }
 
         res.status(200).json(contract);
 

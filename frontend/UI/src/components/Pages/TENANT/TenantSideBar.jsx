@@ -5,6 +5,7 @@ import { Home, Building2, Wallet, Settings, ChevronLeft, Crown, Sparkles, LogOut
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDarkMode } from '../../../useDarkMode.js';
 import { showConfirmToast } from '../../../utils/toast.jsx';
+import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 
 // Constants
 const SIDEBAR_WIDTHS = { collapsed: '4.5rem', expanded: '24rem' };
@@ -22,66 +23,12 @@ const DEFAULT_STATS = {
 // Menu configuration
 // Fix 2: Messages route is now uncommented and active.
 const MENU_ITEMS = [
-    {
-        id: 'dashboard',
-        label: 'Dashboard',
-        icon: Home,
-        route: '/tenant',
-        badge: null,
-        description: 'Analytics & Overview',
-        color: 'from-sky-400 via-sky-500 to-blue-500',
-        premium: true
-    },
-    {
-        id: 'properties',
-        label: 'Properties',
-        icon: Building2,
-        route: '/tenant/properties',
-        badge: null,
-        description: 'Browse Properties',
-        color: 'from-emerald-400 via-emerald-500 to-green-500',
-        premium: true
-    },
-    {
-        id: 'maintenance',
-        label: 'Maintenance',
-        icon: Settings,
-        route: '/tenant/maintenance',
-        badge: 'maintenance',
-        description: 'Service Requests',
-        color: 'from-rose-400 via-pink-400 to-pink-500',
-        premium: false
-    },
-    {
-        id: 'payments',
-        label: 'Payments',
-        icon: Wallet,
-        route: '/tenant/payment',
-        badge: null,
-        description: 'Bills & Transactions',
-        color: 'from-indigo-400 via-indigo-500 to-purple-500',
-        premium: true
-    },
-    {
-        id: 'messages',
-        label: 'Messages',
-        icon: MessageSquare,
-        route: '/tenant/messages',
-        badge: 'messages',
-        description: 'Communication Hub',
-        color: 'from-violet-400 via-purple-400 to-purple-500',
-        premium: false
-    },
-    {
-        id: 'contracts',
-        label: 'Contracts',
-        icon: FileText,
-        route: '/tenant/contracts',
-        badge: null,
-        description: 'Lease Agreements',
-        color: 'from-teal-400 via-cyan-400 to-cyan-500',
-        premium: false
-    },
+    { id: 'dashboard', labelKey: 'sidebar.dashboard', descKey: 'sidebar.descDashboard', icon: Home, route: '/tenant', badge: null, color: 'from-sky-400 via-sky-500 to-blue-500', premium: true },
+    { id: 'properties', labelKey: 'sidebar.properties', descKey: 'sidebar.descProperties', icon: Building2, route: '/tenant/properties', badge: null, color: 'from-emerald-400 via-emerald-500 to-green-500', premium: true },
+    { id: 'maintenance', labelKey: 'sidebar.maintenance', descKey: 'sidebar.descMaintenance', icon: Settings, route: '/tenant/maintenance', badge: 'maintenance', color: 'from-rose-400 via-pink-400 to-pink-500', premium: false },
+    { id: 'payments', labelKey: 'sidebar.payments', descKey: 'sidebar.descPayments', icon: Wallet, route: '/tenant/payment', badge: null, color: 'from-indigo-400 via-indigo-500 to-purple-500', premium: true },
+    { id: 'messages', labelKey: 'sidebar.messages', descKey: 'sidebar.descMessages', icon: MessageSquare, route: '/tenant/messages', badge: 'messages', color: 'from-violet-400 via-purple-400 to-purple-500', premium: false },
+    { id: 'contracts', labelKey: 'sidebar.contracts', descKey: 'sidebar.descContracts', icon: FileText, route: '/tenant/contracts', badge: null, color: 'from-teal-400 via-cyan-400 to-cyan-500', premium: false },
 ];
 
 // Fix 6: Removed onSectionChange prop — it was never passed by any parent. Navigation
@@ -89,6 +36,7 @@ const MENU_ITEMS = [
 // that actually passes it.
 const TenantSideBar = ({ userStats = DEFAULT_STATS }) => {
     const { darkMode: isDark } = useDarkMode();
+    const { t } = useLanguage();
     const [isCollapsed, setIsCollapsed] = useState(() =>
         typeof window !== 'undefined' ? window.innerWidth < BREAKPOINT : false
     );
@@ -182,7 +130,7 @@ const TenantSideBar = ({ userStats = DEFAULT_STATS }) => {
 
     const handleLogout = () => {
         showConfirmToast(
-            'Are you sure you want to logout?',
+            t('common.logoutConfirm'),
             () => {
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('token');
@@ -251,11 +199,11 @@ const TenantSideBar = ({ userStats = DEFAULT_STATS }) => {
                             <h1
                                 className={`text-2xl font-bold ${isDark ? 'text-slate-200' : 'text-slate-700'} transition-colors duration-300`}
                             >
-                                Ghar Nishchit
+                                {t('common.brandName')}
                             </h1>
                             <div className="flex items-center space-x-2">
                                 <Crown className="w-3 h-3 text-amber-500" />
-                                <span className={`text-sm ${themeClasses.textSecondary} font-medium transition-colors duration-300`}>Tenant Portal</span>
+                                <span className={`text-sm ${themeClasses.textSecondary} font-medium transition-colors duration-300`}>{t('common.tenantPortal')}</span>
                             </div>
                         </div>
                     )}
@@ -269,7 +217,7 @@ const TenantSideBar = ({ userStats = DEFAULT_STATS }) => {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setIsCollapsed(!isCollapsed)}
                     className={`p-3 rounded-2xl ${themeClasses.buttonIdle} border ${themeClasses.border} transition-all duration-500 shadow-sm group overflow-hidden hover:shadow-lg hover:shadow-slate-500/10 ${isCollapsed ? 'absolute -right-3 top-6 z-50' : 'relative'} hover:scale-105 hover:-translate-y-1`}
-                    title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                    title={isCollapsed ? t('common.expandSidebar') : t('common.collapseSidebar')}
                 >
                     <motion.div
                         animate={{ rotate: isCollapsed ? 180 : 0 }}
@@ -399,10 +347,10 @@ const TenantSideBar = ({ userStats = DEFAULT_STATS }) => {
                                                     className="flex-1 ml-4 text-left"
                                                 >
                                                     <div className={`font-bold text-lg transition-all duration-300 group-hover:translate-x-1 ${isItemActive(item) ? 'text-white group-hover:text-white/90' : `${themeClasses.textPrimary} group-hover:text-blue-500`}`}>
-                                                        {item.label}
+                                                        {t(item.labelKey)}
                                                     </div>
                                                     <div className={`text-sm transition-all duration-300 group-hover:translate-x-1 ${isItemActive(item) ? 'text-white/80 group-hover:text-white/70' : `${themeClasses.textMuted} group-hover:text-slate-600`}`}>
-                                                        {item.description}
+                                                        {t(item.descKey)}
                                                     </div>
                                                 </motion.div>
                                             )}
@@ -437,11 +385,11 @@ const TenantSideBar = ({ userStats = DEFAULT_STATS }) => {
                                                     <item.icon className="w-4 h-4 text-white" />
                                                 </div>
                                                 <div>
-                                                    <div className="font-bold text-base">{item.label}</div>
-                                                    <div className="text-xs opacity-70">{item.description}</div>
+                                                    <div className="font-bold text-base">{t(item.labelKey)}</div>
+                                                    <div className="text-xs opacity-70">{t(item.descKey)}</div>
                                                     {item.badge && (
                                                         <div className="text-xs text-rose-500 font-bold mt-1">
-                                                            {item.badge} notifications
+                                                            {t('common.notificationsCount', { count: item.badge })}
                                                         </div>
                                                     )}
                                                 </div>
@@ -466,7 +414,7 @@ const TenantSideBar = ({ userStats = DEFAULT_STATS }) => {
                         whileTap={{ scale: 0.98 }}
                         onClick={handleLogout}
                         className={`w-full flex items-center p-4 rounded-2xl ${isDark ? 'hover:bg-rose-500/10' : 'hover:bg-rose-50/80'} transition-all duration-300 group hover:shadow-lg hover:shadow-rose-500/20 hover:-translate-y-1`}
-                        title="Logout"
+                        title={t('common.logout')}
                     >
                         <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-rose-400 to-red-500 flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-xl group-hover:shadow-rose-500/30 transition-all duration-300">
                             <LogOut className="w-6 h-6 text-white group-hover:scale-110 group-hover:rotate-3 transition-all duration-300" />
@@ -481,10 +429,10 @@ const TenantSideBar = ({ userStats = DEFAULT_STATS }) => {
                                     className="flex-1 ml-4 text-left"
                                 >
                                     <div className={`${isDark ? 'text-rose-300 group-hover:text-rose-200' : 'text-rose-600 group-hover:text-rose-700'} font-bold text-lg transition-all duration-300 group-hover:translate-x-1`}>
-                                        Logout
+                                        {t('common.logout')}
                                     </div>
                                     <div className={`${isDark ? 'text-rose-400/80 group-hover:text-rose-300/90' : 'text-rose-500/80 group-hover:text-rose-600/90'} text-sm transition-all duration-300 group-hover:translate-x-1`}>
-                                        Sign out of your account
+                                        {t('common.signOutDesc')}
                                     </div>
                                 </motion.div>
                             )}

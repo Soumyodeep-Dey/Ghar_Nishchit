@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // dark mode context
 import DarkModeProvider from './DarkModeContext.jsx';
+import { LanguageProvider } from './i18n/LanguageContext.jsx';
 
 
 // toast notifications
@@ -45,6 +46,7 @@ const AppLoader = () => (
 export default function App() {
   return (
     <DarkModeProvider>
+      <LanguageProvider>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
         <ToastContainer
           position="top-right"
@@ -188,6 +190,7 @@ export default function App() {
         </Suspense>
         <Chatbot />
       </div>
+      </LanguageProvider>
     </DarkModeProvider>
   );
 }

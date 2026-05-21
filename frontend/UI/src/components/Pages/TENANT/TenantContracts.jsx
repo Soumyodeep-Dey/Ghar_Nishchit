@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
 import api from '../../../services/api.js';
 import { showSuccessToast, showErrorToast } from '../../../utils/toast.jsx';
+import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import {
   FileText, CheckCircle, Clock, XCircle, Home, Calendar,
   IndianRupee, Shield, User, AlertTriangle, RefreshCw, Eye, X
@@ -282,12 +284,12 @@ const ContractCard = ({ contract, onView }) => {
 };
 
 // ─── Empty State ──────────────────────────────────────────────────────────────
-const EmptyState = ({ darkMode }) => (
+const EmptyState = ({ darkMode, t }) => (
   <div className="text-center py-20">
     <div className={`inline-flex items-center justify-center w-24 h-24 rounded-3xl mb-6 ${darkMode ? 'bg-slate-800/80' : 'bg-indigo-50/50'}`}>
       <FileText className={`w-12 h-12 ${darkMode ? 'text-slate-500' : 'text-indigo-400'}`} />
     </div>
-    <h3 className={`text-xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>No Contracts Yet</h3>
+    <h3 className={`text-xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>{t('pages.noContracts')}</h3>
     <p className={`text-sm max-w-xs mx-auto ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
       When a landlord sends you a lease contract, it will appear here for your review and signature.
     </p>
@@ -297,6 +299,8 @@ const EmptyState = ({ darkMode }) => (
 // ─── Main Component ───────────────────────────────────────────────────────────
 const TenantContracts = () => {
   const { darkMode } = useDarkMode();
+  const { t } = useLanguage();
+  const navigate = useNavigate();
 
   const [contracts, setContracts]           = useState([]);
   const [isLoading, setIsLoading]           = useState(true);
@@ -348,22 +352,45 @@ const TenantContracts = () => {
 
   useEffect(() => { fetchContracts(); }, [fetchContracts]);
 
-  // Accept a contract
+  // Accept a contract → redirect to payment with rent + deposit pre-filled
   const handleAccept = useCallback(async (contractId) => {
     try {
       setAccepting(true);
+      const contract =
+        contracts.find(c => String(c._id || c.id) === String(contractId)) ||
+        selectedContract;
+
       await api.updateContractStatus(contractId, 'active');
 
-      // Refetch to clear deleted duplicate contracts
-      await fetchContracts();
+      const propertyId =
+        contract?.property?._id ||
+        contract?.propertyId ||
+        (typeof contract?.property === 'string' ? contract.property : null);
+      const rentAmount = Number(contract?.rentAmount || 0);
+      const securityDeposit = Number(contract?.securityDeposit || 0);
 
-      showSuccessToast('🎉 Lease accepted! You are now an active tenant.');
+      setSelectedContract(null);
+      showSuccessToast('🎉 Lease accepted! Complete your move-in payment.');
+
+      navigate('/tenant/payment', {
+        state: {
+          leasePayment: {
+            contractId,
+            propertyId,
+            propertyTitle: contract?.property?.title || 'Your apartment',
+            landlordName: contract?.landlord?.name || 'Landlord',
+            rentAmount,
+            securityDeposit,
+            totalAmount: rentAmount + securityDeposit,
+          },
+        },
+      });
     } catch (err) {
       showErrorToast(err.message || 'Failed to accept contract. Please try again.');
     } finally {
       setAccepting(false);
     }
-  }, [fetchContracts]);
+  }, [contracts, selectedContract, navigate]);
 
   // Decline a contract
   const handleDecline = useCallback(async () => {
@@ -419,10 +446,10 @@ const TenantContracts = () => {
             {/* Header */}
             <div className="text-center mb-2">
               <h1 className={`text-4xl font-extrabold mb-3 bg-gradient-to-r ${tc.headerGradient} bg-clip-text text-transparent`}>
-                My Contracts
+                {t('pages.myContracts')}
               </h1>
               <p className={`text-lg ${tc.textSecondary} max-w-xl mx-auto`}>
-                Review, sign, and track all your lease agreements in one place.
+                {t('pages.contractsSubtitle')}
               </p>
             </div>
 
@@ -470,7 +497,7 @@ const TenantContracts = () => {
             {/* Contract Grid */}
             <div className={`${tc.cardBg} backdrop-blur-xl border ${tc.cardBorder} rounded-3xl p-6 shadow-xl`}>
               <div className="flex items-center justify-between mb-6">
-                <h2 className={`text-xl font-bold ${tc.textPrimary}`}>All Contracts</h2>
+                <h2 className={`text-xl font-bold ${tc.textPrimary}`}>{t('pages.allContracts')}</h2>
                 <button
                   onClick={fetchContracts}
                   className={`flex items-center gap-2 text-sm px-4 py-2 rounded-xl transition-all hover:scale-105 border ${
@@ -483,7 +510,7 @@ const TenantContracts = () => {
               </div>
 
               {contracts.length === 0 ? (
-                <EmptyState darkMode={darkMode} />
+                <EmptyState darkMode={darkMode} t={t} />
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {contracts.map(contract => (
