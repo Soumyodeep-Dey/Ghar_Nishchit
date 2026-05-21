@@ -857,6 +857,11 @@ const LandlordPayment = () => {
 
   const { darkMode } = useDarkMode();
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
+  const tc = darkMode ? {
+    mainBg: 'from-gray-900 via-slate-800 to-blue-950',
+  } : {
+    mainBg: 'from-pink-300 via-purple-300 to-indigo-400',
+  };
   const { notifications, addNotification, removeNotification } = useNotification();
 
   // ─── Subscription Plans (synced with landing page pricing) ─────────────────────
@@ -1107,10 +1112,7 @@ const LandlordPayment = () => {
   };
 
   return (
-    <div className={`min-h-screen ${darkMode
-      ? 'bg-gradient-to-br from-gray-900 via-slate-900 to-blue-950'
-      : 'bg-gradient-to-br from-white via-indigo-50 to-purple-100'
-      } flex relative overflow-hidden`}>
+    <div className={`min-h-screen flex relative overflow-hidden bg-gradient-to-br ${tc.mainBg}`}>
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
@@ -1133,7 +1135,7 @@ const LandlordPayment = () => {
 
       <LandlordSideBar currentSection={currentSection} />
 
-      <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
+      <div className="flex-1 flex flex-col relative z-10 transition-all duration-700" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <LandlordNavBar currentSection={currentSection} />
 
         <main className="flex-1 overflow-y-auto">

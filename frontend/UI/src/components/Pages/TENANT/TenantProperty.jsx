@@ -560,6 +560,36 @@ const TenantProperty = () => {
   const { darkMode } = useDarkMode();
   const navigate = useNavigate();
 
+  const tc = darkMode
+    ? {
+        mainBg: 'from-gray-900 via-slate-800 to-blue-950',
+        loadingBg: 'from-gray-900 via-slate-800 to-blue-950',
+        cardBg: 'bg-slate-800/50', cardBorder: 'border-slate-700/50',
+        textPrimary: 'text-slate-100', textSecondary: 'text-slate-200',
+        headerGradient: 'from-cyan-300 via-purple-300 to-pink-300',
+        tabBg: 'bg-slate-800/50', tabBorder: 'border-slate-700/50',
+        tabActive: 'from-cyan-500 to-indigo-600', tabActiveText: 'text-blue-950',
+        tabInactive: 'text-slate-300 hover:text-slate-100 hover:bg-slate-700/50',
+        buttonPrimary: 'from-cyan-500 to-indigo-600',
+        buttonSecondary: 'from-purple-500 to-pink-600',
+        iconTrend: 'text-cyan-400',
+        spinnerBorder: 'border-cyan-500/30 border-t-cyan-400',
+      }
+    : {
+        mainBg: 'from-pink-300 via-purple-300 to-indigo-400',
+        loadingBg: 'from-pink-300 via-purple-300 to-indigo-400',
+        cardBg: 'bg-white/60', cardBorder: 'border-indigo-200/50',
+        textPrimary: 'text-gray-900', textSecondary: 'text-indigo-600',
+        headerGradient: 'from-indigo-700 via-purple-700 to-pink-700',
+        tabBg: 'bg-white/30', tabBorder: 'border-indigo-200/50',
+        tabActive: 'from-indigo-600 to-purple-600', tabActiveText: 'text-white',
+        tabInactive: 'text-indigo-600 hover:text-indigo-800 hover:bg-white/40',
+        buttonPrimary: 'from-indigo-600 to-purple-600',
+        buttonSecondary: 'from-purple-600 to-pink-600',
+        iconTrend: 'text-indigo-600',
+        spinnerBorder: 'border-indigo-400/40 border-t-indigo-600',
+      };
+
   const [properties, setProperties] = useState([]);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [scheduleVisitProperty, setScheduleVisitProperty] = useState(null);
@@ -703,11 +733,11 @@ const TenantProperty = () => {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen">
+      <div className={`min-h-screen bg-gradient-to-br ${tc.loadingBg} flex relative`}>
         <TenantSideBar />
-        <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
+        <div className="flex-1 flex flex-col relative z-10 transition-all duration-700" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
           <TenantNavBar currentSection="Properties" />
-          <main className={`flex-1 p-6 overflow-y-auto ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100' : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 text-gray-900'}`}>
+          <main className="flex-1 p-6 overflow-y-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, index) => (
                 <PropertyCardSkeleton key={index} />
@@ -720,23 +750,23 @@ const TenantProperty = () => {
   }
 
   return (
-    <div className="flex h-screen">
+    <div className={`min-h-screen bg-gradient-to-br ${tc.mainBg} flex relative`}>
       <TenantSideBar />
-      <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
+      <div className="flex-1 flex flex-col relative z-10 transition-all duration-700" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <TenantNavBar currentSection="Properties" />
-        <main className={`flex-1 p-6 overflow-y-auto ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100' : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 text-gray-900'}`}>
+        <main className="flex-1 p-6 overflow-y-auto">
           <div className="mb-8 animate-fadeIn">
             <div className="text-center mb-6">
-              <h1 className={`text-4xl font-bold mb-2 animate-slideDown ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>
+              <h1 className={`text-4xl font-bold mb-2 animate-slideDown bg-gradient-to-r ${tc.headerGradient} bg-clip-text text-transparent`}>
                 Find Your Perfect Home
               </h1>
-              <p className={`text-lg animate-slideUp ${darkMode ? 'text-slate-200' : 'text-gray-600'}`}>
+              <p className={`text-lg animate-slideUp ${tc.textSecondary}`}>
                 Discover amazing properties tailored to your lifestyle
               </p>
             </div>
           </div>
 
-          <div className={`${darkMode ? 'bg-slate-800/80 border-slate-700/50' : 'bg-white/80 border-white/20'} backdrop-blur-sm p-6 rounded-2xl shadow-xl mb-8 border animate-slideUp`}>
+          <div className={`${tc.cardBg} backdrop-blur-xl border ${tc.cardBorder} p-6 rounded-3xl shadow-xl mb-8 animate-slideUp`}>
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <div className="flex-1 relative">
                 <div className="relative">
@@ -745,7 +775,7 @@ const TenantProperty = () => {
                     placeholder="Search properties by name or location..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className={`w-full border-2 rounded-xl px-6 py-4 focus:outline-none focus:ring-4 transition-all duration-300 pl-12 text-lg ${darkMode ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:ring-cyan-500/20 focus:border-cyan-500' : 'bg-white border-gray-200 text-gray-800 placeholder-gray-500 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                    className={`w-full border rounded-xl px-6 py-4 focus:outline-none focus:ring-4 transition-all duration-300 pl-12 text-lg ${darkMode ? 'bg-slate-700/50 border-slate-600/50 text-white placeholder-slate-400 focus:ring-cyan-500/20 focus:border-cyan-500' : 'bg-white border-gray-200 text-gray-800 placeholder-gray-500 focus:ring-blue-500/20 focus:border-blue-500'}`}
                   />
                   <MagnifyingGlassIcon className={`h-6 w-6 absolute left-4 top-5 ${darkMode ? 'text-slate-400' : 'text-gray-400'}`} />
                 </div>
@@ -755,7 +785,7 @@ const TenantProperty = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className={`border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-cyan-500/20 focus:border-cyan-500' : 'bg-white border-gray-200 text-gray-800 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                  className={`border rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 ${darkMode ? 'bg-slate-700/50 border-slate-600/50 text-white focus:ring-cyan-500/20 focus:border-cyan-500' : 'bg-white border-gray-200 text-gray-800 focus:ring-blue-500/20 focus:border-blue-500'}`}
                 >
                   <option value="title">Sort by Name</option>
                   <option value="price">Sort by Price</option>
@@ -764,13 +794,13 @@ const TenantProperty = () => {
 
                 <button
                   onClick={() => setFilter('all')}
-                  className={`px-6 py-3 rounded-xl transition-all duration-300 ${filter === 'all' ? `${darkMode ? 'bg-cyan-600' : 'bg-blue-600'} text-white shadow-lg scale-105` : darkMode ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:scale-105' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105'}`}
+                  className={`px-6 py-3 rounded-xl transition-all duration-300 ${filter === 'all' ? `bg-gradient-to-r ${tc.tabActive} ${tc.tabActiveText} shadow-lg scale-105` : darkMode ? 'bg-slate-700/50 text-slate-300 hover:bg-slate-700 hover:scale-105' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105'}`}
                 >
                   All Properties
                 </button>
                 <button
                   onClick={() => setFilter('favorite')}
-                  className={`px-6 py-3 rounded-xl flex items-center transition-all duration-300 ${filter === 'favorite' ? 'bg-red-600 text-white shadow-lg scale-105' : darkMode ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:scale-105' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105'}`}
+                  className={`px-6 py-3 rounded-xl flex items-center transition-all duration-300 ${filter === 'favorite' ? 'bg-gradient-to-r from-red-600 to-pink-600 text-white shadow-lg scale-105' : darkMode ? 'bg-slate-700/50 text-slate-300 hover:bg-slate-700 hover:scale-105' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105'}`}
                 >
                   <HeartSolidIcon className="h-5 w-5 mr-2" />
                   Favorites
@@ -779,7 +809,7 @@ const TenantProperty = () => {
             </div>
 
             <div className="mt-6">
-              <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+              <label className={`block text-sm font-medium mb-2 ${tc.textSecondary}`}>
                 Price Range: ₹{priceRange[0]} - ₹{priceRange[1]}
               </label>
               <input
@@ -799,8 +829,8 @@ const TenantProperty = () => {
               <div className="col-span-full text-center py-16 animate-fadeIn">
                 <div className="max-w-md mx-auto">
                   <BuildingOfficeIcon className={`h-24 w-24 mx-auto mb-6 animate-bounce ${darkMode ? 'text-slate-500' : 'text-gray-400'}`} />
-                  <h3 className={`text-2xl font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>No properties found</h3>
-                  <p className={`text-lg mb-6 ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>
+                  <h3 className={`text-2xl font-bold mb-3 ${tc.textPrimary}`}>No properties found</h3>
+                  <p className={`text-lg mb-6 ${tc.textSecondary}`}>
                     Try adjusting your search criteria or browse all available properties
                   </p>
                   <button
@@ -809,7 +839,7 @@ const TenantProperty = () => {
                       setFilter('all');
                       setPriceRange([0, 50000]);
                     }}
-                    className={`${darkMode ? 'bg-cyan-600 hover:bg-cyan-700' : 'bg-blue-600 hover:bg-blue-700'} text-white px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105`}
+                    className={`bg-gradient-to-r ${tc.buttonPrimary} text-white px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105`}
                   >
                     Reset Filters
                   </button>
@@ -831,22 +861,22 @@ const TenantProperty = () => {
             )}
           </div>
 
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20 animate-slideUp">
-            <h3 className="text-2xl font-bold text-center mb-6">Property Statistics</h3>
+          <div className={`${tc.cardBg} backdrop-blur-xl border ${tc.cardBorder} rounded-3xl p-8 shadow-xl animate-slideUp`}>
+            <h3 className={`text-2xl font-bold text-center mb-6 bg-gradient-to-r ${tc.headerGradient} bg-clip-text text-transparent`}>Property Statistics</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center p-6 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 hover:scale-105 transition-transform duration-300">
-                <div className="text-3xl font-bold text-blue-600">{properties.length}</div>
-                <div className="text-gray-600">Total Properties</div>
+              <div className={`text-center p-6 rounded-xl ${darkMode ? 'bg-slate-900/60 border-slate-700/50' : 'bg-gradient-to-br from-blue-50 to-blue-100'} border hover:scale-105 transition-transform duration-300`}>
+                <div className={`text-3xl font-bold ${darkMode ? 'text-cyan-400' : 'text-blue-600'}`}>{properties.length}</div>
+                <div className={`${tc.textSecondary}`}>Total Properties</div>
               </div>
-              <div className="text-center p-6 rounded-xl bg-gradient-to-br from-red-50 to-red-100 hover:scale-105 transition-transform duration-300">
-                <div className="text-3xl font-bold text-red-600">{properties.filter(p => p.favorite).length}</div>
-                <div className="text-gray-600">Favorites</div>
+              <div className={`text-center p-6 rounded-xl ${darkMode ? 'bg-slate-900/60 border-slate-700/50' : 'bg-gradient-to-br from-red-50 to-red-100'} border hover:scale-105 transition-transform duration-300`}>
+                <div className={`text-3xl font-bold ${darkMode ? 'text-red-500' : 'text-red-600'}`}>{properties.filter(p => p.favorite).length}</div>
+                <div className={`${tc.textSecondary}`}>Favorites</div>
               </div>
-              <div className="text-center p-6 rounded-xl bg-gradient-to-br from-green-50 to-green-100 hover:scale-105 transition-transform duration-300">
-                <div className="text-3xl font-bold text-green-600">
+              <div className={`text-center p-6 rounded-xl ${darkMode ? 'bg-slate-900/60 border-slate-700/50' : 'bg-gradient-to-br from-green-50 to-green-100'} border hover:scale-105 transition-transform duration-300`}>
+                <div className={`text-3xl font-bold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
                   ₹{properties.length ? Math.round(properties.reduce((sum, p) => sum + extractPrice(p.price), 0) / properties.length) : 0}
                 </div>
-                <div className="text-gray-600">Average Price</div>
+                <div className={`${tc.textSecondary}`}>Average Price</div>
               </div>
             </div>
           </div>

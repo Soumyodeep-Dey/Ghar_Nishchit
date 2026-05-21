@@ -1566,8 +1566,14 @@ const LandlordMaintenance = () => {
     }
   };
 
+  const tc = darkMode ? {
+    mainBg: 'from-gray-900 via-slate-800 to-blue-950',
+  } : {
+    mainBg: 'from-pink-300 via-purple-300 to-indigo-400',
+  };
+
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'} flex relative overflow-hidden`}>
+    <div className={`min-h-screen flex relative overflow-hidden bg-gradient-to-br ${tc.mainBg}`}>
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
@@ -1584,7 +1590,7 @@ const LandlordMaintenance = () => {
 
       <LandlordSideBar currentSection={currentSection} />
 
-      <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
+      <div className="flex-1 flex flex-col relative z-10 transition-all duration-700" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <LandlordNavBar currentSection={currentSection} />
 
         <main className="flex-1 overflow-y-auto">

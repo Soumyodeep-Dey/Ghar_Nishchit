@@ -11,12 +11,13 @@ import {
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 const StatusBadge = ({ status }) => {
+  const { darkMode } = useDarkMode();
   const cfg = {
-    pending:   { label: 'Awaiting Your Signature', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Clock },
-    active:    { label: 'Active Lease',             color: 'bg-green-100  text-green-800  border-green-200',  icon: CheckCircle },
-    completed: { label: 'Completed',                color: 'bg-blue-100   text-blue-800   border-blue-200',   icon: CheckCircle },
-    cancelled: { label: 'Cancelled',                color: 'bg-red-100    text-red-800    border-red-200',    icon: XCircle },
-  }[status?.toLowerCase()] || { label: status, color: 'bg-gray-100 text-gray-700 border-gray-200', icon: FileText };
+    pending:   { label: 'Awaiting Your Signature', color: darkMode ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-amber-50 text-amber-800 border-amber-250', icon: Clock },
+    active:    { label: 'Active Lease',             color: darkMode ? 'bg-green-500/20 text-green-300 border-green-500/30' : 'bg-green-50  text-green-800  border-green-200',  icon: CheckCircle },
+    completed: { label: 'Completed',                color: darkMode ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' : 'bg-blue-50   text-blue-800   border-blue-200',   icon: CheckCircle },
+    cancelled: { label: 'Cancelled',                color: darkMode ? 'bg-red-500/20 text-red-300 border-red-500/30' : 'bg-red-50    text-red-800    border-red-200',    icon: XCircle },
+  }[status?.toLowerCase()] || { label: status, color: darkMode ? 'bg-slate-800/80 text-slate-350 border-slate-700/50' : 'bg-gray-100 text-gray-700 border-gray-250', icon: FileText };
 
   const Icon = cfg.icon;
   return (
@@ -33,11 +34,11 @@ const ContractModal = ({ contract, onClose, onAccept, onDecline, accepting }) =>
   if (!contract) return null;
 
   const isPending = contract.status === 'pending';
-  const bg = darkMode ? 'bg-slate-900' : 'bg-white';
+  const bg = darkMode ? 'bg-slate-900/95 backdrop-blur-xl border border-slate-700/50' : 'bg-white/95 backdrop-blur-xl border border-indigo-200/50';
   const text = darkMode ? 'text-slate-100' : 'text-gray-900';
   const sub = darkMode ? 'text-slate-400' : 'text-gray-500';
-  const border = darkMode ? 'border-slate-700' : 'border-gray-200';
-  const rowBg = darkMode ? 'bg-slate-800' : 'bg-gray-50';
+  const border = darkMode ? 'border-slate-700/50' : 'border-indigo-100';
+  const rowBg = darkMode ? 'bg-slate-800/50 border border-slate-700/30' : 'bg-gray-50/80 border border-indigo-50';
 
   const Row = ({ label, value }) => (
     <div className={`flex justify-between items-center py-3 px-4 rounded-xl ${rowBg}`}>
@@ -47,15 +48,15 @@ const ContractModal = ({ contract, onClose, onAccept, onDecline, accepting }) =>
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fadeIn" onClick={onClose}>
       <div
-        className={`${bg} rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto`}
+        className={`${bg} rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar`}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
         <div className={`sticky top-0 ${bg} p-6 border-b ${border} rounded-t-3xl flex items-center justify-between`}>
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl">
+            <div className="p-2.5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
               <FileText className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -63,7 +64,7 @@ const ContractModal = ({ contract, onClose, onAccept, onDecline, accepting }) =>
               <p className={`text-sm ${sub}`}>{contract.property?.title || 'Property Contract'}</p>
             </div>
           </div>
-          <button onClick={onClose} className={`p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors ${sub}`}>
+          <button onClick={onClose} className={`p-2 rounded-xl hover:bg-slate-100/50 dark:hover:bg-slate-800 transition-colors ${sub}`}>
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -72,11 +73,13 @@ const ContractModal = ({ contract, onClose, onAccept, onDecline, accepting }) =>
         <div className="p-6 space-y-5">
           {/* Status banner for pending */}
           {isPending && (
-            <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
-              <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+            <div className={`flex items-start gap-3 p-4 border rounded-2xl ${
+              darkMode ? 'bg-amber-500/10 border-amber-500/25' : 'bg-amber-50 border-amber-200'
+            }`}>
+              <AlertTriangle className="w-5 h-5 text-amber-550 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm font-semibold text-amber-800">Action Required</p>
-                <p className="text-sm text-amber-700 mt-0.5">
+                <p className={`text-sm font-semibold ${darkMode ? 'text-amber-400' : 'text-amber-800'}`}>Action Required</p>
+                <p className={`text-sm mt-0.5 ${darkMode ? 'text-amber-500' : 'text-amber-700'}`}>
                   Your landlord has sent you this lease contract. Please review all terms carefully before signing.
                 </p>
               </div>
@@ -147,7 +150,9 @@ const ContractModal = ({ contract, onClose, onAccept, onDecline, accepting }) =>
               <button
                 onClick={onDecline}
                 disabled={accepting}
-                className="flex-1 py-3 rounded-xl border border-red-200 text-red-600 font-semibold text-sm hover:bg-red-50 transition-colors disabled:opacity-50"
+                className={`flex-1 py-3 rounded-xl border font-semibold text-sm transition-colors disabled:opacity-50 ${
+                  darkMode ? 'border-red-500/30 text-red-400 hover:bg-red-500/10' : 'border-red-200 text-red-500 hover:bg-red-50'
+                }`}
               >
                 Decline
               </button>
@@ -171,7 +176,10 @@ const ContractModal = ({ contract, onClose, onAccept, onDecline, accepting }) =>
 const ContractCard = ({ contract, onView }) => {
   const { darkMode } = useDarkMode();
   const isPending = contract.status === 'pending';
-  const cardBg = darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-100';
+  const cardBg = darkMode ? 'bg-slate-800/60 border-slate-700/50 backdrop-blur-md' : 'bg-white/60 border-indigo-100 backdrop-blur-md';
+  const text = darkMode ? 'text-white' : 'text-gray-900';
+  const sub = darkMode ? 'text-slate-400' : 'text-gray-500';
+  const subCardBg = darkMode ? 'bg-slate-700/40 border border-slate-650' : 'bg-indigo-50/40 border border-indigo-100/50';
 
   return (
     <div className={`relative rounded-2xl border shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group ${cardBg} ${isPending ? 'ring-2 ring-amber-400/50' : ''}`}>
@@ -188,14 +196,14 @@ const ContractCard = ({ contract, onView }) => {
       <div className="p-6">
         {/* Top row */}
         <div className="flex items-start gap-4 mb-5">
-          <div className={`p-3 rounded-xl flex-shrink-0 ${isPending ? 'bg-amber-100' : 'bg-blue-100'}`}>
-            <Home className={`w-6 h-6 ${isPending ? 'text-amber-600' : 'text-blue-600'}`} />
+          <div className={`p-3 rounded-xl flex-shrink-0 ${isPending ? darkMode ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-100 text-amber-600' : darkMode ? 'bg-blue-500/20 text-cyan-400' : 'bg-blue-100 text-blue-600'}`}>
+            <Home className="w-6 h-6" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className={`font-bold text-lg truncate ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+            <h3 className={`font-bold text-lg truncate ${text}`}>
               {contract.property?.title || 'Property Contract'}
             </h3>
-            <p className={`text-sm mt-0.5 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+            <p className={`text-sm mt-0.5 ${sub}`}>
               {contract.type?.charAt(0).toUpperCase() + contract.type?.slice(1) || 'Lease'} Agreement
             </p>
           </div>
@@ -203,39 +211,39 @@ const ContractCard = ({ contract, onView }) => {
 
         {/* Info Grid */}
         <div className="grid grid-cols-2 gap-3 mb-5">
-          <div className={`p-3 rounded-xl ${darkMode ? 'bg-slate-700' : 'bg-gray-50'}`}>
+          <div className={`p-3 rounded-xl ${subCardBg}`}>
             <div className="flex items-center gap-1.5 mb-1">
-              <IndianRupee className={`w-3.5 h-3.5 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`} />
-              <span className={`text-xs ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Monthly Rent</span>
+              <IndianRupee className={`w-3.5 h-3.5 ${sub}`} />
+              <span className={`text-xs ${sub}`}>Monthly Rent</span>
             </div>
-            <p className={`font-bold text-base ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+            <p className={`font-bold text-base ${text}`}>
               ₹{Number(contract.rentAmount || 0).toLocaleString('en-IN')}
             </p>
           </div>
-          <div className={`p-3 rounded-xl ${darkMode ? 'bg-slate-700' : 'bg-gray-50'}`}>
+          <div className={`p-3 rounded-xl ${subCardBg}`}>
             <div className="flex items-center gap-1.5 mb-1">
-              <Calendar className={`w-3.5 h-3.5 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`} />
-              <span className={`text-xs ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Duration</span>
+              <Calendar className={`w-3.5 h-3.5 ${sub}`} />
+              <span className={`text-xs ${sub}`}>Duration</span>
             </div>
-            <p className={`font-bold text-base ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+            <p className={`font-bold text-base ${text}`}>
               {contract.duration || '—'} months
             </p>
           </div>
-          <div className={`p-3 rounded-xl ${darkMode ? 'bg-slate-700' : 'bg-gray-50'}`}>
+          <div className={`p-3 rounded-xl ${subCardBg}`}>
             <div className="flex items-center gap-1.5 mb-1">
-              <Calendar className={`w-3.5 h-3.5 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`} />
-              <span className={`text-xs ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Start Date</span>
+              <Calendar className={`w-3.5 h-3.5 ${sub}`} />
+              <span className={`text-xs ${sub}`}>Start Date</span>
             </div>
-            <p className={`font-semibold text-sm ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+            <p className={`font-semibold text-sm ${text}`}>
               {contract.startDate ? new Date(contract.startDate).toLocaleDateString('en-IN') : '—'}
             </p>
           </div>
-          <div className={`p-3 rounded-xl ${darkMode ? 'bg-slate-700' : 'bg-gray-50'}`}>
+          <div className={`p-3 rounded-xl ${subCardBg}`}>
             <div className="flex items-center gap-1.5 mb-1">
-              <Shield className={`w-3.5 h-3.5 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`} />
-              <span className={`text-xs ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>Deposit</span>
+              <Shield className={`w-3.5 h-3.5 ${sub}`} />
+              <span className={`text-xs ${sub}`}>Deposit</span>
             </div>
-            <p className={`font-bold text-base ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+            <p className={`font-bold text-base ${text}`}>
               ₹{Number(contract.securityDeposit || 0).toLocaleString('en-IN')}
             </p>
           </div>
@@ -243,9 +251,9 @@ const ContractCard = ({ contract, onView }) => {
 
         {/* Landlord */}
         {contract.landlord && (
-          <div className={`flex items-center gap-2 mb-4 p-3 rounded-xl ${darkMode ? 'bg-slate-700' : 'bg-gray-50'}`}>
-            <User className={`w-4 h-4 flex-shrink-0 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`} />
-            <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
+          <div className={`flex items-center gap-2 mb-4 p-3 rounded-xl ${subCardBg}`}>
+            <User className={`w-4 h-4 flex-shrink-0 ${sub}`} />
+            <span className={`text-sm ${darkMode ? 'text-slate-350' : 'text-gray-700'}`}>
               From <strong>{contract.landlord.name || 'Landlord'}</strong>
             </span>
           </div>
@@ -258,10 +266,10 @@ const ContractCard = ({ contract, onView }) => {
             onClick={() => onView(contract)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
               isPending
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-amber-500/25'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-amber-500/25 hover:scale-105'
                 : darkMode
-                ? 'bg-slate-700 text-slate-200 hover:bg-slate-600'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-slate-700/80 text-slate-200 hover:bg-slate-650 hover:text-white border border-slate-600/30'
+                : 'bg-indigo-50 text-indigo-650 hover:bg-indigo-100 hover:scale-105'
             }`}
           >
             <Eye className="w-4 h-4" />
@@ -276,8 +284,8 @@ const ContractCard = ({ contract, onView }) => {
 // ─── Empty State ──────────────────────────────────────────────────────────────
 const EmptyState = ({ darkMode }) => (
   <div className="text-center py-20">
-    <div className={`inline-flex items-center justify-center w-24 h-24 rounded-3xl mb-6 ${darkMode ? 'bg-slate-800' : 'bg-gray-100'}`}>
-      <FileText className={`w-12 h-12 ${darkMode ? 'text-slate-500' : 'text-gray-400'}`} />
+    <div className={`inline-flex items-center justify-center w-24 h-24 rounded-3xl mb-6 ${darkMode ? 'bg-slate-800/80' : 'bg-indigo-50/50'}`}>
+      <FileText className={`w-12 h-12 ${darkMode ? 'text-slate-500' : 'text-indigo-400'}`} />
     </div>
     <h3 className={`text-xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>No Contracts Yet</h3>
     <p className={`text-sm max-w-xs mx-auto ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
@@ -295,9 +303,33 @@ const TenantContracts = () => {
   const [selectedContract, setSelectedContract] = useState(null);
   const [accepting, setAccepting]           = useState(false);
 
-  const bgClass = darkMode
-    ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950'
-    : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400';
+  const tc = darkMode
+    ? {
+        mainBg: 'from-gray-900 via-slate-800 to-blue-950',
+        loadingBg: 'from-gray-900 via-slate-800 to-blue-950',
+        cardBg: 'bg-slate-800/50',
+        cardBorder: 'border-slate-700/50',
+        textPrimary: 'text-slate-100',
+        textSecondary: 'text-slate-200',
+        headerGradient: 'from-cyan-300 via-purple-300 to-pink-300',
+        buttonPrimary: 'from-cyan-500 to-indigo-600',
+        buttonSecondary: 'from-purple-500 to-pink-600',
+        spinnerBorder: 'border-cyan-500/30 border-t-cyan-400',
+        panelBg: 'bg-slate-900/60',
+      }
+    : {
+        mainBg: 'from-pink-300 via-purple-300 to-indigo-400',
+        loadingBg: 'from-pink-300 via-purple-300 to-indigo-400',
+        cardBg: 'bg-white/60',
+        cardBorder: 'border-indigo-200/50',
+        textPrimary: 'text-gray-900',
+        textSecondary: 'text-indigo-600',
+        headerGradient: 'from-indigo-700 via-purple-700 to-pink-700',
+        buttonPrimary: 'from-indigo-600 to-purple-600',
+        buttonSecondary: 'from-purple-600 to-pink-600',
+        spinnerBorder: 'border-indigo-400/40 border-t-indigo-600',
+        panelBg: 'bg-white/40',
+      };
 
   // Fetch contracts from API
   const fetchContracts = useCallback(async () => {
@@ -331,7 +363,7 @@ const TenantContracts = () => {
     } finally {
       setAccepting(false);
     }
-  }, []);
+  }, [fetchContracts]);
 
   // Decline a contract
   const handleDecline = useCallback(async () => {
@@ -357,17 +389,17 @@ const TenantContracts = () => {
   // Loading
   if (isLoading) {
     return (
-      <div className={`flex h-screen ${bgClass}`}>
+      <div className={`flex min-h-screen bg-gradient-to-br ${tc.loadingBg}`}>
         <TenantSideBar />
-        <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
+        <div className="flex-1 flex flex-col relative z-10 transition-all duration-700" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
           <TenantNavBar currentSection="Contracts" />
           <main className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <div className="relative w-20 h-20 mx-auto mb-6">
-                <div className="w-20 h-20 border-4 border-indigo-200 rounded-full animate-spin" />
-                <div className="absolute inset-0 w-20 h-20 border-4 border-t-indigo-600 rounded-full animate-spin" />
+                <div className={`w-20 h-20 border-4 ${tc.spinnerBorder} rounded-full animate-spin`} />
               </div>
-              <p className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Loading Contracts…</p>
+              <h2 className={`text-xl font-bold ${tc.textPrimary} mt-6 animate-pulse`}>Loading Contracts...</h2>
+              <p className={`${tc.textSecondary} mt-2`}>Retrieving your lease documents</p>
             </div>
           </main>
         </div>
@@ -375,45 +407,43 @@ const TenantContracts = () => {
     );
   }
 
-  const cardBg = darkMode ? 'bg-slate-800/80 border-slate-700/50' : 'bg-white/80 border-white/50';
-
   return (
-    <div className={`flex h-screen ${bgClass}`}>
+    <div className={`flex min-h-screen bg-gradient-to-br ${tc.mainBg} relative overflow-hidden`}>
       <TenantSideBar />
-      <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
+      <div className="flex-1 flex flex-col relative z-10 transition-all duration-700" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <TenantNavBar currentSection="Contracts" />
 
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-6 space-y-8">
+        <main className="flex-1 overflow-y-auto custom-scrollbar">
+          <div className="p-6 space-y-8 max-w-7xl mx-auto">
 
             {/* Header */}
             <div className="text-center mb-2">
-              <h1 className={`text-4xl font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+              <h1 className={`text-4xl font-extrabold mb-3 bg-gradient-to-r ${tc.headerGradient} bg-clip-text text-transparent`}>
                 My Contracts
               </h1>
-              <p className={`text-lg ${darkMode ? 'text-slate-300' : 'text-gray-600'} max-w-xl mx-auto`}>
+              <p className={`text-lg ${tc.textSecondary} max-w-xl mx-auto`}>
                 Review, sign, and track all your lease agreements in one place.
               </p>
             </div>
 
             {/* Stats */}
             {contracts.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 {[
                   { label: 'Awaiting Signature', value: pending,   icon: Clock,        color: 'from-amber-500 to-orange-500',  warn: pending > 0 },
                   { label: 'Active Leases',       value: active,    icon: CheckCircle,  color: 'from-green-500 to-emerald-500', warn: false },
                   { label: 'Completed',           value: completed, icon: FileText,     color: 'from-blue-500 to-indigo-500',   warn: false },
                 ].map(({ label, value, icon: Icon, color, warn }) => (
-                  <div key={label} className={`${cardBg} backdrop-blur-sm border rounded-2xl p-5 flex items-center gap-4 ${warn && value > 0 ? 'ring-2 ring-amber-400/50' : ''}`}>
-                    <div className={`p-3 rounded-xl bg-gradient-to-br ${color} flex-shrink-0`}>
+                  <div key={label} className={`${tc.cardBg} backdrop-blur-xl border ${tc.cardBorder} rounded-2xl p-5 flex items-center gap-4 transition-all duration-300 hover:shadow-lg ${warn && value > 0 ? 'ring-2 ring-amber-400/50' : ''}`}>
+                    <div className={`p-3 rounded-xl bg-gradient-to-br ${color} flex-shrink-0 shadow-md`}>
                       <Icon className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <p className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{value}</p>
-                      <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-600'}`}>{label}</p>
+                      <p className={`text-3xl font-bold ${tc.textPrimary}`}>{value}</p>
+                      <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>{label}</p>
                     </div>
                     {warn && value > 0 && (
-                      <span className="ml-auto text-xs bg-amber-100 text-amber-700 font-semibold px-2 py-1 rounded-full">Action needed</span>
+                      <span className="ml-auto text-xs bg-amber-500/20 text-amber-300 font-semibold px-2.5 py-1 rounded-full border border-amber-500/30 animate-pulse">Action needed</span>
                     )}
                   </div>
                 ))}
@@ -422,13 +452,15 @@ const TenantContracts = () => {
 
             {/* Pending Alert Banner */}
             {pending > 0 && (
-              <div className="flex items-center gap-4 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
-                <AlertTriangle className="w-6 h-6 text-amber-600 flex-shrink-0" />
+              <div className={`flex items-center gap-4 p-4 border rounded-2xl transition-all duration-300 ${
+                darkMode ? 'bg-amber-500/10 border-amber-500/25' : 'bg-amber-50 border-amber-200'
+              }`}>
+                <AlertTriangle className="w-6 h-6 text-amber-500 flex-shrink-0 animate-bounce" />
                 <div className="flex-1">
-                  <p className="font-semibold text-amber-800">
+                  <p className={`font-semibold ${darkMode ? 'text-amber-400' : 'text-amber-800'}`}>
                     You have {pending} contract{pending > 1 ? 's' : ''} waiting for your signature.
                   </p>
-                  <p className="text-sm text-amber-700 mt-0.5">
+                  <p className={`text-sm mt-0.5 ${darkMode ? 'text-amber-500/80' : 'text-amber-700/80'}`}>
                     Click "Review & Sign" on the contract card below to proceed.
                   </p>
                 </div>
@@ -436,12 +468,14 @@ const TenantContracts = () => {
             )}
 
             {/* Contract Grid */}
-            <div className={`${cardBg} backdrop-blur-sm border rounded-3xl p-6`}>
+            <div className={`${tc.cardBg} backdrop-blur-xl border ${tc.cardBorder} rounded-3xl p-6 shadow-xl`}>
               <div className="flex items-center justify-between mb-6">
-                <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>All Contracts</h2>
+                <h2 className={`text-xl font-bold ${tc.textPrimary}`}>All Contracts</h2>
                 <button
                   onClick={fetchContracts}
-                  className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg transition-colors ${darkMode ? 'text-slate-400 hover:bg-slate-700' : 'text-gray-500 hover:bg-gray-100'}`}
+                  className={`flex items-center gap-2 text-sm px-4 py-2 rounded-xl transition-all hover:scale-105 border ${
+                    darkMode ? 'text-slate-350 hover:bg-slate-700/50 border-slate-700/50' : 'text-indigo-650 hover:bg-indigo-50 border-indigo-100'
+                  }`}
                 >
                   <RefreshCw className="w-4 h-4" />
                   Refresh
@@ -451,7 +485,7 @@ const TenantContracts = () => {
               {contracts.length === 0 ? (
                 <EmptyState darkMode={darkMode} />
               ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {contracts.map(contract => (
                     <ContractCard
                       key={contract._id || contract.id}
@@ -476,6 +510,15 @@ const TenantContracts = () => {
           accepting={accepting}
         />
       )}
+
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: ${darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)'}; }
+        @keyframes fadeIn { from { opacity:0; transform:scale(0.98); } to { opacity:1; transform:scale(1); } }
+        .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+      `}</style>
     </div>
   );
 };

@@ -564,6 +564,12 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
 
 // Main Component
 const LandlordMessage = () => {
+  const { darkMode } = useDarkMode();
+  const tc = darkMode ? {
+    mainBg: 'from-gray-900 via-slate-800 to-blue-950',
+  } : {
+    mainBg: 'from-pink-300 via-purple-300 to-indigo-400',
+  };
   const [currentSection] = useState('Messages');
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
   const location = useLocation();
@@ -919,24 +925,24 @@ const LandlordMessage = () => {
 
   return (
     <>
-    <div className="h-screen bg-gradient-to-br from-white via-indigo-50 to-purple-100 dark:from-gray-900 dark:via-slate-900 dark:to-blue-950 flex relative overflow-hidden">
+    <div className={`h-screen flex relative overflow-hidden bg-gradient-to-br ${tc.mainBg}`}>
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
           animate={{ rotate: 360, scale: [1, 1.1, 1] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-indigo-300/20 to-pink-300/20 dark:from-cyan-500/10 dark:to-blue-500/10 rounded-full blur-3xl"
+          className={`absolute -top-40 -right-40 w-80 h-80 ${darkMode ? 'from-purple-500/10 to-pink-500/10' : 'from-indigo-600/20 to-purple-600/20'} rounded-full blur-3xl bg-gradient-to-r`}
         />
         <motion.div
           animate={{ rotate: -360, scale: [1.1, 1, 1.1] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-purple-300/20 to-indigo-300/20 dark:from-blue-500/10 dark:to-cyan-500/10 rounded-full blur-3xl"
+          className={`absolute -bottom-40 -left-40 w-80 h-80 ${darkMode ? 'from-blue-500/10 to-cyan-500/10' : 'from-pink-500/20 to-orange-500/20'} rounded-full blur-3xl bg-gradient-to-r`}
         />
       </div>
 
       <LandlordSideBar currentSection={currentSection} />
 
-      <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
+      <div className="flex-1 flex flex-col relative z-10 transition-all duration-700" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <LandlordNavBar currentSection={currentSection} />
 
         <main className="flex-1 overflow-hidden">

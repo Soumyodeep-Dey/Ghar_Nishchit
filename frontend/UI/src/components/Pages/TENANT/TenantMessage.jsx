@@ -46,18 +46,18 @@ const MessageBubble = ({ msg, darkMode }) => {
           ${msg.isOwn
             ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-br-md'
             : darkMode
-              ? 'bg-gray-800 text-gray-100 rounded-bl-md border border-gray-700'
-              : 'bg-white text-gray-800 rounded-bl-md border border-gray-200'
+              ? 'bg-slate-800/80 text-slate-100 rounded-bl-md border border-slate-700/50'
+              : 'bg-white/80 text-gray-800 rounded-bl-md border border-indigo-100 backdrop-blur-md'
           }`}
       >
         {!msg.isOwn && (
-          <p className={`text-xs font-semibold mb-1 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+          <p className={`text-xs font-semibold mb-1 ${darkMode ? 'text-cyan-400' : 'text-indigo-600'}`}>
             {msg.senderName || (msg.role === 'landlord' ? 'Landlord' : 'Tenant')}
           </p>
         )}
         <p className="leading-relaxed">{msg.content}</p>
         <div className="flex items-center justify-between mt-2">
-          <p className={`text-xs ${msg.isOwn ? 'text-blue-200' : darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+          <p className={`text-xs ${msg.isOwn ? 'text-blue-200' : darkMode ? 'text-slate-400' : 'text-gray-500'}`}>
             {time}
           </p>
           {msg.isOwn && (
@@ -85,26 +85,26 @@ const ConversationItem = ({ inquiry, isActive, onClick, darkMode }) => {
     <div
       onClick={onClick}
       className={`flex items-center p-4 border-b cursor-pointer transition-all duration-300
-        ${darkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-100 hover:bg-gray-50'}
+        ${darkMode ? 'border-slate-700/50 hover:bg-slate-700/40' : 'border-indigo-100 hover:bg-indigo-50/40'}
         ${isActive
           ? darkMode
-            ? 'bg-gradient-to-r from-blue-900 to-purple-900 border-l-4 border-blue-500'
-            : 'bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-blue-500'
+            ? 'bg-gradient-to-r from-slate-700/60 to-slate-800/80 border-l-4 border-cyan-400 shadow-md'
+            : 'bg-gradient-to-r from-indigo-50/80 to-purple-50/80 border-l-4 border-indigo-600 shadow-md'
           : ''
         }`}
     >
-      <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-lg flex-shrink-0 ${isActive ? 'ring-4 ring-blue-300' : ''}`}>
+      <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-lg flex-shrink-0 ${isActive ? 'ring-4 ring-cyan-500/20' : ''}`}>
         {name.charAt(0).toUpperCase()}
       </div>
       <div className="ml-3 flex-1 min-w-0">
         <div className="flex justify-between">
-          <h3 className={`font-medium truncate ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>{name}</h3>
-          <span className={`text-xs flex-shrink-0 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{time}</span>
+          <h3 className={`font-medium truncate ${darkMode ? 'text-slate-100' : 'text-gray-900'}`}>{name}</h3>
+          <span className={`text-xs flex-shrink-0 ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>{time}</span>
         </div>
-        <p className={`text-xs flex items-center gap-1 mb-1 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>
+        <p className={`text-xs flex items-center gap-1 mb-1 ${darkMode ? 'text-cyan-400' : 'text-indigo-600'}`}>
           <BuildingOfficeIcon className="h-3 w-3" />{property}
         </p>
-        <p className={`text-sm truncate ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{lastReply}</p>
+        <p className={`text-sm truncate ${darkMode ? 'text-slate-300' : 'text-gray-500'}`}>{lastReply}</p>
       </div>
     </div>
   );
@@ -113,11 +113,11 @@ const ConversationItem = ({ inquiry, isActive, onClick, darkMode }) => {
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 const StatusBadge = ({ status }) => {
   const cfg = {
-    pending:   { label: 'Awaiting Your Signature', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Clock },
-    active:    { label: 'Active Lease',             color: 'bg-green-100  text-green-800  border-green-200',  icon: CheckCircle },
-    completed: { label: 'Completed',                color: 'bg-blue-100   text-blue-800   border-blue-200',   icon: CheckCircle },
-    cancelled: { label: 'Cancelled',                color: 'bg-red-100    text-red-800    border-red-200',    icon: XCircle },
-  }[status?.toLowerCase()] || { label: status, color: 'bg-gray-100 text-gray-700 border-gray-200', icon: FileText };
+    pending:   { label: 'Awaiting Your Signature', color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', icon: Clock },
+    active:    { label: 'Active Lease',             color: 'bg-green-500/20  text-green-400  border-green-500/30',  icon: CheckCircle },
+    completed: { label: 'Completed',                color: 'bg-blue-500/20   text-blue-400   border-blue-500/30',   icon: CheckCircle },
+    cancelled: { label: 'Cancelled',                color: 'bg-red-500/20    text-red-400    border-red-500/30',    icon: XCircle },
+  }[status?.toLowerCase()] || { label: status, color: 'bg-gray-500/20 text-slate-300 border-slate-700/30', icon: FileText };
 
   const Icon = cfg.icon;
   return (
@@ -134,11 +134,11 @@ const ContractModal = ({ contract, onClose, onAccept, onDecline, accepting }) =>
   if (!contract) return null;
 
   const isPending = contract.status === 'pending';
-  const bg = darkMode ? 'bg-slate-900' : 'bg-white';
+  const bg = darkMode ? 'bg-slate-900/95 backdrop-blur-xl border border-slate-700/50' : 'bg-white/95 backdrop-blur-xl border border-indigo-200/50';
   const text = darkMode ? 'text-slate-100' : 'text-gray-900';
   const sub = darkMode ? 'text-slate-400' : 'text-gray-500';
-  const border = darkMode ? 'border-slate-700' : 'border-gray-200';
-  const rowBg = darkMode ? 'bg-slate-800' : 'bg-gray-50';
+  const border = darkMode ? 'border-slate-700/50' : 'border-indigo-100';
+  const rowBg = darkMode ? 'bg-slate-800/50 border border-slate-700/30' : 'bg-gray-50 border border-gray-150';
 
   const Row = ({ label, value }) => (
     <div className={`flex justify-between items-center py-3 px-4 rounded-xl ${rowBg}`}>
@@ -148,7 +148,7 @@ const ContractModal = ({ contract, onClose, onAccept, onDecline, accepting }) =>
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4" onClick={onClose}>
       <div
         className={`${bg} rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto`}
         onClick={e => e.stopPropagation()}
@@ -164,7 +164,7 @@ const ContractModal = ({ contract, onClose, onAccept, onDecline, accepting }) =>
               <p className={`text-sm ${sub}`}>{contract.property?.title || 'Property Contract'}</p>
             </div>
           </div>
-          <button onClick={onClose} className={`p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors ${sub}`}>
+          <button onClick={onClose} className={`p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-850 transition-colors ${sub}`}>
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -173,11 +173,11 @@ const ContractModal = ({ contract, onClose, onAccept, onDecline, accepting }) =>
         <div className="p-6 space-y-5">
           {/* Status banner for pending */}
           {isPending && (
-            <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
-              <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+            <div className={`flex items-start gap-3 p-4 border rounded-2xl ${darkMode ? 'bg-amber-500/10 border-amber-500/25' : 'bg-amber-50 border-amber-200'}`}>
+              <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm font-semibold text-amber-800">Action Required</p>
-                <p className="text-sm text-amber-700 mt-0.5">
+                <p className={`text-sm font-semibold ${darkMode ? 'text-amber-400' : 'text-amber-800'}`}>Action Required</p>
+                <p className={`text-sm mt-0.5 ${darkMode ? 'text-amber-500' : 'text-amber-700'}`}>
                   Your landlord has sent you this lease contract. Please review all terms carefully before signing.
                 </p>
               </div>
@@ -248,7 +248,7 @@ const ContractModal = ({ contract, onClose, onAccept, onDecline, accepting }) =>
               <button
                 onClick={onDecline}
                 disabled={accepting}
-                className="flex-1 py-3 rounded-xl border border-red-200 text-red-600 font-semibold text-sm hover:bg-red-50 transition-colors disabled:opacity-50"
+                className="flex-1 py-3 rounded-xl border border-red-200 text-red-500 font-semibold text-sm hover:bg-red-500/10 transition-colors disabled:opacity-50"
               >
                 Decline
               </button>
@@ -274,6 +274,38 @@ const TenantMessage = () => {
   const { darkMode } = useDarkMode();
   const location = useLocation();
   const navigate = useNavigate();
+
+  const tc = darkMode
+    ? {
+        mainBg: 'from-gray-900 via-slate-800 to-blue-950',
+        loadingBg: 'from-gray-900 via-slate-800 to-blue-950',
+        cardBg: 'bg-slate-800/50',
+        cardBorder: 'border-slate-700/50',
+        textPrimary: 'text-slate-100',
+        textSecondary: 'text-slate-200',
+        headerGradient: 'from-cyan-300 via-purple-300 to-pink-300',
+        buttonPrimary: 'from-cyan-500 to-indigo-600',
+        buttonSecondary: 'from-purple-500 to-pink-600',
+        spinnerBorder: 'border-cyan-500/30 border-t-cyan-400',
+        panelBg: 'bg-slate-900/60',
+        chatHeaderBg: 'from-slate-800 to-blue-950/80',
+        chatInputBg: 'bg-slate-800/80 border-slate-700/50',
+      }
+    : {
+        mainBg: 'from-pink-300 via-purple-300 to-indigo-400',
+        loadingBg: 'from-pink-300 via-purple-300 to-indigo-400',
+        cardBg: 'bg-white/60',
+        cardBorder: 'border-indigo-200/50',
+        textPrimary: 'text-gray-900',
+        textSecondary: 'text-indigo-600',
+        headerGradient: 'from-indigo-700 via-purple-700 to-pink-700',
+        buttonPrimary: 'from-indigo-600 to-purple-600',
+        buttonSecondary: 'from-purple-600 to-pink-600',
+        spinnerBorder: 'border-indigo-400/40 border-t-indigo-600',
+        panelBg: 'bg-white/40',
+        chatHeaderBg: 'from-white to-blue-50/80',
+        chatInputBg: 'bg-white/80 border-indigo-200/50',
+      };
 
   const [inquiries, setInquiries] = useState([]);
   const [activeInquiry, setActiveInquiry] = useState(null);
@@ -510,18 +542,17 @@ const TenantMessage = () => {
   // ── Loading screen ───────────────────────────────────────────────────────────
   if (isLoading) {
     return (
-      <div className="flex h-screen">
+      <div className={`min-h-screen bg-gradient-to-br ${tc.loadingBg} flex relative`}>
         <TenantSideBar />
-        <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
+        <div className="flex-1 flex flex-col relative z-10 transition-all duration-700" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
           <TenantNavBar currentSection="Messages" />
-          <main className={`flex-1 flex items-center justify-center ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-br from-blue-50 to-purple-50'}`}>
+          <main className="flex-1 flex items-center justify-center">
             <div className="text-center">
-              <div className="relative w-20 h-20 mx-auto">
-                <div className={`w-20 h-20 border-4 ${darkMode ? 'border-blue-900' : 'border-blue-200'} rounded-full animate-spin`} />
-                <div className={`absolute inset-0 w-20 h-20 border-4 ${darkMode ? 'border-t-cyan-500' : 'border-t-blue-600'} rounded-full animate-spin`} />
+              <div className="relative mx-auto w-20 h-20">
+                <div className={`w-20 h-20 border-4 ${tc.spinnerBorder} rounded-full animate-spin`}></div>
               </div>
-              <h2 className={`text-xl font-bold ${darkMode ? 'text-slate-100' : 'text-gray-800'} mt-6 animate-pulse`}>Loading Messages...</h2>
-              <p className={`${darkMode ? 'text-slate-300' : 'text-gray-600'} mt-2`}>Connecting to your conversations</p>
+              <h2 className={`text-xl font-bold ${tc.textPrimary} mt-6 animate-pulse`}>Loading Messages...</h2>
+              <p className={`${tc.textSecondary} mt-2`}>Connecting to your conversations</p>
             </div>
           </main>
         </div>
@@ -530,189 +561,200 @@ const TenantMessage = () => {
   }
 
   return (
-    <div className={`flex h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-br from-gray-50 to-blue-50'}`}>
+    <div className={`min-h-screen bg-gradient-to-br ${tc.mainBg} flex relative`}>
       <TenantSideBar />
-      <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
+      <div className="flex-1 flex flex-col relative z-10 transition-all duration-700" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <TenantNavBar currentSection="Messages" />
-        <main className="flex-1 flex h-full overflow-hidden">
+        <main className="flex-1 flex h-[calc(100vh-4rem)] overflow-hidden p-6 animate-fadeIn">
+          <div className="flex w-full h-full rounded-3xl shadow-2xl overflow-hidden border border-slate-700/30 backdrop-blur-xl">
+            {/* ── Conversations list ── */}
+            <div className={`w-1/3 border-r ${darkMode ? 'border-slate-700/50 bg-slate-800/40' : 'border-indigo-100 bg-white/40'} flex flex-col backdrop-blur-xl`}>
+              {/* Header */}
+              <div className={`p-6 border-b ${darkMode ? 'border-slate-700/50 bg-slate-800/60' : 'border-indigo-100 bg-white/60'}`}>
+                <h2 className={`text-2xl font-bold mb-4 flex items-center bg-gradient-to-r ${tc.headerGradient} bg-clip-text text-transparent`}>
+                  <ChatBubbleLeftRightIcon className="h-8 w-8 mr-3 text-indigo-600 dark:text-cyan-400" />
+                  Messages
+                </h2>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search conversations..."
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    className={`w-full border rounded-xl px-4 py-3 pl-12 focus:outline-none focus:ring-4 transition-all duration-300 ${
+                      darkMode ? 'bg-slate-700/50 border-slate-600/50 text-white placeholder-slate-400 focus:ring-cyan-500/20 focus:border-cyan-500' : 'bg-white border-gray-200 text-gray-800 placeholder-gray-500 focus:ring-blue-500/20 focus:border-blue-500'
+                    }`}
+                  />
+                  <MagnifyingGlassIcon className={`h-5 w-5 absolute left-4 top-4 ${darkMode ? 'text-slate-400' : 'text-gray-400'}`} />
+                </div>
+              </div>
 
-          {/* ── Conversations list ── */}
-          <div className={`w-1/3 border-r ${darkMode ? 'border-gray-700' : 'border-gray-200'} flex flex-col ${darkMode ? 'bg-slate-800/80' : 'bg-white/80'} backdrop-blur-sm`}>
-            {/* Header */}
-            <div className={`p-6 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'} bg-gradient-to-r from-blue-600 to-purple-600 text-white`}>
-              <h2 className="text-2xl font-bold mb-4 flex items-center">
-                <ChatBubbleLeftRightIcon className="h-8 w-8 mr-3" />
-                Messages
-              </h2>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search conversations..."
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                  className="w-full bg-white/20 border border-white/30 rounded-xl px-4 py-3 pl-12 text-white placeholder-white/70 focus:outline-none focus:ring-4 focus:ring-white/20"
-                />
-                <MagnifyingGlassIcon className="h-5 w-5 absolute left-4 top-4 text-white/70" />
+              {/* Conversation list */}
+              <div className="flex-1 overflow-y-auto custom-scrollbar">
+                {filteredInquiries.length === 0 ? (
+                  <div className="text-center py-12 px-4">
+                    <ChatBubbleLeftRightIcon className={`h-16 w-16 ${darkMode ? 'text-slate-500' : 'text-gray-400'} mx-auto mb-4 animate-pulse`} />
+                    <p className={`${tc.textPrimary} font-medium mb-2`}>No conversations yet</p>
+                    <p className={`text-sm ${tc.textSecondary}`}>
+                      Browse properties and click "Contact Landlord" to start a conversation
+                    </p>
+                  </div>
+                ) : (
+                  filteredInquiries.map(inq => (
+                    <ConversationItem
+                      key={inq._id}
+                      inquiry={inq}
+                      isActive={activeInquiry?._id === inq._id}
+                      onClick={() => setActiveInquiry(inq)}
+                      darkMode={darkMode}
+                    />
+                  ))
+                )}
               </div>
             </div>
 
-            {/* Conversation list */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar">
-              {filteredInquiries.length === 0 ? (
-                <div className="text-center py-12 px-4">
-                  <ChatBubbleLeftRightIcon className={`h-16 w-16 ${darkMode ? 'text-gray-600' : 'text-gray-400'} mx-auto mb-4`} />
-                  <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} font-medium mb-2`}>No conversations yet</p>
-                  <p className={`text-sm ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-                    Browse properties and click "Contact Landlord" to start a conversation
-                  </p>
-                </div>
-              ) : (
-                filteredInquiries.map(inq => (
-                  <ConversationItem
-                    key={inq._id}
-                    inquiry={inq}
-                    isActive={activeInquiry?._id === inq._id}
-                    onClick={() => setActiveInquiry(inq)}
-                    darkMode={darkMode}
-                  />
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* ── Chat area ── */}
-          <div className={`flex-1 flex flex-col ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
-            {activeInquiry ? (
-              <>
-                {/* Chat header */}
-                <div className={`p-4 border-b ${darkMode ? 'border-gray-700 bg-gradient-to-r from-gray-800 to-blue-900' : 'border-gray-200 bg-gradient-to-r from-white to-blue-50'}`}>
-                  <div className="flex items-center">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-lg mr-4">
-                      {(activeInquiry.landlord?.name || activeInquiry.property?.postedBy?.name || 'L').charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <h3 className={`font-semibold text-lg ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
-                        {activeInquiry.landlord?.name || activeInquiry.property?.postedBy?.name || 'Landlord'}
-                      </h3>
-                      <p className={`text-sm flex items-center gap-1 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>
-                        <BuildingOfficeIcon className="h-4 w-4" />
-                        {activeInquiry.property?.title || 'Property'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Pending Contract Banner */}
-                {pendingContract && pendingContract.status === 'pending' && (
-
-                  <div className={`p-4 flex items-center justify-between ${darkMode ? 'bg-amber-900/20 border-amber-800' : 'bg-amber-50 border-amber-200'} border-b`}>
-                    <div className="flex items-center gap-3">
-                      <AlertTriangle className={`w-5 h-5 ${darkMode ? 'text-amber-400' : 'text-amber-600'}`} />
+            {/* ── Chat area ── */}
+            <div className={`flex-1 flex flex-col ${darkMode ? 'bg-slate-900/60' : 'bg-white/60'} backdrop-blur-xl`}>
+              {activeInquiry ? (
+                <>
+                  {/* Chat header */}
+                  <div className={`p-4 border-b ${darkMode ? 'border-slate-700/50 bg-slate-800/30' : 'border-indigo-100 bg-indigo-50/20'}`}>
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-lg mr-4 ring-2 ring-cyan-500/20">
+                        {(activeInquiry.landlord?.name || activeInquiry.property?.postedBy?.name || 'L').charAt(0).toUpperCase()}
+                      </div>
                       <div>
-                        <p className={`text-sm font-semibold ${darkMode ? 'text-amber-400' : 'text-amber-800'}`}>Action Required</p>
-                        <p className={`text-xs ${darkMode ? 'text-amber-500' : 'text-amber-700'}`}>
-                          A lease agreement has been sent for this property.
+                        <h3 className={`font-semibold text-lg ${darkMode ? 'text-slate-100' : 'text-gray-900'}`}>
+                          {activeInquiry.landlord?.name || activeInquiry.property?.postedBy?.name || 'Landlord'}
+                        </h3>
+                        <p className={`text-sm flex items-center gap-1 ${darkMode ? 'text-cyan-400' : 'text-indigo-600'}`}>
+                          <BuildingOfficeIcon className="h-4 w-4" />
+                          {activeInquiry.property?.title || 'Property'}
                         </p>
                       </div>
                     </div>
-                    <button
-                      onClick={() => setShowContractModal(true)}
-                      className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-bold rounded-xl shadow-md transition-all"
-                    >
-                      Review & Sign
-                    </button>
                   </div>
-                )}
 
-                {/* Messages */}
-
-                <div className={`flex-1 overflow-y-auto p-6 ${darkMode ? 'bg-gradient-to-b from-gray-900 to-gray-800' : 'bg-gradient-to-b from-gray-50 to-white'} custom-scrollbar`}>
-                  {messages.length === 0 ? (
-                    <div className="text-center py-12">
-                      <ChatBubbleLeftRightIcon className={`h-16 w-16 ${darkMode ? 'text-gray-600' : 'text-gray-400'} mx-auto mb-4`} />
-                      <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>No messages yet. Start the conversation!</p>
-                    </div>
-                  ) : (
-                    messages.map((msg, idx) => (
-                      <MessageBubble key={msg._id || idx} msg={msg} darkMode={darkMode} />
-                    ))
-                  )}
-                  {isTyping && <TypingIndicator />}
-                  <div ref={messagesEndRef} />
-                </div>
-
-                {/* Input area */}
-                <div className={`p-4 border-t ${darkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
-                  {/* Emoji picker */}
-                  {showEmojiPicker && (
-                    <div className={`mb-4 p-4 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-xl shadow-lg border`}>
-                      <div className="grid grid-cols-7 gap-2">
-                        {emojis.map((emoji, idx) => (
-                          <button
-                            key={idx}
-                            className={`p-2 text-xl ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} rounded-lg transition-all hover:scale-125`}
-                            onClick={() => { setNewMessage(prev => prev + emoji); setShowEmojiPicker(false); }}
-                          >
-                            {emoji}
-                          </button>
-                        ))}
+                  {/* Pending Contract Banner */}
+                  {pendingContract && pendingContract.status === 'pending' && (
+                    <div className={`p-4 flex items-center justify-between border-b ${
+                      darkMode ? 'bg-amber-500/10 border-amber-500/25 text-amber-400' : 'bg-amber-50 border-amber-200 text-amber-800'
+                    }`}>
+                      <div className="flex items-center gap-3">
+                        <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-semibold">Action Required</p>
+                          <p className={`text-xs ${darkMode ? 'text-amber-500/80' : 'text-amber-700/80'}`}>
+                            A lease agreement has been sent for this property.
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  )}
-
-                  <div className="flex items-end space-x-3">
-                    <div className="flex-1 relative">
-                      <textarea
-                        value={newMessage}
-                        onChange={e => setNewMessage(e.target.value)}
-                        placeholder="Type a message..."
-                        className={`w-full border-2 ${darkMode ? 'border-gray-700 bg-gray-800 text-gray-200 placeholder-gray-500' : 'border-gray-200 bg-white text-gray-800 placeholder-gray-400'} rounded-2xl px-6 py-4 pr-16 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 resize-none`}
-                        rows="1"
-                        style={{ minHeight: '56px', maxHeight: '120px' }}
-                        onKeyPress={e => {
-                          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-                        }}
-                      />
                       <button
-                        className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${darkMode ? 'text-gray-500 hover:text-yellow-400' : 'text-gray-400 hover:text-yellow-500'} transition-all hover:scale-110`}
-                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                        onClick={() => setShowContractModal(true)}
+                        className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-bold rounded-xl shadow-md transition-all hover:scale-105"
                       >
-                        <FaceSmileIcon className="h-6 w-6" />
+                        Review & Sign
                       </button>
                     </div>
+                  )}
 
-                    {/* Attachment (UI only for now) */}
-                    <input ref={fileInputRef} type="file" multiple className="hidden" />
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className={`p-4 ${darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'} rounded-2xl transition-all hover:scale-110`}
-                    >
-                      <PaperClipIcon className="h-6 w-6" />
-                    </button>
-
-                    {/* Send */}
-                    <button
-                      className={`p-4 rounded-2xl transition-all hover:scale-110 ${newMessage.trim()
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl'
-                        : darkMode ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      }`}
-                      onClick={sendMessage}
-                      disabled={!newMessage.trim() || isSending}
-                    >
-                      <PaperAirplaneIcon className="h-6 w-6" />
-                    </button>
+                  {/* Messages */}
+                  <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                    {messages.length === 0 ? (
+                      <div className="text-center py-12">
+                        <ChatBubbleLeftRightIcon className={`h-16 w-16 ${darkMode ? 'text-slate-650' : 'text-gray-400'} mx-auto mb-4`} />
+                        <p className={tc.textSecondary}>No messages yet. Start the conversation!</p>
+                      </div>
+                    ) : (
+                      messages.map((msg, idx) => (
+                        <MessageBubble key={msg._id || idx} msg={msg} darkMode={darkMode} />
+                      ))
+                    )}
+                    {isTyping && <TypingIndicator />}
+                    <div ref={messagesEndRef} />
                   </div>
+
+                  {/* Input area */}
+                  <div className={`p-4 border-t ${darkMode ? 'border-slate-700/50 bg-slate-800/40' : 'border-indigo-100 bg-white/40'}`}>
+                    {/* Emoji picker */}
+                    {showEmojiPicker && (
+                      <div className={`mb-4 p-4 rounded-xl shadow-lg border animate-fadeIn ${
+                        darkMode ? 'bg-slate-800 border-slate-700/50' : 'bg-white border-indigo-100'
+                      }`}>
+                        <div className="grid grid-cols-7 gap-2">
+                          {emojis.map((emoji, idx) => (
+                            <button
+                              key={idx}
+                              className={`p-2 text-xl rounded-lg transition-all hover:scale-125 ${darkMode ? 'hover:bg-slate-750' : 'hover:bg-indigo-50'}`}
+                              onClick={() => { setNewMessage(prev => prev + emoji); setShowEmojiPicker(false); }}
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex items-end space-x-3">
+                      <div className="flex-1 relative">
+                        <textarea
+                          value={newMessage}
+                          onChange={e => setNewMessage(e.target.value)}
+                          placeholder="Type a message..."
+                          className={`w-full border focus:outline-none focus:ring-4 transition-all duration-300 resize-none rounded-2xl px-6 py-4 pr-16 ${
+                            darkMode ? 'border-slate-700/50 bg-slate-800/50 text-white placeholder-slate-500 focus:ring-cyan-500/20 focus:border-cyan-500' : 'border-indigo-250 bg-white text-gray-800 placeholder-gray-400 focus:ring-blue-500/20 focus:border-blue-500'
+                          }`}
+                          rows="1"
+                          style={{ minHeight: '56px', maxHeight: '120px' }}
+                          onKeyPress={e => {
+                            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+                          }}
+                        />
+                        <button
+                          className={`absolute right-3 top-1/2 transform -translate-y-1/2 transition-all hover:scale-110 ${
+                            darkMode ? 'text-slate-400 hover:text-yellow-400' : 'text-gray-400 hover:text-yellow-500'
+                          }`}
+                          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                        >
+                          <FaceSmileIcon className="h-6 w-6" />
+                        </button>
+                      </div>
+
+                      {/* Attachment (UI only for now) */}
+                      <input ref={fileInputRef} type="file" multiple className="hidden" />
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className={`p-4 rounded-2xl transition-all hover:scale-110 ${
+                          darkMode ? 'bg-slate-800/50 text-slate-350 hover:bg-slate-700/50 border border-slate-700/30' : 'bg-indigo-50/50 text-indigo-600 hover:bg-indigo-100 border border-indigo-150'
+                        }`}
+                      >
+                        <PaperClipIcon className="h-6 w-6" />
+                      </button>
+
+                      {/* Send */}
+                      <button
+                        className={`p-4 rounded-2xl transition-all hover:scale-110 ${newMessage.trim()
+                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl'
+                          : darkMode ? 'bg-slate-800 text-slate-600 border border-slate-700/30 cursor-not-allowed' : 'bg-gray-150 text-gray-400 cursor-not-allowed'
+                        }`}
+                        onClick={sendMessage}
+                        disabled={!newMessage.trim() || isSending}
+                      >
+                        <PaperAirplaneIcon className="h-6 w-6" />
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="flex-1 flex flex-col items-center justify-center p-6">
+                  <ChatBubbleLeftRightIcon className={`h-24 w-24 ${darkMode ? 'text-slate-700' : 'text-gray-300'} mb-6`} />
+                  <h2 className={`text-2xl font-bold ${darkMode ? 'text-slate-200' : 'text-gray-700'} mb-2`}>No conversation selected</h2>
+                  <p className={`${darkMode ? 'text-slate-400' : 'text-gray-500'} text-center max-w-md`}>
+                    Select a conversation from the list, or go to Properties and click "Contact Landlord" to start one.
+                  </p>
                 </div>
-              </>
-            ) : (
-              <div className={`flex-1 flex flex-col items-center justify-center ${darkMode ? 'bg-gradient-to-b from-gray-900 to-gray-800' : 'bg-gradient-to-b from-gray-50 to-white'}`}>
-                <ChatBubbleLeftRightIcon className={`h-24 w-24 ${darkMode ? 'text-gray-700' : 'text-gray-300'} mb-6`} />
-                <h2 className={`text-2xl font-bold ${darkMode ? 'text-gray-200' : 'text-gray-700'} mb-2`}>No conversation selected</h2>
-                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-center max-w-md`}>
-                  Select a conversation from the list, or go to Properties and click "Contact Landlord" to start one.
-                </p>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </main>
       </div>
@@ -729,13 +771,12 @@ const TenantMessage = () => {
       )}
 
       <style>{`
-
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: ${darkMode ? '#1e293b' : '#f1f5f9'}; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: linear-gradient(45deg,#3b82f6,#8b5cf6); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: linear-gradient(45deg,#2563eb,#7c3aed); }
-        @keyframes fadeIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
-        .animate-fadeIn { animation: fadeIn 0.5s ease-out; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: ${darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)'}; }
+        @keyframes fadeIn { from { opacity:0; transform:scale(0.98); } to { opacity:1; transform:scale(1); } }
+        .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
       `}</style>
     </div>
   );
