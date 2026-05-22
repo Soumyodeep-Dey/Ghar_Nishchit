@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useDarkMode } from '../../../useDarkMode.js';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import TenantSideBar from './TenantSideBar.jsx';
 import TenantNavBar from './TenantNavBar.jsx';
 import api from '../../../services/api.js';
-import { showErrorToast } from '../../../utils/toast.jsx';
+import { showErrorToast, showSuccessToast } from '../../../utils/toast.jsx';
 import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -81,9 +82,9 @@ const PropertyCard = React.memo(({ property, onRemove, removeConfirmId, onConfir
     <div className={`rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden group hover:scale-105 border ${
       darkMode ? 'bg-slate-800 border-slate-700 hover:shadow-blue-500/10' : 'bg-white border-gray-100 hover:shadow-blue-500/20'
     }`}>
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden bg-slate-100 dark:bg-slate-900/50">
         <img src={property.image} alt={property.title}
-          className="w-full h-48 object-cover transition-all duration-700 group-hover:scale-110" loading="lazy" />
+          className="w-full h-48 object-contain transition-all duration-700 group-hover:scale-110" loading="lazy" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         <div className={`absolute bottom-4 left-4 px-4 py-2 rounded-full font-semibold shadow-lg text-white ${
           darkMode ? 'bg-gradient-to-r from-blue-700 to-purple-800' : 'bg-gradient-to-r from-blue-600 to-purple-600'
@@ -259,61 +260,112 @@ const TenantDashboard = () => {
   const location  = useLocation();
 
   const [currentSection, setCurrentSection] = useState('Dashboard');
-  const [isLoading,  setIsLoading]  = useState(true);
-  const [fetchError, setFetchError] = useState(null);
-
-  // All data from real API — no hardcoded mock objects
-  const [profile,             setProfile]             = useState(null);
-  const [favouriteProperties, setFavouriteProperties] = useState([]);
-  const [notifications,       setNotifications]       = useState([]);
-  const [maintenanceRequests, setMaintenanceRequests] = useState([]);
-  const [paymentHistory,      setPaymentHistory]      = useState([]);
+  const queryClient = useQueryClient();
 
   // -------------------------------------------------------------------------
-  // Coordinated parallel fetch
+  // TanStack Query Declarative Data Fetching
   // -------------------------------------------------------------------------
-  const fetchDashboardData = useCallback(async () => {
-    setIsLoading(true);
-    setFetchError(null);
-    try {
-      const profileData = await api.getProfile();
-      setProfile(profileData);
+  const { data: profile = null, isLoading: isProfileLoading, error: profileError } = useQuery({
+    queryKey: ['userProfile'],
+    queryFn: api.getProfile,
+    staleTime: 60000,
+  });
 
-      const tenantId = profileData?.id;
+  const tenantId = profile?._id || profile?.id;
 
-      const [favResult, notifResult, maintResult, payResult] = await Promise.allSettled([
-        api.getFavouriteProperties(tenantId),
-        api.getTenantNotifications(tenantId),
-        api.getTenantMaintenanceRequests(tenantId),
-        api.getTenantPaymentHistory(tenantId),
-      ]);
+  const { data: favouriteProperties = [], isLoading: isFavLoading, error: favError } = useQuery({
+    queryKey: ['favouriteProperties', tenantId],
+    queryFn: () => api.getFavouriteProperties(tenantId),
+    enabled: !!tenantId,
+  });
 
-      setFavouriteProperties(
-        favResult.status   === 'fulfilled' && Array.isArray(favResult.value)   ? favResult.value   : []
-      );
-      setNotifications(
-        notifResult.status === 'fulfilled' && Array.isArray(notifResult.value) ? notifResult.value : []
-      );
-      setMaintenanceRequests(
-        maintResult.status === 'fulfilled' && Array.isArray(maintResult.value) ? maintResult.value : []
-      );
-      setPaymentHistory(
-        payResult.status   === 'fulfilled' && Array.isArray(payResult.value)   ? payResult.value   : []
-      );
+  const { data: notifications = [], isLoading: isNotifLoading, error: notifError } = useQuery({
+    queryKey: ['tenantNotifications', tenantId],
+    queryFn: () => api.getTenantNotifications(tenantId),
+    enabled: !!tenantId,
+  });
 
-      [favResult, notifResult, maintResult, payResult].forEach((r, i) => {
-        if (r.status === 'rejected') console.warn(`Dashboard fetch [${i}] failed:`, r.reason);
-      });
-    } catch (err) {
-      console.error('Fatal dashboard fetch error:', err);
-      setFetchError('Failed to load your dashboard. Please check your connection and try again.');
-      showErrorToast('Failed to load dashboard data');
-    } finally {
-      setIsLoading(false);
+  const { data: maintenanceRequests = [], isLoading: isMaintLoading, error: maintError } = useQuery({
+    queryKey: ['tenantMaintenanceRequests', tenantId],
+    queryFn: () => api.getTenantMaintenanceRequests(tenantId),
+    enabled: !!tenantId,
+  });
+
+  const { data: paymentHistory = [], isLoading: isPayLoading, error: payError } = useQuery({
+    queryKey: ['tenantPaymentHistory', tenantId],
+    queryFn: () => api.getTenantPaymentHistory(tenantId),
+    enabled: !!tenantId,
+  });
+
+  const isLoading = isProfileLoading || (!!tenantId && (isFavLoading || isNotifLoading || isMaintLoading || isPayLoading));
+  const fetchError = profileError || favError || notifError || maintError || payError ? 'Failed to load your dashboard. Please check your connection and try again.' : null;
+
+  const handleRetry = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+    if (tenantId) {
+      queryClient.invalidateQueries({ queryKey: ['favouriteProperties', tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['tenantNotifications', tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['tenantMaintenanceRequests', tenantId] });
+      queryClient.invalidateQueries({ queryKey: ['tenantPaymentHistory', tenantId] });
     }
-  }, []);
+  }, [queryClient, tenantId]);
 
-  useEffect(() => { fetchDashboardData(); }, [fetchDashboardData]);
+  // -------------------------------------------------------------------------
+  // Optimistic Cache Mutations
+  // -------------------------------------------------------------------------
+  const markAsReadMutation = useMutation({
+    mutationFn: api.markNotificationRead,
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['tenantNotifications', tenantId] });
+      const previousNotifications = queryClient.getQueryData(['tenantNotifications', tenantId]);
+      queryClient.setQueryData(['tenantNotifications', tenantId], (old) =>
+        Array.isArray(old) ? old.map(n => (n._id === id || n.id === id) ? { ...n, read: true } : n) : []
+      );
+      return { previousNotifications };
+    },
+    onError: (err, id, context) => {
+      queryClient.setQueryData(['tenantNotifications', tenantId], context.previousNotifications);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['tenantNotifications', tenantId] });
+    }
+  });
+
+  const markAllAsReadMutation = useMutation({
+    mutationFn: api.markAllNotificationsRead,
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ['tenantNotifications', tenantId] });
+      const previousNotifications = queryClient.getQueryData(['tenantNotifications', tenantId]);
+      queryClient.setQueryData(['tenantNotifications', tenantId], (old) =>
+        Array.isArray(old) ? old.map(n => ({ ...n, read: true })) : []
+      );
+      return { previousNotifications };
+    },
+    onError: (err, variables, context) => {
+      queryClient.setQueryData(['tenantNotifications', tenantId], context.previousNotifications);
+      showErrorToast('Failed to mark notifications as read');
+    },
+    onSuccess: () => {
+      showSuccessToast('All notifications marked as read');
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['tenantNotifications', tenantId] });
+    }
+  });
+
+  const handleMarkAsRead = useCallback((id) => {
+    markAsReadMutation.mutate(id);
+  }, [markAsReadMutation]);
+
+  const handleDeleteNotification = useCallback((id) => {
+    queryClient.setQueryData(['tenantNotifications', tenantId], (old) =>
+      Array.isArray(old) ? old.filter(n => n._id !== id && n.id !== id) : []
+    );
+  }, [queryClient, tenantId]);
+
+  const handleMarkAllAsRead = useCallback(() => {
+    markAllAsReadMutation.mutate();
+  }, [markAllAsReadMutation]);
 
   // -------------------------------------------------------------------------
   // Derived stats — real API data
@@ -324,28 +376,28 @@ const TenantDashboard = () => {
       value: favouriteProperties.length,
       change: favouriteProperties.length > 0 ? `+${favouriteProperties.length}` : '0',
       trend: favouriteProperties.length > 0 ? 'up' : 'down',
-      color: darkMode ? 'from-cyan-500 to-indigo-600' : 'from-indigo-500 to-purple-600',
+      color: darkMode ? 'from-amber-400 to-amber-600' : 'from-amber-500 to-amber-700',
     },
     {
       icon: Bell, title: t('tenant.unreadNotifications'),
       value: notifications.filter(n => !n.read).length,
       change: String(notifications.filter(n => !n.read).length),
       trend: 'up',
-      color: darkMode ? 'from-indigo-500 to-purple-600' : 'from-purple-500 to-pink-500',
+      color: darkMode ? 'from-yellow-400 to-amber-500' : 'from-yellow-500 to-amber-600',
     },
     {
       icon: Wrench, title: t('tenant.maintenanceRequests'),
       value: maintenanceRequests.length,
       change: String(maintenanceRequests.length),
       trend: maintenanceRequests.length > 0 ? 'down' : 'up',
-      color: darkMode ? 'from-purple-500 to-pink-600' : 'from-pink-400 to-rose-500',
+      color: darkMode ? 'from-orange-400 to-amber-500' : 'from-orange-500 to-amber-600',
     },
     {
       icon: CreditCard, title: t('tenant.paymentsMade'),
       value: paymentHistory.filter(p => p.status === 'Paid' || p.status === 'paid').length,
       change: String(paymentHistory.filter(p => p.status === 'Paid' || p.status === 'paid').length),
       trend: 'up',
-      color: darkMode ? 'from-pink-500 to-rose-600' : 'from-rose-400 to-pink-500',
+      color: darkMode ? 'from-amber-500 to-yellow-600' : 'from-amber-600 to-yellow-700',
     },
   ], [darkMode, favouriteProperties, notifications, maintenanceRequests, paymentHistory, t]);
 
@@ -372,32 +424,32 @@ const TenantDashboard = () => {
   // -------------------------------------------------------------------------
   const tc = darkMode
     ? {
-        mainBg: 'from-gray-900 via-slate-800 to-blue-950',
-        loadingBg: 'from-gray-900 via-slate-800 to-blue-950',
-        cardBg: 'bg-slate-800/50', cardBorder: 'border-slate-700/50',
-        textPrimary: 'text-slate-100', textSecondary: 'text-slate-200',
-        headerGradient: 'from-cyan-300 via-purple-300 to-pink-300',
-        tabBg: 'bg-slate-800/50', tabBorder: 'border-slate-700/50',
-        tabActive: 'from-cyan-500 to-indigo-600', tabActiveText: 'text-blue-950',
-        tabInactive: 'text-slate-300 hover:text-slate-100 hover:bg-slate-700/50',
-        buttonPrimary: 'from-cyan-500 to-indigo-600',
-        buttonSecondary: 'from-purple-500 to-pink-600',
-        iconTrend: 'text-cyan-400',
-        spinnerBorder: 'border-cyan-500/30 border-t-cyan-400',
+        mainBg: 'from-black via-zinc-950 to-amber-950/20',
+        loadingBg: 'from-black via-zinc-950 to-amber-950/20',
+        cardBg: 'bg-zinc-900/60', cardBorder: 'border-amber-500/10',
+        textPrimary: 'text-slate-100', textSecondary: 'text-amber-400',
+        headerGradient: 'from-amber-200 via-yellow-400 to-amber-500',
+        tabBg: 'bg-zinc-900/50', tabBorder: 'border-zinc-850',
+        tabActive: 'from-amber-500 to-yellow-600', tabActiveText: 'text-slate-950 font-black',
+        tabInactive: 'text-slate-400 hover:text-amber-400 hover:bg-zinc-800/50',
+        buttonPrimary: 'from-amber-500 to-yellow-600',
+        buttonSecondary: 'bg-zinc-900 hover:bg-zinc-800 text-amber-500 border border-amber-500/30',
+        iconTrend: 'text-amber-400',
+        spinnerBorder: 'border-amber-500/30 border-t-amber-500',
       }
     : {
-        mainBg: 'from-pink-300 via-purple-300 to-indigo-400',
-        loadingBg: 'from-pink-300 via-purple-300 to-indigo-400',
-        cardBg: 'bg-white/60', cardBorder: 'border-indigo-200/50',
-        textPrimary: 'text-gray-900', textSecondary: 'text-indigo-600',
-        headerGradient: 'from-indigo-700 via-purple-700 to-pink-700',
-        tabBg: 'bg-white/30', tabBorder: 'border-indigo-200/50',
-        tabActive: 'from-indigo-600 to-purple-600', tabActiveText: 'text-white',
-        tabInactive: 'text-indigo-600 hover:text-indigo-800 hover:bg-white/40',
-        buttonPrimary: 'from-indigo-600 to-purple-600',
-        buttonSecondary: 'from-purple-600 to-pink-600',
-        iconTrend: 'text-indigo-600',
-        spinnerBorder: 'border-indigo-400/40 border-t-indigo-600',
+        mainBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
+        loadingBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
+        cardBg: 'bg-white/80', cardBorder: 'border-amber-200/50',
+        textPrimary: 'text-stone-900', textSecondary: 'text-amber-700',
+        headerGradient: 'from-amber-800 via-yellow-800 to-amber-900',
+        tabBg: 'bg-white/40', tabBorder: 'border-amber-200/50',
+        tabActive: 'from-amber-600 to-yellow-600', tabActiveText: 'text-white font-black',
+        tabInactive: 'text-amber-700 hover:text-amber-900 hover:bg-white/60',
+        buttonPrimary: 'from-amber-600 to-yellow-600',
+        buttonSecondary: 'bg-stone-100 hover:bg-stone-200 text-amber-800 border border-amber-200/50',
+        iconTrend: 'text-amber-600',
+        spinnerBorder: 'border-amber-400/40 border-t-amber-600',
       };
 
   // -------------------------------------------------------------------------
@@ -440,7 +492,7 @@ const TenantDashboard = () => {
 
             {/* Error banner */}
             {fetchError && (
-              <ErrorBanner message={fetchError} onRetry={fetchDashboardData} isDark={darkMode} />
+              <ErrorBanner message={fetchError} onRetry={handleRetry} isDark={darkMode} />
             )}
 
             {/* Header — no animate-pulse on text */}
@@ -530,6 +582,64 @@ const TenantDashboard = () => {
                   </div>
                 </div>
 
+              </div>
+            )}
+
+            {/* Notifications Content */}
+            {currentSection === 'Notifications' && (
+              <div className="space-y-10">
+                <div className={`${tc.cardBg} backdrop-blur-xl border ${tc.cardBorder} rounded-3xl p-8`}>
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                    <div>
+                      <h2 className={`text-3xl font-bold ${tc.textPrimary} mb-2 flex items-center gap-3`}>
+                        <Bell className="w-8 h-8 text-amber-500" />
+                        <span>{t('tenant.notifications') || 'Notifications'}</span>
+                      </h2>
+                      <p className={`text-sm ${tc.textSecondary}`}>
+                        Stay updated with real-time property, billing, and maintenance alerts.
+                      </p>
+                    </div>
+                    {notifications.some(n => !n.read) && (
+                      <button
+                        onClick={handleMarkAllAsRead}
+                        className={`px-5 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r ${tc.buttonPrimary} text-slate-950 hover:opacity-95 shadow-sm transition-all duration-300`}
+                      >
+                        Mark All as Read
+                      </button>
+                    )}
+                  </div>
+
+                  {notifications.length === 0 ? (
+                    <div className="text-center py-16">
+                      <Bell className="w-16 h-16 text-zinc-600 mx-auto mb-4 opacity-40 animate-pulse" />
+                      <p className={`text-lg font-semibold ${tc.textPrimary} mb-1`}>No Notifications Yet</p>
+                      <p className={`text-sm ${tc.textSecondary} max-w-sm mx-auto`}>
+                        We'll alert you here when there are updates about your properties, rents, or maintenance tickets.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-4">
+                      {notifications.map((notif) => (
+                        <NotificationItem
+                          key={notif._id || notif.id}
+                          notification={{
+                            id: notif._id || notif.id,
+                            title: notif.title,
+                            message: notif.message,
+                            type: notif.type || 'general',
+                            read: notif.read,
+                            time: notif.createdAt ? new Date(notif.createdAt).toLocaleString(undefined, {
+                              dateStyle: 'short',
+                              timeStyle: 'short'
+                            }) : notif.time || 'Just now'
+                          }}
+                          onMarkAsRead={handleMarkAsRead}
+                          onDelete={handleDeleteNotification}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 

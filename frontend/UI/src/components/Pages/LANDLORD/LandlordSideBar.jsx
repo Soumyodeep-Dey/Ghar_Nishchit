@@ -22,12 +22,12 @@ const USER_STATS = {
 
 // Menu configuration - Static list for better performance
 const MENU_ITEMS = [
-  { id: 'dashboard', labelKey: 'sidebar.dashboard', descKey: 'sidebar.descDashboard', icon: Home, route: '/landlord', badge: null, color: 'from-sky-400 via-sky-500 to-blue-500', premium: true },
-  { id: 'properties', labelKey: 'sidebar.properties', descKey: 'sidebar.descLandlordProperties', icon: Building2, route: '/landlord/properties', badge: null, color: 'from-emerald-400 via-emerald-500 to-green-500', premium: true },
-  { id: 'tenants', labelKey: 'sidebar.tenants', descKey: 'sidebar.descTenants', icon: Users, route: '/landlord/tenants', badge: null, color: 'from-teal-400 via-teal-500 to-cyan-500', premium: true },
-  { id: 'payments', labelKey: 'sidebar.payments', descKey: 'sidebar.descLandlordPayments', icon: Wallet, route: '/landlord/payment', badge: null, color: 'from-indigo-400 via-indigo-500 to-purple-500', premium: true },
-  { id: 'maintenance', labelKey: 'sidebar.maintenance', descKey: 'sidebar.descMaintenance', icon: Settings, route: '/landlord/maintenance', badge: null, color: 'from-rose-400 via-pink-400 to-pink-500', premium: false },
-  { id: 'messages', labelKey: 'sidebar.messages', descKey: 'sidebar.descMessages', icon: MessageSquare, route: '/landlord/messages', badge: null, color: 'from-violet-400 via-purple-400 to-purple-500', premium: false },
+  { id: 'dashboard', labelKey: 'sidebar.dashboard', descKey: 'sidebar.descDashboard', icon: Home, route: '/landlord', badge: null, color: 'from-amber-400 via-amber-500 to-yellow-600', premium: true },
+  { id: 'properties', labelKey: 'sidebar.properties', descKey: 'sidebar.descLandlordProperties', icon: Building2, route: '/landlord/properties', badge: null, color: 'from-amber-400 via-amber-500 to-yellow-600', premium: true },
+  { id: 'tenants', labelKey: 'sidebar.tenants', descKey: 'sidebar.descTenants', icon: Users, route: '/landlord/tenants', badge: null, color: 'from-amber-400 via-amber-500 to-yellow-600', premium: true },
+  { id: 'payments', labelKey: 'sidebar.payments', descKey: 'sidebar.descLandlordPayments', icon: Wallet, route: '/landlord/payment', badge: null, color: 'from-amber-400 via-amber-500 to-yellow-600', premium: true },
+  { id: 'maintenance', labelKey: 'sidebar.maintenance', descKey: 'sidebar.descMaintenance', icon: Settings, route: '/landlord/maintenance', badge: null, color: 'from-amber-400 via-amber-500 to-yellow-600', premium: false },
+  { id: 'messages', labelKey: 'sidebar.messages', descKey: 'sidebar.descMessages', icon: MessageSquare, route: '/landlord/messages', badge: null, color: 'from-amber-400 via-amber-500 to-yellow-600', premium: false },
 ];
 
 const LandlordSideBar = ({ onSectionChange }) => {
@@ -144,10 +144,10 @@ const LandlordSideBar = ({ onSectionChange }) => {
             transition={{ duration: 0.4 }}
             className="relative"
           >
-            <div className="w-14 h-14 rounded-3xl bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-500 flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:shadow-blue-500/20 transition-all duration-300">
+            <div className="w-14 h-14 rounded-3xl bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:shadow-amber-500/20 transition-all duration-300">
               <Building2 className="w-8 h-8 text-white group-hover:scale-105 transition-transform duration-300" />
             </div>
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-500 opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300 -z-10" />
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300 -z-10" />
           </motion.div>
           {!isCollapsed && (
             <div className="flex flex-col">
@@ -179,7 +179,7 @@ const LandlordSideBar = ({ onSectionChange }) => {
             transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
             className="group-hover:scale-110 transition-transform duration-300"
           >
-            <ChevronLeft className={`w-5 h-5 ${themeClasses.textSecondary} group-hover:text-blue-500 transition-colors duration-300`} />
+            <ChevronLeft className={`w-5 h-5 ${themeClasses.textSecondary} group-hover:text-amber-505 transition-colors duration-300`} />
           </motion.div>
         </motion.button>
       </div>
@@ -187,31 +187,31 @@ const LandlordSideBar = ({ onSectionChange }) => {
   );
 
   const themeClasses = isDark ? {
-    shellBg: 'from-gray-900/95 via-slate-900/95 to-gray-900/95',
-    border: 'border-slate-800/60',
-    overlay: 'bg-slate-900/40',
-    sectionCard: 'from-gray-800/70 to-slate-800/70',
+    shellBg: 'from-black/95 via-zinc-950/95 to-black/95',
+    border: 'border-amber-500/10',
+    overlay: 'bg-black/40',
+    sectionCard: 'from-zinc-900/70 to-zinc-900/50',
     textPrimary: 'text-slate-100',
-    textSecondary: 'text-slate-300',
+    textSecondary: 'text-amber-400',
     textMuted: 'text-slate-400',
-    buttonIdle: 'bg-slate-800/70 hover:bg-slate-700/60',
-    menuIdle: 'hover:bg-slate-800/70 hover:border-slate-700/60',
-    tooltipBg: 'bg-slate-900/95',
-    tooltipBorder: 'border-slate-700/60',
-    footerText: 'text-slate-400',
+    buttonIdle: 'bg-zinc-900/70 hover:bg-zinc-800/60',
+    menuIdle: 'hover:bg-zinc-900/70 hover:border-amber-500/20',
+    tooltipBg: 'bg-zinc-950/95',
+    tooltipBorder: 'border-amber-500/20',
+    footerText: 'text-slate-500',
   } : {
-    shellBg: 'from-slate-50/95 via-indigo-50/95 to-slate-50/95',
-    border: 'border-slate-200/60',
+    shellBg: 'from-stone-50/95 via-amber-50/90 to-stone-50/95',
+    border: 'border-amber-200/40',
     overlay: 'bg-slate-900/30',
-    sectionCard: 'from-white/60 to-slate-50/60',
-    textPrimary: 'text-slate-700',
-    textSecondary: 'text-slate-600',
+    sectionCard: 'from-white/60 to-amber-50/40',
+    textPrimary: 'text-stone-700',
+    textSecondary: 'text-amber-700',
     textMuted: 'text-slate-500',
-    buttonIdle: 'bg-slate-100/80 hover:bg-slate-200/80',
-    menuIdle: 'hover:bg-slate-100/80 hover:border-slate-200/60',
+    buttonIdle: 'bg-stone-100/80 hover:bg-stone-200/80',
+    menuIdle: 'hover:bg-amber-50/80 hover:border-amber-200/60',
     tooltipBg: 'bg-white/95',
-    tooltipBorder: 'border-slate-200/60',
-    footerText: 'text-slate-400',
+    tooltipBorder: 'border-amber-200/60',
+    footerText: 'text-amber-700/60',
   };
 
   return (
@@ -280,8 +280,8 @@ const LandlordSideBar = ({ onSectionChange }) => {
       >
         {/* Soft static background glow — no continuous animation */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className={`absolute -top-32 -left-32 w-64 h-64 ${isDark ? 'bg-blue-500/5' : 'bg-blue-200/15'} rounded-full blur-3xl`} />
-          <div className={`absolute -bottom-32 -right-32 w-64 h-64 ${isDark ? 'bg-emerald-500/5' : 'bg-emerald-200/15'} rounded-full blur-3xl`} />
+          <div className={`absolute -top-32 -left-32 w-64 h-64 ${isDark ? 'bg-amber-500/5' : 'bg-amber-200/15'} rounded-full blur-3xl`} />
+          <div className={`absolute -bottom-32 -right-32 w-64 h-64 ${isDark ? 'bg-amber-500/5' : 'bg-amber-200/15'} rounded-full blur-3xl`} />
         </div>
 
         <SidebarHeader />
@@ -323,7 +323,7 @@ const LandlordSideBar = ({ onSectionChange }) => {
                     )}
 
                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 ${isItemActive(item) ? 'bg-white/20 group-hover:bg-white/30' : 'bg-slate-100/80 group-hover:bg-slate-200/90'}`}>
-                      <item.icon className={`w-6 h-6 transition-all duration-300 group-hover:scale-110 ${isItemActive(item) ? 'text-white group-hover:text-white/90' : `${themeClasses.textPrimary} group-hover:text-blue-500`}`} />
+                      <item.icon className={`w-6 h-6 transition-all duration-300 group-hover:scale-110 ${isItemActive(item) ? 'text-white group-hover:text-white/90' : `${themeClasses.textPrimary} group-hover:text-amber-500`}`} />
                     </div>
 
                     <AnimatePresence>
@@ -335,7 +335,7 @@ const LandlordSideBar = ({ onSectionChange }) => {
                           transition={{ duration: 0.3 }}
                           className="flex-1 ml-4 text-left"
                         >
-                          <div className={`font-bold text-lg transition-all duration-300 group-hover:translate-x-1 ${isItemActive(item) ? 'text-white group-hover:text-white/90' : `${themeClasses.textPrimary} group-hover:text-blue-500`}`}>
+                          <div className={`font-bold text-lg transition-all duration-300 group-hover:translate-x-1 ${isItemActive(item) ? 'text-white group-hover:text-white/90' : `${themeClasses.textPrimary} group-hover:text-amber-500`}`}>
                             {t(item.labelKey)}
                           </div>
                           <div className={`text-sm transition-all duration-300 group-hover:translate-x-1 ${isItemActive(item) ? 'text-white/80 group-hover:text-white/70' : `${themeClasses.textMuted} group-hover:text-slate-600`}`}>

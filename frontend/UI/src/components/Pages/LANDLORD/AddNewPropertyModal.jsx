@@ -20,6 +20,13 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
     area: '',
     images: [],
     available: true,
+    policies: {
+      petFriendly: false,
+      smokingAllowed: false,
+      furnished: false,
+      sublettingAllowed: false,
+      earlyTermination: false
+    }
   });
 
   // Populate form when editing
@@ -38,6 +45,7 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
         area: property.area || '',
         images: property.images || prev.images,
         available: property.status ? property.status === 'Available' : prev.available,
+        policies: property.policies || prev.policies,
       }));
     }
   }, [mode, property]);
@@ -94,10 +102,12 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
       rating: 4.5, // Default rating
       trend: null, // Default trend
       // Contact info will be auto-populated from logged-in user
-      policies: { // Default policies
+      policies: propertyData.policies || {
         petFriendly: false,
         smokingAllowed: false,
-        furnished: false
+        furnished: false,
+        sublettingAllowed: false,
+        earlyTermination: false
       }
     };
 
@@ -360,6 +370,91 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
             <label htmlFor="available" className={`text-sm font-medium ${modalTheme.text}`}>
               Property is available for rent
             </label>
+          </div>
+
+          <div className="border-t border-gray-200 dark:border-slate-700 pt-4">
+            <h3 className={`text-base font-semibold mb-3 ${modalTheme.text}`}>Property Rules & Policies</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="petFriendly"
+                  checked={propertyData.policies?.petFriendly || false}
+                  onChange={(e) => setPropertyData({
+                    ...propertyData,
+                    policies: { ...(propertyData.policies || {}), petFriendly: e.target.checked }
+                  })}
+                  className="w-4 h-4 rounded border border-gray-300 dark:border-slate-650 focus:ring-indigo-500"
+                />
+                <label htmlFor="petFriendly" className={`text-sm font-medium ${modalTheme.text}`}>
+                  Pets Allowed
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="smokingAllowed"
+                  checked={propertyData.policies?.smokingAllowed || false}
+                  onChange={(e) => setPropertyData({
+                    ...propertyData,
+                    policies: { ...(propertyData.policies || {}), smokingAllowed: e.target.checked }
+                  })}
+                  className="w-4 h-4 rounded border border-gray-300 dark:border-slate-650 focus:ring-indigo-500"
+                />
+                <label htmlFor="smokingAllowed" className={`text-sm font-medium ${modalTheme.text}`}>
+                  Smoking Allowed
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="furnished"
+                  checked={propertyData.policies?.furnished || false}
+                  onChange={(e) => setPropertyData({
+                    ...propertyData,
+                    policies: { ...(propertyData.policies || {}), furnished: e.target.checked }
+                  })}
+                  className="w-4 h-4 rounded border border-gray-300 dark:border-slate-650 focus:ring-indigo-500"
+                />
+                <label htmlFor="furnished" className={`text-sm font-medium ${modalTheme.text}`}>
+                  Furnished Property
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="sublettingAllowed"
+                  checked={propertyData.policies?.sublettingAllowed || false}
+                  onChange={(e) => setPropertyData({
+                    ...propertyData,
+                    policies: { ...(propertyData.policies || {}), sublettingAllowed: e.target.checked }
+                  })}
+                  className="w-4 h-4 rounded border border-gray-300 dark:border-slate-650 focus:ring-indigo-500"
+                />
+                <label htmlFor="sublettingAllowed" className={`text-sm font-medium ${modalTheme.text}`}>
+                  Subletting Allowed
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-2 col-span-2">
+                <input
+                  type="checkbox"
+                  id="earlyTermination"
+                  checked={propertyData.policies?.earlyTermination || false}
+                  onChange={(e) => setPropertyData({
+                    ...propertyData,
+                    policies: { ...(propertyData.policies || {}), earlyTermination: e.target.checked }
+                  })}
+                  className="w-4 h-4 rounded border border-gray-300 dark:border-slate-650 focus:ring-indigo-500"
+                />
+                <label htmlFor="earlyTermination" className={`text-sm font-medium ${modalTheme.text}`}>
+                  Early Termination Clause Included
+                </label>
+              </div>
+            </div>
           </div>
           <div className="flex justify-end space-x-4 pt-4">
             <button

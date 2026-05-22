@@ -93,7 +93,7 @@ export const getLandlordInquiries = async (req, res) => {
     const propertyIds = properties.map(p => p._id);
 
     const inquiries = await Inquiry.find({ property: { $in: propertyIds } })
-      .populate('property', 'title price propertyType')
+      .populate('property', 'title price propertyType policies')
       .populate('seeker',   'name email')
       .populate('replies.sender', 'name')
       .sort({ contactTime: -1 });

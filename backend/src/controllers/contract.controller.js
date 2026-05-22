@@ -2,65 +2,13 @@ import Contract from '../models/contract.model.js';
 import Property from '../models/property.model.js';
 import Notification from '../models/notification.model.js';
 import User from '../models/user.model.js';
-import { query as neonQuery } from '../db/neon.js';
+import AppError from '../utils/AppError.js';
+import Outbox from '../models/outbox.model.js';
 
-// ── NeonDB Sync Helper ────────────────────────────────────────────────────────
-const syncContractToNeon = async (c) => {
-  try {
-    const toDate = (d) => d ? new Date(d).toISOString().split('T')[0] : null;
-    await neonQuery(
-      `INSERT INTO contracts (
-         id, tenant_id, landlord_id, property_id, type, duration,
-         rent_amount, security_deposit, start_date, end_date, status,
-         pets_allowed, smoking_allowed, subletting_allowed, early_termination,
-         custom_clauses, created_at, updated_at
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
-       ON CONFLICT (id) DO UPDATE SET
-         status             = EXCLUDED.status,
-         rent_amount        = EXCLUDED.rent_amount,
-         security_deposit   = EXCLUDED.security_deposit,
-         start_date         = EXCLUDED.start_date,
-         end_date           = EXCLUDED.end_date,
-         pets_allowed       = EXCLUDED.pets_allowed,
-         smoking_allowed    = EXCLUDED.smoking_allowed,
-         subletting_allowed = EXCLUDED.subletting_allowed,
-         early_termination  = EXCLUDED.early_termination,
-         custom_clauses     = EXCLUDED.custom_clauses,
-         updated_at         = NOW()`,
-      [
-        c._id.toString(),
-        c.tenant?.toString(),
-        c.landlord?.toString(),
-        c.property?.toString(),
-        c.type || 'lease',
-        Number(c.duration),
-        Number(c.rentAmount),
-        Number(c.securityDeposit),
-        toDate(c.startDate),
-        toDate(c.endDate),
-        c.status || 'pending',
-        c.terms?.petsAllowed       ?? false,
-        c.terms?.smokingAllowed    ?? false,
-        c.terms?.sublettingAllowed ?? false,
-        c.terms?.earlyTermination  ?? false,
-        c.customClauses || '',
-        c.createdAt ? new Date(c.createdAt).toISOString() : new Date().toISOString(),
-        c.updatedAt ? new Date(c.updatedAt).toISOString() : new Date().toISOString(),
-      ]
-    );
-  } catch (e) {
-    console.warn('[NeonDB] contract sync warning:', e.message);
-  }
-};
-
-export const sendContract = async (req, res) => {
+export const sendContract = async (req, res, next) => {
     try {
         const { tenantId, contractType, duration, rentAmount, securityDeposit, startDate, property, terms, customClauses } = req.body;
         const landlordId = req.user.id || req.user._id || req.user.userId;
-
-        if (!tenantId || !duration || !rentAmount || !securityDeposit || !startDate || !property) {
-            return res.status(400).json({ message: 'Missing required fields' });
-        }
 
         // Find property by title and landlordId since frontend sends title
         let propertyId = property;
@@ -77,9 +25,7 @@ export const sendContract = async (req, res) => {
             status: 'active'
         });
         if (existingActive) {
-            return res.status(409).json({
-                message: 'An active lease already exists for this tenant and property.'
-            });
+            throw new AppError('An active lease already exists for this tenant and property.', 409);
         }
 
         // Keep only the latest pending draft before creating a new one.
@@ -95,8 +41,6 @@ export const sendContract = async (req, res) => {
         const endDate = new Date(new Date(startDate).setMonth(new Date(startDate).getMonth() + duration));
 
         const contract = new Contract({
-
-
             tenant: tenantId,
             landlord: landlordId,
             property: propertyId,
@@ -113,13 +57,18 @@ export const sendContract = async (req, res) => {
 
         await contract.save();
 
-        // Dual-write to NeonDB
-        await syncContractToNeon(contract);
+        // Queue task to MongoDB Outbox
+        await Outbox.create({
+            aggregateType: 'Contract',
+            aggregateId: contract._id,
+            action: 'sync_contract',
+            payload: contract.toObject(),
+            status: 'pending'
+        });
 
         res.status(201).json(contract);
     } catch (error) {
-        console.error('Error sending contract:', error);
-        res.status(500).json({ message: error.message });
+        next(error);
     }
 };
 
@@ -246,8 +195,14 @@ export const updateContractStatus = async (req, res) => {
         contract.status = status;
         await contract.save();
 
-        // Dual-write to NeonDB
-        await syncContractToNeon(contract);
+        // Queue task to MongoDB Outbox
+        await Outbox.create({
+            aggregateType: 'Contract',
+            aggregateId: contract._id,
+            action: 'sync_contract',
+            payload: contract.toObject(),
+            status: 'pending'
+        });
 
         if (status === 'active') {
             try {

@@ -154,28 +154,28 @@ const TenantPayment = () => {
 
   const tc = darkMode
     ? {
-        mainBg: 'from-gray-900 via-slate-800 to-blue-950',
-        loadingBg: 'from-gray-900 via-slate-800 to-blue-950',
-        cardBg: 'bg-slate-800/50',
-        cardBorder: 'border-slate-700/50',
+        mainBg: 'from-black via-zinc-950 to-amber-950/20',
+        loadingBg: 'from-black via-zinc-950 to-amber-950/20',
+        cardBg: 'bg-zinc-900/60',
+        cardBorder: 'border-amber-500/10',
         textPrimary: 'text-slate-100',
-        textSecondary: 'text-slate-200',
-        headerGradient: 'from-cyan-300 via-purple-300 to-pink-300',
-        buttonPrimary: 'from-cyan-500 to-indigo-600',
-        buttonSecondary: 'from-purple-500 to-pink-600',
-        spinnerBorder: 'border-cyan-500/30 border-t-cyan-400',
+        textSecondary: 'text-amber-400',
+        headerGradient: 'from-amber-200 via-yellow-400 to-amber-500',
+        buttonPrimary: 'from-amber-500 to-yellow-600',
+        buttonSecondary: 'bg-zinc-900 hover:bg-zinc-800 text-amber-500 border border-amber-500/30',
+        spinnerBorder: 'border-amber-500/30 border-t-amber-500',
       }
     : {
-        mainBg: 'from-pink-300 via-purple-300 to-indigo-400',
-        loadingBg: 'from-pink-300 via-purple-300 to-indigo-400',
-        cardBg: 'bg-white/60',
-        cardBorder: 'border-indigo-200/50',
-        textPrimary: 'text-gray-900',
-        textSecondary: 'text-indigo-600',
-        headerGradient: 'from-indigo-700 via-purple-700 to-pink-700',
-        buttonPrimary: 'from-indigo-600 to-purple-600',
-        buttonSecondary: 'from-purple-600 to-pink-600',
-        spinnerBorder: 'border-indigo-400/40 border-t-indigo-600',
+        mainBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
+        loadingBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
+        cardBg: 'bg-white/80',
+        cardBorder: 'border-amber-200/50',
+        textPrimary: 'text-stone-900',
+        textSecondary: 'text-amber-700',
+        headerGradient: 'from-amber-800 via-yellow-800 to-amber-900',
+        buttonPrimary: 'from-amber-600 to-yellow-600',
+        buttonSecondary: 'bg-stone-100 hover:bg-stone-200 text-amber-800 border border-amber-200/50',
+        spinnerBorder: 'border-amber-400/40 border-t-amber-600',
       };
 
   const [paymentHistory,   setPaymentHistory]   = useState([]);
@@ -388,31 +388,31 @@ const TenantPayment = () => {
 
           {/* Move-in payment banner (after lease acceptance) */}
           {leaseCheckout && (
-            <div className={`${cardBg} backdrop-blur-sm rounded-3xl shadow-xl p-6 mb-8 border-2 border-green-400/50`}>
-              <h2 className={`text-xl font-bold mb-4 ${textHead}`}>Complete Move-in Payment</h2>
-              <p className={`${textSub} mb-4`}>
+            <div className={`${tc.cardBg} backdrop-blur-sm rounded-3xl shadow-xl p-6 mb-8 border-2 border-green-400/50`}>
+              <h2 className={`text-xl font-bold mb-4 ${tc.textPrimary}`}>Complete Move-in Payment</h2>
+              <p className={`${tc.textSecondary} mb-4`}>
                 Pay your first month&apos;s rent and security deposit for the property you just signed.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div className={`p-4 rounded-xl ${darkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-                  <p className={`text-xs uppercase tracking-wide ${textSub}`}>Apartment</p>
-                  <p className={`font-semibold ${textHead}`}>{leaseCheckout.propertyTitle}</p>
+                  <p className={`text-xs uppercase tracking-wide ${tc.textSecondary}`}>Apartment</p>
+                  <p className={`font-semibold ${tc.textPrimary}`}>{leaseCheckout.propertyTitle}</p>
                 </div>
                 <div className={`p-4 rounded-xl ${darkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-                  <p className={`text-xs uppercase tracking-wide ${textSub}`}>Landlord</p>
-                  <p className={`font-semibold ${textHead}`}>{leaseCheckout.landlordName}</p>
+                  <p className={`text-xs uppercase tracking-wide ${tc.textSecondary}`}>Landlord</p>
+                  <p className={`font-semibold ${tc.textPrimary}`}>{leaseCheckout.landlordName}</p>
                 </div>
                 <div className={`p-4 rounded-xl ${darkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-                  <p className={`text-xs uppercase tracking-wide ${textSub}`}>Monthly Rent</p>
-                  <p className={`font-bold text-lg ${textHead}`}>₹{Number(leaseCheckout.rentAmount || 0).toLocaleString('en-IN')}</p>
+                  <p className={`text-xs uppercase tracking-wide ${tc.textSecondary}`}>Monthly Rent</p>
+                  <p className={`font-bold text-lg ${tc.textPrimary}`}>₹{Number(leaseCheckout.rentAmount || 0).toLocaleString('en-IN')}</p>
                 </div>
                 <div className={`p-4 rounded-xl ${darkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-                  <p className={`text-xs uppercase tracking-wide ${textSub}`}>Security Deposit</p>
-                  <p className={`font-bold text-lg ${textHead}`}>₹{Number(leaseCheckout.securityDeposit || 0).toLocaleString('en-IN')}</p>
+                  <p className={`text-xs uppercase tracking-wide ${tc.textSecondary}`}>Security Deposit</p>
+                  <p className={`font-bold text-lg ${tc.textPrimary}`}>₹{Number(leaseCheckout.securityDeposit || 0).toLocaleString('en-IN')}</p>
                 </div>
               </div>
               <div className={`flex items-center justify-between p-4 rounded-xl ${darkMode ? 'bg-green-900/30' : 'bg-green-50'}`}>
-                <span className={`font-semibold ${textHead}`}>Total Due Now</span>
+                <span className={`font-semibold ${tc.textPrimary}`}>Total Due Now</span>
                 <span className="text-2xl font-bold text-green-600">
                   ₹{Number(leaseCheckout.totalAmount || 0).toLocaleString('en-IN')}
                 </span>

@@ -5,17 +5,19 @@ import Maintenance from '../models/maintenance.model.js';
 import Payment from '../models/payment.model.js';
 import Inquiry from '../models/inquiry.model.js';
 import Notification from '../models/notification.model.js';
+import LandlordPayment from '../models/landlordPayment.model.js';
 
 // ── Dashboard Overview ────────────────────────────────────────────────────
 export const getDashboardData = async (req, res) => {
   try {
-    const [users, properties, contracts, maintenance, payments, inquiries] = await Promise.all([
+    const [users, properties, contracts, maintenance, payments, inquiries, landlordPayments] = await Promise.all([
       User.find().select('-password').sort({ createdAt: -1 }),
       Property.find().populate('postedBy', 'name email').sort({ createdAt: -1 }),
       Contract.find().populate('tenant landlord property').sort({ createdAt: -1 }),
       Maintenance.find().populate('tenant landlord property', 'name email title').sort({ createdAt: -1 }),
       Payment.find().populate('tenantId', 'name email').populate('propertyId', 'title').sort({ createdAt: -1 }),
       Inquiry.find().populate('seeker landlord', 'name email').populate('property', 'title').sort({ contactTime: -1 }),
+      LandlordPayment.find().populate('landlordId', 'name email').sort({ createdAt: -1 }),
     ]);
 
     // SLA breaches: Open/In Progress maintenance older than 7 days
@@ -25,9 +27,15 @@ export const getDashboardData = async (req, res) => {
     );
 
     // Financial summary
-    const totalRevenue = payments.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.amount, 0);
-    const pendingPayments = payments.filter(p => p.status === 'Pending').reduce((sum, p) => sum + p.amount, 0);
-    const failedPayments = payments.filter(p => p.status === 'Failed').length;
+    const tenantPaidRevenue = payments.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.amount, 0);
+    const landlordPaidRevenue = landlordPayments.filter(lp => lp.status === 'Paid').reduce((sum, lp) => sum + lp.totalAmount, 0);
+    const totalRevenue = tenantPaidRevenue + landlordPaidRevenue;
+
+    const tenantPendingPayments = payments.filter(p => p.status === 'Pending').reduce((sum, p) => sum + p.amount, 0);
+    const landlordPendingPayments = landlordPayments.filter(lp => lp.status === 'Pending').reduce((sum, lp) => sum + lp.totalAmount, 0);
+    const pendingPayments = tenantPendingPayments + landlordPendingPayments;
+
+    const failedPayments = payments.filter(p => p.status === 'Failed').length + landlordPayments.filter(lp => lp.status === 'Failed').length;
 
     // Property occupancy
     const occupiedProperties = properties.filter(p => p.status === 'Occupied').length;
@@ -59,6 +67,7 @@ export const getDashboardData = async (req, res) => {
       maintenance,
       payments,
       inquiries,
+      landlordPayments,
       analytics: {
         totalUsers: users.length,
         totalLandlords: users.filter(u => u.role === 'landlord').length,
@@ -66,6 +75,8 @@ export const getDashboardData = async (req, res) => {
         totalContracts: contracts.length,
         activeContracts,
         totalRevenue,
+        tenantPaidRevenue,
+        landlordPaidRevenue,
         pendingPayments,
         failedPayments,
         occupiedProperties,

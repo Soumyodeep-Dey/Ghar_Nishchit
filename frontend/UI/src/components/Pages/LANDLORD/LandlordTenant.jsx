@@ -1187,9 +1187,9 @@ const LandlordTenant = () => {
   const { darkMode } = useDarkMode();
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
   const tc = darkMode ? {
-    mainBg: 'from-gray-900 via-slate-800 to-blue-950',
+    mainBg: 'from-black via-zinc-950 to-amber-950/20',
   } : {
-    mainBg: 'from-pink-300 via-purple-300 to-indigo-400',
+    mainBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
   };
 
   // State for tenants data - now fetched from API

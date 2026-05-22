@@ -80,9 +80,9 @@ const FloatingCard = ({ children, delay = 0, className = '' }) => (
 
 const StatsCard = ({ title, value, icon, delay = 0 }) => {
   const { darkMode } = useDarkMode();
-  const cardBg = darkMode ? 'bg-slate-800/50 border-slate-700/50 shadow-black/30' : 'bg-white/60 border-indigo-200/50 shadow-indigo-100/40';
-  const textPrimary = darkMode ? 'text-slate-100' : 'text-gray-900';
-  const textSecondary = darkMode ? 'text-slate-400' : 'text-indigo-700/70';
+  const cardBg = darkMode ? 'bg-zinc-900/60 border-amber-500/10 shadow-amber-950/20' : 'bg-white/80 border-amber-200/50 shadow-amber-100/50';
+  const textPrimary = darkMode ? 'text-slate-100' : 'text-stone-900';
+  const textSecondary = darkMode ? 'text-amber-400' : 'text-amber-700';
 
   return (
     <FloatingCard delay={delay}>
@@ -93,7 +93,7 @@ const StatsCard = ({ title, value, icon, delay = 0 }) => {
             <AnimatedCounter value={value} />
           </h3>
         </div>
-        <div className={`p-3 rounded-xl ${darkMode ? 'bg-slate-700/50' : 'bg-indigo-50'} flex items-center justify-center transform transition-transform duration-350 hover:rotate-12`}>
+        <div className={`p-3 rounded-xl ${darkMode ? 'bg-zinc-800/50' : 'bg-amber-50'} flex items-center justify-center transform transition-transform duration-350 hover:rotate-12`}>
           {icon}
         </div>
       </div>
@@ -329,32 +329,32 @@ const TenantMaintenance = () => {
 
   const tc = darkMode
     ? {
-        mainBg: 'from-gray-900 via-slate-800 to-blue-950',
-        loadingBg: 'from-gray-900 via-slate-800 to-blue-950',
-        cardBg: 'bg-slate-800/50', cardBorder: 'border-slate-700/50',
-        textPrimary: 'text-slate-100', textSecondary: 'text-slate-200',
-        headerGradient: 'from-cyan-300 via-purple-300 to-pink-300',
-        tabBg: 'bg-slate-800/50', tabBorder: 'border-slate-700/50',
-        tabActive: 'from-cyan-500 to-indigo-600', tabActiveText: 'text-blue-950',
-        tabInactive: 'text-slate-300 hover:text-slate-100 hover:bg-slate-700/50',
-        buttonPrimary: 'from-cyan-500 to-indigo-600',
-        buttonSecondary: 'from-purple-500 to-pink-600',
-        iconTrend: 'text-cyan-400',
-        spinnerBorder: 'border-cyan-500/30 border-t-cyan-400',
+        mainBg: 'from-black via-zinc-950 to-amber-950/20',
+        loadingBg: 'from-black via-zinc-950 to-amber-950/20',
+        cardBg: 'bg-zinc-900/60', cardBorder: 'border-amber-500/10',
+        textPrimary: 'text-slate-100', textSecondary: 'text-amber-400',
+        headerGradient: 'from-amber-200 via-yellow-400 to-amber-500',
+        tabBg: 'bg-zinc-900/50', tabBorder: 'border-zinc-850',
+        tabActive: 'from-amber-500 to-yellow-600', tabActiveText: 'text-slate-950 font-black',
+        tabInactive: 'text-slate-400 hover:text-amber-400 hover:bg-zinc-800/50',
+        buttonPrimary: 'from-amber-500 to-yellow-600',
+        buttonSecondary: 'bg-zinc-900 hover:bg-zinc-800 text-amber-500 border border-amber-500/30',
+        iconTrend: 'text-amber-400',
+        spinnerBorder: 'border-amber-500/30 border-t-amber-500',
       }
     : {
-        mainBg: 'from-pink-300 via-purple-300 to-indigo-400',
-        loadingBg: 'from-pink-300 via-purple-300 to-indigo-400',
-        cardBg: 'bg-white/60', cardBorder: 'border-indigo-200/50',
-        textPrimary: 'text-gray-900', textSecondary: 'text-indigo-600',
-        headerGradient: 'from-indigo-700 via-purple-700 to-pink-700',
-        tabBg: 'bg-white/30', tabBorder: 'border-indigo-200/50',
-        tabActive: 'from-indigo-600 to-purple-600', tabActiveText: 'text-white',
-        tabInactive: 'text-indigo-600 hover:text-indigo-800 hover:bg-white/40',
-        buttonPrimary: 'from-indigo-600 to-purple-600',
-        buttonSecondary: 'from-purple-600 to-pink-600',
-        iconTrend: 'text-indigo-600',
-        spinnerBorder: 'border-indigo-400/40 border-t-indigo-600',
+        mainBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
+        loadingBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
+        cardBg: 'bg-white/80', cardBorder: 'border-amber-200/50',
+        textPrimary: 'text-stone-900', textSecondary: 'text-amber-700',
+        headerGradient: 'from-amber-800 via-yellow-800 to-amber-900',
+        tabBg: 'bg-white/40', tabBorder: 'border-amber-200/50',
+        tabActive: 'from-amber-600 to-yellow-600', tabActiveText: 'text-white font-black',
+        tabInactive: 'text-amber-700 hover:text-amber-900 hover:bg-white/60',
+        buttonPrimary: 'from-amber-600 to-yellow-600',
+        buttonSecondary: 'bg-stone-100 hover:bg-stone-200 text-amber-800 border border-amber-200/50',
+        iconTrend: 'text-amber-600',
+        spinnerBorder: 'border-amber-400/40 border-t-amber-600',
       };
 
   useEffect(() => {
@@ -362,7 +362,7 @@ const TenantMaintenance = () => {
       try {
         setIsLoading(true);
         const profile = await api.getProfile();
-        const res = await api.getTenantMaintenanceRequests(profile.id);
+        const res = await api.getTenantMaintenanceRequests(profile._id || profile.id);
         if (Array.isArray(res)) {
           setRequests(res.map(normalizeRequest));
         }
@@ -408,7 +408,7 @@ const TenantMaintenance = () => {
         reader.onload = () => resolve({ id: Date.now().toString() + Math.random(), name: file.name, url: reader.result });
         reader.readAsDataURL(file);
       })));
-      const requestData = { ...newRequest, reportedBy: profile.id, status: 'Pending', attachments: uploadedAttachments };
+      const requestData = { ...newRequest, reportedBy: profile._id || profile.id, status: 'Pending', attachments: uploadedAttachments };
       const created = await api.createMaintenanceRequest(requestData);
       setRequests(prev => [normalizeRequest(created?.data || created), ...prev]);
       setNewRequest({ title: '', description: '', priority: 'Medium', attachments: [] });

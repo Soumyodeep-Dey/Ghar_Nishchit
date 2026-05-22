@@ -248,7 +248,7 @@ const PropertyDetailsModal = ({ isOpen, onClose, property, isDark }) => {
             <img 
               src={property.images[0]} 
               alt={property.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain bg-slate-100 dark:bg-slate-900/50"
               onError={(e) => {
                 e.target.onerror = null;
                 e.target.src = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
@@ -561,7 +561,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
               <img
                 src={property.images[currentImageIndex]}
                 alt={property.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain bg-slate-100 dark:bg-slate-900/50"
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
@@ -1046,9 +1046,9 @@ const LandlordProperty = () => {
   };
 
   const tc = darkMode ? {
-    mainBg: 'from-gray-900 via-slate-800 to-blue-950',
+    mainBg: 'from-black via-zinc-950 to-amber-950/20',
   } : {
-    mainBg: 'from-pink-300 via-purple-300 to-indigo-400',
+    mainBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
   };
 
   return (

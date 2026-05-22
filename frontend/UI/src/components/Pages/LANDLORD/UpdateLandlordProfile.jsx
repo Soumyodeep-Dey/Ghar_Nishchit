@@ -479,46 +479,46 @@ export default function UpdateLandlordProfile() {
 
   const tc = darkMode
     ? {
-        mainBg: 'from-gray-900 via-slate-800 to-blue-950',
-        cardBg: 'bg-slate-800/50 backdrop-blur-xl border border-slate-700/50',
-        cardBorder: 'border-slate-700/50',
+        mainBg: 'from-black via-zinc-950 to-amber-950/20',
+        cardBg: 'bg-zinc-900/60 backdrop-blur-xl border border-amber-500/10',
+        cardBorder: 'border-amber-500/10',
         textPrimary: 'text-slate-100',
-        textSecondary: 'text-slate-300',
-        headerGradient: 'from-cyan-300 via-purple-300 to-pink-300',
-        buttonPrimary: 'from-cyan-500 to-indigo-650',
-        buttonPrimaryHover: 'from-cyan-600 to-indigo-700',
-        inputBg: 'bg-slate-900/50',
-        inputBorder: 'border-slate-700/80',
+        textSecondary: 'text-amber-400',
+        headerGradient: 'from-amber-200 via-yellow-400 to-amber-500',
+        buttonPrimary: 'from-amber-500 to-yellow-600',
+        buttonPrimaryHover: 'from-amber-450 to-yellow-550',
+        inputBg: 'bg-zinc-955/60',
+        inputBorder: 'border-amber-500/15',
         inputText: 'text-slate-100',
-        inputPlaceholder: 'placeholder-slate-500',
-        inputFocusRing: 'focus:ring-cyan-500/20 focus:border-cyan-500',
+        inputPlaceholder: 'placeholder-zinc-500',
+        inputFocusRing: 'focus:ring-amber-500/20 focus:border-amber-500',
         dangerBg: 'bg-red-500/10 border-red-500/20 text-red-300',
-        dangerBtn: 'bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600',
+        dangerBtn: 'bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700',
       }
     : {
-        mainBg: 'from-pink-300 via-purple-300 to-indigo-400',
-        cardBg: 'bg-white/60 backdrop-blur-xl border border-indigo-200/50',
-        cardBorder: 'border-indigo-200/50',
-        textPrimary: 'text-gray-900',
-        textSecondary: 'text-indigo-650',
-        headerGradient: 'from-indigo-700 via-purple-700 to-pink-700',
-        buttonPrimary: 'from-indigo-600 to-purple-650',
-        buttonPrimaryHover: 'from-indigo-700 to-purple-700',
+        mainBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
+        cardBg: 'bg-white/80 backdrop-blur-xl border border-amber-200/50',
+        cardBorder: 'border-amber-200/50',
+        textPrimary: 'text-stone-900',
+        textSecondary: 'text-amber-700',
+        headerGradient: 'from-amber-800 via-yellow-800 to-amber-900',
+        buttonPrimary: 'from-amber-600 to-yellow-600',
+        buttonPrimaryHover: 'from-amber-700 to-yellow-700',
         inputBg: 'bg-white/80',
-        inputBorder: 'border-indigo-150',
-        inputText: 'text-gray-950',
-        inputPlaceholder: 'placeholder-gray-400',
-        inputFocusRing: 'focus:ring-indigo-500/20 focus:border-indigo-650',
+        inputBorder: 'border-amber-200/60',
+        inputText: 'text-stone-900',
+        inputPlaceholder: 'placeholder-stone-400',
+        inputFocusRing: 'focus:ring-amber-500/20 focus:border-amber-650',
         dangerBg: 'bg-red-50 border-red-200 text-red-700',
-        dangerBtn: 'bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600',
+        dangerBtn: 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600',
       };
 
   return (
     <div className={`min-h-screen flex relative overflow-hidden bg-gradient-to-br ${tc.mainBg}`}>
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className={`absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-purple-500/10 to-pink-500/10' : 'bg-gradient-to-r from-indigo-500/20 to-cyan-500/20'}`} />
-        <div className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10' : 'bg-gradient-to-r from-pink-500/20 to-purple-500/20'}`} />
+        <div className={`absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-amber-500/10 to-yellow-500/10' : 'bg-gradient-to-r from-amber-500/20 to-yellow-600/20'}`} />
+        <div className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-amber-500/10 to-yellow-500/10' : 'bg-gradient-to-r from-amber-500/20 to-orange-500/20'}`} />
       </div>
 
       <LandlordSideBar />

@@ -144,13 +144,22 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ message: 'amount is required and must be > 0' });
     }
 
-    // Validate propertyId only if provided
+    // Validate propertyId only if provided, else attempt fallback to active contract property
     let safePropertyId = null;
     if (propertyId) {
       if (mongoose.Types.ObjectId.isValid(propertyId)) {
         safePropertyId = propertyId;
       } else {
         return res.status(400).json({ message: `Invalid propertyId: "${propertyId}"` });
+      }
+    } else {
+      try {
+        const activeContract = await Contract.findOne({ tenant: tenantId, status: 'active' }).select('property').lean();
+        if (activeContract && activeContract.property) {
+          safePropertyId = activeContract.property;
+        }
+      } catch (err) {
+        console.warn('[createOrder] Fallback contract lookup warning:', err.message);
       }
     }
 
@@ -401,6 +410,41 @@ export const getPaymentStats = async (req, res) => {
   }
 };
 
+// Helper to filter payments:
+// 1. Matches if payment's propertyId belongs to landlord's properties.
+// 2. Matches if propertyId is null/missing and note contains a contract ID belonging to the landlord.
+// 3. Matches if propertyId is null/missing and the tenant only has contracts with THIS landlord.
+export const filterLandlordPayments = async (payments, landlordId, propertyIds) => {
+  const filtered = [];
+  for (const p of payments) {
+    const pPropId = p.propertyId?._id || p.propertyId;
+    if (pPropId && propertyIds.some(id => id.toString() === pPropId.toString())) {
+      filtered.push(p);
+      continue;
+    }
+    if (!pPropId) {
+      const match = p.note?.match(/contract:([a-f0-9]{24})/i);
+      if (match) {
+        const contractId = match[1];
+        const contract = await Contract.findById(contractId).select('landlord').lean();
+        if (contract && contract.landlord?.toString() === landlordId.toString()) {
+          filtered.push(p);
+        }
+        continue;
+      }
+      const tenantId = p.tenantId?._id || p.tenantId;
+      if (tenantId) {
+        const tenantContracts = await Contract.find({ tenant: tenantId }).select('landlord').lean();
+        const landlords = [...new Set(tenantContracts.map(c => c.landlord?.toString()).filter(Boolean))];
+        if (landlords.length === 1 && landlords[0] === landlordId.toString()) {
+          filtered.push(p);
+        }
+      }
+    }
+  }
+  return filtered;
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/payments/landlord-revenue
 // Returns the landlord's total revenue from tenant payments for their properties
@@ -450,13 +494,15 @@ export const getLandlordRevenue = async (req, res) => {
       });
     }
 
-    const paidPayments = await Payment.find(paidQuery).lean();
+    const rawPaidPayments = await Payment.find(paidQuery).lean();
+    const paidPayments = await filterLandlordPayments(rawPaidPayments, landlordId, propertyIds);
 
     const pendingQuery = {
       status: 'Pending',
       $or: paidQuery.$or,
     };
-    const pendingPayments = await Payment.find(pendingQuery).lean();
+    const rawPendingPayments = await Payment.find(pendingQuery).lean();
+    const pendingPayments = await filterLandlordPayments(rawPendingPayments, landlordId, propertyIds);
 
     const totalRevenue = paidPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
     const pendingAmount = pendingPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
@@ -474,7 +520,6 @@ export const getLandlordRevenue = async (req, res) => {
     return res.status(500).json({ message: 'Failed to fetch landlord revenue' });
   }
 };
-
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /api/payments/landlord-tenant-payments
 // Tenant rent payments received by the logged-in landlord
@@ -511,7 +556,9 @@ export const getLandlordTenantPayments = async (req, res) => {
       .populate('propertyId', 'title')
       .lean();
 
-    const shaped = payments.map((p) => ({
+    const filteredPayments = await filterLandlordPayments(payments, landlordId, propertyIds);
+
+    const shaped = filteredPayments.map((p) => ({
       id: p._id,
       amount: p.amount,
       status: p.status,

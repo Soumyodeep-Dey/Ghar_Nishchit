@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
@@ -33,6 +34,10 @@ const StatusBadge = ({ status }) => {
 // ─── Contract Detail Modal ────────────────────────────────────────────────────
 const ContractModal = ({ contract, onClose, onAccept, onDecline, accepting }) => {
   const { darkMode } = useDarkMode();
+  const [showSignPad, setShowSignPad] = useState(false);
+  const [signatureName, setSignatureName] = useState('');
+  const [agreeTerms, setAgreeTerms] = useState(false);
+
   if (!contract) return null;
 
   const isPending = contract.status === 'pending';
@@ -74,14 +79,14 @@ const ContractModal = ({ contract, onClose, onAccept, onDecline, accepting }) =>
         {/* Body */}
         <div className="p-6 space-y-5">
           {/* Status banner for pending */}
-          {isPending && (
+          {isPending && !showSignPad && (
             <div className={`flex items-start gap-3 p-4 border rounded-2xl ${
               darkMode ? 'bg-amber-500/10 border-amber-500/25' : 'bg-amber-50 border-amber-200'
             }`}>
               <AlertTriangle className="w-5 h-5 text-amber-550 mt-0.5 flex-shrink-0" />
               <div>
                 <p className={`text-sm font-semibold ${darkMode ? 'text-amber-400' : 'text-amber-800'}`}>Action Required</p>
-                <p className={`text-sm mt-0.5 ${darkMode ? 'text-amber-500' : 'text-amber-700'}`}>
+                <p className={`text-sm mt-0.5 ${darkMode ? 'text-amber-550' : 'text-amber-700'}`}>
                   Your landlord has sent you this lease contract. Please review all terms carefully before signing.
                 </p>
               </div>
@@ -145,28 +150,120 @@ const ContractModal = ({ contract, onClose, onAccept, onDecline, accepting }) =>
         {/* Footer Actions */}
         {isPending && (
           <div className={`sticky bottom-0 ${bg} p-6 border-t ${border} rounded-b-3xl`}>
-            <p className={`text-xs ${sub} text-center mb-4`}>
-              By clicking "Accept & Sign", you agree to all terms stated in this contract.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={onDecline}
-                disabled={accepting}
-                className={`flex-1 py-3 rounded-xl border font-semibold text-sm transition-colors disabled:opacity-50 ${
-                  darkMode ? 'border-red-500/30 text-red-400 hover:bg-red-500/10' : 'border-red-200 text-red-500 hover:bg-red-50'
-                }`}
-              >
-                Decline
-              </button>
-              <button
-                onClick={() => onAccept(contract._id || contract.id)}
-                disabled={accepting}
-                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold text-sm hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg shadow-green-500/25 disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {accepting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
-                {accepting ? 'Processing…' : 'Accept & Sign'}
-              </button>
-            </div>
+            {showSignPad ? (
+              <div className="space-y-4 animate-fadeIn">
+                <div className={`p-5 rounded-2xl border ${darkMode ? 'bg-zinc-950/60 border-amber-500/20' : 'bg-amber-50/50 border-amber-200'} space-y-4`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Shield className="w-5 h-5 text-amber-500" />
+                    <h4 className={`font-bold text-sm uppercase tracking-wider ${darkMode ? 'text-amber-300' : 'text-amber-800'}`}>
+                      Secure e-Signature Certificate
+                    </h4>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <label className={`block text-xs font-bold ${darkMode ? 'text-zinc-400' : 'text-stone-600'}`}>
+                      TYPE YOUR FULL NAME TO SIGN:
+                    </label>
+                    <input
+                      type="text"
+                      value={signatureName}
+                      onChange={(e) => setSignatureName(e.target.value)}
+                      placeholder="e.g. Jane Doe"
+                      className={`w-full px-4 py-3 rounded-xl border-2 font-medium text-sm focus:outline-none transition-all duration-300 ${
+                        darkMode 
+                          ? 'bg-zinc-900 border-zinc-800 text-slate-100 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/20' 
+                          : 'bg-white border-amber-200 text-stone-900 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/20'
+                      }`}
+                    />
+                  </div>
+
+                  {signatureName.trim() && (
+                    <div className="space-y-2">
+                      <span className={`block text-xs font-bold ${darkMode ? 'text-zinc-500' : 'text-stone-400'}`}>
+                        LIVE E-SIGNATURE PREVIEW:
+                      </span>
+                      <div className={`p-6 rounded-xl border border-dashed text-center relative overflow-hidden ${
+                        darkMode ? 'bg-zinc-950/80 border-amber-500/30' : 'bg-amber-50/20 border-amber-300'
+                      }`}>
+                        {/* Interactive cursive script preview */}
+                        <p className={`text-4xl text-amber-500 tracking-wider select-none font-light py-2`} style={{ fontFamily: "'Brush Script MT', 'Great Vibes', 'Parisienne', 'Georgia', cursive, sans-serif" }}>
+                          {signatureName}
+                        </p>
+                        <div className={`text-[10px] uppercase font-bold tracking-widest mt-2 ${darkMode ? 'text-zinc-650' : 'text-stone-400'}`}>
+                          Digitally Verified • {new Date().toLocaleDateString(undefined, { dateStyle: 'medium' })}
+                        </div>
+                        {/* Decorative background logo */}
+                        <div className="absolute right-3 bottom-1 opacity-5">
+                          <Shield className="w-16 h-16 text-amber-500" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <label className="flex items-start gap-3 cursor-pointer group mt-2">
+                    <input
+                      type="checkbox"
+                      checked={agreeTerms}
+                      onChange={(e) => setAgreeTerms(e.target.checked)}
+                      className="mt-1 rounded border-amber-500/30 text-amber-500 focus:ring-amber-500/20 w-4 h-4"
+                    />
+                    <span className={`text-xs select-none ${darkMode ? 'text-zinc-400 group-hover:text-zinc-300' : 'text-stone-600 group-hover:text-stone-850'}`}>
+                      I agree that this is a legally binding electronic signature and I accept all terms, conditions, and custom clauses of this lease contract.
+                    </span>
+                  </label>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowSignPad(false)}
+                    disabled={accepting}
+                    className={`flex-1 py-3 rounded-xl border font-semibold text-sm transition-colors disabled:opacity-50 ${
+                      darkMode ? 'border-zinc-800 text-zinc-400 hover:bg-zinc-850' : 'border-amber-250 text-amber-800 hover:bg-amber-50/50'
+                    }`}
+                  >
+                    Back to Review
+                  </button>
+                  <button
+                    onClick={() => onAccept(contract._id || contract.id)}
+                    disabled={accepting || !signatureName.trim() || !agreeTerms}
+                    className={`flex-1 py-3 rounded-xl font-semibold text-sm transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                      signatureName.trim() && agreeTerms
+                        ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-zinc-950 hover:from-amber-400 hover:to-yellow-500 shadow-amber-500/20 shadow-lg'
+                        : darkMode 
+                        ? 'bg-zinc-800 text-zinc-500 border border-zinc-700/50' 
+                        : 'bg-stone-100 text-stone-400 border border-stone-200'
+                    }`}
+                  >
+                    {accepting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                    {accepting ? 'Signing…' : 'Sign & Finalize'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <p className={`text-xs ${sub} text-center mb-4`}>
+                  By clicking "Proceed to e-Signature", you will open the secure digital signature pad.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={onDecline}
+                    disabled={accepting}
+                    className={`flex-1 py-3 rounded-xl border font-semibold text-sm transition-colors disabled:opacity-50 ${
+                      darkMode ? 'border-red-500/30 text-red-400 hover:bg-red-500/10' : 'border-red-200 text-red-500 hover:bg-red-50'
+                    }`}
+                  >
+                    Decline
+                  </button>
+                  <button
+                    onClick={() => setShowSignPad(true)}
+                    disabled={accepting}
+                    className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-600 text-zinc-950 font-semibold text-sm hover:from-amber-450 hover:to-yellow-500 transition-all shadow-lg shadow-amber-500/25 disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    Proceed to e-Signature
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -302,55 +399,46 @@ const TenantContracts = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
 
-  const [contracts, setContracts]           = useState([]);
-  const [isLoading, setIsLoading]           = useState(true);
+  const queryClient = useQueryClient();
+
+  const { data: contracts = [], isLoading, refetch } = useQuery({
+    queryKey: ['tenantContracts'],
+    queryFn: async () => {
+      const data = await api.getTenantContracts();
+      return Array.isArray(data) ? data : [];
+    }
+  });
+
   const [selectedContract, setSelectedContract] = useState(null);
   const [accepting, setAccepting]           = useState(false);
 
   const tc = darkMode
     ? {
-        mainBg: 'from-gray-900 via-slate-800 to-blue-950',
-        loadingBg: 'from-gray-900 via-slate-800 to-blue-950',
-        cardBg: 'bg-slate-800/50',
-        cardBorder: 'border-slate-700/50',
+        mainBg: 'from-black via-zinc-950 to-amber-950/20',
+        loadingBg: 'from-black via-zinc-950 to-amber-950/20',
+        cardBg: 'bg-zinc-900/60',
+        cardBorder: 'border-amber-500/10',
         textPrimary: 'text-slate-100',
-        textSecondary: 'text-slate-200',
-        headerGradient: 'from-cyan-300 via-purple-300 to-pink-300',
-        buttonPrimary: 'from-cyan-500 to-indigo-600',
-        buttonSecondary: 'from-purple-500 to-pink-600',
-        spinnerBorder: 'border-cyan-500/30 border-t-cyan-400',
-        panelBg: 'bg-slate-900/60',
+        textSecondary: 'text-amber-400',
+        headerGradient: 'from-amber-200 via-yellow-400 to-amber-500',
+        buttonPrimary: 'from-amber-500 to-yellow-600',
+        buttonSecondary: 'bg-zinc-900 hover:bg-zinc-800 text-amber-500 border border-amber-500/30',
+        spinnerBorder: 'border-amber-500/30 border-t-amber-500',
+        panelBg: 'bg-zinc-950/80',
       }
     : {
-        mainBg: 'from-pink-300 via-purple-300 to-indigo-400',
-        loadingBg: 'from-pink-300 via-purple-300 to-indigo-400',
-        cardBg: 'bg-white/60',
-        cardBorder: 'border-indigo-200/50',
-        textPrimary: 'text-gray-900',
-        textSecondary: 'text-indigo-600',
-        headerGradient: 'from-indigo-700 via-purple-700 to-pink-700',
-        buttonPrimary: 'from-indigo-600 to-purple-600',
-        buttonSecondary: 'from-purple-600 to-pink-600',
-        spinnerBorder: 'border-indigo-400/40 border-t-indigo-600',
+        mainBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
+        loadingBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
+        cardBg: 'bg-white/80',
+        cardBorder: 'border-amber-200/50',
+        textPrimary: 'text-stone-900',
+        textSecondary: 'text-amber-700',
+        headerGradient: 'from-amber-800 via-yellow-800 to-amber-900',
+        buttonPrimary: 'from-amber-600 to-yellow-600',
+        buttonSecondary: 'bg-stone-100 hover:bg-stone-200 text-amber-800 border border-amber-200/50',
+        spinnerBorder: 'border-amber-400/40 border-t-amber-600',
         panelBg: 'bg-white/40',
       };
-
-  // Fetch contracts from API
-  const fetchContracts = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const data = await api.getTenantContracts();
-      setContracts(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error('Failed to fetch contracts:', err);
-      showErrorToast('Could not load your contracts. Please try again.');
-      setContracts([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => { fetchContracts(); }, [fetchContracts]);
 
   // Accept a contract → redirect to payment with rent + deposit pre-filled
   const handleAccept = useCallback(async (contractId) => {
@@ -361,6 +449,7 @@ const TenantContracts = () => {
         selectedContract;
 
       await api.updateContractStatus(contractId, 'active');
+      queryClient.invalidateQueries({ queryKey: ['tenantContracts'] });
 
       const propertyId =
         contract?.property?._id ||
@@ -398,9 +487,7 @@ const TenantContracts = () => {
     const id = selectedContract._id || selectedContract.id;
     try {
       await api.updateContractStatus(id, 'cancelled');
-      setContracts(prev =>
-        prev.map(c => (c._id === id || c.id === id) ? { ...c, status: 'cancelled' } : c)
-      );
+      queryClient.invalidateQueries({ queryKey: ['tenantContracts'] });
       setSelectedContract(null);
       showSuccessToast('Contract declined.');
     } catch (err) {
@@ -499,7 +586,7 @@ const TenantContracts = () => {
               <div className="flex items-center justify-between mb-6">
                 <h2 className={`text-xl font-bold ${tc.textPrimary}`}>{t('pages.allContracts')}</h2>
                 <button
-                  onClick={fetchContracts}
+                  onClick={() => refetch()}
                   className={`flex items-center gap-2 text-sm px-4 py-2 rounded-xl transition-all hover:scale-105 border ${
                     darkMode ? 'text-slate-350 hover:bg-slate-700/50 border-slate-700/50' : 'text-indigo-650 hover:bg-indigo-50 border-indigo-100'
                   }`}
