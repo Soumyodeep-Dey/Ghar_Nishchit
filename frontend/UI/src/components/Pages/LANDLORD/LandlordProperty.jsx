@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../services/api.js';
-import { showConfirmToast } from '../../../utils/toast.jsx';
+import { showConfirmToast, showErrorToast, showSuccessToast } from '../../../utils/toast.jsx';
 
 // Ensure 'motion' symbol is referenced to satisfy some linters that may report it as unused
 void motion;
@@ -994,6 +994,7 @@ const LandlordProperty = () => {
             console.log('🔄 Normalized server item:', serverItem);
             setProperties(prev => prev.map(p => p.id === serverItem.id || p.id === propertyData.id ? serverItem : p));
             console.log('✅ Property updated successfully in frontend!');
+            showSuccessToast('Property updated successfully!');
             setUpdateSuccess(true);
             setTimeout(() => setUpdateSuccess(false), 3000); // Hide success message after 3 seconds
           } else {
@@ -1001,8 +1002,7 @@ const LandlordProperty = () => {
           }
         } catch (err) {
           console.error('❌ Failed to update property on server:', err.message || err);
-          console.error('❌ Error details:', err);
-          console.warn('Failed to update property on server, change kept locally', err.message || err);
+          showErrorToast(err.message || 'Failed to update property on server');
         }
       })();
     } else {
@@ -1018,9 +1018,13 @@ const LandlordProperty = () => {
             // normalize server response into local shape
             const serverItem = normalizePropertyFromBackend(created);
             setProperties(prev => prev.map(p => p.id === tempId ? serverItem : p));
+            showSuccessToast('Property submitted successfully!');
           }
         } catch (err) {
-          console.warn('Failed to create property on server, saved locally', err.message || err);
+          console.error('Failed to create property on server:', err.message || err);
+          // Revert optimistic insert
+          setProperties(prev => prev.filter(p => p.id !== tempId));
+          showErrorToast(err.message || 'Failed to create property on server');
         }
       })();
     }

@@ -3,6 +3,7 @@ import { MessageCircle, X, Send, Bot, User, Loader2, Home, RotateCcw, Volume2, V
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
+import api from '../services/api.js';
 
 // Initialize the Gemini API client
 // Note: It's best practice to use environment variables for API keys
@@ -12,15 +13,52 @@ const genAI = new GoogleGenerativeAI(apiKey);
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'model', content: "Hi there, I'm here to help! Let's get started!", timestamp: 'Today 06:46 pm' }
+    { role: 'model', content: "Hi there! I am Ghar Nishchit's official AI assistant. How can I help you today? I have real-time access to our active property listings, so feel free to ask about specific houses or policies (e.g. which properties allow pets)!", timestamp: 'Today 06:46 pm' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [properties, setProperties] = useState([]);
   const messagesEndRef = useRef(null);
 
   const location = useLocation();
   const [showTooltip, setShowTooltip] = useState(false);
+
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const data = await api.getProperties();
+        if (Array.isArray(data)) {
+          const activeProperties = data.filter(p => p.available !== false && p.status !== 'Occupied');
+          const cleaned = activeProperties.map(p => {
+            const rawPrice = Number(p.price || p.rent || 0);
+            return {
+              id: p._id || p.id,
+              title: p.title || 'Untitled',
+              price: `₹${rawPrice}/month`,
+              location: p.address ? (typeof p.address === 'object' ? `${p.address.street || ''}, ${p.address.city || ''}, ${p.address.state || ''}`.trim() : p.address) : 'Unspecified',
+              city: p.address?.city || '',
+              description: p.description || '',
+              propertyType: p.propertyType || 'apartment',
+              bedrooms: p.bedrooms || 0,
+              bathrooms: p.bathrooms || 0,
+              area: p.area || 0,
+              amenities: p.amenities || [],
+              petFriendly: !!p.policies?.petFriendly,
+              furnished: !!p.policies?.furnished,
+              smokingAllowed: !!p.policies?.smokingAllowed,
+              sublettingAllowed: !!p.policies?.sublettingAllowed,
+              earlyTermination: !!p.policies?.earlyTermination,
+            };
+          });
+          setProperties(cleaned);
+        }
+      } catch (err) {
+        console.warn('[Chatbot] Failed to fetch active properties for context:', err.message);
+      }
+    };
+    fetchProperties();
+  }, []);
 
   useEffect(() => {
     // Show tooltip on the landing page if chat is closed
@@ -93,7 +131,14 @@ const Chatbot = () => {
 Ghar Nishchit is a property management platform for landlords and tenants. 
 If asked how to log in, tell them to click the "Login" button at the top navigation bar, enter their email and password, and select their role (Tenant or Landlord).
 Key features: Landlords can manage properties, tenants, maintenance, and payments. Tenants can pay rent, submit maintenance requests, and message landlords.
-Always be polite, concise, and helpful!`;
+
+Here is the real-time list of active property listings currently available on the platform in JSON format:
+${JSON.stringify(properties, null, 2)}
+
+Your task:
+1. When a user asks about available properties, renting a place, or specific requirements (e.g. "which properties allow pets?", "properties under ₹20000", "apartments in Mumbai", etc.), scan the JSON list above.
+2. List the matching properties by name, price, location, and key features.
+3. Be friendly, polite, concise, and helpful! Always format the property details nicely. If no properties match, politely state so and suggest they adjust their requirements or search terms.`;
 
       const model = genAI.getGenerativeModel({ 
         model: "gemini-flash-latest",
@@ -231,16 +276,16 @@ Always be polite, concise, and helpful!`;
                       {index === 0 && (
                         <div className="flex flex-wrap gap-2 mt-2">
                           <button 
-                            onClick={() => setInput("Explore Jobs")}
-                            className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:border-indigo-600 hover:text-indigo-600 transition-all shadow-sm"
+                            onClick={() => setInput("Which properties allow pets?")}
+                            className="px-4 py-2 bg-white border border-gray-200 rounded-full text-xs font-semibold text-indigo-700 hover:border-indigo-600 hover:text-indigo-600 transition-all shadow-sm"
                           >
-                            Explore Jobs
+                            Which properties allow pets?
                           </button>
                           <button 
-                            onClick={() => setInput("Ask a question")}
-                            className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:border-indigo-600 hover:text-indigo-600 transition-all shadow-sm"
+                            onClick={() => setInput("Show properties under ₹20000")}
+                            className="px-4 py-2 bg-white border border-gray-200 rounded-full text-xs font-semibold text-indigo-700 hover:border-indigo-600 hover:text-indigo-600 transition-all shadow-sm"
                           >
-                            Ask a question
+                            Show properties under ₹20000
                           </button>
                         </div>
                       )}

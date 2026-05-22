@@ -396,7 +396,7 @@ const TenantMessage = () => {
           showSuccessToast(`Started conversation for ${propertyTitle || 'property'}`);
         } catch (err) {
           console.error('Failed to create inquiry:', err);
-          showErrorToast('Could not start conversation');
+          showErrorToast(err.message || 'Could not start conversation');
         } finally {
           setIsSending(false);
           navigate(location.pathname, { replace: true, state: {} });
