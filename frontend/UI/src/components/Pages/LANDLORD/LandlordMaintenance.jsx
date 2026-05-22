@@ -1566,25 +1566,31 @@ const LandlordMaintenance = () => {
     }
   };
 
+  const tc = darkMode ? {
+    mainBg: 'from-black via-zinc-950 to-amber-950/20',
+  } : {
+    mainBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
+  };
+
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'} flex relative overflow-hidden`}>
+    <div className={`min-h-screen flex relative overflow-hidden bg-gradient-to-br ${tc.mainBg}`}>
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
           animate={{ rotate: 360, scale: [1, 1.1, 1] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className={`absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r ${darkMode ? 'from-purple-500/10 to-pink-500/10' : 'from-indigo-600/20 to-purple-600/20'} rounded-full blur-3xl`}
+          className={`absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r ${darkMode ? 'from-amber-500/10 to-yellow-500/10' : 'from-amber-600/20 to-yellow-600/20'} rounded-full blur-3xl`}
         />
         <motion.div
           animate={{ rotate: -360, scale: [1.1, 1, 1.1] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className={`absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r ${darkMode ? 'from-blue-500/10 to-cyan-500/10' : 'from-pink-500/20 to-orange-500/20'} rounded-full blur-3xl`}
+          className={`absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r ${darkMode ? 'from-amber-500/10 to-yellow-500/10' : 'from-amber-500/20 to-orange-500/20'} rounded-full blur-3xl`}
         />
       </div>
 
       <LandlordSideBar currentSection={currentSection} />
 
-      <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
+      <div className="flex-1 flex flex-col relative z-10 transition-all duration-700" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <LandlordNavBar currentSection={currentSection} />
 
         <main className="flex-1 overflow-y-auto">

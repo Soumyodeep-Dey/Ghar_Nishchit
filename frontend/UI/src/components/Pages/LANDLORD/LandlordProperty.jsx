@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../services/api.js';
-import { showConfirmToast } from '../../../utils/toast.jsx';
+import { showConfirmToast, showErrorToast, showSuccessToast } from '../../../utils/toast.jsx';
 
 // Ensure 'motion' symbol is referenced to satisfy some linters that may report it as unused
 void motion;
@@ -248,7 +248,7 @@ const PropertyDetailsModal = ({ isOpen, onClose, property, isDark }) => {
             <img 
               src={property.images[0]} 
               alt={property.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain bg-slate-100 dark:bg-slate-900/50"
               onError={(e) => {
                 e.target.onerror = null;
                 e.target.src = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
@@ -561,7 +561,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
               <img
                 src={property.images[currentImageIndex]}
                 alt={property.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain bg-slate-100 dark:bg-slate-900/50"
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
@@ -789,6 +789,7 @@ const LandlordProperty = () => {
   const [modalMode, setModalMode] = useState('add');
   const [detailsProperty, setDetailsProperty] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [monthlyRevenue, setMonthlyRevenue] = useState(null);
   // isLoading state removed — not used
 
   // Filter and sort properties
@@ -890,6 +891,29 @@ const LandlordProperty = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Monthly revenue from active leases (same calculation as LandlordTenant)
+  useEffect(() => {
+    let mounted = true;
+    const fetchRevenue = async () => {
+      try {
+        const stats = await api.getTenantStats();
+        if (mounted && stats?.monthlyRevenue != null) {
+          setMonthlyRevenue(Number(stats.monthlyRevenue));
+        }
+      } catch (err) {
+        console.warn('Could not load monthly revenue:', err);
+      }
+    };
+
+    fetchRevenue();
+    const interval = setInterval(fetchRevenue, 30000);
+
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, []);
+
   const handleAddProperty = () => {
     setSelectedProperty(null);
     setModalMode('add');
@@ -970,6 +994,7 @@ const LandlordProperty = () => {
             console.log('🔄 Normalized server item:', serverItem);
             setProperties(prev => prev.map(p => p.id === serverItem.id || p.id === propertyData.id ? serverItem : p));
             console.log('✅ Property updated successfully in frontend!');
+            showSuccessToast('Property updated successfully!');
             setUpdateSuccess(true);
             setTimeout(() => setUpdateSuccess(false), 3000); // Hide success message after 3 seconds
           } else {
@@ -977,8 +1002,7 @@ const LandlordProperty = () => {
           }
         } catch (err) {
           console.error('❌ Failed to update property on server:', err.message || err);
-          console.error('❌ Error details:', err);
-          console.warn('Failed to update property on server, change kept locally', err.message || err);
+          showErrorToast(err.message || 'Failed to update property on server');
         }
       })();
     } else {
@@ -994,9 +1018,13 @@ const LandlordProperty = () => {
             // normalize server response into local shape
             const serverItem = normalizePropertyFromBackend(created);
             setProperties(prev => prev.map(p => p.id === tempId ? serverItem : p));
+            showSuccessToast('Property submitted successfully!');
           }
         } catch (err) {
-          console.warn('Failed to create property on server, saved locally', err.message || err);
+          console.error('Failed to create property on server:', err.message || err);
+          // Revert optimistic insert
+          setProperties(prev => prev.filter(p => p.id !== tempId));
+          showErrorToast(err.message || 'Failed to create property on server');
         }
       })();
     }
@@ -1017,11 +1045,18 @@ const LandlordProperty = () => {
     available: properties.filter(p => p.status === 'Available').length,
     occupied: properties.filter(p => p.status === 'Occupied').length,
     maintenance: properties.filter(p => p.status === 'Maintenance').length,
-    totalRevenue: properties.reduce((sum, p) => sum + (p.status === 'Occupied' ? parseInt(p.rent) : 0), 0)
+    // Use actual tenant payment revenue if available, otherwise fall back to occupied property rent
+    totalRevenue: monthlyRevenue !== null ? monthlyRevenue : properties.reduce((sum, p) => sum + (p.status === 'Occupied' ? parseInt(p.rent) : 0), 0)
+  };
+
+  const tc = darkMode ? {
+    mainBg: 'from-black via-zinc-950 to-amber-950/20',
+  } : {
+    mainBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
   };
 
   return (
-    <div className={`min-h-screen flex relative overflow-hidden ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-r from-pink-100 via-purple-100 to-indigo-200'}`}>
+    <div className={`min-h-screen flex relative overflow-hidden bg-gradient-to-br ${tc.mainBg}`}>
       {/* Success Notification */}
       {updateSuccess && (
         <motion.div
@@ -1050,7 +1085,7 @@ const LandlordProperty = () => {
 
       <LandlordSideBar currentSection={currentSection} />
 
-      <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
+      <div className="flex-1 flex flex-col relative z-10 transition-all duration-700" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <LandlordNavBar currentSection={currentSection} />
 
         <main className="flex-1 overflow-y-auto">

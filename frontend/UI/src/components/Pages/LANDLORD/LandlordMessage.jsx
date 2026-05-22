@@ -8,6 +8,7 @@ import {
   MessageSquare, Send, Paperclip, MoreVertical, Search, Phone, Smile, File, Calendar, Archive, Trash2, Forward, Reply, Edit3, Download, Check, CheckCheck, AlertCircle, Pin, X, Volume2, VolumeX, Heart, ThumbsUp, Laugh, Angry, Frown, Meh, Bold, Italic, Wrench, CreditCard, FileText, Building2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useDarkMode } from '../../../useDarkMode.js';
 
 // Custom Hooks
 const useLocalStorage = (key, initialValue) => {
@@ -564,6 +565,12 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
 
 // Main Component
 const LandlordMessage = () => {
+  const { darkMode } = useDarkMode();
+  const tc = darkMode ? {
+    mainBg: 'from-black via-zinc-950 to-amber-950/20',
+  } : {
+    mainBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
+  };
   const [currentSection] = useState('Messages');
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
   const location = useLocation();
@@ -678,7 +685,11 @@ const LandlordMessage = () => {
     securityDeposit: '',
     startDate: '',
     endDate: '',
-    terms: 'Standard lease terms apply. Rent is due on the 1st of each month.'
+    terms: 'Standard lease terms apply. Rent is due on the 1st of each month.',
+    petsAllowed: false,
+    smokingAllowed: false,
+    sublettingAllowed: false,
+    earlyTermination: false
   });
 
   const handleOpenLeaseModal = () => {
@@ -688,6 +699,10 @@ const LandlordMessage = () => {
     let rent = '';
     let deposit = '';
     let type = 'residential';
+    let pets = false;
+    let smoking = false;
+    let subletting = false;
+    let earlyTerm = false;
     
     if (property) {
       if (property.price) {
@@ -696,6 +711,12 @@ const LandlordMessage = () => {
       }
       if (property.propertyType === 'commercial') {
         type = 'commercial';
+      }
+      if (property.policies) {
+        pets = property.policies.petFriendly || false;
+        smoking = property.policies.smokingAllowed || false;
+        subletting = property.policies.sublettingAllowed || false;
+        earlyTerm = property.policies.earlyTermination || false;
       }
     }
 
@@ -709,7 +730,11 @@ const LandlordMessage = () => {
       securityDeposit: deposit,
       startDate: today.toISOString().split('T')[0],
       endDate: nextYear.toISOString().split('T')[0],
-      terms: 'Standard lease terms apply. Rent is due on the 1st of each month.'
+      terms: 'Standard lease terms apply. Rent is due on the 1st of each month.',
+      petsAllowed: pets,
+      smokingAllowed: smoking,
+      sublettingAllowed: subletting,
+      earlyTermination: earlyTerm
     });
     
     setShowLeaseModal(true);
@@ -737,6 +762,12 @@ const LandlordMessage = () => {
         startDate: leaseForm.startDate,
         rentAmount: Number(leaseForm.rentAmount),
         securityDeposit: Number(leaseForm.securityDeposit),
+        terms: {
+          petsAllowed: leaseForm.petsAllowed,
+          smokingAllowed: leaseForm.smokingAllowed,
+          sublettingAllowed: leaseForm.sublettingAllowed,
+          earlyTermination: leaseForm.earlyTermination
+        },
         customClauses: leaseForm.terms // Backend expects string here, 'terms' is an object schema
       });
       
@@ -919,24 +950,24 @@ const LandlordMessage = () => {
 
   return (
     <>
-    <div className="h-screen bg-gradient-to-br from-white via-indigo-50 to-purple-100 dark:from-gray-900 dark:via-slate-900 dark:to-blue-950 flex relative overflow-hidden">
+    <div className={`h-screen flex relative overflow-hidden bg-gradient-to-br ${tc.mainBg}`}>
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
           animate={{ rotate: 360, scale: [1, 1.1, 1] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-indigo-300/20 to-pink-300/20 dark:from-cyan-500/10 dark:to-blue-500/10 rounded-full blur-3xl"
+          className={`absolute -top-40 -right-40 w-80 h-80 ${darkMode ? 'from-purple-500/10 to-pink-500/10' : 'from-indigo-600/20 to-purple-600/20'} rounded-full blur-3xl bg-gradient-to-r`}
         />
         <motion.div
           animate={{ rotate: -360, scale: [1.1, 1, 1.1] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-purple-300/20 to-indigo-300/20 dark:from-blue-500/10 dark:to-cyan-500/10 rounded-full blur-3xl"
+          className={`absolute -bottom-40 -left-40 w-80 h-80 ${darkMode ? 'from-blue-500/10 to-cyan-500/10' : 'from-pink-500/20 to-orange-500/20'} rounded-full blur-3xl bg-gradient-to-r`}
         />
       </div>
 
       <LandlordSideBar currentSection={currentSection} />
 
-      <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
+      <div className="flex-1 flex flex-col relative z-10 transition-all duration-700" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <LandlordNavBar currentSection={currentSection} />
 
         <main className="flex-1 overflow-hidden">
@@ -1216,6 +1247,47 @@ const LandlordMessage = () => {
                   onChange={(e) => setLeaseForm({...leaseForm, securityDeposit: e.target.value})}
                   className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 border"
                 />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Terms & Policies</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer transition-all">
+                    <input
+                      type="checkbox"
+                      checked={leaseForm.petsAllowed}
+                      onChange={(e) => setLeaseForm({...leaseForm, petsAllowed: e.target.checked})}
+                      className="rounded text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+                    />
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">Pets Allowed</span>
+                  </label>
+                  <label className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer transition-all">
+                    <input
+                      type="checkbox"
+                      checked={leaseForm.smokingAllowed}
+                      onChange={(e) => setLeaseForm({...leaseForm, smokingAllowed: e.target.checked})}
+                      className="rounded text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+                    />
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">Smoking Allowed</span>
+                  </label>
+                  <label className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer transition-all">
+                    <input
+                      type="checkbox"
+                      checked={leaseForm.sublettingAllowed}
+                      onChange={(e) => setLeaseForm({...leaseForm, sublettingAllowed: e.target.checked})}
+                      className="rounded text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+                    />
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">Subletting Allowed</span>
+                  </label>
+                  <label className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer transition-all">
+                    <input
+                      type="checkbox"
+                      checked={leaseForm.earlyTermination}
+                      onChange={(e) => setLeaseForm({...leaseForm, earlyTermination: e.target.checked})}
+                      className="rounded text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+                    />
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">Early Termination Clause</span>
+                  </label>
+                </div>
               </div>
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Terms & Conditions</label>

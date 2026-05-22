@@ -139,7 +139,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
       whileHover={{ scale: 1.02, y: -5 }}
-      className={`relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 group ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}
+      className={`relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 group backdrop-blur-xl border ${darkMode ? 'bg-white/10 border-white/20 text-white shadow-black/40' : 'bg-white/80 border-indigo-200/50 text-indigo-900 shadow-indigo-100'}`}
     >
       {/* Background gradient effect */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -1186,6 +1186,11 @@ const NotificationToast = ({ notifications, onRemove }) => {
 const LandlordTenant = () => {
   const { darkMode } = useDarkMode();
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
+  const tc = darkMode ? {
+    mainBg: 'from-black via-zinc-950 to-amber-950/20',
+  } : {
+    mainBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
+  };
 
   // State for tenants data - now fetched from API
   const [tenants, setTenants] = useState([]);
@@ -1350,13 +1355,23 @@ const LandlordTenant = () => {
   const handleDeleteTenant = (tenantId) => {
     showConfirmToast(
       'Are you sure you want to remove this tenant?',
-      () => {
-        setTenants(prev => prev.filter(t => t.id !== tenantId));
-        addNotification({
-          type: 'success',
-          title: 'Tenant Removed',
-          message: 'Tenant has been successfully removed from your list.'
-        });
+      async () => {
+        try {
+          await api.removeTenant(tenantId);
+          setTenants(prev => prev.filter(t => String(t.id) !== String(tenantId)));
+          addNotification({
+            type: 'success',
+            title: 'Tenant Removed',
+            message: 'Tenant has been successfully removed from your list.'
+          });
+        } catch (error) {
+          console.error('Failed to remove tenant:', error);
+          addNotification({
+            type: 'error',
+            title: 'Remove Failed',
+            message: error.message || 'Could not remove tenant. Please try again.'
+          });
+        }
       }
     );
   };
@@ -1454,27 +1469,24 @@ const LandlordTenant = () => {
   };
 
   return (
-    <div className={`min-h-screen transition-colors duration-500 ${darkMode
-      ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100'
-      : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 text-gray-900'
-      } flex relative overflow-hidden`}>
+    <div className={`min-h-screen flex relative overflow-hidden bg-gradient-to-br ${tc.mainBg} ${darkMode ? 'text-slate-100' : 'text-gray-900'}`}>
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
           animate={{ rotate: 360, scale: [1, 1.1, 1] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-3xl"
+          className={`absolute -top-40 -right-40 w-80 h-80 ${darkMode ? 'from-purple-500/10 to-pink-500/10' : 'from-indigo-600/20 to-purple-600/20'} rounded-full blur-3xl bg-gradient-to-r`}
         />
         <motion.div
           animate={{ rotate: -360, scale: [1.1, 1, 1.1] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-full blur-3xl"
+          className={`absolute -bottom-40 -left-40 w-80 h-80 ${darkMode ? 'from-blue-500/10 to-cyan-500/10' : 'from-pink-500/20 to-orange-500/20'} rounded-full blur-3xl bg-gradient-to-r`}
         />
       </div>
 
       <LandlordSideBar currentSection="Tenants" />
 
-      <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
+      <div className="flex-1 flex flex-col relative z-10 transition-all duration-700" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <LandlordNavBar currentSection="Tenants" />
 
         <main className="flex-1 overflow-y-auto">
@@ -1503,7 +1515,7 @@ const LandlordTenant = () => {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-6 mb-8">
-              <AnimatedCard className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
+              <AnimatedCard className={`xl:col-span-1 rounded-2xl p-6 text-center backdrop-blur-xl border ${darkMode ? 'bg-white/10 border-white/20 text-white' : 'bg-white/80 border-indigo-200/50 shadow-md text-indigo-900'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center"
@@ -1511,10 +1523,10 @@ const LandlordTenant = () => {
                   <Users className="w-6 h-6 text-white" />
                 </motion.div>
                 <div className="text-2xl font-bold mb-1">{stats.total}</div>
-                <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>Total Tenants</div>
+                <div className={`${darkMode ? 'text-white/60' : 'text-indigo-700/70'} text-sm`}>Total Tenants</div>
               </AnimatedCard>
 
-              <AnimatedCard delay={0.1} className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
+              <AnimatedCard delay={0.1} className={`xl:col-span-1 rounded-2xl p-6 text-center backdrop-blur-xl border ${darkMode ? 'bg-white/10 border-white/20 text-white' : 'bg-white/80 border-indigo-200/50 shadow-md text-indigo-900'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center"
@@ -1522,10 +1534,10 @@ const LandlordTenant = () => {
                   <CheckCircle className="w-6 h-6 text-white" />
                 </motion.div>
                 <div className="text-2xl font-bold mb-1">{stats.active}</div>
-                <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>Active</div>
+                <div className={`${darkMode ? 'text-white/60' : 'text-indigo-700/70'} text-sm`}>Active</div>
               </AnimatedCard>
 
-              <AnimatedCard delay={0.2} className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
+              <AnimatedCard delay={0.2} className={`xl:col-span-1 rounded-2xl p-6 text-center backdrop-blur-xl border ${darkMode ? 'bg-white/10 border-white/20 text-white' : 'bg-white/80 border-indigo-200/50 shadow-md text-indigo-900'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center"
@@ -1533,10 +1545,10 @@ const LandlordTenant = () => {
                   <UserPlus className="w-6 h-6 text-white" />
                 </motion.div>
                 <div className="text-2xl font-bold mb-1">{stats.prospects}</div>
-                <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>Prospects</div>
+                <div className={`${darkMode ? 'text-white/60' : 'text-indigo-700/70'} text-sm`}>Prospects</div>
               </AnimatedCard>
 
-              <AnimatedCard delay={0.3} className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
+              <AnimatedCard delay={0.3} className={`xl:col-span-1 rounded-2xl p-6 text-center backdrop-blur-xl border ${darkMode ? 'bg-white/10 border-white/20 text-white' : 'bg-white/80 border-indigo-200/50 shadow-md text-indigo-900'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center"
@@ -1544,10 +1556,10 @@ const LandlordTenant = () => {
                   <AlertCircle className="w-6 h-6 text-white" />
                 </motion.div>
                 <div className="text-2xl font-bold mb-1">{stats.overdue}</div>
-                <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>Overdue</div>
+                <div className={`${darkMode ? 'text-white/60' : 'text-indigo-700/70'} text-sm`}>Overdue</div>
               </AnimatedCard>
 
-              <AnimatedCard delay={0.4} className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
+              <AnimatedCard delay={0.4} className={`xl:col-span-1 rounded-2xl p-6 text-center backdrop-blur-xl border ${darkMode ? 'bg-white/10 border-white/20 text-white' : 'bg-white/80 border-indigo-200/50 shadow-md text-indigo-900'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center"
@@ -1555,10 +1567,10 @@ const LandlordTenant = () => {
                   <Calendar className="w-6 h-6 text-white" />
                 </motion.div>
                 <div className="text-2xl font-bold mb-1">{stats.pendingVisits}</div>
-                <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>Pending Visits</div>
+                <div className={`${darkMode ? 'text-white/60' : 'text-indigo-700/70'} text-sm`}>Pending Visits</div>
               </AnimatedCard>
 
-              <AnimatedCard delay={0.5} className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
+              <AnimatedCard delay={0.5} className={`xl:col-span-1 rounded-2xl p-6 text-center backdrop-blur-xl border ${darkMode ? 'bg-white/10 border-white/20 text-white' : 'bg-white/80 border-indigo-200/50 shadow-md text-indigo-900'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center"
@@ -1566,10 +1578,10 @@ const LandlordTenant = () => {
                   <IndianRupee className="w-6 h-6 text-white" />
                 </motion.div>
                 <div className="text-2xl font-bold mb-1">₹{stats.totalRevenue.toLocaleString()}</div>
-                <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>Monthly Revenue</div>
+                <div className={`${darkMode ? 'text-white/60' : 'text-indigo-700/70'} text-sm`}>Monthly Revenue</div>
               </AnimatedCard>
 
-              <AnimatedCard delay={0.6} className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
+              <AnimatedCard delay={0.6} className={`xl:col-span-1 rounded-2xl p-6 text-center backdrop-blur-xl border ${darkMode ? 'bg-white/10 border-white/20 text-white' : 'bg-white/80 border-indigo-200/50 shadow-md text-indigo-900'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center"
@@ -1577,12 +1589,12 @@ const LandlordTenant = () => {
                   <Star className="w-6 h-6 text-white" />
                 </motion.div>
                 <div className="text-2xl font-bold mb-1">{stats.avgRating}</div>
-                <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>Avg Rating</div>
+                <div className={`${darkMode ? 'text-white/60' : 'text-indigo-700/70'} text-sm`}>Avg Rating</div>
               </AnimatedCard>
             </div>
 
             {/* Filters and Controls */}
-            <AnimatedCard delay={0.7} className={`rounded-2xl p-6 ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
+            <AnimatedCard delay={0.7} className={`rounded-2xl p-6 backdrop-blur-xl border ${darkMode ? 'bg-white/10 border-white/20 text-white' : 'bg-white/80 border-indigo-200/50 shadow-md text-indigo-900'}`}>
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                   {/* Search */}

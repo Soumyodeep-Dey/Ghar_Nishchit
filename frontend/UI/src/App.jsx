@@ -1,17 +1,19 @@
 import { Suspense, lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import ProtectedRoute from './components/ProtectedRoute';
 
 // dark mode context
 import DarkModeProvider from './DarkModeContext.jsx';
+import { LanguageProvider } from './i18n/LanguageContext.jsx';
 
 
 // toast notifications
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import Chatbot from '../../../Ai/Chatbot.jsx';
+import Chatbot from './Ai/Chatbot.jsx';
 
 const Landing = lazy(() => import('./components/landing'));
 const Login = lazy(() => import('./components/Auth/Login'));
@@ -34,15 +36,29 @@ const LandlordPayment = lazy(() => import('./components/Pages/LANDLORD/LandlordP
 const LandlordTenant = lazy(() => import('./components/Pages/LANDLORD/LandlordTenant'));
 const UpdateLandlordProfile = lazy(() => import('./components/Pages/LANDLORD/UpdateLandlordProfile'));
 
+const AdminDashboard = lazy(() => import('./components/Pages/AdminDashboard'));
+
 const AppLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-200">
     Loading...
   </div>
 );
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 10000, // 10 seconds cache validity
+      refetchOnWindowFocus: false, // Prevents tab-switch fetching storms
+      retry: 1
+    }
+  }
+});
+
 export default function App() {
   return (
-    <DarkModeProvider>
+    <QueryClientProvider client={queryClient}>
+      <DarkModeProvider>
+      <LanguageProvider>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
         <ToastContainer
           position="top-right"
@@ -174,10 +190,20 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </Suspense>
         <Chatbot />
       </div>
-    </DarkModeProvider>
+      </LanguageProvider>
+      </DarkModeProvider>
+    </QueryClientProvider>
   );
 }

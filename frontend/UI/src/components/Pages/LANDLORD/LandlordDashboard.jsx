@@ -3,6 +3,7 @@ import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import AddNewPropertyModal from './AddNewPropertyModal';
 import GenerateReportModal from './GenerateReportModal';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   IndianRupee, Users, Wrench, BarChart3, TrendingUp, TrendingDown, Plus, Calendar, Building2
 } from 'lucide-react';
@@ -10,67 +11,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../../../useDarkMode.js';
 import api from '../../../services/api.js';
-
-// Enhanced Custom Hooks with better performance - commented out as they are not used
-// const useIntersectionObserver = (options = {}) => {
-//   const [isIntersecting, setIsIntersecting] = useState(false);
-//   const [element, setElement] = useState(null);
-//   const observerRef = useRef(null);
-
-//   useEffect(() => {
-//     if (!element) return;
-
-//     if (!observerRef.current) {
-//       observerRef.current = new IntersectionObserver(([entry]) => {
-//         setIsIntersecting(entry.isIntersecting);
-//       }, { threshold: 0.1, rootMargin: '50px', ...options });
-//     }
-
-//     observerRef.current.observe(element);
-
-//     return () => {
-//       if (observerRef.current && element) {
-//         observerRef.current.unobserve(element);
-//       }
-//     };
-//   }, [element, options]);
-
-//   return [setElement, isIntersecting];
-// };
-
-// const useCountUp = (end, duration = 2000, start = 0, shouldStart = true) => {
-//   const [count, setCount] = useState(start);
-//   const animationRef = useRef();
-
-//   useEffect(() => {
-//     if (!shouldStart) return;
-
-//     const startTime = Date.now();
-//     const animate = () => {
-//       const elapsed = Date.now() - startTime;
-//       const progress = Math.min(elapsed / duration, 1);
-
-//       const easeOutExpo = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-//       const currentCount = Math.floor(start + (end - start) * easeOutExpo);
-
-//       setCount(currentCount);
-
-//       if (progress < 1) {
-//         animationRef.current = requestAnimationFrame(animate);
-//       }
-//     };
-
-//     animationRef.current = requestAnimationFrame(animate);
-
-//     return () => {
-//       if (animationRef.current) {
-//         cancelAnimationFrame(animationRef.current);
-//       }
-//     };
-//   }, [end, duration, start, shouldStart]);
-
-//   return count;
-// };
+import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 
 // Simplified Animated Card Wrapper (no framer-motion)
 const AnimatedCard = React.memo(({ children, className = '', ...props }) => {
@@ -148,6 +89,7 @@ const StatCard = React.memo(({ icon: Icon, title, value, change, trend, color, p
 });
 
 const LandlordDashboard = () => {
+  const { t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,24rem)]';
@@ -155,15 +97,65 @@ const LandlordDashboard = () => {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showAddPropertyModal, setShowAddPropertyModal] = useState(false);
   const [showGenerateReportModal, setShowGenerateReportModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const { darkMode: isDarkMode } = useDarkMode();
-  const [properties, setProperties] = useState([]);
-  const [tenantStats, setTenantStats] = useState({
-    activeTenants: 0,
-    pendingContracts: 0
+
+  // -------------------------------------------------------------------------
+  // TanStack Query Declarative Data Fetching
+  // -------------------------------------------------------------------------
+  const { data: profile = null, isLoading: isProfileLoading } = useQuery({
+    queryKey: ['userProfile'],
+    queryFn: api.getProfile,
+    staleTime: 60000,
   });
+
+  const userId = profile?._id || profile?.id || profile?.userId;
+
+  const { data: remoteProperties = [], isLoading: isPropsLoading } = useQuery({
+    queryKey: ['landlordProperties', userId],
+    queryFn: async () => {
+      if (!userId) return [];
+      try {
+        return await api.getPropertiesByUser(userId);
+      } catch (err) {
+        console.warn('Could not load user properties, falling back to all properties', err);
+        return await api.getProperties();
+      }
+    },
+    enabled: !!userId,
+  });
+
+  const { data: rawStats = null, isLoading: isStatsLoading } = useQuery({
+    queryKey: ['tenantStats', userId],
+    queryFn: api.getTenantStats,
+    enabled: !!userId,
+    refetchInterval: 30000, // Professional declarative polling cache refresh
+  });
+
+  const properties = useMemo(() => {
+    if (!Array.isArray(remoteProperties)) return [];
+    return remoteProperties.map(r => ({
+      id: r._id || r.id,
+      title: r.title,
+      rent: r.rent || r.price || r.monthlyRent || 0,
+      status: r.status || (r.available ? 'Available' : 'Occupied') || 'Available',
+      tenantCount: r.tenants ? r.tenants.length : (r.tenantCount || 0),
+      maintenanceRequests: r.maintenanceRequests || 0
+    }));
+  }, [remoteProperties]);
+
+  const tenantStats = useMemo(() => ({
+    activeTenants: Number(rawStats?.activeTenants || 0),
+    pendingContracts: Number(rawStats?.pendingContracts || 0)
+  }), [rawStats]);
+
+  const monthlyRevenue = useMemo(() => {
+    return rawStats?.monthlyRevenue != null ? Number(rawStats.monthlyRevenue) : null;
+  }, [rawStats]);
+
+  const isLoading = isProfileLoading || (!!userId && (isPropsLoading || isStatsLoading));
 
   const updateSection = useCallback((path) => {
     if (path === '/landlord' || path === '/landlord/') {
@@ -185,171 +177,124 @@ const LandlordDashboard = () => {
     updateSection(location.pathname);
   }, [location.pathname, updateSection]);
 
-  const stats = useMemo(() => [
-    {
-      icon: Building2,
-      title: 'Total Properties',
-      value: properties.length || 0,
-      change: '+0%',
-      trend: properties.length > 0 ? 'up' : 'down',
-      color: isDarkMode ? 'from-cyan-500 to-indigo-600' : 'from-indigo-500 to-purple-600'
-    },
-    {
-      icon: IndianRupee,
-      title: 'Monthly Revenue',
-      value: properties.reduce((acc, p) => acc + (p.status === 'Occupied' ? Number(p.rent || p.price || 0) : 0), 0) || 0,
-      change: '+0%',
-      trend: 'up',
-      color: isDarkMode ? 'from-indigo-500 to-purple-600' : 'from-purple-500 to-pink-500',
-      prefix: '₹'
-    },
-    {
-      icon: Users,
-      title: 'Active Tenants',
-      value: tenantStats.activeTenants || 0,
-      change: '+0%',
-      trend: 'up',
-      color: isDarkMode ? 'from-purple-500 to-pink-600' : 'from-pink-400 to-rose-500'
-    },
-    {
-      icon: Wrench,
-      title: 'Maintenance Requests',
-      value: properties.reduce((acc, p) => acc + (p.maintenanceRequests || 0), 0) || 0,
-      change: '-0%',
-      trend: 'down',
-      color: isDarkMode ? 'from-pink-500 to-rose-600' : 'from-rose-400 to-pink-500'
-    }
-  ], [isDarkMode, properties, tenantStats.activeTenants]);
-
-  // Load properties on mount
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        let profile = null;
-        try {
-          profile = await api.getProfile();
-        } catch {
-          // not authenticated or endpoint failed
-        }
-        
-        const userId = profile?._id || profile?.id || profile?.userId;
-        let remote = [];
-
-        if (userId) {
-          try {
-            remote = await api.getPropertiesByUser(userId);
-          } catch (err) {
-            console.warn('Could not load user properties, falling back to all properties', err);
-            remote = await api.getProperties();
-          }
-
-          try {
-            const stats = await api.getTenantStats();
-            if (mounted && stats) {
-              setTenantStats({
-                activeTenants: Number(stats.activeTenants || 0),
-                pendingContracts: Number(stats.pendingContracts || 0)
-              });
-            }
-          } catch (statsErr) {
-            console.warn('Could not load tenant stats:', statsErr);
-          }
-        } else {
-            remote = await api.getProperties();
-        }
-
-        if (mounted && Array.isArray(remote)) {
-          const normalized = remote.map(r => ({
-            id: r._id || r.id,
-            title: r.title,
-            rent: r.rent || r.price || r.monthlyRent || 0,
-            status: r.status || (r.available ? 'Available' : 'Occupied') || 'Available',
-            tenantCount: r.tenants ? r.tenants.length : (r.tenantCount || 0),
-            maintenanceRequests: r.maintenanceRequests || 0
-          }));
-          setProperties(normalized);
-        }
-      } catch (err) {
-        console.warn('Dashboard: failed to load properties from API', err.message || err);
-      }
-    })();
-    return () => { mounted = false; };
-  }, []);
-
-  const themeConfig = isDarkMode
+  const themeConfig = useMemo(() => isDarkMode
     ? {
-      mainBg: 'from-gray-900 via-slate-800 to-blue-950',
-      loadingBg: 'from-gray-900 via-slate-800 to-blue-950',
-      cardBg: 'bg-slate-800/50',
-      cardBorder: 'border-slate-700/50',
+      mainBg: 'from-black via-zinc-950 to-amber-950/20',
+      loadingBg: 'from-black via-zinc-950 to-amber-950/20',
+      cardBg: 'bg-zinc-900/60',
+      cardBorder: 'border-amber-500/10',
       textPrimary: 'text-slate-100',
-      textSecondary: 'text-slate-200',
-      textAccent: 'text-cyan-300',
-      headerGradient: 'from-cyan-300 via-purple-300 to-pink-300',
-      tabBg: 'bg-slate-800/50',
-      tabBorder: 'border-slate-700/50',
-      tabActive: 'from-cyan-500 to-indigo-600',
-      tabActiveText: 'text-blue-950',
-      tabInactive: 'text-slate-300 hover:text-slate-100 hover:bg-slate-700/50',
-      buttonPrimary: 'from-cyan-500 to-indigo-600',
-      buttonSecondary: 'from-purple-500 to-pink-600',
+      textSecondary: 'text-amber-400',
+      textAccent: 'text-amber-400',
+      headerGradient: 'from-amber-200 via-yellow-400 to-amber-500',
+      tabBg: 'bg-zinc-900/50',
+      tabBorder: 'border-zinc-850',
+      tabActive: 'from-amber-500 to-yellow-600',
+      tabActiveText: 'text-slate-950 font-black',
+      tabInactive: 'text-slate-400 hover:text-amber-400 hover:bg-zinc-800/50',
+      buttonPrimary: 'from-amber-500 to-yellow-600',
+      buttonSecondary: 'bg-zinc-900 hover:bg-zinc-800 text-amber-500 border border-amber-500/30',
       iconColors: {
-        flame: 'text-pink-400',
-        trend: 'text-cyan-400',
-        building: 'text-cyan-400',
-        wrench: 'text-pink-400'
+        flame: 'text-amber-400',
+        trend: 'text-amber-400',
+        building: 'text-amber-400',
+        wrench: 'text-amber-400'
       },
       backgroundParticles: [
-        'from-purple-500/15 to-pink-500/15',
-        'from-cyan-500/15 to-indigo-500/15',
-        'from-indigo-500/10 to-purple-500/10'
+        'from-amber-500/10 to-yellow-500/10',
+        'from-zinc-900/40 to-amber-950/25',
+        'from-amber-900/10 to-yellow-900/10'
       ],
-      spinnerBorder: 'border-cyan-500/30 border-t-cyan-400',
-      loadingText: 'text-cyan-200'
+      spinnerBorder: 'border-amber-500/30 border-t-amber-500',
+      loadingText: 'text-amber-200'
     }
     : {
-      mainBg: 'from-pink-300 via-purple-300 to-indigo-400',
-      loadingBg: 'from-pink-300 via-purple-300 to-indigo-400',
-      cardBg: 'bg-white/60',
-      cardBorder: 'border-indigo-200/50',
-      textPrimary: 'text-gray-900',
-      textSecondary: 'text-indigo-600',
-      textAccent: 'text-indigo-700',
-      headerGradient: 'from-indigo-700 via-purple-700 to-pink-700',
-      tabBg: 'bg-white/30',
-      tabBorder: 'border-indigo-200/50',
-      tabActive: 'from-indigo-600 to-purple-600',
-      tabActiveText: 'text-white',
-      tabInactive: 'text-indigo-600 hover:text-indigo-800 hover:bg-white/40',
-      buttonPrimary: 'from-indigo-600 to-purple-600',
-      buttonSecondary: 'from-purple-600 to-pink-600',
+      mainBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
+      loadingBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
+      cardBg: 'bg-white/80',
+      cardBorder: 'border-amber-200/50',
+      textPrimary: 'text-stone-900',
+      textSecondary: 'text-amber-700',
+      textAccent: 'text-amber-800',
+      headerGradient: 'from-amber-800 via-yellow-800 to-amber-900',
+      tabBg: 'bg-white/40',
+      tabBorder: 'border-amber-200/50',
+      tabActive: 'from-amber-600 to-yellow-600',
+      tabActiveText: 'text-white font-black',
+      tabInactive: 'text-amber-700 hover:text-amber-900 hover:bg-white/60',
+      buttonPrimary: 'from-amber-600 to-yellow-600',
+      buttonSecondary: 'bg-stone-100 hover:bg-stone-200 text-amber-800 border border-amber-200/50',
       iconColors: {
-        flame: 'text-pink-600',
-        trend: 'text-indigo-600',
-        building: 'text-indigo-600',
-        wrench: 'text-pink-600'
+        flame: 'text-amber-700',
+        trend: 'text-amber-700',
+        building: 'text-amber-700',
+        wrench: 'text-amber-700'
       },
       backgroundParticles: [
-        'from-purple-300/20 to-pink-300/20',
-        'from-indigo-300/20 to-purple-300/20',
-        'from-pink-300/15 to-indigo-300/15'
+        'from-amber-200/20 to-orange-200/20',
+        'from-amber-300/20 to-yellow-300/20',
+        'from-orange-100/15 to-amber-100/15'
       ],
-      spinnerBorder: 'border-indigo-400/40 border-t-indigo-600',
-      loadingText: 'text-indigo-700'
-    };
+      spinnerBorder: 'border-amber-400/40 border-t-amber-600',
+      loadingText: 'text-amber-700'
+    }, [isDarkMode]);
+
+  const stats = useMemo(() => {
+    // Fallback: sum rent of Occupied properties if real payment stats not yet loaded
+    const occupiedRentTotal = properties.reduce(
+      (acc, p) => acc + (p.status === 'Occupied' ? Number(p.rent || p.price || 0) : 0),
+      0
+    );
+    const revenueValue = monthlyRevenue !== null ? monthlyRevenue : occupiedRentTotal;
+
+    return [
+      {
+        icon: Building2,
+        title: 'Total Properties',
+        value: properties.length || 0,
+        change: '+0%',
+        trend: properties.length > 0 ? 'up' : 'down',
+        color: isDarkMode ? 'from-cyan-500 to-indigo-600' : 'from-indigo-500 to-purple-600'
+      },
+      {
+        icon: IndianRupee,
+        title: 'Monthly Revenue',
+        value: revenueValue,
+        change: '+0%',
+        trend: revenueValue > 0 ? 'up' : 'down',
+        color: isDarkMode ? 'from-indigo-500 to-purple-600' : 'from-purple-500 to-pink-500',
+        prefix: '₹'
+      },
+      {
+        icon: Users,
+        title: 'Active Tenants',
+        value: tenantStats.activeTenants || 0,
+        change: '+0%',
+        trend: 'up',
+        color: isDarkMode ? 'from-purple-500 to-pink-600' : 'from-pink-400 to-rose-500'
+      },
+      {
+        icon: Wrench,
+        title: 'Maintenance Requests',
+        value: properties.reduce((acc, p) => acc + (p.maintenanceRequests || 0), 0) || 0,
+        change: '-0%',
+        trend: 'down',
+        color: isDarkMode ? 'from-pink-500 to-rose-600' : 'from-rose-400 to-pink-500'
+      }
+    ];
+  }, [isDarkMode, properties, tenantStats.activeTenants, monthlyRevenue]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 800);
+    const timer = setTimeout(() => setInitialLoading(false), 800);
     return () => clearTimeout(timer);
   }, []);
 
-  if (isLoading) {
+  if (isLoading || initialLoading) {
     return (
       <div className={`min-h-screen bg-gradient-to-br ${themeConfig.loadingBg} flex items-center justify-center`}>
         <div className="text-center">
           <div className={`w-12 h-12 border-4 ${themeConfig.spinnerBorder} rounded-full mx-auto mb-4 animate-spin`} />
-          <h2 className={`text-xl font-bold ${themeConfig.textPrimary} mb-1`}>Loading Dashboard...</h2>
+          <h2 className={`text-xl font-bold ${themeConfig.textPrimary} mb-1`}>{t('pages.loadingDashboard')}</h2>
           <p className={`${themeConfig.loadingText} text-sm`}>Preparing your property insights</p>
         </div>
       </div>
@@ -369,7 +314,7 @@ const LandlordDashboard = () => {
             {/* Header Section - simplified */}
             <div className="text-center mb-12">
               <h1 className={`text-4xl font-bold ${themeConfig.textPrimary} mb-4 bg-gradient-to-r ${themeConfig.headerGradient} bg-clip-text text-transparent`}>
-                Welcome Back, Landlord!
+                {t('landlord.welcomeBackLandlord')}
               </h1>
               <p className={`text-lg ${themeConfig.textSecondary} max-w-2xl mx-auto leading-relaxed`}>
                 Your comprehensive property management dashboard with real-time insights and advanced analytics
@@ -528,6 +473,7 @@ const LandlordDashboard = () => {
           isOpen={showScheduleModal}
           onClose={() => setShowScheduleModal(false)}
           isDark={isDarkMode}
+          properties={properties}
         />
       )}
 
@@ -552,119 +498,252 @@ const LandlordDashboard = () => {
   );
 };
 
-const ScheduleInspectionModal = ({ isOpen, onClose, isDark }) => {
+const ScheduleInspectionModal = ({ isOpen, onClose, isDark, properties }) => {
+  const [tenants, setTenants] = useState([]);
+  const [selectedProperty, setSelectedProperty] = useState('');
+  const [selectedTenant, setSelectedTenant] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
-  const [type, setType] = useState('in-person'); // 'in-person' or 'virtual'
+  const [type, setType] = useState('in-person');
+  const [notes, setNotes] = useState('');
+  const [isLoadingTenants, setIsLoadingTenants] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    if (isOpen) {
+      const fetchTenants = async () => {
+        setIsLoadingTenants(true);
+        try {
+          const res = await api.getMyTenants();
+          if (Array.isArray(res)) {
+            setTenants(res);
+          }
+        } catch (err) {
+          console.error('Failed to load tenants:', err);
+        } finally {
+          setIsLoadingTenants(false);
+        }
+      };
+      fetchTenants();
+    }
+  }, [isOpen]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Scheduling inspection:', { date, time, type });
-    // In a real app, you'd send this data to a backend
-    onClose();
+    if (!selectedProperty || !selectedTenant || !date || !time) {
+      setError('Please select a property, a tenant, date, and time.');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setError('');
+    setSuccess(false);
+
+    try {
+      const payload = {
+        tenantId: selectedTenant,
+        date,
+        time,
+        property: selectedProperty, // Passes the property title/ID
+        type,
+        notes
+      };
+
+      await api.scheduleVisit(payload);
+      setSuccess(true);
+      setTimeout(() => {
+        onClose();
+      }, 1500);
+    } catch (err) {
+      console.error('Error scheduling inspection:', err);
+      setError(err.message || 'Failed to schedule inspection. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
 
   const modalTheme = isDark
     ? {
-      bg: 'bg-slate-800/90',
-      border: 'border-slate-700/50',
-      text: 'text-white',
-      inputBg: 'bg-slate-700/50',
-      inputBorder: 'border-slate-600/50',
-      inputPlaceholder: 'placeholder-slate-400',
-      focusBorder: 'focus:border-cyan-500',
-      buttonPrimaryBg: 'bg-gradient-to-r from-cyan-500 to-indigo-600',
-      buttonPrimaryText: 'text-white',
-      buttonSecondaryBg: 'bg-slate-700/50',
-      buttonSecondaryText: 'text-slate-300',
-      buttonHover: 'hover:brightness-110',
+      bg: 'bg-zinc-900/95 backdrop-blur-xl',
+      border: 'border-amber-500/20',
+      text: 'text-slate-100',
+      textMuted: 'text-zinc-400',
+      inputBg: 'bg-zinc-950/80',
+      inputBorder: 'border-zinc-850 focus:border-amber-500 focus:ring-amber-500/20',
+      inputPlaceholder: 'placeholder-zinc-600',
+      buttonPrimaryBg: 'bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-zinc-950 shadow-amber-500/10 shadow-lg',
+      buttonSecondaryBg: 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 border border-zinc-700/50',
     }
     : {
-      bg: 'bg-white/90',
-      border: 'border-indigo-200/50',
+      bg: 'bg-white/95 backdrop-blur-xl',
+      border: 'border-indigo-100',
       text: 'text-gray-900',
-      inputBg: 'bg-white/70',
-      inputBorder: 'border-indigo-300/50',
-      inputPlaceholder: 'placeholder-indigo-400',
-      focusBorder: 'focus:border-indigo-500',
-      buttonPrimaryBg: 'bg-gradient-to-r from-indigo-600 to-purple-600',
-      buttonPrimaryText: 'text-white',
-      buttonSecondaryBg: 'bg-indigo-100/60',
-      buttonSecondaryText: 'text-indigo-700',
-      buttonHover: 'hover:brightness-105',
+      textMuted: 'text-gray-500',
+      inputBg: 'bg-gray-50',
+      inputBorder: 'border-gray-200 focus:border-amber-500 focus:ring-amber-500/20',
+      inputPlaceholder: 'placeholder-gray-400',
+      buttonPrimaryBg: 'bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-950 font-bold',
+      buttonSecondaryBg: 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200',
     };
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
       onClick={onClose}
     >
       <div
-        className={`${modalTheme.bg} ${modalTheme.border} border rounded-2xl w-full max-w-md p-6 shadow-xl`}
+        className={`${modalTheme.bg} ${modalTheme.border} border rounded-3xl w-full max-w-lg p-8 shadow-2xl transition-all duration-300 transform scale-100 relative overflow-hidden`}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className={`text-2xl font-bold mb-6 ${modalTheme.text}`}>Schedule Inspection</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className={`block text-sm font-medium mb-2 ${modalTheme.text}`}>Date</label>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className={`w-full p-3 rounded-lg ${modalTheme.inputBg} ${modalTheme.inputBorder} border ${modalTheme.text} ${modalTheme.inputPlaceholder} ${modalTheme.focusBorder} focus:outline-none transition-colors`}
-              required
-            />
+        {/* Glow decoration */}
+        <div className="absolute -top-24 -right-24 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <h2 className={`text-3xl font-extrabold mb-2 tracking-tight ${modalTheme.text} flex items-center gap-2`}>
+          <Calendar className="w-8 h-8 text-amber-500 animate-pulse" />
+          Schedule Inspection
+        </h2>
+        <p className={`text-sm mb-6 ${modalTheme.textMuted}`}>
+          Arrange a virtual or in-person walk-through with an active tenant.
+        </p>
+
+        {error && (
+          <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-semibold flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+            {error}
           </div>
-          <div>
-            <label className={`block text-sm font-medium mb-2 ${modalTheme.text}`}>Time</label>
-            <input
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              className={`w-full p-3 rounded-lg ${modalTheme.inputBg} ${modalTheme.inputBorder} border ${modalTheme.text} ${modalTheme.inputPlaceholder} ${modalTheme.focusBorder} focus:outline-none transition-colors`}
-              required
-            />
+        )}
+
+        {success && (
+          <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm font-semibold flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+            Inspection scheduled successfully! Closing...
           </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Property Dropdown */}
           <div>
-            <label className={`block text-sm font-medium mb-2 ${modalTheme.text}`}>Type</label>
-            <div className="flex space-x-4">
-              <label className={`flex items-center ${modalTheme.text}`}>
+            <label className={`block text-xs font-bold uppercase tracking-wider mb-2 ${modalTheme.textMuted}`}>Select Property</label>
+            <select
+              value={selectedProperty}
+              onChange={(e) => setSelectedProperty(e.target.value)}
+              className={`w-full p-3.5 rounded-xl ${modalTheme.inputBg} ${modalTheme.inputBorder} border ${modalTheme.text} focus:outline-none focus:ring-2 transition-all`}
+              required
+            >
+              <option value="">-- Choose a property --</option>
+              {properties.map((prop) => (
+                <option key={prop.id} value={prop.title}>
+                  {prop.title} ({prop.status})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Tenant Dropdown */}
+          <div>
+            <label className={`block text-xs font-bold uppercase tracking-wider mb-2 ${modalTheme.textMuted}`}>Select Tenant</label>
+            {isLoadingTenants ? (
+              <div className="p-3 text-sm text-zinc-500 animate-pulse">Loading tenants...</div>
+            ) : (
+              <select
+                value={selectedTenant}
+                onChange={(e) => setSelectedTenant(e.target.value)}
+                className={`w-full p-3.5 rounded-xl ${modalTheme.inputBg} ${modalTheme.inputBorder} border ${modalTheme.text} focus:outline-none focus:ring-2 transition-all`}
+                required
+              >
+                <option value="">-- Choose a tenant --</option>
+                {tenants.map((ten) => (
+                  <option key={ten.id || ten._id} value={ten.id || ten._id}>
+                    {ten.name} - {ten.property || 'No active lease'}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
+          {/* Date & Time Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className={`block text-xs font-bold uppercase tracking-wider mb-2 ${modalTheme.textMuted}`}>Date</label>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className={`w-full p-3.5 rounded-xl ${modalTheme.inputBg} ${modalTheme.inputBorder} border ${modalTheme.text} focus:outline-none focus:ring-2 transition-all`}
+                required
+              />
+            </div>
+            <div>
+              <label className={`block text-xs font-bold uppercase tracking-wider mb-2 ${modalTheme.textMuted}`}>Time</label>
+              <input
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className={`w-full p-3.5 rounded-xl ${modalTheme.inputBg} ${modalTheme.inputBorder} border ${modalTheme.text} focus:outline-none focus:ring-2 transition-all`}
+                required
+              />
+            </div>
+          </div>
+
+          {/* Visit Type */}
+          <div>
+            <label className={`block text-xs font-bold uppercase tracking-wider mb-2 ${modalTheme.textMuted}`}>Type</label>
+            <div className="flex gap-6 mt-1">
+              <label className={`flex items-center gap-2 cursor-pointer font-medium ${modalTheme.text}`}>
                 <input
                   type="radio"
                   value="in-person"
                   checked={type === 'in-person'}
                   onChange={() => setType('in-person')}
-                  className="form-radio h-4 w-4 text-blue-600 transition-colors duration-200"
+                  className="form-radio h-5 w-5 text-amber-500 focus:ring-amber-500/20 accent-amber-500 transition-all"
                 />
-                <span className="ml-2">In-person</span>
+                <span>In-person</span>
               </label>
-              <label className={`flex items-center ${modalTheme.text}`}>
+              <label className={`flex items-center gap-2 cursor-pointer font-medium ${modalTheme.text}`}>
                 <input
                   type="radio"
                   value="virtual"
                   checked={type === 'virtual'}
                   onChange={() => setType('virtual')}
-                  className="form-radio h-4 w-4 text-blue-600 transition-colors duration-200"
+                  className="form-radio h-5 w-5 text-amber-500 focus:ring-amber-500/20 accent-amber-500 transition-all"
                 />
-                <span className="ml-2">Virtual Tour</span>
+                <span>Virtual Tour</span>
               </label>
             </div>
           </div>
-          <div className="flex justify-end space-x-4 pt-4">
+
+          {/* Notes */}
+          <div>
+            <label className={`block text-xs font-bold uppercase tracking-wider mb-2 ${modalTheme.textMuted}`}>Inspection Notes</label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="E.g., Routine quarterly plumbing check."
+              rows={2}
+              className={`w-full p-3.5 rounded-xl ${modalTheme.inputBg} ${modalTheme.inputBorder} border ${modalTheme.text} ${modalTheme.inputPlaceholder} focus:outline-none focus:ring-2 transition-all resize-none`}
+            />
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-end space-x-4 pt-4 border-t border-zinc-800/40">
             <button
               type="button"
               onClick={onClose}
-              className={`px-6 py-2 rounded-lg font-semibold transition-all duration-200 ${modalTheme.buttonSecondaryBg} ${modalTheme.buttonSecondaryText} ${modalTheme.buttonHover}`}
+              disabled={isSubmitting}
+              className={`px-6 py-3 rounded-xl font-bold transition-all ${modalTheme.buttonSecondaryBg} opacity-90 hover:opacity-100 disabled:opacity-50`}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className={`px-6 py-2 rounded-lg font-semibold transition-all duration-200 ${modalTheme.buttonPrimaryBg} ${modalTheme.buttonPrimaryText} ${modalTheme.buttonHover}`}
+              disabled={isSubmitting}
+              className={`px-8 py-3 rounded-xl font-bold transition-all ${modalTheme.buttonPrimaryBg} disabled:opacity-50 flex items-center gap-2`}
             >
-              Schedule Visit
+              {isSubmitting ? 'Scheduling...' : 'Schedule Visit'}
             </button>
           </div>
         </form>

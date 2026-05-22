@@ -3,7 +3,8 @@ import { verifyToken } from '../middlewares/auth.middleware.js';
 import {
     getMyTenants,
     getTenantById,
-    getTenantStats
+    getTenantStats,
+    removeTenant,
 } from '../controllers/tenant.controller.js';
 
 const router = Router();
@@ -12,6 +13,7 @@ const router = Router();
 // Only landlords should access these endpoints (could add role check middleware)
 router.get('/', verifyToken, getMyTenants);
 router.get('/stats', verifyToken, getTenantStats);
+router.delete('/:tenantId', verifyToken, removeTenant);
 router.get('/:tenantId', verifyToken, getTenantById);
 
 export default router;

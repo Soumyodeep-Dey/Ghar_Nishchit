@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { X, Building, Home, IndianRupee, Image, Upload, MapPin, Bed, Bath } from 'lucide-react';
+import { X, Building, Home, IndianRupee, Image, Upload, MapPin, Bed, Bath, Maximize2 } from 'lucide-react';
 
 // Accept mode='add'|'edit', property to edit, and onSave callback
 const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property = null, onSave = null }) => {
@@ -17,8 +17,16 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
     price: '',
     bedrooms: 1,
     bathrooms: 1,
+    area: '',
     images: [],
     available: true,
+    policies: {
+      petFriendly: false,
+      smokingAllowed: false,
+      furnished: false,
+      sublettingAllowed: false,
+      earlyTermination: false
+    }
   });
 
   // Populate form when editing
@@ -34,8 +42,10 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
         price: property.rent || property.price || prev.price,
         bedrooms: property.bedrooms ?? prev.bedrooms,
         bathrooms: property.bathrooms ?? prev.bathrooms,
+        area: property.area || '',
         images: property.images || prev.images,
         available: property.status ? property.status === 'Available' : prev.available,
+        policies: property.policies || prev.policies,
       }));
     }
   }, [mode, property]);
@@ -84,7 +94,7 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
       price: parseFloat(propertyData.price) || 0,
       bedrooms: parseInt(propertyData.bedrooms) || 0,
       bathrooms: parseInt(propertyData.bathrooms) || 0,
-      area: 0, // Default area - can be added to form later
+      area: parseFloat(propertyData.area) || 0,
       images: resolvedImages, // Using base64 strings
       amenities: [], // Default empty - can be added to form later
       available: propertyData.available,
@@ -92,10 +102,12 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
       rating: 4.5, // Default rating
       trend: null, // Default trend
       // Contact info will be auto-populated from logged-in user
-      policies: { // Default policies
+      policies: propertyData.policies || {
         petFriendly: false,
         smokingAllowed: false,
-        furnished: false
+        furnished: false,
+        sublettingAllowed: false,
+        earlyTermination: false
       }
     };
 
@@ -255,7 +267,7 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className={`block text-sm font-medium mb-2 ${modalTheme.text}`}>Price (₹)</label>
               <div className="relative">
@@ -268,6 +280,21 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
                   className={`w-full p-3 pl-10 rounded-lg ${modalTheme.inputBg} ${modalTheme.inputBorder} border ${modalTheme.text} ${modalTheme.inputPlaceholder} ${modalTheme.focusBorder} focus:outline-none transition-colors`}
                   placeholder="e.g., 2500"
                   required
+                  min="0"
+                />
+              </div>
+            </div>
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${modalTheme.text}`}>Area (sq ft)</label>
+              <div className="relative">
+                <Maximize2 className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 ${modalTheme.text}`} />
+                <input
+                  type="number"
+                  name="area"
+                  value={propertyData.area}
+                  onChange={handleChange}
+                  className={`w-full p-3 pl-10 rounded-lg ${modalTheme.inputBg} ${modalTheme.inputBorder} border ${modalTheme.text} ${modalTheme.inputPlaceholder} ${modalTheme.focusBorder} focus:outline-none transition-colors`}
+                  placeholder="e.g., 850"
                   min="0"
                 />
               </div>
@@ -343,6 +370,91 @@ const AddNewPropertyModal = ({ isOpen, onClose, isDark, mode = 'add', property =
             <label htmlFor="available" className={`text-sm font-medium ${modalTheme.text}`}>
               Property is available for rent
             </label>
+          </div>
+
+          <div className="border-t border-gray-200 dark:border-slate-700 pt-4">
+            <h3 className={`text-base font-semibold mb-3 ${modalTheme.text}`}>Property Rules & Policies</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="petFriendly"
+                  checked={propertyData.policies?.petFriendly || false}
+                  onChange={(e) => setPropertyData({
+                    ...propertyData,
+                    policies: { ...(propertyData.policies || {}), petFriendly: e.target.checked }
+                  })}
+                  className="w-4 h-4 rounded border border-gray-300 dark:border-slate-650 focus:ring-indigo-500"
+                />
+                <label htmlFor="petFriendly" className={`text-sm font-medium ${modalTheme.text}`}>
+                  Pets Allowed
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="smokingAllowed"
+                  checked={propertyData.policies?.smokingAllowed || false}
+                  onChange={(e) => setPropertyData({
+                    ...propertyData,
+                    policies: { ...(propertyData.policies || {}), smokingAllowed: e.target.checked }
+                  })}
+                  className="w-4 h-4 rounded border border-gray-300 dark:border-slate-650 focus:ring-indigo-500"
+                />
+                <label htmlFor="smokingAllowed" className={`text-sm font-medium ${modalTheme.text}`}>
+                  Smoking Allowed
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="furnished"
+                  checked={propertyData.policies?.furnished || false}
+                  onChange={(e) => setPropertyData({
+                    ...propertyData,
+                    policies: { ...(propertyData.policies || {}), furnished: e.target.checked }
+                  })}
+                  className="w-4 h-4 rounded border border-gray-300 dark:border-slate-650 focus:ring-indigo-500"
+                />
+                <label htmlFor="furnished" className={`text-sm font-medium ${modalTheme.text}`}>
+                  Furnished Property
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="sublettingAllowed"
+                  checked={propertyData.policies?.sublettingAllowed || false}
+                  onChange={(e) => setPropertyData({
+                    ...propertyData,
+                    policies: { ...(propertyData.policies || {}), sublettingAllowed: e.target.checked }
+                  })}
+                  className="w-4 h-4 rounded border border-gray-300 dark:border-slate-650 focus:ring-indigo-500"
+                />
+                <label htmlFor="sublettingAllowed" className={`text-sm font-medium ${modalTheme.text}`}>
+                  Subletting Allowed
+                </label>
+              </div>
+
+              <div className="flex items-center space-x-2 col-span-2">
+                <input
+                  type="checkbox"
+                  id="earlyTermination"
+                  checked={propertyData.policies?.earlyTermination || false}
+                  onChange={(e) => setPropertyData({
+                    ...propertyData,
+                    policies: { ...(propertyData.policies || {}), earlyTermination: e.target.checked }
+                  })}
+                  className="w-4 h-4 rounded border border-gray-300 dark:border-slate-650 focus:ring-indigo-500"
+                />
+                <label htmlFor="earlyTermination" className={`text-sm font-medium ${modalTheme.text}`}>
+                  Early Termination Clause Included
+                </label>
+              </div>
+            </div>
           </div>
           <div className="flex justify-end space-x-4 pt-4">
             <button

@@ -41,6 +41,15 @@ export const createInquiry = async (req, res) => {
     let inquiry = await Inquiry.findOne({ property: propertyId, seeker: seekerId });
 
     if (!inquiry) {
+      // Enforce inquiry limit: tenant can contact at most 3 unique properties
+      const existingPropertiesContacted = await Inquiry.distinct('property', { seeker: seekerId });
+      
+      if (existingPropertiesContacted.length >= 3) {
+        return res.status(403).json({
+          message: 'Contact limit reached: You can only contact up to 3 unique properties. Please delete an existing conversation thread to contact other properties.'
+        });
+      }
+
       inquiry = await Inquiry.create({
         property:    propertyId,
         seeker:      seekerId,
@@ -93,7 +102,7 @@ export const getLandlordInquiries = async (req, res) => {
     const propertyIds = properties.map(p => p._id);
 
     const inquiries = await Inquiry.find({ property: { $in: propertyIds } })
-      .populate('property', 'title price propertyType')
+      .populate('property', 'title price propertyType policies')
       .populate('seeker',   'name email')
       .populate('replies.sender', 'name')
       .sort({ contactTime: -1 });

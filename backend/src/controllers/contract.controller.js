@@ -1,14 +1,14 @@
 import Contract from '../models/contract.model.js';
 import Property from '../models/property.model.js';
+import Notification from '../models/notification.model.js';
+import User from '../models/user.model.js';
+import AppError from '../utils/AppError.js';
+import Outbox from '../models/outbox.model.js';
 
-export const sendContract = async (req, res) => {
+export const sendContract = async (req, res, next) => {
     try {
         const { tenantId, contractType, duration, rentAmount, securityDeposit, startDate, property, terms, customClauses } = req.body;
         const landlordId = req.user.id || req.user._id || req.user.userId;
-
-        if (!tenantId || !duration || !rentAmount || !securityDeposit || !startDate || !property) {
-            return res.status(400).json({ message: 'Missing required fields' });
-        }
 
         // Find property by title and landlordId since frontend sends title
         let propertyId = property;
@@ -25,9 +25,7 @@ export const sendContract = async (req, res) => {
             status: 'active'
         });
         if (existingActive) {
-            return res.status(409).json({
-                message: 'An active lease already exists for this tenant and property.'
-            });
+            throw new AppError('An active lease already exists for this tenant and property.', 409);
         }
 
         // Keep only the latest pending draft before creating a new one.
@@ -43,8 +41,6 @@ export const sendContract = async (req, res) => {
         const endDate = new Date(new Date(startDate).setMonth(new Date(startDate).getMonth() + duration));
 
         const contract = new Contract({
-
-
             tenant: tenantId,
             landlord: landlordId,
             property: propertyId,
@@ -60,10 +56,19 @@ export const sendContract = async (req, res) => {
         });
 
         await contract.save();
+
+        // Queue task to MongoDB Outbox
+        await Outbox.create({
+            aggregateType: 'Contract',
+            aggregateId: contract._id,
+            action: 'sync_contract',
+            payload: contract.toObject(),
+            status: 'pending'
+        });
+
         res.status(201).json(contract);
     } catch (error) {
-        console.error('Error sending contract:', error);
-        res.status(500).json({ message: error.message });
+        next(error);
     }
 };
 
@@ -190,6 +195,34 @@ export const updateContractStatus = async (req, res) => {
         contract.status = status;
         await contract.save();
 
+        // Queue task to MongoDB Outbox
+        await Outbox.create({
+            aggregateType: 'Contract',
+            aggregateId: contract._id,
+            action: 'sync_contract',
+            payload: contract.toObject(),
+            status: 'pending'
+        });
+
+        if (status === 'active') {
+            try {
+                const [tenant, property] = await Promise.all([
+                    User.findById(contract.tenant).select('name').lean(),
+                    Property.findById(contract.property).select('title').lean(),
+                ]);
+                const tenantName = tenant?.name || 'A tenant';
+                const propertyTitle = property?.title || 'your property';
+                await Notification.create({
+                    userId: contract.landlord,
+                    title: 'Lease Signed',
+                    message: `${tenantName} accepted the lease for ${propertyTitle}. Move-in payment is pending.`,
+                    type: 'general',
+                    relatedId: contract._id,
+                });
+            } catch (notifErr) {
+                console.warn('[Contract] landlord accept notification failed:', notifErr.message);
+            }
+        }
 
         res.status(200).json(contract);
 

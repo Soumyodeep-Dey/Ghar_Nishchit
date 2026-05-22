@@ -106,6 +106,7 @@ const api = {
     getMyTenants:    ()         => request('/tenants', { method: 'GET' }),
     getTenantById:   (tenantId) => request(`/tenants/${tenantId}`, { method: 'GET' }),
     getTenantStats:  ()         => request('/tenants/stats', { method: 'GET' }),
+    removeTenant:    (tenantId) => request(`/tenants/${tenantId}`, { method: 'DELETE' }),
 
     // -------------------------------------------------------------------------
     // Notifications (Tenant)
@@ -121,6 +122,8 @@ const api = {
     // -------------------------------------------------------------------------
     getTenantPaymentHistory: (_tenantId) => request('/payments', { method: 'GET' }),
     getPaymentStats:         ()          => request('/payments/stats', { method: 'GET' }),
+    getLandlordRevenue:      ()          => request('/payments/landlord-revenue', { method: 'GET' }),
+    getLandlordTenantPayments: ()        => request('/payments/landlord-tenant-payments', { method: 'GET' }),
 
     // -------------------------------------------------------------------------
     // Payments — Tenant Razorpay Gateway

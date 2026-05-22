@@ -3,7 +3,8 @@ import { User, Mail, Lock, Phone, Eye, EyeOff, Image as ImageIcon, AlertTriangle
 import { useDarkMode } from '../../../useDarkMode.js';
 import { useNavigate } from 'react-router-dom';
 import { showConfirmToast, showSuccessToast } from '../../../utils/toast.jsx';
-
+import TenantSideBar from './TenantSideBar';
+import TenantNavBar from './TenantNavBar';
 
 export default function UpdateTenantProfile() {
     const navigate = useNavigate();
@@ -215,8 +216,6 @@ export default function UpdateTenantProfile() {
                         password: '',
                         profilePicture: storedUser.profilePicture || '',
                     });
-                } else {
-                    // Avoid redirect here; let route guard manage auth
                 }
             }
         };
@@ -476,274 +475,316 @@ export default function UpdateTenantProfile() {
         );
     };
 
-    const themeClasses = {
-        bg: darkMode ? 'bg-gradient-to-br from-blue-950 via-slate-900 to-cyan-900' : 'bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100',
-        cardBg: darkMode ? 'bg-gradient-to-br from-slate-900 via-blue-950 to-cyan-900 bg-opacity-95' : 'bg-white',
-        textPrimary: darkMode ? 'text-cyan-100' : 'text-gray-700',
-        textSecondary: darkMode ? 'text-cyan-200' : 'text-gray-500',
-        textAccent: darkMode ? 'text-cyan-300' : 'text-indigo-700',
-        inputBg: darkMode ? 'bg-slate-900' : 'bg-white',
-        inputBorder: darkMode ? 'border-cyan-700' : 'border-gray-300',
-        inputText: darkMode ? 'text-cyan-100' : 'text-gray-900',
-        inputPlaceholder: darkMode ? 'placeholder-cyan-300' : 'placeholder-gray-500',
-        inputFocusRing: darkMode ? 'focus:ring-cyan-400' : 'focus:ring-indigo-400',
-        buttonPrimaryBg: darkMode ? 'bg-gradient-to-r from-cyan-500 via-blue-700 to-slate-900' : 'bg-indigo-600',
-        buttonPrimaryText: 'text-white',
-        buttonPrimaryHover: darkMode ? 'hover:from-blue-900 hover:via-cyan-700 hover:to-slate-800' : 'hover:bg-indigo-700',
-        buttonDangerBg: 'bg-red-600',
-        buttonDangerHover: 'hover:bg-red-700',
-        buttonDangerText: 'text-white',
-        backButtonBg: darkMode ? 'bg-cyan-400' : 'bg-white',
-        backButtonText: darkMode ? 'text-blue-950' : 'text-indigo-600',
-        backButtonHover: darkMode ? 'hover:bg-cyan-300' : 'hover:bg-indigo-100',
-    };
+    const tc = darkMode
+        ? {
+            mainBg: 'from-black via-zinc-950 to-amber-950/20',
+            loadingBg: 'from-black via-zinc-950 to-amber-950/20',
+            cardBg: 'bg-zinc-900/60',
+            cardBorder: 'border-amber-500/10',
+            textPrimary: 'text-slate-100',
+            textSecondary: 'text-amber-400',
+            headerGradient: 'from-amber-200 via-yellow-400 to-amber-500',
+            buttonPrimary: 'from-amber-500 to-yellow-600',
+            buttonPrimaryHover: 'from-amber-450 to-yellow-550',
+            inputBg: 'bg-zinc-950/60',
+            inputBorder: 'border-amber-500/15',
+            inputText: 'text-slate-100',
+            inputPlaceholder: 'placeholder-zinc-500',
+            inputFocusRing: 'focus:ring-amber-500/20 focus:border-amber-500',
+            dangerBg: 'bg-red-500/10 border-red-500/20 text-red-200',
+            dangerBtn: 'bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700',
+          }
+        : {
+            mainBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
+            loadingBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
+            cardBg: 'bg-white/80',
+            cardBorder: 'border-amber-200/50',
+            textPrimary: 'text-stone-900',
+            textSecondary: 'text-amber-700',
+            headerGradient: 'from-amber-800 via-yellow-800 to-amber-900',
+            buttonPrimary: 'from-amber-600 to-yellow-600',
+            buttonPrimaryHover: 'from-amber-700 to-yellow-700',
+            inputBg: 'bg-white/80',
+            inputBorder: 'border-amber-200/60',
+            inputText: 'text-stone-900',
+            inputPlaceholder: 'placeholder-stone-400',
+            inputFocusRing: 'focus:ring-amber-500/20 focus:border-amber-650',
+            dangerBg: 'bg-red-50 border-red-200 text-red-700',
+            dangerBtn: 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600',
+          };
 
     return (
-        <div className={`min-h-screen flex relative overflow-hidden ${themeClasses.bg}`}>
-            {/* Background elements */}
-            <div className="absolute inset-0 overflow-hidden">
-                <div className={`absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-purple-500/10 to-pink-500/10' : 'bg-gradient-to-r from-indigo-500/20 to-cyan-500/20'}`} />
-                <div className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10' : 'bg-gradient-to-r from-pink-500/20 to-purple-500/20'}`} />
-            </div>
+        <div className={`min-h-screen flex relative overflow-hidden bg-gradient-to-br ${tc.mainBg}`}>
+            <TenantSideBar />
+            
+            <div className="flex-1 flex flex-col relative z-10 transition-all duration-700" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
+                <TenantNavBar currentSection="Profile" />
+                
+                {/* Server status indicator */}
+                <div className={`absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-full shadow-lg z-20 ${serverStatus === 'online' ? 'bg-green-500/20 border border-green-500/30' : serverStatus === 'offline' ? 'bg-red-500/20 border border-red-500/30' : 'bg-yellow-500/20 border border-yellow-500/30'}`}>
+                    <div className={`w-2.5 h-2.5 rounded-full animate-pulse ${serverStatus === 'online' ? 'bg-green-400' : serverStatus === 'offline' ? 'bg-red-400' : 'bg-yellow-400'}`}></div>
+                    <span className={`text-xs font-semibold ${serverStatus === 'online' ? 'text-green-300' : serverStatus === 'offline' ? 'text-red-300' : 'text-yellow-300'}`}>
+                        {serverStatus === 'online' ? 'Server Online' : serverStatus === 'offline' ? 'Offline Mode' : 'Checking connection...'}
+                    </span>
+                    {serverStatus === 'offline' && (
+                        <button
+                            onClick={retryConnection}
+                            className="ml-2 text-xs bg-cyan-500 hover:bg-cyan-600 text-slate-950 px-2.5 py-0.5 rounded-full transition-all shadow-sm font-bold focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                            title="Try to reconnect to the server"
+                        >
+                            Retry
+                        </button>
+                    )}
+                </div>
 
-            {/* Server status indicator */}
-            <div className={`absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-full shadow-lg z-10 ${serverStatus === 'online' ? 'bg-green-100 dark:bg-green-900' : serverStatus === 'offline' ? 'bg-red-100 dark:bg-red-900' : 'bg-yellow-100 dark:bg-yellow-900'}`}>
-                <div className={`w-2.5 h-2.5 rounded-full animate-pulse ${serverStatus === 'online' ? 'bg-green-500' : serverStatus === 'offline' ? 'bg-red-500' : 'bg-yellow-500'}`}></div>
-                <span className={`text-xs font-semibold ${serverStatus === 'online' ? 'text-green-800 dark:text-green-200' : serverStatus === 'offline' ? 'text-red-800 dark:text-red-200' : 'text-yellow-800 dark:text-yellow-200'}`}>
-                    {serverStatus === 'online' ? 'Server Online' : serverStatus === 'offline' ? 'Server Offline - Using Local Data' : 'Checking Server Status...'}
-                </span>
-                {serverStatus === 'offline' && (
-                    <button
-                        onClick={retryConnection}
-                        className="ml-2 text-xs bg-blue-500 hover:bg-blue-600 text-white px-2.5 py-0.5 rounded-full transition-colors shadow-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
-                        title="Try to reconnect to the server"
-                        aria-label="Retry connection to server"
-                    >
-                        Retry
-                    </button>
-                )}
-            </div>
-
-            <main className="flex-1 overflow-y-auto flex items-center justify-center px-2 sm:px-4 relative z-10 w-full">
-                {/* Server status notification */}
-                {serverStatus === 'offline' && (
-                    <div className="absolute top-4 left-0 right-0 mx-auto w-full max-w-md bg-amber-100 border-l-4 border-amber-500 text-amber-700 p-3 rounded shadow-md">
-                        <div className="flex items-start">
-                            <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0" />
-                            <div>
-                                <p className="font-medium">Connection Error: Backend server is not running</p>
-                                <p className="text-sm">Unable to connect to http://localhost:3000 (ERR_CONNECTION_REFUSED). Your changes will be saved locally and will sync when the server is available again.</p>
-                                <p className="text-xs mt-1 text-amber-800">Please ensure the backend server is running at the correct port.</p>
-                            </div>
-                        </div>
-                    </div>
-                )}
-                <div className={`relative flex flex-col rounded-2xl shadow-2xl overflow-hidden max-w-lg sm:max-w-xl w-full transition-colors duration-300 ${themeClasses.cardBg}`}>
-                    <div className="w-full p-6 sm:p-8 relative">
-                        <h2 className={`text-xl sm:text-2xl font-bold mb-2 ${themeClasses.textAccent}`}>
-                            Update Your Profile
-                        </h2>
-                        <p className={`mb-6 ${themeClasses.textSecondary}`}>
-                            Manage your personal information.
-                        </p>
-                        <div className="mb-6 flex justify-start">
-                            <button
-                                onClick={() => navigate(-1)}
-                                className={`px-4 py-2 rounded-full font-semibold transition-colors duration-300 ${themeClasses.backButtonBg} ${themeClasses.backButtonText} ${themeClasses.backButtonHover}`}
-                                aria-label="Go back"
-                            >
-                                ← Back
-                            </button>
-                        </div>
-
-                        {message && (
-                            <div className={`mb-4 p-3 rounded-lg text-sm text-center font-medium flex items-center justify-center gap-2 ${message.includes('successfully')
-                                ? 'text-green-700 bg-green-100 border border-green-300'
-                                : 'text-red-700 bg-red-100 border border-red-300'
-                                }`}>
-                                {message.includes('successfully') ? (
-                                    <CheckCircle className="w-4 h-4" />
-                                ) : (
-                                    <XCircle className="w-4 h-4" />
-                                )}
-                                {message}
+                <main className="flex-1 overflow-y-auto custom-scrollbar p-6 animate-fadeIn">
+                    <div className="max-w-4xl mx-auto space-y-8">
+                        {/* Server status notification */}
+                        {serverStatus === 'offline' && (
+                            <div className="bg-amber-500/10 border border-amber-500/20 text-amber-300 p-4 rounded-2xl flex items-start gap-3 shadow-lg">
+                                <AlertTriangle className="h-5 w-5 mt-0.5 flex-shrink-0 text-amber-400" />
+                                <div>
+                                    <p className="font-semibold text-amber-200">Server Offline</p>
+                                    <p className="text-sm mt-0.5">
+                                        Unable to connect to http://localhost:3000. Your changes will be saved locally and synced when the server is available.
+                                    </p>
+                                </div>
                             </div>
                         )}
 
-                        <form className="space-y-4" onSubmit={handleSubmit}>
-                            <div>
-                                <label htmlFor="name" className={`flex items-center gap-1 font-semibold mb-1 ${themeClasses.textPrimary}`}>
-                                    <User size={18} /> Name
-                                </label>
-                                <input
-                                    type="text"
-                                    id="name"
-                                    name="name"
-                                    autoComplete="name"
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${errors.name
-                                        ? 'border-red-500 focus:ring-red-400'
-                                        : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
-                                        } ${themeClasses.inputText} ${themeClasses.inputPlaceholder}`}
-                                    placeholder="Your full name"
-                                    required
-                                />
-                                {errors.name && (
-                                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                                        <XCircle className="w-3 h-3" />
-                                        {errors.name}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div>
-                                <label htmlFor="email" className={`flex items-center gap-1 font-semibold mb-1 ${themeClasses.textPrimary}`}>
-                                    <Mail size={18} /> Email
-                                </label>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    autoComplete="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${errors.email
-                                        ? 'border-red-500 focus:ring-red-400'
-                                        : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
-                                        } ${themeClasses.inputText} ${themeClasses.inputPlaceholder}`}
-                                    placeholder="you@example.com"
-                                    required
-                                />
-                                {errors.email && (
-                                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                                        <XCircle className="w-3 h-3" />
-                                        {errors.email}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div>
-                                <label htmlFor="phone" className={`flex items-center gap-1 font-semibold mb-1 ${themeClasses.textPrimary}`}>
-                                    <Phone size={18} /> Phone Number
-                                </label>
-                                <input
-                                    type="tel"
-                                    id="phone"
-                                    name="phone"
-                                    autoComplete="tel"
-                                    value={formData.phone}
-                                    onChange={handleChange}
-                                    className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${errors.phone
-                                        ? 'border-red-500 focus:ring-red-400'
-                                        : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
-                                        } ${themeClasses.inputText} ${themeClasses.inputPlaceholder}`}
-                                    placeholder="Your phone number"
-                                    required
-                                />
-                                {errors.phone && (
-                                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                                        <XCircle className="w-3 h-3" />
-                                        {errors.phone}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div>
-                                <label htmlFor="password" className={`flex items-center gap-1 font-semibold mb-1 ${themeClasses.textPrimary}`}>
-                                    <Lock size={18} /> New Password (optional)
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type={showPassword ? 'text' : 'password'}
-                                        id="password"
-                                        name="password"
-                                        autoComplete="new-password"
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${errors.password
-                                            ? 'border-red-500 focus:ring-red-400'
-                                            : `${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputFocusRing}`
-                                            } ${themeClasses.inputText} ${themeClasses.inputPlaceholder}`}
-                                        placeholder="Leave blank to keep current password"
-                                    />
+                        {/* Profile edit card */}
+                        <div className={`${tc.cardBg} backdrop-blur-xl border ${tc.cardBorder} rounded-3xl overflow-hidden shadow-2xl transition-all duration-300`}>
+                            <div className="p-6 sm:p-8 space-y-6">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <h1 className={`text-3xl font-extrabold bg-gradient-to-r ${tc.headerGradient} bg-clip-text text-transparent`}>
+                                            Update Profile
+                                        </h1>
+                                        <p className={`text-sm ${tc.textSecondary} mt-1`}>
+                                            Manage your personal credentials and options.
+                                        </p>
+                                    </div>
                                     <button
-                                        type="button"
-                                        onClick={() => setShowPassword((prev) => !prev)}
-                                        className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${darkMode ? 'text-gray-400 hover:text-cyan-300' : 'text-gray-400 hover:text-gray-700'}`}
-                                        tabIndex={-1}
-                                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                        onClick={() => navigate(-1)}
+                                        className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-all ${
+                                            darkMode 
+                                                ? 'border-slate-700 text-slate-300 hover:bg-slate-700/50' 
+                                                : 'border-indigo-100 text-indigo-650 hover:bg-indigo-50'
+                                        }`}
                                     >
-                                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                        ← Back
                                     </button>
                                 </div>
-                                {errors.password && (
-                                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                                        <XCircle className="w-3 h-3" />
-                                        {errors.password}
+
+                                {message && (
+                                    <div className={`p-4 rounded-xl text-sm font-semibold border flex items-center gap-3 animate-fadeIn ${
+                                        message.includes('successfully')
+                                            ? darkMode ? 'bg-green-500/10 border-green-500/20 text-green-300' : 'bg-green-50 border-green-200 text-green-800'
+                                            : darkMode ? 'bg-red-500/10 border-red-500/20 text-red-300' : 'bg-red-50 border-red-200 text-red-800'
+                                    }`}>
+                                        {message.includes('successfully') ? <CheckCircle className="w-5 h-5 flex-shrink-0" /> : <XCircle className="w-5 h-5 flex-shrink-0" />}
+                                        <p>{message}</p>
+                                    </div>
+                                )}
+
+                                <form className="space-y-5" onSubmit={handleSubmit}>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        {/* Name */}
+                                        <div>
+                                            <label htmlFor="name" className={`flex items-center gap-1.5 font-semibold text-sm mb-2 ${tc.textPrimary}`}>
+                                                <User size={16} /> Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="name"
+                                                name="name"
+                                                autoComplete="name"
+                                                value={formData.name}
+                                                onChange={handleChange}
+                                                className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-4 transition-all ${
+                                                    errors.name
+                                                        ? 'border-red-500 focus:ring-red-500/25'
+                                                        : `${tc.inputBg} ${tc.inputBorder} ${tc.inputFocusRing}`
+                                                } ${tc.inputText} ${tc.inputPlaceholder}`}
+                                                placeholder="Your full name"
+                                                required
+                                            />
+                                            {errors.name && (
+                                                <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                                                    <XCircle className="w-3.5 h-3.5" />
+                                                    {errors.name}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        {/* Email */}
+                                        <div>
+                                            <label htmlFor="email" className={`flex items-center gap-1.5 font-semibold text-sm mb-2 ${tc.textPrimary}`}>
+                                                <Mail size={16} /> Email
+                                            </label>
+                                            <input
+                                                type="email"
+                                                id="email"
+                                                name="email"
+                                                autoComplete="email"
+                                                value={formData.email}
+                                                onChange={handleChange}
+                                                className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-4 transition-all ${
+                                                    errors.email
+                                                        ? 'border-red-500 focus:ring-red-500/25'
+                                                        : `${tc.inputBg} ${tc.inputBorder} ${tc.inputFocusRing}`
+                                                } ${tc.inputText} ${tc.inputPlaceholder}`}
+                                                placeholder="you@example.com"
+                                                required
+                                            />
+                                            {errors.email && (
+                                                <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                                                    <XCircle className="w-3.5 h-3.5" />
+                                                    {errors.email}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        {/* Phone */}
+                                        <div>
+                                            <label htmlFor="phone" className={`flex items-center gap-1.5 font-semibold text-sm mb-2 ${tc.textPrimary}`}>
+                                                <Phone size={16} /> Phone Number
+                                            </label>
+                                            <input
+                                                type="tel"
+                                                id="phone"
+                                                name="phone"
+                                                autoComplete="tel"
+                                                value={formData.phone}
+                                                onChange={handleChange}
+                                                className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-4 transition-all ${
+                                                    errors.phone
+                                                        ? 'border-red-500 focus:ring-red-500/25'
+                                                        : `${tc.inputBg} ${tc.inputBorder} ${tc.inputFocusRing}`
+                                                } ${tc.inputText} ${tc.inputPlaceholder}`}
+                                                placeholder="Your phone number"
+                                                required
+                                            />
+                                            {errors.phone && (
+                                                <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                                                    <XCircle className="w-3.5 h-3.5" />
+                                                    {errors.phone}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        {/* Password */}
+                                        <div>
+                                            <label htmlFor="password" className={`flex items-center gap-1.5 font-semibold text-sm mb-2 ${tc.textPrimary}`}>
+                                                <Lock size={16} /> New Password (optional)
+                                            </label>
+                                            <div className="relative">
+                                                <input
+                                                    type={showPassword ? 'text' : 'password'}
+                                                    id="password"
+                                                    name="password"
+                                                    autoComplete="new-password"
+                                                    value={formData.password}
+                                                    onChange={handleChange}
+                                                    className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-4 transition-all ${
+                                                        errors.password
+                                                            ? 'border-red-500 focus:ring-red-500/25'
+                                                            : `${tc.inputBg} ${tc.inputBorder} ${tc.inputFocusRing}`
+                                                    } ${tc.inputText} ${tc.inputPlaceholder}`}
+                                                    placeholder="Leave blank to keep current"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPassword((prev) => !prev)}
+                                                    className="absolute right-3.5 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-cyan-400 transition-colors"
+                                                    tabIndex={-1}
+                                                >
+                                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                                </button>
+                                            </div>
+                                            {errors.password && (
+                                                <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                                                    <XCircle className="w-3.5 h-3.5" />
+                                                    {errors.password}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Profile pic uploader */}
+                                    <div className={`p-5 rounded-2xl border ${tc.inputBorder} ${tc.inputBg} flex flex-col sm:flex-row items-center gap-6`}>
+                                        <div className="relative group w-24 h-24 rounded-full overflow-hidden border border-slate-700/30 shadow-lg flex-shrink-0 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center">
+                                            {formData.profilePicture ? (
+                                                <img src={formData.profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <User className={`w-10 h-10 ${darkMode ? 'text-slate-500' : 'text-indigo-400'}`} />
+                                            )}
+                                        </div>
+                                        <div className="flex-1 text-center sm:text-left space-y-2">
+                                            <p className={`font-semibold text-sm ${tc.textPrimary}`}>Upload a Profile Image</p>
+                                            <p className={`text-xs ${tc.textSecondary}`}>Supported formats: JPG, PNG. Max 5MB.</p>
+                                            <input
+                                                type="file"
+                                                id="profilePicture"
+                                                name="profilePicture"
+                                                accept="image/*"
+                                                onChange={handleFileChange}
+                                                className={`w-full max-w-xs text-xs file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 dark:file:bg-slate-700 dark:file:text-cyan-300 hover:file:opacity-80 cursor-pointer ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Submit */}
+                                    <button
+                                        type="submit"
+                                        disabled={isLoading}
+                                        className={`w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r ${tc.buttonPrimary} hover:opacity-90 shadow-lg transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2`}
+                                    >
+                                        {isLoading ? (
+                                            <>
+                                                <RefreshCw className="w-5 h-5 animate-spin" />
+                                                <span>Updating Profile…</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <CheckCircle className="w-5 h-5" />
+                                                <span>Save Profile Changes</span>
+                                            </>
+                                        )}
+                                    </button>
+                                </form>
+
+                                {/* Danger Zone */}
+                                <div className={`p-6 border rounded-2xl mt-8 shadow-md ${tc.dangerBg}`}>
+                                    <h3 className="flex items-center gap-2 text-lg font-bold text-red-500 mb-3">
+                                        <AlertTriangle size={20} className="text-red-500 animate-pulse" />
+                                        DANGER ZONE
+                                    </h3>
+                                    <p className="text-sm mb-4">
+                                        Deleting your account is permanent. All lease documents, billing items, and message histories will be deleted forever.
                                     </p>
-                                )}
+                                    <button
+                                        onClick={handleDeleteAccount}
+                                        className={`py-3 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-red-650 to-pink-600 hover:from-red-700 hover:to-pink-700 shadow-md transition-all hover:scale-105 flex items-center justify-center gap-2`}
+                                    >
+                                        <Trash2 size={16} />
+                                        <span>Delete My Account</span>
+                                    </button>
+                                </div>
                             </div>
-
-                            <div>
-                                <label htmlFor="profilePicture" className={`flex items-center gap-1 font-semibold mb-1 ${themeClasses.textPrimary}`}>
-                                    <ImageIcon size={18} /> Profile Picture (not operational yet)
-                                </label>
-                                <input
-                                    type="file"
-                                    id="profilePicture"
-                                    name="profilePicture"
-                                    accept="image/*"
-                                    onChange={handleFileChange}
-                                    className={`w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-lg focus:outline-none focus:ring-2 shadow-sm transition-shadow duration-300 hover:shadow-lg text-sm sm:text-base ${themeClasses.inputBg} ${themeClasses.inputBorder} ${themeClasses.inputText} ${themeClasses.inputFocusRing}`}
-                                />
-                                {formData.profilePicture && (
-                                    <div className="mt-2">
-                                        <img src={formData.profilePicture} alt="Profile Preview" className="w-24 h-24 rounded-full object-cover mx-auto" />
-                                    </div>
-                                )}
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                className={`w-full py-3 sm:py-4 rounded-lg font-bold text-center transition-all duration-300 hover:shadow-xl hover:scale-105 text-sm sm:text-base transform active:scale-95 ${isLoading
-                                    ? 'bg-gray-400 cursor-not-allowed'
-                                    : `${themeClasses.buttonPrimaryBg} ${themeClasses.buttonPrimaryText} ${themeClasses.buttonPrimaryHover}`
-                                    }`}
-                            >
-                                {isLoading ? (
-                                    <div className="flex items-center justify-center gap-2">
-                                        <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
-                                        <span>Updating Profile...</span>
-                                    </div>
-                                ) : (
-                                    <span className="flex items-center justify-center gap-2">
-                                        <CheckCircle className="w-5 h-5" />
-                                        Save Changes
-                                    </span>
-                                )}
-                            </button>
-                        </form>
-
-                        {/* DANGER ZONE */}
-                        <div className={`mt-8 p-6 border-2 rounded-lg ${darkMode ? 'border-red-700 bg-red-950 bg-opacity-20' : 'border-red-300 bg-red-50'}`}>
-                            <h3 className="flex items-center gap-2 text-lg sm:text-xl font-bold text-red-600 mb-4">
-                                <AlertTriangle size={24} /> DANGER ZONE
-                            </h3>
-                            <p className={`mb-4 ${darkMode ? 'text-red-200' : 'text-red-700'}`}>
-                                Deleting your account is a permanent action. All your data will be lost.
-                            </p>
-                            <button
-                                onClick={handleDeleteAccount}
-                                className={`w-full py-2 sm:py-3 rounded-lg font-semibold transition-colors duration-300 hover:shadow-xl hover:scale-105 text-sm sm:text-base ${themeClasses.buttonDangerBg} ${themeClasses.buttonDangerText} ${themeClasses.buttonDangerHover}`}
-                            >
-                                <Trash2 size={18} className="inline mr-2" /> Delete Account
-                            </button>
                         </div>
                     </div>
-                </div>
-            </main>
+                </main>
+            </div>
+
+            <style>{`
+                .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}; border-radius: 10px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: ${darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)'}; }
+                @keyframes fadeIn { from { opacity:0; transform:scale(0.98); } to { opacity:1; transform:scale(1); } }
+                .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+            `}</style>
         </div>
     );
 }

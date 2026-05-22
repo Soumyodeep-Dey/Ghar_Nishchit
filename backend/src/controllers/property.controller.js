@@ -30,6 +30,39 @@ export const createProperty = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // Verify listing limits based on subscription plan
+    const existingCount = await Property.countDocuments({ postedBy: authUserId });
+    const LandlordPayment = (await import('../models/landlordPayment.model.js')).default;
+    const paidPayments = await LandlordPayment.find({ landlordId: authUserId, status: 'Paid' })
+      .sort({ paidAt: -1, createdAt: -1 })
+      .lean();
+
+    const latestPaid = paidPayments[0];
+    let planLimit = 1; // Default Free Plan: 1 submission
+    let activePlanName = 'Free Plan';
+
+    if (latestPaid) {
+      // Paid plan is valid for 30 days
+      const planExpiry = new Date(new Date(latestPaid.paidAt || latestPaid.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000);
+      if (planExpiry > new Date()) {
+        activePlanName = latestPaid.planName;
+        const nameLower = activePlanName.toLowerCase();
+        if (nameLower.includes('featured')) {
+          planLimit = 5;
+        } else if (nameLower.includes('verified') || nameLower.includes('vip') || nameLower.includes('unlimited')) {
+          planLimit = Infinity;
+        } else if (nameLower.includes('standard')) {
+          planLimit = 1;
+        }
+      }
+    }
+
+    if (existingCount >= planLimit) {
+      return res.status(403).json({
+        message: `Listing limit reached. You are on the ${activePlanName} which allows up to ${planLimit === Infinity ? 'unlimited' : planLimit} property listings. Please upgrade your subscription plan in the Billing section to submit more properties.`
+      });
+    }
+
     const payload = { ...req.body };
     // Ignore any client-provided ownerId - always use authenticated user
     delete payload.ownerId;

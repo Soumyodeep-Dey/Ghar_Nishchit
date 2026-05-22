@@ -242,14 +242,24 @@ export const getLandlordPaymentStats = async (req, res) => {
     const landlordId = req.user?.userId;
     const all        = await LandlordPayment.find({ landlordId }).lean();
 
+    const paidPayments = all
+      .filter(p => p.status === 'Paid')
+      .sort((a, b) => new Date(b.paidAt || b.createdAt) - new Date(a.paidAt || a.createdAt));
+
+    const latestPaid = paidPayments[0];
+    const activePlan = latestPaid ? latestPaid.planName : null;
+    const nextRenewalDate = latestPaid
+      ? new Date(new Date(latestPaid.paidAt || latestPaid.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      : null;
+
     const stats = {
       total:              all.length,
-      paid:               all.filter(p => p.status === 'Paid').length,
+      paid:               paidPayments.length,
       pending:            all.filter(p => p.status === 'Pending').length,
       failed:             all.filter(p => p.status === 'Failed').length,
-      totalAmountSpent:   all.filter(p => p.status === 'Paid')
-                            .reduce((s, p) => s + p.totalAmount, 0),
-      activePlan:         all.find(p => p.status === 'Paid')?.planName ?? null,
+      totalAmountSpent:   paidPayments.reduce((s, p) => s + p.totalAmount, 0),
+      activePlan,
+      nextRenewalDate,
     };
 
     return res.status(200).json(stats);

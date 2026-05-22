@@ -1,13 +1,26 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Bell, Sun, Moon, User, Settings, HelpCircle, LogOut, ChevronDown, X, MessageSquare, Wrench, CreditCard, Home, Building2, Users, IndianRupee } from 'lucide-react';
+import { Search, Bell, Sun, Moon, User, Settings, Languages, LogOut, ChevronDown, X, MessageSquare, Wrench, CreditCard, Home, Building2, Users, IndianRupee } from 'lucide-react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import { Link, useNavigate } from 'react-router-dom';
 import { showConfirmToast } from '../../../utils/toast.jsx';
 import api from '../../../services/api.js';
+import { useLanguage } from '../../../i18n/LanguageContext.jsx';
+import LanguageDialog from '../../LanguageDialog.jsx';
+
+const LANDLORD_SECTION_SUBTITLE_KEYS = {
+  Dashboard: 'sections.overviewAnalytics',
+  Properties: 'sections.manageProperties',
+  Tenants: 'sections.tenantManagement',
+  Payments: 'sections.paymentManagement',
+  Maintenance: 'sections.serviceRequests',
+  Messages: 'sections.communicationHub',
+};
 
 const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
   const { darkMode: isDarkMode, toggleDarkMode } = useDarkMode();
+  const { t } = useLanguage();
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [languageDialogOpen, setLanguageDialogOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -27,6 +40,11 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
         window.location.href = '/';
       }
     );
+  };
+
+  const handleLanguages = () => {
+    setIsProfileDropdownOpen(false);
+    setLanguageDialogOpen(true);
   };
 
   const profileDropdownRef = useRef(null);
@@ -158,6 +176,8 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
     // Redirect logic
     if (notification.type === 'inquiry' || notification.type === 'message') {
       navigate('/landlord/messages', { state: { activeInquiryId: notification.relatedId } });
+    } else if (notification.type === 'payment') {
+      navigate('/landlord/payment', { state: { highlightTenantPayments: true } });
     }
   };
 
@@ -174,15 +194,15 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
 
   // Search suggestions (you can replace with real search logic)
   const searchSuggestions = [
-    'Skyline Residency',
-    'John Doe',
-    'Maintenance requests',
-    'Payment history',
-    'Tenant messages'
+    { labelKey: 'search.myProperties' },
+    { labelKey: 'search.tenantList' },
+    { labelKey: 'search.maintenanceRequests' },
+    { labelKey: 'search.paymentHistory' },
+    { labelKey: 'search.messages' },
   ];
 
-  const filteredSuggestions = searchSuggestions.filter(suggestion =>
-    suggestion.toLowerCase().includes(searchQuery.toLowerCase()) && searchQuery.length > 0
+  const filteredSuggestions = searchSuggestions.filter(s =>
+    t(s.labelKey).toLowerCase().includes(searchQuery.toLowerCase()) && searchQuery.length > 0
   );
 
   const CurrentSectionIcon = getCurrentSectionIcon();
@@ -201,15 +221,10 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {currentSection}
+                  {t(`sections.${currentSection}`)}
                 </h1>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {currentSection === 'Dashboard' && 'Overview & Analytics'}
-                  {currentSection === 'Properties' && 'Manage Properties'}
-                  {currentSection === 'Tenants' && 'Tenant Management'}
-                  {currentSection === 'Payments' && 'Payment Management'}
-                  {currentSection === 'Maintenance' && 'Service Requests'}
-                  {currentSection === 'Messages' && 'Communication Hub'}
+                  {t(LANDLORD_SECTION_SUBTITLE_KEYS[currentSection] || 'sections.overviewAnalytics')}
                 </p>
               </div>
             </div>
@@ -228,7 +243,7 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-                placeholder="Search properties, tenants, or requests..."
+                placeholder={t('common.searchLandlord')}
                 className="w-full pl-11 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
               {searchQuery && (
@@ -247,12 +262,12 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
                     <button
                       key={index}
                       onClick={() => {
-                        setSearchQuery(suggestion);
+                        setSearchQuery(t(suggestion.labelKey));
                         setIsSearchFocused(false);
                       }}
                       className="w-full px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm"
                     >
-                      {suggestion}
+                      {t(suggestion.labelKey)}
                     </button>
                   ))}
                 </div>
@@ -283,13 +298,13 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
                   {/* Header */}
                   <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{t('common.notifications')}</h3>
                       {unreadCount > 0 && (
                         <button
                           onClick={markAllAsRead}
                           className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
                         >
-                          Mark all read
+                          {t('common.markAllRead')}
                         </button>
                       )}
                     </div>
@@ -299,7 +314,7 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
                   <div className="max-h-96 overflow-y-auto">
                     {notifications.length === 0 ? (
                       <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                        No new notifications
+                        {t('sections.noNewNotifications')}
                       </div>
                     ) : (
                       notifications.map((notification) => {
@@ -347,7 +362,7 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
                   {/* Footer */}
                   <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                     <button className="w-full text-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium py-2 text-sm">
-                      View all notifications
+                      {t('sections.viewAllNotifications')}
                     </button>
                   </div>
                 </div>
@@ -408,14 +423,17 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
                       <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                         <Settings className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                       </div>
-                      <span className="font-medium">Update Profile</span>
+                      <span className="font-medium">{t('common.updateProfile')}</span>
                     </Link>
 
-                    <button className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                    <button
+                      onClick={handleLanguages}
+                      className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                    >
                       <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
-                        <HelpCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                        <Languages className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
                       </div>
-                      <span className="font-medium">Help & Support</span>
+                      <span className="font-medium">{t('common.languages')}</span>
                     </button>
 
                     <hr className="my-2 border-gray-200 dark:border-gray-700" />
@@ -424,7 +442,7 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
                       <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
                         <LogOut className="h-4 w-4" />
                       </div>
-                      <span className="font-medium">Logout</span>
+                      <span className="font-medium">{t('common.logout')}</span>
                     </button>
                   </div>
                 </div>
@@ -433,6 +451,8 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
           </div>
         </div>
       </div>
+
+      <LanguageDialog open={languageDialogOpen} onClose={() => setLanguageDialogOpen(false)} />
 
       {/* Mobile Search */}
       <div className="md:hidden px-4 pb-3">
