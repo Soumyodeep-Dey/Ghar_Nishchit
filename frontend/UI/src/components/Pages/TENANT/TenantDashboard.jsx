@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useDarkMode } from '../../../useDarkMode.js';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import TenantSideBar from './TenantSideBar.jsx';
 import TenantNavBar from './TenantNavBar.jsx';
 import api from '../../../services/api.js';
-import { showErrorToast, showSuccessToast } from '../../../utils/toast.jsx';
+import { showErrorToast } from '../../../utils/toast.jsx';
 import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { getDashboardTheme, dotPatternStyle } from '../../../styles/dashboardTheme.js';
 import {
   Wrench, BarChart3, TrendingUp, TrendingDown, Building2, Heart,
   Bell, CreditCard, Star, X, AlertCircle, RefreshCw
@@ -35,39 +35,26 @@ const usePagination = (items, itemsPerPage = ITEMS_PER_PAGE) => {
 // ---------------------------------------------------------------------------
 const StatCard = React.memo(({ icon: Icon, title, value, change, trend, color, prefix = '', suffix = '', isDark = true }) => {
   const TrendIcon = trend === 'up' ? TrendingUp : TrendingDown;
-  const th = isDark
-    ? {
-        cardBg: 'bg-slate-800/80', cardBorder: 'border-slate-700/50',
-        iconBg: 'from-cyan-500/20 to-indigo-500/20', iconBorder: 'border-cyan-400/30',
-        iconColor: 'text-cyan-300', textPrimary: 'text-slate-100', textSecondary: 'text-slate-300',
-        trendUp: 'bg-cyan-400/20 text-cyan-300 border-cyan-400/40',
-        trendDown: 'bg-pink-400/20 text-pink-300 border-pink-400/40',
-      }
-    : {
-        cardBg: 'bg-white/80', cardBorder: 'border-indigo-200/50',
-        iconBg: 'from-indigo-100/80 to-purple-100/80', iconBorder: 'border-indigo-300/50',
-        iconColor: 'text-indigo-700', textPrimary: 'text-gray-900', textSecondary: 'text-indigo-600',
-        trendUp: 'bg-indigo-100/60 text-indigo-700 border-indigo-300/60',
-        trendDown: 'bg-pink-100/60 text-pink-700 border-pink-300/60',
-      };
+  const th = getDashboardTheme(isDark).statCard;
+
   return (
-    <div className={`group relative overflow-hidden ${th.cardBg} border ${th.cardBorder} rounded-2xl p-5 shadow-sm ${color}`}>
+    <div className={`group relative overflow-hidden ${th.cardBg} border ${th.cardBorder} rounded-3xl p-6 shadow-[0_10px_40px_rgba(0,0,0,0.04)] transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 ${color}`}>
       <div className="relative z-20">
         <div className="flex items-center justify-between mb-4">
-          <div className={`p-3 rounded-xl bg-gradient-to-br ${th.iconBg} backdrop-blur-sm border ${th.iconBorder}`}>
+          <div className={`p-3 rounded-2xl bg-gradient-to-br ${th.iconBg} backdrop-blur-sm border ${th.iconBorder}`}>
             {Icon && <Icon className={`w-6 h-6 ${th.iconColor}`} />}
           </div>
-          <div className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm border ${
+          <div className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-widest backdrop-blur-sm border ${
             trend === 'up' ? th.trendUp : th.trendDown
           }`}>
             <TrendIcon className="w-3 h-3" />
             <span>{change}</span>
           </div>
         </div>
-        <h3 className={`text-2xl font-bold ${th.textPrimary} mb-2`}>
+        <h3 className={`text-3xl font-black ${th.textPrimary} mb-2`}>
           {prefix}{parseInt(value).toLocaleString()}{suffix}
         </h3>
-        <p className={`${th.textSecondary} font-medium text-sm`}>{title}</p>
+        <p className={`${th.textSecondary} font-bold text-xs uppercase tracking-widest`}>{title}</p>
       </div>
     </div>
   );
@@ -80,19 +67,19 @@ const PropertyCard = React.memo(({ property, onRemove, removeConfirmId, onConfir
   const { darkMode } = useDarkMode();
   return (
     <div className={`rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden group hover:scale-105 border ${
-      darkMode ? 'bg-slate-800 border-slate-700 hover:shadow-blue-500/10' : 'bg-white border-gray-100 hover:shadow-blue-500/20'
+      darkMode ? 'bg-slate-800 border-slate-700 hover:shadow-amber-500/10' : 'bg-white border-gray-100 hover:shadow-amber-500/20'
     }`}>
-      <div className="relative overflow-hidden bg-slate-100 dark:bg-slate-900/50">
+      <div className="relative overflow-hidden">
         <img src={property.image} alt={property.title}
-          className="w-full h-48 object-contain transition-all duration-700 group-hover:scale-110" loading="lazy" />
+          className="w-full h-48 object-cover transition-all duration-700 group-hover:scale-110" loading="lazy" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         <div className={`absolute bottom-4 left-4 px-4 py-2 rounded-full font-semibold shadow-lg text-white ${
-          darkMode ? 'bg-gradient-to-r from-blue-700 to-purple-800' : 'bg-gradient-to-r from-blue-600 to-purple-600'
+          darkMode ? 'bg-gradient-to-r from-amber-500 to-amber-600' : 'bg-gradient-to-r from-amber-500 to-amber-600'
         }`}>{property.price}</div>
       </div>
       <div className="p-6">
         <h3 className={`font-bold text-xl mb-2 transition-colors duration-300 ${
-          darkMode ? 'text-slate-100 group-hover:text-blue-400' : 'text-gray-800 group-hover:text-blue-600'
+          darkMode ? 'text-slate-100 group-hover:text-amber-400' : 'text-gray-800 group-hover:text-amber-600'
         }`}>{property.title}</h3>
         <p className={`mb-3 flex items-center ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>
           <Star className={`h-4 w-4 mr-2 ${darkMode ? 'text-yellow-400' : 'text-yellow-500'}`} />
@@ -134,7 +121,7 @@ const NotificationItem = React.memo(({ notification, onMarkAsRead, onDelete }) =
   const { darkMode } = useDarkMode();
   const typeIcon = {
     maintenance: <Wrench className={`h-6 w-6 ${darkMode ? 'text-orange-400' : 'text-orange-500'}`} />,
-    payment:     <CreditCard className={`h-6 w-6 ${darkMode ? 'text-purple-400' : 'text-purple-500'}`} />,
+    payment:     <CreditCard className={`h-6 w-6 ${darkMode ? 'text-amber-400' : 'text-amber-500'}`} />,
     general:     <Bell className={`h-6 w-6 ${darkMode ? 'text-yellow-400' : 'text-yellow-500'}`} />,
   };
   return (
@@ -144,7 +131,7 @@ const NotificationItem = React.memo(({ notification, onMarkAsRead, onDelete }) =
       } ${
         notification.read
           ? (darkMode ? 'border-slate-600' : 'border-gray-300')
-          : (darkMode ? 'border-blue-400' : 'border-blue-500')
+          : (darkMode ? 'border-amber-500' : 'border-amber-500')
       } hover:scale-105 group`}
       onClick={() => onMarkAsRead(notification.id)}
     >
@@ -158,7 +145,7 @@ const NotificationItem = React.memo(({ notification, onMarkAsRead, onDelete }) =
           <div className="flex justify-between items-center mt-2">
             <span className={`text-xs ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>{notification.time}</span>
             {!notification.read && (
-              <div className="w-2.5 h-2.5 bg-blue-500 rounded-full" aria-label="Unread" />
+              <div className="w-2.5 h-2.5 bg-amber-500 rounded-full" aria-label="Unread" />
             )}
           </div>
         </div>
@@ -216,8 +203,8 @@ const Modal = React.memo(({ isOpen, onClose, title, children, size = 'md' }) => 
 // Skeleton card — shown while data is fetching
 // ---------------------------------------------------------------------------
 const SkeletonCard = ({ isDark }) => (
-  <div className={`rounded-2xl p-5 border animate-pulse ${
-    isDark ? 'bg-slate-800/80 border-slate-700/50' : 'bg-white/80 border-indigo-200/50'
+  <div className={`rounded-3xl p-6 border animate-pulse ${
+    isDark ? 'bg-slate-900/80 border-slate-800' : 'bg-white border-slate-100'
   }`}>
     <div className={`h-10 w-10 rounded-xl mb-4 ${isDark ? 'bg-slate-700' : 'bg-gray-200'}`} />
     <div className={`h-6 w-24 rounded mb-2 ${isDark ? 'bg-slate-700' : 'bg-gray-200'}`} />
@@ -260,112 +247,61 @@ const TenantDashboard = () => {
   const location  = useLocation();
 
   const [currentSection, setCurrentSection] = useState('Dashboard');
-  const queryClient = useQueryClient();
+  const [isLoading,  setIsLoading]  = useState(true);
+  const [fetchError, setFetchError] = useState(null);
+
+  // All data from real API — no hardcoded mock objects
+  const [profile,             setProfile]             = useState(null);
+  const [favouriteProperties, setFavouriteProperties] = useState([]);
+  const [notifications,       setNotifications]       = useState([]);
+  const [maintenanceRequests, setMaintenanceRequests] = useState([]);
+  const [paymentHistory,      setPaymentHistory]      = useState([]);
 
   // -------------------------------------------------------------------------
-  // TanStack Query Declarative Data Fetching
+  // Coordinated parallel fetch
   // -------------------------------------------------------------------------
-  const { data: profile = null, isLoading: isProfileLoading, error: profileError } = useQuery({
-    queryKey: ['userProfile'],
-    queryFn: api.getProfile,
-    staleTime: 60000,
-  });
+  const fetchDashboardData = useCallback(async () => {
+    setIsLoading(true);
+    setFetchError(null);
+    try {
+      const profileData = await api.getProfile();
+      setProfile(profileData);
 
-  const tenantId = profile?._id || profile?.id;
+      const tenantId = profileData?.id;
 
-  const { data: favouriteProperties = [], isLoading: isFavLoading, error: favError } = useQuery({
-    queryKey: ['favouriteProperties', tenantId],
-    queryFn: () => api.getFavouriteProperties(tenantId),
-    enabled: !!tenantId,
-  });
+      const [favResult, notifResult, maintResult, payResult] = await Promise.allSettled([
+        api.getFavouriteProperties(tenantId),
+        api.getTenantNotifications(tenantId),
+        api.getTenantMaintenanceRequests(tenantId),
+        api.getTenantPaymentHistory(tenantId),
+      ]);
 
-  const { data: notifications = [], isLoading: isNotifLoading, error: notifError } = useQuery({
-    queryKey: ['tenantNotifications', tenantId],
-    queryFn: () => api.getTenantNotifications(tenantId),
-    enabled: !!tenantId,
-  });
-
-  const { data: maintenanceRequests = [], isLoading: isMaintLoading, error: maintError } = useQuery({
-    queryKey: ['tenantMaintenanceRequests', tenantId],
-    queryFn: () => api.getTenantMaintenanceRequests(tenantId),
-    enabled: !!tenantId,
-  });
-
-  const { data: paymentHistory = [], isLoading: isPayLoading, error: payError } = useQuery({
-    queryKey: ['tenantPaymentHistory', tenantId],
-    queryFn: () => api.getTenantPaymentHistory(tenantId),
-    enabled: !!tenantId,
-  });
-
-  const isLoading = isProfileLoading || (!!tenantId && (isFavLoading || isNotifLoading || isMaintLoading || isPayLoading));
-  const fetchError = profileError || favError || notifError || maintError || payError ? 'Failed to load your dashboard. Please check your connection and try again.' : null;
-
-  const handleRetry = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['userProfile'] });
-    if (tenantId) {
-      queryClient.invalidateQueries({ queryKey: ['favouriteProperties', tenantId] });
-      queryClient.invalidateQueries({ queryKey: ['tenantNotifications', tenantId] });
-      queryClient.invalidateQueries({ queryKey: ['tenantMaintenanceRequests', tenantId] });
-      queryClient.invalidateQueries({ queryKey: ['tenantPaymentHistory', tenantId] });
-    }
-  }, [queryClient, tenantId]);
-
-  // -------------------------------------------------------------------------
-  // Optimistic Cache Mutations
-  // -------------------------------------------------------------------------
-  const markAsReadMutation = useMutation({
-    mutationFn: api.markNotificationRead,
-    onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: ['tenantNotifications', tenantId] });
-      const previousNotifications = queryClient.getQueryData(['tenantNotifications', tenantId]);
-      queryClient.setQueryData(['tenantNotifications', tenantId], (old) =>
-        Array.isArray(old) ? old.map(n => (n._id === id || n.id === id) ? { ...n, read: true } : n) : []
+      setFavouriteProperties(
+        favResult.status   === 'fulfilled' && Array.isArray(favResult.value)   ? favResult.value   : []
       );
-      return { previousNotifications };
-    },
-    onError: (err, id, context) => {
-      queryClient.setQueryData(['tenantNotifications', tenantId], context.previousNotifications);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['tenantNotifications', tenantId] });
-    }
-  });
-
-  const markAllAsReadMutation = useMutation({
-    mutationFn: api.markAllNotificationsRead,
-    onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey: ['tenantNotifications', tenantId] });
-      const previousNotifications = queryClient.getQueryData(['tenantNotifications', tenantId]);
-      queryClient.setQueryData(['tenantNotifications', tenantId], (old) =>
-        Array.isArray(old) ? old.map(n => ({ ...n, read: true })) : []
+      setNotifications(
+        notifResult.status === 'fulfilled' && Array.isArray(notifResult.value) ? notifResult.value : []
       );
-      return { previousNotifications };
-    },
-    onError: (err, variables, context) => {
-      queryClient.setQueryData(['tenantNotifications', tenantId], context.previousNotifications);
-      showErrorToast('Failed to mark notifications as read');
-    },
-    onSuccess: () => {
-      showSuccessToast('All notifications marked as read');
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['tenantNotifications', tenantId] });
+      setMaintenanceRequests(
+        maintResult.status === 'fulfilled' && Array.isArray(maintResult.value) ? maintResult.value : []
+      );
+      setPaymentHistory(
+        payResult.status   === 'fulfilled' && Array.isArray(payResult.value)   ? payResult.value   : []
+      );
+
+      [favResult, notifResult, maintResult, payResult].forEach((r, i) => {
+        if (r.status === 'rejected') console.warn(`Dashboard fetch [${i}] failed:`, r.reason);
+      });
+    } catch (err) {
+      console.error('Fatal dashboard fetch error:', err);
+      setFetchError('Failed to load your dashboard. Please check your connection and try again.');
+      showErrorToast('Failed to load dashboard data');
+    } finally {
+      setIsLoading(false);
     }
-  });
+  }, []);
 
-  const handleMarkAsRead = useCallback((id) => {
-    markAsReadMutation.mutate(id);
-  }, [markAsReadMutation]);
-
-  const handleDeleteNotification = useCallback((id) => {
-    queryClient.setQueryData(['tenantNotifications', tenantId], (old) =>
-      Array.isArray(old) ? old.filter(n => n._id !== id && n.id !== id) : []
-    );
-  }, [queryClient, tenantId]);
-
-  const handleMarkAllAsRead = useCallback(() => {
-    markAllAsReadMutation.mutate();
-  }, [markAllAsReadMutation]);
+  useEffect(() => { fetchDashboardData(); }, [fetchDashboardData]);
 
   // -------------------------------------------------------------------------
   // Derived stats — real API data
@@ -376,98 +312,71 @@ const TenantDashboard = () => {
       value: favouriteProperties.length,
       change: favouriteProperties.length > 0 ? `+${favouriteProperties.length}` : '0',
       trend: favouriteProperties.length > 0 ? 'up' : 'down',
-      color: darkMode ? 'from-amber-400 to-amber-600' : 'from-amber-500 to-amber-700',
+      color: darkMode ? 'from-amber-500 to-amber-600' : 'from-amber-500 to-amber-600',
     },
     {
       icon: Bell, title: t('tenant.unreadNotifications'),
       value: notifications.filter(n => !n.read).length,
       change: String(notifications.filter(n => !n.read).length),
       trend: 'up',
-      color: darkMode ? 'from-yellow-400 to-amber-500' : 'from-yellow-500 to-amber-600',
+      color: darkMode ? 'from-amber-600 to-orange-600' : 'from-amber-500 to-orange-500',
     },
     {
       icon: Wrench, title: t('tenant.maintenanceRequests'),
       value: maintenanceRequests.length,
       change: String(maintenanceRequests.length),
       trend: maintenanceRequests.length > 0 ? 'down' : 'up',
-      color: darkMode ? 'from-orange-400 to-amber-500' : 'from-orange-500 to-amber-600',
+      color: darkMode ? 'from-amber-500 to-amber-700' : 'from-amber-400 to-amber-600',
     },
     {
       icon: CreditCard, title: t('tenant.paymentsMade'),
       value: paymentHistory.filter(p => p.status === 'Paid' || p.status === 'paid').length,
       change: String(paymentHistory.filter(p => p.status === 'Paid' || p.status === 'paid').length),
       trend: 'up',
-      color: darkMode ? 'from-amber-500 to-yellow-600' : 'from-amber-600 to-yellow-700',
+      color: darkMode ? 'from-slate-700 to-slate-800' : 'from-slate-800 to-slate-900',
     },
   ], [darkMode, favouriteProperties, notifications, maintenanceRequests, paymentHistory, t]);
 
-  const activityMetrics = useMemo(() => [
-    {
-      value: notifications.filter(n => !n.read).length,
-      label: t('tenant.unreadNotifications'),
-      color: darkMode ? 'text-cyan-400'   : 'text-indigo-600',
-    },
-    {
-      value: maintenanceRequests.length,
-      label: t('tenant.totalRequests'),
-      color: darkMode ? 'text-indigo-400' : 'text-purple-600',
-    },
-    {
-      value: favouriteProperties.length,
-      label: t('tenant.savedProperties'),
-      color: darkMode ? 'text-purple-400' : 'text-pink-600',
-    },
-  ], [darkMode, notifications, maintenanceRequests, favouriteProperties, t]);
+  const activityMetrics = useMemo(() => {
+    const theme = getDashboardTheme(darkMode);
+    return [
+      {
+        value: notifications.filter(n => !n.read).length,
+        label: t('tenant.unreadNotifications'),
+        color: theme.metricColors[0],
+      },
+      {
+        value: maintenanceRequests.length,
+        label: t('tenant.totalRequests'),
+        color: theme.metricColors[1],
+      },
+      {
+        value: favouriteProperties.length,
+        label: t('tenant.savedProperties'),
+        color: theme.metricColors[2],
+      },
+    ];
+  }, [darkMode, notifications, maintenanceRequests, favouriteProperties, t]);
 
-  // -------------------------------------------------------------------------
-  // Theme config
-  // -------------------------------------------------------------------------
-  const tc = darkMode
-    ? {
-        mainBg: 'from-black via-zinc-950 to-amber-950/20',
-        loadingBg: 'from-black via-zinc-950 to-amber-950/20',
-        cardBg: 'bg-zinc-900/60', cardBorder: 'border-amber-500/10',
-        textPrimary: 'text-slate-100', textSecondary: 'text-amber-400',
-        headerGradient: 'from-amber-200 via-yellow-400 to-amber-500',
-        tabBg: 'bg-zinc-900/50', tabBorder: 'border-zinc-850',
-        tabActive: 'from-amber-500 to-yellow-600', tabActiveText: 'text-slate-950 font-black',
-        tabInactive: 'text-slate-400 hover:text-amber-400 hover:bg-zinc-800/50',
-        buttonPrimary: 'from-amber-500 to-yellow-600',
-        buttonSecondary: 'bg-zinc-900 hover:bg-zinc-800 text-amber-500 border border-amber-500/30',
-        iconTrend: 'text-amber-400',
-        spinnerBorder: 'border-amber-500/30 border-t-amber-500',
-      }
-    : {
-        mainBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
-        loadingBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
-        cardBg: 'bg-white/80', cardBorder: 'border-amber-200/50',
-        textPrimary: 'text-stone-900', textSecondary: 'text-amber-700',
-        headerGradient: 'from-amber-800 via-yellow-800 to-amber-900',
-        tabBg: 'bg-white/40', tabBorder: 'border-amber-200/50',
-        tabActive: 'from-amber-600 to-yellow-600', tabActiveText: 'text-white font-black',
-        tabInactive: 'text-amber-700 hover:text-amber-900 hover:bg-white/60',
-        buttonPrimary: 'from-amber-600 to-yellow-600',
-        buttonSecondary: 'bg-stone-100 hover:bg-stone-200 text-amber-800 border border-amber-200/50',
-        iconTrend: 'text-amber-600',
-        spinnerBorder: 'border-amber-400/40 border-t-amber-600',
-      };
+  const tc = getDashboardTheme(darkMode);
 
   // -------------------------------------------------------------------------
   // Loading skeleton
   // -------------------------------------------------------------------------
   if (isLoading) {
     return (
-      <div className={`min-h-screen bg-gradient-to-br ${tc.loadingBg} flex`}>
-        <div className={`w-[4.5rem] ${darkMode ? 'bg-slate-900/60' : 'bg-white/30'}`} />
-        <div className="flex-1 flex flex-col">
-          <div className={`h-16 border-b ${darkMode ? 'bg-slate-900/60 border-slate-700' : 'bg-white/60 border-indigo-200'}`} />
+      <div className={`min-h-screen bg-gradient-to-br ${tc.loadingBg} flex relative`}>
+        <div className="absolute inset-0 opacity-[0.25]" style={dotPatternStyle} />
+        <div className={`w-[4.5rem] ${darkMode ? 'bg-slate-950/60' : 'bg-white'}`} />
+        <div className="flex-1 flex flex-col relative z-10">
+          <div className={`h-16 border-b ${darkMode ? 'bg-slate-950/60 border-slate-800' : 'bg-white/80 border-amber-100'}`} />
           <main className="flex-1 p-6 space-y-6">
-            <div className={`h-10 w-64 rounded-xl mx-auto animate-pulse ${darkMode ? 'bg-slate-700' : 'bg-white/60'}`} />
-            <div className={`h-5 w-96 rounded mx-auto animate-pulse ${darkMode ? 'bg-slate-700/60' : 'bg-white/40'}`} />
+            <div className={`h-10 w-64 rounded-xl mx-auto animate-pulse ${darkMode ? 'bg-slate-800' : 'bg-white'}`} />
+            <div className={`h-5 w-96 rounded mx-auto animate-pulse ${darkMode ? 'bg-slate-800/60' : 'bg-slate-100'}`} />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
               {[0,1,2,3].map(i => <SkeletonCard key={i} isDark={darkMode} />)}
             </div>
-            <div className={`h-48 w-full rounded-3xl animate-pulse ${darkMode ? 'bg-slate-800/60' : 'bg-white/50'}`} />
+            <div className={`h-48 w-full rounded-3xl animate-pulse ${darkMode ? 'bg-slate-900/60' : 'bg-white'}`} />
           </main>
         </div>
       </div>
@@ -478,7 +387,9 @@ const TenantDashboard = () => {
   // Render
   // -------------------------------------------------------------------------
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${tc.mainBg} flex relative`}>
+    <div className={`min-h-screen bg-gradient-to-br ${tc.pageBgGradient} flex relative transition-colors duration-500`}>
+      <div className="absolute inset-0 opacity-[0.25] dark:opacity-[0.12] pointer-events-none" style={dotPatternStyle} />
+      <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-amber-400/10 rounded-full blur-[120px] pointer-events-none" />
       <TenantSideBar setCurrentSection={setCurrentSection} />
 
       <div
@@ -492,15 +403,16 @@ const TenantDashboard = () => {
 
             {/* Error banner */}
             {fetchError && (
-              <ErrorBanner message={fetchError} onRetry={handleRetry} isDark={darkMode} />
+              <ErrorBanner message={fetchError} onRetry={fetchDashboardData} isDark={darkMode} />
             )}
 
             {/* Header — no animate-pulse on text */}
             <div className="text-center mb-12">
-              <h1 className={`text-4xl font-bold bg-gradient-to-r ${tc.headerGradient} bg-clip-text text-transparent mb-4`}>
+              <h1 className={`text-4xl md:text-5xl font-black tracking-tighter mb-4 ${tc.headerTitle}`}>
                 {t('tenant.welcomeBack')}{profile?.name ? `, ${profile.name.split(' ')[0]}` : ''}!
               </h1>
-              <p className={`text-lg ${tc.textSecondary} max-w-2xl mx-auto leading-relaxed`}>
+              <div className="w-24 h-1.5 bg-amber-500 mx-auto rounded-full mb-4" />
+              <p className={`text-lg ${tc.textSecondary} max-w-2xl mx-auto leading-relaxed font-medium`}>
                 {t('tenant.dashboardSubtitle')}
               </p>
             </div>
@@ -525,10 +437,10 @@ const TenantDashboard = () => {
                     if (action === 'tab') { setCurrentSection('Dashboard'); navigate('/tenant'); }
                     else navigate(route);
                   }}
-                  className={`flex items-center space-x-3 px-6 py-3 rounded-2xl font-bold text-sm ${
+                  className={`flex items-center space-x-3 px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-widest ${
                     (action === 'tab' && location.pathname === '/tenant') ||
                     (action === 'navigate' && location.pathname === route)
-                      ? `bg-gradient-to-r ${tc.tabActive} ${tc.tabActiveText}`
+                      ? `${tc.tabActive} ${tc.tabActiveText} shadow-[0_10px_30px_rgba(245,158,11,0.3)]`
                       : tc.tabInactive
                   }`}
                 >
@@ -543,8 +455,8 @@ const TenantDashboard = () => {
               <div className="space-y-10">
 
                 {/* Quick Actions */}
-                <div className={`${tc.cardBg} backdrop-blur-xl border ${tc.cardBorder} rounded-3xl p-8`}>
-                  <h2 className={`text-3xl font-bold ${tc.textPrimary} mb-8`}>{t('tenant.quickActions')}</h2>
+                <div className={`${tc.cardBg} backdrop-blur-xl border ${tc.cardBorder} rounded-3xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.04)]`}>
+                  <h2 className={`text-3xl font-black ${tc.textPrimary} mb-8`}>{t('tenant.quickActions')}</h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {[
                       { id: 'viewProps', labelKey: 'tenant.viewProperties', descKey: 'tenant.browseRentals', icon: Building2, color: tc.buttonPrimary,   onClick: () => navigate('/tenant/properties') },
@@ -552,7 +464,7 @@ const TenantDashboard = () => {
                       { id: 'notif', labelKey: 'tenant.viewNotifications', descKey: 'tenant.checkAlerts', icon: Bell, color: tc.buttonSecondary, onClick: () => setCurrentSection('Notifications') },
                     ].map((action) => (
                       <button key={action.id} onClick={action.onClick}
-                        className={`group relative p-8 bg-gradient-to-br ${action.color} rounded-2xl text-white font-bold shadow-sm text-base hover:opacity-95`}
+                        className={`group relative p-8 bg-gradient-to-br ${action.color} rounded-2xl text-white font-black shadow-[0_20px_50px_rgba(245,158,11,0.2)] text-base hover:-translate-y-1 transition-all duration-300`}
                       >
                         <div className="mb-4"><action.icon className="w-8 h-8 mx-auto" /></div>
                         <div className="text-lg font-bold mb-2">{t(action.labelKey)}</div>
@@ -563,83 +475,23 @@ const TenantDashboard = () => {
                 </div>
 
                 {/* Recent Activity — real counts */}
-                <div className={`${tc.cardBg} backdrop-blur-xl border ${tc.cardBorder} rounded-3xl p-8`}>
-                  <h2 className={`text-3xl font-bold ${tc.textPrimary} mb-8 flex items-center space-x-4`}>
-                    <TrendingUp className={`w-8 h-8 ${tc.iconTrend}`} />
+                <div className={`${tc.cardBg} backdrop-blur-xl border ${tc.cardBorder} rounded-3xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.04)]`}>
+                  <h2 className={`text-3xl font-black ${tc.textPrimary} mb-8 flex items-center space-x-4`}>
+                    <TrendingUp className={`w-8 h-8 ${tc.iconAccent}`} />
                     <span>{t('tenant.recentActivity')}</span>
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {activityMetrics.map((metric) => (
                       <div key={metric.label}
-                        className={`text-center p-8 ${
-                          darkMode ? 'bg-slate-900/60 border-slate-700/50' : 'bg-white/60 border-indigo-200/50'
-                        } rounded-2xl border backdrop-blur-sm`}
+                        className={`text-center p-8 rounded-2xl border backdrop-blur-sm ${tc.metricCard}`}
                       >
-                        <div className={`text-4xl font-bold ${metric.color} mb-3`}>{metric.value}</div>
-                        <div className={`${tc.textSecondary} text-lg font-semibold`}>{metric.label}</div>
+                        <div className={`text-4xl font-black ${metric.color} mb-3`}>{metric.value}</div>
+                        <div className={`${tc.textSecondary} text-sm font-black uppercase tracking-widest`}>{metric.label}</div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-              </div>
-            )}
-
-            {/* Notifications Content */}
-            {currentSection === 'Notifications' && (
-              <div className="space-y-10">
-                <div className={`${tc.cardBg} backdrop-blur-xl border ${tc.cardBorder} rounded-3xl p-8`}>
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                    <div>
-                      <h2 className={`text-3xl font-bold ${tc.textPrimary} mb-2 flex items-center gap-3`}>
-                        <Bell className="w-8 h-8 text-amber-500" />
-                        <span>{t('tenant.notifications') || 'Notifications'}</span>
-                      </h2>
-                      <p className={`text-sm ${tc.textSecondary}`}>
-                        Stay updated with real-time property, billing, and maintenance alerts.
-                      </p>
-                    </div>
-                    {notifications.some(n => !n.read) && (
-                      <button
-                        onClick={handleMarkAllAsRead}
-                        className={`px-5 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r ${tc.buttonPrimary} text-slate-950 hover:opacity-95 shadow-sm transition-all duration-300`}
-                      >
-                        Mark All as Read
-                      </button>
-                    )}
-                  </div>
-
-                  {notifications.length === 0 ? (
-                    <div className="text-center py-16">
-                      <Bell className="w-16 h-16 text-zinc-600 mx-auto mb-4 opacity-40 animate-pulse" />
-                      <p className={`text-lg font-semibold ${tc.textPrimary} mb-1`}>No Notifications Yet</p>
-                      <p className={`text-sm ${tc.textSecondary} max-w-sm mx-auto`}>
-                        We'll alert you here when there are updates about your properties, rents, or maintenance tickets.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 gap-4">
-                      {notifications.map((notif) => (
-                        <NotificationItem
-                          key={notif._id || notif.id}
-                          notification={{
-                            id: notif._id || notif.id,
-                            title: notif.title,
-                            message: notif.message,
-                            type: notif.type || 'general',
-                            read: notif.read,
-                            time: notif.createdAt ? new Date(notif.createdAt).toLocaleString(undefined, {
-                              dateStyle: 'short',
-                              timeStyle: 'short'
-                            }) : notif.time || 'Just now'
-                          }}
-                          onMarkAsRead={handleMarkAsRead}
-                          onDelete={handleDeleteNotification}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
               </div>
             )}
 

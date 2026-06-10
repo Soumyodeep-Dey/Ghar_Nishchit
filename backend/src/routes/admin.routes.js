@@ -9,6 +9,11 @@ import {
   updateMaintenanceStatus,
   broadcastNotification,
 } from '../controllers/admin.controller.js';
+import {
+  getAllSupportRequests,
+  updateSupportStatus,
+  adminReplyToSupport,
+} from '../controllers/support.controller.js';
 
 const router = express.Router();
 
@@ -31,5 +36,10 @@ router.put('/maintenance-status/:id', updateMaintenanceStatus);
 
 // Broadcast notification
 router.post('/broadcast', broadcastNotification);
+
+// Help / support requests
+router.get('/support', getAllSupportRequests);
+router.put('/support-status/:id', updateSupportStatus);
+router.post('/support/:id/reply', adminReplyToSupport);
 
 export default router;

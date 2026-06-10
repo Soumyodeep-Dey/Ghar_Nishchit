@@ -93,7 +93,7 @@ export default function RazorpayCheckout({
         },
 
         theme: {
-          color:          '#01696f',          // Ghar Nishchit teal
+          color:          '#d97706',          // Ghar Nishchit amber
           backdrop_color: 'rgba(0,0,0,0.6)',
         },
 

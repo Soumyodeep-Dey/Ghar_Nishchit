@@ -1,7 +1,7 @@
 /* =============================================================
    LandlordRazorpayCheckout.css
    Subscription payment widget for landlords.
-   Mirrors tenant's RazorpayCheckout.css — Nexus teal palette.
+   Mirrors tenant's RazorpayCheckout.css — Ghar Nishchit amber palette.
    Supports light + dark mode via prefers-color-scheme
    and [data-theme="dark"] for the manual toggle.
    ============================================================= */
@@ -71,7 +71,7 @@
 }
 
 .lrzp-plan-summary__row--total span {
-  color:       #01696f !important;
+  color:       #d97706 !important;
   font-size:   1.05rem;
 }
 
@@ -90,7 +90,7 @@
   padding:         12px 28px;
   min-width:       200px;
   min-height:      44px;      /* accessibility: 44 px touch target */
-  background-color: #01696f;
+  background-color: #d97706;
   color:           #ffffff;
   border:          none;
   border-radius:   8px;
@@ -102,20 +102,20 @@
     background-color 180ms cubic-bezier(0.16, 1, 0.3, 1),
     transform        120ms cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow       180ms cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 3px rgba(1, 105, 111, 0.3);
+  box-shadow: 0 1px 3px rgba(217, 119, 6, 0.3);
   width: 100%;
 }
 
 .lrzp-pay-btn:hover:not(:disabled) {
-  background-color: #0c4e54;
-  box-shadow:       0 4px 12px rgba(1, 105, 111, 0.35);
+  background-color: #b45309;
+  box-shadow:       0 4px 12px rgba(217, 119, 6, 0.35);
   transform:        translateY(-1px);
 }
 
 .lrzp-pay-btn:active:not(:disabled) {
-  background-color: #0f3638;
+  background-color: #92400e;
   transform:        translateY(0);
-  box-shadow:       0 1px 3px rgba(1, 105, 111, 0.2);
+  box-shadow:       0 1px 3px rgba(217, 119, 6, 0.2);
 }
 
 .lrzp-pay-btn:disabled,
@@ -237,7 +237,7 @@
   }
 
   .lrzp-plan-summary__row--total span {
-    color: #4f98a3 !important;
+    color: #f59e0b !important;
   }
 
   .lrzp-plan-summary__divider {
@@ -245,17 +245,17 @@
   }
 
   .lrzp-pay-btn {
-    background-color: #4f98a3;
+    background-color: #f59e0b;
     box-shadow:       0 1px 3px rgba(0, 0, 0, 0.4);
   }
 
   .lrzp-pay-btn:hover:not(:disabled) {
-    background-color: #227f8b;
+    background-color: #d97706;
     box-shadow:       0 4px 12px rgba(0, 0, 0, 0.5);
   }
 
   .lrzp-pay-btn:active:not(:disabled) {
-    background-color: #1a626b;
+    background-color: #b45309;
   }
 
   .lrzp-banner--success {
@@ -305,7 +305,7 @@
 }
 
 [data-theme="dark"] .lrzp-plan-summary__row--total span {
-  color: #4f98a3 !important;
+  color: #f59e0b !important;
 }
 
 [data-theme="dark"] .lrzp-plan-summary__divider {
@@ -313,7 +313,7 @@
 }
 
 [data-theme="dark"] .lrzp-pay-btn {
-  background-color: #4f98a3;
+  background-color: #f59e0b;
   box-shadow:       0 1px 3px rgba(0, 0, 0, 0.4);
 }
 

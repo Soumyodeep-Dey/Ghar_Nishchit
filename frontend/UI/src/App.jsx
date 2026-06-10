@@ -27,6 +27,7 @@ const TenantMaintenance = lazy(() => import('./components/Pages/TENANT/TenantMai
 const TenantPayment = lazy(() => import('./components/Pages/TENANT/TenantPayment'));
 const UpdateTenantProfile = lazy(() => import('./components/Pages/TENANT/UpdateTenantProfile'));
 const TenantContracts = lazy(() => import('./components/Pages/TENANT/TenantContracts'));
+const HelpSupport = lazy(() => import('./components/Pages/HelpSupport'));
 
 const LandlordDashboard = lazy(() => import('./components/Pages/LANDLORD/LandlordDashboard'));
 const LandlordProperty = lazy(() => import('./components/Pages/LANDLORD/LandlordProperty'));
@@ -135,6 +136,14 @@ export default function App() {
               }
             />
             <Route
+              path="/tenant/help"
+              element={
+                <ProtectedRoute requiredRole="tenant">
+                  <HelpSupport portal="tenant" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/landlord"
               element={
                 <ProtectedRoute requiredRole="landlord">
@@ -187,6 +196,14 @@ export default function App() {
               element={
                 <ProtectedRoute requiredRole="landlord">
                   <UpdateLandlordProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/landlord/help"
+              element={
+                <ProtectedRoute requiredRole="landlord">
+                  <HelpSupport portal="landlord" />
                 </ProtectedRoute>
               }
             />

@@ -4,6 +4,7 @@ import { User, Mail, Lock, Phone, Eye, EyeOff, ArrowLeft, Home, Sparkles, Shield
 import { useDarkMode } from '../../useDarkMode.js';
 import { signInWithGoogle, handleGoogleRedirectResult } from '../../firebase.js';
 import { showSuccessToast, showErrorToast } from '../../utils/toast.jsx';
+import { setAuthSession, getRoleDashboardPath } from '../../services/authService.js';
 
 const GoogleIcon = () => (
   <span
@@ -96,16 +97,10 @@ export default function SignUp() {
       }
       
       const data = await response.json();
-      const { token, user } = data;
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      const { user } = data;
+      setAuthSession(data);
       showSuccessToast("Registered successfully!");
-      const userRole = user.role || (user.roles && user.roles[0]) || '';
-      setTimeout(() => {
-        if (userRole.toLowerCase() === 'tenant') navigate('/tenant');
-        else if (userRole.toLowerCase() === 'landlord') navigate('/landlord');
-        else navigate('/');
-      }, 1000);
+      setTimeout(() => navigate(getRoleDashboardPath(user)), 1000);
     } catch (err) {
       console.error(err);
       showErrorToast(err.message || "Error during registration.");
@@ -223,7 +218,7 @@ export default function SignUp() {
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 transition-all outline-none font-bold text-sm ${darkMode ? 'bg-slate-800/50 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
+                      className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 transition-all outline-none font-bold text-sm ${darkMode ? 'bg-slate-900/80 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
                       placeholder="John Doe"
                       required
                     />
@@ -239,7 +234,7 @@ export default function SignUp() {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 transition-all outline-none font-bold text-sm ${darkMode ? 'bg-slate-800/50 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
+                      className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 transition-all outline-none font-bold text-sm ${darkMode ? 'bg-slate-900/80 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
                       placeholder="you@example.com"
                       required
                     />
@@ -255,7 +250,7 @@ export default function SignUp() {
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 transition-all outline-none font-bold text-sm ${darkMode ? 'bg-slate-800/50 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
+                      className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 transition-all outline-none font-bold text-sm ${darkMode ? 'bg-slate-900/80 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
                       placeholder="+91 00000 00000"
                       required
                     />
@@ -283,7 +278,7 @@ export default function SignUp() {
                       name="password"
                       value={formData.password}
                       onChange={handlePasswordChange}
-                      className={`w-full pl-12 pr-12 py-4 rounded-2xl border-2 transition-all outline-none font-bold text-sm ${darkMode ? 'bg-slate-800/50 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
+                      className={`w-full pl-12 pr-12 py-4 rounded-2xl border-2 transition-all outline-none font-bold text-sm ${darkMode ? 'bg-slate-900/80 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
                       placeholder="••••••••"
                       required
                     />

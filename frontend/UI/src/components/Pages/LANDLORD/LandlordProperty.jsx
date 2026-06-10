@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../../services/api.js';
-import { showConfirmToast, showErrorToast, showSuccessToast } from '../../../utils/toast.jsx';
+import { showConfirmToast } from '../../../utils/toast.jsx';
 
 // Ensure 'motion' symbol is referenced to satisfy some linters that may report it as unused
 void motion;
@@ -124,7 +124,7 @@ const PropertyDropdownMenu = ({ property, onEdit, onDelete, onView, onToggleStat
               onClick={() => { onView(property); setShowMenu(false); }}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
             >
-              <div className={`p-2 rounded-lg ${darkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-600'} group-hover:scale-110 transition-transform`}>
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-50 text-amber-600'} group-hover:scale-110 transition-transform`}>
                 <Eye className="w-4 h-4" />
               </div>
               <div className="flex-1 text-left">
@@ -153,7 +153,7 @@ const PropertyDropdownMenu = ({ property, onEdit, onDelete, onView, onToggleStat
               whileTap={{ scale: 0.98 }}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
             >
-              <div className={`p-2 rounded-lg ${darkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-100 text-purple-600'} group-hover:scale-110 transition-transform`}>
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-100 text-amber-600'} group-hover:scale-110 transition-transform`}>
                 <Share2 className="w-4 h-4" />
               </div>
               <div className="flex-1 text-left">
@@ -167,7 +167,7 @@ const PropertyDropdownMenu = ({ property, onEdit, onDelete, onView, onToggleStat
               whileTap={{ scale: 0.98 }}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${theme.menuItem} hover:shadow-lg`}
             >
-              <div className={`p-2 rounded-lg ${darkMode ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600'} group-hover:scale-110 transition-transform`}>
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-50 text-amber-600'} group-hover:scale-110 transition-transform`}>
                 <Download className="w-4 h-4" />
               </div>
               <div className="flex-1 text-left">
@@ -248,14 +248,14 @@ const PropertyDetailsModal = ({ isOpen, onClose, property, isDark }) => {
             <img 
               src={property.images[0]} 
               alt={property.title}
-              className="w-full h-full object-contain bg-slate-100 dark:bg-slate-900/50"
+              className="w-full h-full object-cover"
               onError={(e) => {
                 e.target.onerror = null;
                 e.target.src = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
               }}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500/20 to-purple-600/20">
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-500/20 to-amber-600/20">
                <Building2 className="w-20 h-20 opacity-30" />
             </div>
           )}
@@ -264,7 +264,7 @@ const PropertyDetailsModal = ({ isOpen, onClose, property, isDark }) => {
           </div>
           <div className="absolute bottom-4 left-4">
              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold backdrop-blur-md bg-white/95 text-slate-900 shadow-xl">
-                <CheckCircle className={`w-4 h-4 ${property.status === 'Available' ? 'text-emerald-600' : property.status === 'Occupied' ? 'text-blue-600' : 'text-orange-600'}`} />
+                <CheckCircle className={`w-4 h-4 ${property.status === 'Available' ? 'text-emerald-600' : property.status === 'Occupied' ? 'text-amber-600' : 'text-orange-600'}`} />
                 <span>{property.status}</span>
              </span>
           </div>
@@ -280,20 +280,20 @@ const PropertyDetailsModal = ({ isOpen, onClose, property, isDark }) => {
                   {property.title}
                 </h3>
                 <p className="text-lg opacity-80 flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-indigo-500" />
+                  <MapPin className="w-5 h-5 text-amber-600" />
                   <span>{property.location || 'No location specified'}</span>
                 </p>
               </div>
 
               {property.description && (
-                <div className={`${isDark ? 'bg-slate-800/50' : 'bg-slate-100/80'} p-4 rounded-xl`}>
+                <div className={`${isDark ? 'bg-slate-900/80' : 'bg-slate-100/80'} p-4 rounded-xl`}>
                   <p className="text-sm opacity-90 leading-relaxed">{property.description}</p>
                 </div>
               )}
 
               <div className="flex flex-wrap gap-4 pt-2">
-                <div className={`flex items-center gap-3 ${isDark ? 'bg-indigo-500/10' : 'bg-indigo-50'} px-4 py-3 rounded-2xl flex-1 min-w-[120px]`}>
-                  <div className={`p-2 ${isDark ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-200 text-indigo-600'} rounded-xl`}><Bed className="w-5 h-5" /></div>
+                <div className={`flex items-center gap-3 ${isDark ? 'bg-amber-500/10' : 'bg-amber-50'} px-4 py-3 rounded-2xl flex-1 min-w-[120px]`}>
+                  <div className={`p-2 ${isDark ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-100 text-amber-600'} rounded-xl`}><Bed className="w-5 h-5" /></div>
                   <div>
                     <p className="text-xs opacity-60 font-bold uppercase tracking-wider">Bedrooms</p>
                     <p className="font-bold text-xl">{property.bedrooms}</p>
@@ -306,8 +306,8 @@ const PropertyDetailsModal = ({ isOpen, onClose, property, isDark }) => {
                     <p className="font-bold text-xl">{property.bathrooms}</p>
                   </div>
                 </div>
-                <div className={`flex items-center gap-3 ${isDark ? 'bg-purple-500/10' : 'bg-purple-50'} px-4 py-3 rounded-2xl flex-1 min-w-[120px]`}>
-                  <div className={`p-2 ${isDark ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-200 text-purple-600'} rounded-xl`}><Maximize className="w-5 h-5" /></div>
+                <div className={`flex items-center gap-3 ${isDark ? 'bg-amber-500/10' : 'bg-amber-50'} px-4 py-3 rounded-2xl flex-1 min-w-[120px]`}>
+                  <div className={`p-2 ${isDark ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-100 text-amber-600'} rounded-xl`}><Maximize className="w-5 h-5" /></div>
                   <div>
                     <p className="text-xs opacity-60 font-bold uppercase tracking-wider">Area</p>
                     <p className="font-bold text-xl">{property.area} <span className="text-sm">sq ft</span></p>
@@ -382,7 +382,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
     if (darkMode) {
       return {
         cardBg: 'bg-white/10 backdrop-blur-xl border border-white/20',
-        listCardBg: 'bg-slate-800/80 border-slate-700/50 hover:border-cyan-400/30',
+        listCardBg: 'bg-slate-800/80 border-slate-700/50 hover:border-amber-500/30',
         title: 'text-white',
         text: 'text-white/70',
         subtleText: 'text-white/60',
@@ -392,7 +392,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
         deleteMenuItem: 'hover:bg-red-500/20 text-red-300',
         status: {
           Available: 'bg-green-500/20 text-green-300 border border-green-500/30',
-          Occupied: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
+          Occupied: 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
           Maintenance: 'bg-orange-500/20 text-orange-300 border border-orange-500/30',
         },
         amenityBg: 'bg-white/10',
@@ -405,24 +405,24 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
       };
     }
     return {
-      cardBg: 'bg-white/80 backdrop-blur-xl border border-indigo-200/50',
-      listCardBg: 'bg-white/80 border-indigo-200/50 hover:border-indigo-400/40',
-      title: 'text-indigo-900',
-      text: 'text-indigo-700/80',
-      subtleText: 'text-indigo-600/80',
-      icon: 'text-indigo-700/70',
-      menuBg: 'bg-white/90 border border-indigo-200/50',
-      menuItem: 'hover:bg-indigo-50 text-indigo-700',
+      cardBg: 'bg-white/80 backdrop-blur-xl border border-slate-100',
+      listCardBg: 'bg-white/80 border-slate-100 hover:border-amber-200',
+      title: 'text-slate-900',
+      text: 'text-amber-700/80',
+      subtleText: 'text-amber-600/80',
+      icon: 'text-amber-700/70',
+      menuBg: 'bg-white/90 border border-slate-100',
+      menuItem: 'hover:bg-amber-50 text-amber-700',
       deleteMenuItem: 'hover:bg-red-50 text-red-600',
       status: {
         Available: 'bg-green-100 text-green-800 border border-green-200',
-        Occupied: 'bg-blue-100 text-blue-800 border border-blue-200',
+        Occupied: 'bg-amber-50 text-amber-800 border border-amber-200',
         Maintenance: 'bg-orange-100 text-orange-800 border border-orange-200',
       },
-      amenityBg: 'bg-indigo-100/60',
-      amenityIcon: 'text-indigo-600',
-      price: 'text-indigo-900',
-      priceUnit: 'text-indigo-700/80',
+      amenityBg: 'bg-amber-50',
+      amenityIcon: 'text-amber-600',
+      price: 'text-slate-900',
+      priceUnit: 'text-amber-700/80',
       rating: 'text-yellow-500',
       trendUp: 'text-green-600',
       trendDown: 'text-red-600',
@@ -461,7 +461,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
         className={`backdrop-blur-xl border rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 group ${theme.listCardBg} relative overflow-visible`}
       >
         <div className="flex items-center space-x-6">
-          <div className="w-24 h-24 rounded-lg overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+          <div className="w-24 h-24 rounded-lg overflow-hidden bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center flex-shrink-0">
             {property.images?.[0] ? (
               <img 
                 src={property.images[0]} 
@@ -515,7 +515,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setShowMenu(!showMenu)}
-                className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10' : 'hover:bg-indigo-100'}`}
+                className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10' : 'hover:bg-amber-50'}`}
               >
                 <MoreVertical className={`w-5 h-5 ${theme.icon}`} />
               </motion.button>
@@ -561,14 +561,14 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
               <img
                 src={property.images[currentImageIndex]}
                 alt={property.title}
-                className="w-full h-full object-contain bg-slate-100 dark:bg-slate-900/50"
+                className="w-full h-full object-cover"
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
                 }}
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+              <div className="w-full h-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
                 <Building2 className="w-20 h-20 text-white/50" />
               </div>
             )}
@@ -656,7 +656,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setShowMenu(!showMenu)}
-              className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10' : 'hover:bg-indigo-100/80'}`}
+              className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10' : 'hover:bg-amber-50/80'}`}
             >
               <MoreVertical className={`w-5 h-5 ${theme.icon}`} />
             </motion.button>
@@ -702,7 +702,7 @@ const PropertyCard = ({ property, onEdit, onDelete, onView, onToggleStatus, dela
             </div>
           ))}
           {property.amenities?.length > 4 && (
-            <span className={`text-xs ${darkMode ? 'text-white/50' : 'text-indigo-500'}`}>+{property.amenities.length - 4} more</span>
+            <span className={`text-xs ${darkMode ? 'text-white/50' : 'text-amber-600'}`}>+{property.amenities.length - 4} more</span>
           )}
         </div>
 
@@ -994,7 +994,6 @@ const LandlordProperty = () => {
             console.log('🔄 Normalized server item:', serverItem);
             setProperties(prev => prev.map(p => p.id === serverItem.id || p.id === propertyData.id ? serverItem : p));
             console.log('✅ Property updated successfully in frontend!');
-            showSuccessToast('Property updated successfully!');
             setUpdateSuccess(true);
             setTimeout(() => setUpdateSuccess(false), 3000); // Hide success message after 3 seconds
           } else {
@@ -1002,7 +1001,8 @@ const LandlordProperty = () => {
           }
         } catch (err) {
           console.error('❌ Failed to update property on server:', err.message || err);
-          showErrorToast(err.message || 'Failed to update property on server');
+          console.error('❌ Error details:', err);
+          console.warn('Failed to update property on server, change kept locally', err.message || err);
         }
       })();
     } else {
@@ -1018,13 +1018,9 @@ const LandlordProperty = () => {
             // normalize server response into local shape
             const serverItem = normalizePropertyFromBackend(created);
             setProperties(prev => prev.map(p => p.id === tempId ? serverItem : p));
-            showSuccessToast('Property submitted successfully!');
           }
         } catch (err) {
-          console.error('Failed to create property on server:', err.message || err);
-          // Revert optimistic insert
-          setProperties(prev => prev.filter(p => p.id !== tempId));
-          showErrorToast(err.message || 'Failed to create property on server');
+          console.warn('Failed to create property on server, saved locally', err.message || err);
         }
       })();
     }
@@ -1049,14 +1045,8 @@ const LandlordProperty = () => {
     totalRevenue: monthlyRevenue !== null ? monthlyRevenue : properties.reduce((sum, p) => sum + (p.status === 'Occupied' ? parseInt(p.rent) : 0), 0)
   };
 
-  const tc = darkMode ? {
-    mainBg: 'from-black via-zinc-950 to-amber-950/20',
-  } : {
-    mainBg: 'from-amber-50/40 via-stone-50 to-orange-50/30',
-  };
-
   return (
-    <div className={`min-h-screen flex relative overflow-hidden bg-gradient-to-br ${tc.mainBg}`}>
+    <div className={`min-h-screen flex relative overflow-hidden ${darkMode ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950' : 'bg-gradient-to-r from-[#fafaf9] via-white to-[#fafaf9]'}`}>
       {/* Success Notification */}
       {updateSuccess && (
         <motion.div
@@ -1074,18 +1064,18 @@ const LandlordProperty = () => {
         <motion.div
           animate={{ rotate: 360, scale: [1, 1.1, 1] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className={`absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-purple-500/10 to-pink-500/10' : 'bg-gradient-to-r from-indigo-500/20 to-cyan-500/20'}`}
+          className={`absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-amber-500/10 to-amber-600/10' : 'bg-gradient-to-r from-amber-500/20 to-amber-600/10'}`}
         />
         <motion.div
           animate={{ rotate: -360, scale: [1.1, 1, 1.1] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10' : 'bg-gradient-to-r from-pink-500/20 to-purple-500/20'}`}
+          className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-amber-500/10 to-amber-600/10' : 'bg-gradient-to-r from-amber-100/20 to-amber-50/20'}`}
         />
       </div>
 
       <LandlordSideBar currentSection={currentSection} />
 
-      <div className="flex-1 flex flex-col relative z-10 transition-all duration-700" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
+      <div className={`flex-1 flex flex-col relative z-10 ${sidebarWidthClass} transition-all duration-700`}>
         <LandlordNavBar currentSection={currentSection} />
 
         <main className="flex-1 overflow-y-auto">
@@ -1098,7 +1088,7 @@ const LandlordProperty = () => {
               className="text-center mb-12"
             >
               <motion.h1
-                className={`text-5xl font-bold mb-4 bg-clip-text text-transparent ${darkMode ? 'bg-gradient-to-r from-white via-purple-200 to-white' : 'bg-gradient-to-r from-indigo-800 via-purple-800 to-indigo-800'}`}
+                className={`text-5xl font-bold mb-4 bg-clip-text text-transparent ${darkMode ? 'bg-gradient-to-r from-white via-amber-200 to-white' : 'bg-gradient-to-r from-slate-900 via-slate-800 to-amber-700'}`}
               >
                 Property Management Hub
               </motion.h1>
@@ -1106,7 +1096,7 @@ const LandlordProperty = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.6 }}
-                className={`text-xl max-w-2xl mx-auto ${darkMode ? 'text-white/70' : 'text-indigo-900/80'}`}
+                className={`text-xl max-w-2xl mx-auto ${darkMode ? 'text-white/70' : 'text-slate-900/80'}`}
               >
                 Manage, track, and optimize your property portfolio with advanced tools and analytics
               </motion.p>
@@ -1114,50 +1104,50 @@ const LandlordProperty = () => {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-              <AnimatedCard className={`backdrop-blur-xl rounded-xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
-                <Building2 className={`w-8 h-8 mx-auto mb-3 ${darkMode ? 'text-blue-400' : 'text-indigo-600'}`} />
-                <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.total}</div>
-                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Total Properties</div>
+              <AnimatedCard className={`backdrop-blur-xl rounded-xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-slate-100 shadow-md'}`}>
+                <Building2 className={`w-8 h-8 mx-auto mb-3 ${darkMode ? 'text-amber-400' : 'text-amber-600'}`} />
+                <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{stats.total}</div>
+                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-amber-700/70'}`}>Total Properties</div>
               </AnimatedCard>
 
-              <AnimatedCard delay={0.1} className={`backdrop-blur-xl rounded-xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
+              <AnimatedCard delay={0.1} className={`backdrop-blur-xl rounded-xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-slate-100 shadow-md'}`}>
                 <CheckCircle className={`w-8 h-8 mx-auto mb-3 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
-                <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.available}</div>
-                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Available</div>
+                <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{stats.available}</div>
+                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-amber-700/70'}`}>Available</div>
               </AnimatedCard>
 
-              <AnimatedCard delay={0.2} className={`backdrop-blur-xl rounded-xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
-                <Users className={`w-8 h-8 mx-auto mb-3 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`} />
-                <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.occupied}</div>
-                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Occupied</div>
+              <AnimatedCard delay={0.2} className={`backdrop-blur-xl rounded-xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-slate-100 shadow-md'}`}>
+                <Users className={`w-8 h-8 mx-auto mb-3 ${darkMode ? 'text-amber-400' : 'text-amber-600'}`} />
+                <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{stats.occupied}</div>
+                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-amber-700/70'}`}>Occupied</div>
               </AnimatedCard>
 
-              <AnimatedCard delay={0.3} className={`backdrop-blur-xl rounded-xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
+              <AnimatedCard delay={0.3} className={`backdrop-blur-xl rounded-xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-slate-100 shadow-md'}`}>
                 <Settings className={`w-8 h-8 mx-auto mb-3 ${darkMode ? 'text-orange-400' : 'text-orange-600'}`} />
-                <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.maintenance}</div>
-                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Maintenance</div>
+                <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{stats.maintenance}</div>
+                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-amber-700/70'}`}>Maintenance</div>
               </AnimatedCard>
 
-              <AnimatedCard delay={0.4} className={`backdrop-blur-xl rounded-xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
+              <AnimatedCard delay={0.4} className={`backdrop-blur-xl rounded-xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-slate-100 shadow-md'}`}>
                 <IndianRupee className={`w-8 h-8 mx-auto mb-3 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
-                <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>₹{stats.totalRevenue.toLocaleString()}</div>
-                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Monthly Revenue</div>
+                <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>₹{stats.totalRevenue.toLocaleString()}</div>
+                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-amber-700/70'}`}>Monthly Revenue</div>
               </AnimatedCard>
             </div>
 
             {/* Controls */}
-            <AnimatedCard delay={0.5} className={`backdrop-blur-xl rounded-2xl p-6 ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border-indigo-200/50'}`}>
+            <AnimatedCard delay={0.5} className={`backdrop-blur-xl rounded-2xl p-6 ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border-slate-100'}`}>
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                   {/* Search */}
                   <div className="relative">
-                    <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${darkMode ? 'text-white/50' : 'text-indigo-700/70'}`} />
+                    <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${darkMode ? 'text-white/50' : 'text-amber-700/70'}`} />
                     <input
                       type="text"
                       placeholder="Search properties..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className={`pl-10 pr-4 py-3 w-64 rounded-xl focus:outline-none transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white placeholder-white/50 focus:border-blue-500' : 'bg-white/50 border border-indigo-300 text-indigo-900 placeholder-indigo-700/50 focus:border-indigo-500'}`}
+                      className={`pl-10 pr-4 py-3 w-64 rounded-xl focus:outline-none transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white placeholder-white/50 focus:border-amber-500' : 'bg-white/50 border border-amber-200 text-slate-900 placeholder-slate-400 focus:border-amber-500'}`}
                     />
                   </div>
 
@@ -1166,14 +1156,14 @@ const LandlordProperty = () => {
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className={`pl-4 pr-10 py-3 rounded-xl focus:outline-none transition-colors appearance-none ${darkMode ? 'bg-slate-800 border border-slate-700 text-white focus:border-cyan-500' : 'bg-white/50 border border-indigo-300 text-indigo-900 focus:border-indigo-500'}`}
+                      className={`pl-4 pr-10 py-3 rounded-xl focus:outline-none transition-colors appearance-none ${darkMode ? 'bg-slate-800 border border-slate-700 text-white focus:border-amber-500' : 'bg-white/50 border border-amber-200 text-slate-900 focus:border-amber-500'}`}
                     >
                       <option value="All">All Status</option>
                       <option value="Available">Available</option>
                       <option value="Occupied">Occupied</option>
                       <option value="Maintenance">Maintenance</option>
                     </select>
-                    <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none ${darkMode ? 'text-white/50' : 'text-indigo-700/70'}`} />
+                    <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none ${darkMode ? 'text-white/50' : 'text-amber-700/70'}`} />
                   </div>
 
                   {/* Sort */}
@@ -1182,21 +1172,21 @@ const LandlordProperty = () => {
                       <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
-                        className={`pl-4 pr-10 py-3 rounded-xl focus:outline-none transition-colors appearance-none ${darkMode ? 'bg-slate-800 border border-slate-700 text-white focus:border-cyan-500' : 'bg-white/50 border border-indigo-300 text-indigo-900 focus:border-indigo-500'}`}
+                        className={`pl-4 pr-10 py-3 rounded-xl focus:outline-none transition-colors appearance-none ${darkMode ? 'bg-slate-800 border border-slate-700 text-white focus:border-amber-500' : 'bg-white/50 border border-amber-200 text-slate-900 focus:border-amber-500'}`}
                       >
                         <option value="title">Sort by Title</option>
                         <option value="rent">Sort by Rent</option>
                         <option value="location">Sort by Location</option>
                         <option value="createdAt">Sort by Date</option>
                       </select>
-                      <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none ${darkMode ? 'text-white/50' : 'text-indigo-700/70'}`} />
+                      <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none ${darkMode ? 'text-white/50' : 'text-amber-700/70'}`} />
                     </div>
 
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                      className={`p-3 rounded-xl transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white hover:bg-white/20' : 'bg-white/50 border border-indigo-300 text-indigo-900 hover:bg-white'}`}
+                      className={`p-3 rounded-xl transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white hover:bg-white/20' : 'bg-white/50 border border-amber-200 text-slate-900 hover:bg-white'}`}
                     >
                       {sortOrder === 'asc' ? <SortAsc className="w-5 h-5" /> : <SortDesc className="w-5 h-5" />}
                     </motion.button>
@@ -1205,12 +1195,12 @@ const LandlordProperty = () => {
 
                 <div className="flex items-center space-x-4">
                   {/* View Mode Toggle */}
-                  <div className={`rounded-xl p-1 ${darkMode ? 'bg-slate-800' : 'bg-indigo-200/50'}`}>
+                  <div className={`rounded-xl p-1 ${darkMode ? 'bg-slate-800' : 'bg-amber-100/50'}`}>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setViewMode('grid')}
-                      className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? (darkMode ? 'bg-cyan-500 text-white' : 'bg-indigo-600 text-white') : (darkMode ? 'text-slate-400 hover:text-white' : 'text-indigo-700 hover:text-indigo-900')
+                      className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? (darkMode ? 'bg-amber-500 text-white' : 'bg-amber-600 text-white') : (darkMode ? 'text-slate-400 hover:text-white' : 'text-amber-700 hover:text-slate-900')
                         }`}
                     >
                       <Grid3X3 className="w-5 h-5" />
@@ -1219,7 +1209,7 @@ const LandlordProperty = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setViewMode('list')}
-                      className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? (darkMode ? 'bg-cyan-500 text-white' : 'bg-indigo-600 text-white') : (darkMode ? 'text-slate-400 hover:text-white' : 'text-indigo-700 hover:text-indigo-900')
+                      className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? (darkMode ? 'bg-amber-500 text-white' : 'bg-amber-600 text-white') : (darkMode ? 'text-slate-400 hover:text-white' : 'text-amber-700 hover:text-slate-900')
                         }`}
                     >
                       <List className="w-5 h-5" />
@@ -1242,7 +1232,7 @@ const LandlordProperty = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleAddProperty}
-                    className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 flex items-center space-x-2 shadow-lg"
+                    className="px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-amber-700 transition-all duration-300 flex items-center space-x-2 shadow-lg"
                   >
                     <Plus className="w-5 h-5" />
                     <span>Add Property</span>
@@ -1255,9 +1245,9 @@ const LandlordProperty = () => {
             <AnimatedCard delay={0.6}>
               {filteredProperties.length === 0 ? (
                 <div className={`text-center py-20 rounded-2xl ${darkMode ? 'bg-white/5' : 'bg-white/50'}`}>
-                  <Building2 className={`w-20 h-20 mx-auto mb-6 ${darkMode ? 'text-white/30' : 'text-indigo-300'}`} />
-                  <h3 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-indigo-900'}`}>No Properties Found</h3>
-                  <p className={`mb-8 ${darkMode ? 'text-white/60' : 'text-indigo-700/80'}`}>
+                  <Building2 className={`w-20 h-20 mx-auto mb-6 ${darkMode ? 'text-white/30' : 'text-amber-300'}`} />
+                  <h3 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-slate-900'}`}>No Properties Found</h3>
+                  <p className={`mb-8 ${darkMode ? 'text-white/60' : 'text-amber-700/80'}`}>
                     {searchTerm || statusFilter !== 'All'
                       ? 'Try adjusting your search criteria or filters'
                       : 'Start by adding your first property to get started'
@@ -1267,7 +1257,7 @@ const LandlordProperty = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleAddProperty}
-                    className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 flex items-center space-x-2 mx-auto"
+                    className="px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-amber-700 transition-all duration-300 flex items-center space-x-2 mx-auto"
                   >
                     <Plus className="w-5 h-5" />
                     <span>Add Your First Property</span>

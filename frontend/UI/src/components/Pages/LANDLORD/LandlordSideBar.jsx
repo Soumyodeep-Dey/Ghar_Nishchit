@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Building2, Users, Wallet, Settings, MessageSquare, ChevronLeft, Crown, Sparkles, LogOut } from 'lucide-react';
+import { Home, Building2, Users, Wallet, Settings, MessageSquare, ChevronLeft, Crown, Sparkles, LogOut, LifeBuoy } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDarkMode } from '../../../useDarkMode.js';
 import { showConfirmToast } from '../../../utils/toast.jsx';
 import { useLanguage } from '../../../i18n/LanguageContext.jsx';
+import { getDashboardTheme, sidebarMenuColors } from '../../../styles/dashboardTheme.js';
+import { clearAuthSession } from '../../../services/authService.js';
 
 // Constants
 const SIDEBAR_WIDTHS = { collapsed: '4.5rem', expanded: '24rem' };
@@ -22,12 +24,13 @@ const USER_STATS = {
 
 // Menu configuration - Static list for better performance
 const MENU_ITEMS = [
-  { id: 'dashboard', labelKey: 'sidebar.dashboard', descKey: 'sidebar.descDashboard', icon: Home, route: '/landlord', badge: null, color: 'from-amber-400 via-amber-500 to-yellow-600', premium: true },
-  { id: 'properties', labelKey: 'sidebar.properties', descKey: 'sidebar.descLandlordProperties', icon: Building2, route: '/landlord/properties', badge: null, color: 'from-amber-400 via-amber-500 to-yellow-600', premium: true },
-  { id: 'tenants', labelKey: 'sidebar.tenants', descKey: 'sidebar.descTenants', icon: Users, route: '/landlord/tenants', badge: null, color: 'from-amber-400 via-amber-500 to-yellow-600', premium: true },
-  { id: 'payments', labelKey: 'sidebar.payments', descKey: 'sidebar.descLandlordPayments', icon: Wallet, route: '/landlord/payment', badge: null, color: 'from-amber-400 via-amber-500 to-yellow-600', premium: true },
-  { id: 'maintenance', labelKey: 'sidebar.maintenance', descKey: 'sidebar.descMaintenance', icon: Settings, route: '/landlord/maintenance', badge: null, color: 'from-amber-400 via-amber-500 to-yellow-600', premium: false },
-  { id: 'messages', labelKey: 'sidebar.messages', descKey: 'sidebar.descMessages', icon: MessageSquare, route: '/landlord/messages', badge: null, color: 'from-amber-400 via-amber-500 to-yellow-600', premium: false },
+  { id: 'dashboard', labelKey: 'sidebar.dashboard', descKey: 'sidebar.descDashboard', icon: Home, route: '/landlord', badge: null, color: sidebarMenuColors.dashboard, premium: true },
+  { id: 'properties', labelKey: 'sidebar.properties', descKey: 'sidebar.descLandlordProperties', icon: Building2, route: '/landlord/properties', badge: null, color: sidebarMenuColors.properties, premium: true },
+  { id: 'tenants', labelKey: 'sidebar.tenants', descKey: 'sidebar.descTenants', icon: Users, route: '/landlord/tenants', badge: null, color: sidebarMenuColors.tenants, premium: true },
+  { id: 'payments', labelKey: 'sidebar.payments', descKey: 'sidebar.descLandlordPayments', icon: Wallet, route: '/landlord/payment', badge: null, color: sidebarMenuColors.payments, premium: true },
+  { id: 'maintenance', labelKey: 'sidebar.maintenance', descKey: 'sidebar.descMaintenance', icon: Settings, route: '/landlord/maintenance', badge: null, color: sidebarMenuColors.maintenance, premium: false },
+  { id: 'messages', labelKey: 'sidebar.messages', descKey: 'sidebar.descMessages', icon: MessageSquare, route: '/landlord/messages', badge: null, color: sidebarMenuColors.messages, premium: false },
+  { id: 'help', labelKey: 'sidebar.help', descKey: 'sidebar.descHelp', icon: LifeBuoy, route: '/landlord/help', badge: null, color: sidebarMenuColors.help, premium: false },
 ];
 
 const LandlordSideBar = ({ onSectionChange }) => {
@@ -117,12 +120,25 @@ const LandlordSideBar = ({ onSectionChange }) => {
     showConfirmToast(
       t('common.logoutConfirm'),
       () => {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('userData');
-        // Redirect to home page
+        clearAuthSession();
         navigate('/');
       }
     );
+  };
+
+  const portalTheme = getDashboardTheme(isDark);
+  const themeClasses = {
+    shellBg: portalTheme.shellBg,
+    border: portalTheme.shellBorder,
+    overlay: isDark ? 'bg-slate-900/40' : 'bg-slate-900/30',
+    textPrimary: portalTheme.textPrimary,
+    textSecondary: portalTheme.textSecondary,
+    textMuted: isDark ? 'text-slate-500' : 'text-slate-400',
+    buttonIdle: isDark ? 'bg-slate-800/70 hover:bg-slate-700/60' : 'bg-white hover:bg-amber-50',
+    menuIdle: portalTheme.menuIdle,
+    tooltipBg: isDark ? 'bg-slate-900/95' : 'bg-white/95',
+    tooltipBorder: isDark ? 'border-slate-800' : 'border-amber-100',
+    footerText: portalTheme.textSecondary,
   };
 
   // Sub-components
@@ -144,21 +160,21 @@ const LandlordSideBar = ({ onSectionChange }) => {
             transition={{ duration: 0.4 }}
             className="relative"
           >
-            <div className="w-14 h-14 rounded-3xl bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:shadow-amber-500/20 transition-all duration-300">
+            <div className="w-14 h-14 rounded-[14px] bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-[0_8px_20px_rgba(217,119,6,0.3)] group-hover:shadow-xl group-hover:shadow-amber-500/20 transition-all duration-300">
               <Building2 className="w-8 h-8 text-white group-hover:scale-105 transition-transform duration-300" />
             </div>
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300 -z-10" />
+            <div className="absolute inset-0 rounded-[14px] bg-gradient-to-br from-amber-400 to-amber-600 opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300 -z-10" />
           </motion.div>
           {!isCollapsed && (
             <div className="flex flex-col">
               <h1
-                className={`text-2xl font-bold ${isDark ? 'text-slate-200' : 'text-slate-700'} transition-colors duration-300`}
+                className={`text-2xl font-black tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'} transition-colors duration-300`}
               >
                 {t('common.brandName')}
               </h1>
               <div className="flex items-center space-x-2">
                 <Crown className="w-3 h-3 text-amber-500" />
-                <span className={`text-sm ${themeClasses.textSecondary} font-medium transition-colors duration-300`}>{t('common.landlordPortal')}</span>
+                <span className={`text-[10px] font-black uppercase tracking-[0.4em] text-amber-600`}>{t('common.landlordPortal')}</span>
               </div>
             </div>
           )}
@@ -179,40 +195,12 @@ const LandlordSideBar = ({ onSectionChange }) => {
             transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
             className="group-hover:scale-110 transition-transform duration-300"
           >
-            <ChevronLeft className={`w-5 h-5 ${themeClasses.textSecondary} group-hover:text-amber-505 transition-colors duration-300`} />
+            <ChevronLeft className={`w-5 h-5 ${themeClasses.textSecondary} group-hover:text-amber-500 transition-colors duration-300`} />
           </motion.div>
         </motion.button>
       </div>
     </div>
   );
-
-  const themeClasses = isDark ? {
-    shellBg: 'from-black/95 via-zinc-950/95 to-black/95',
-    border: 'border-amber-500/10',
-    overlay: 'bg-black/40',
-    sectionCard: 'from-zinc-900/70 to-zinc-900/50',
-    textPrimary: 'text-slate-100',
-    textSecondary: 'text-amber-400',
-    textMuted: 'text-slate-400',
-    buttonIdle: 'bg-zinc-900/70 hover:bg-zinc-800/60',
-    menuIdle: 'hover:bg-zinc-900/70 hover:border-amber-500/20',
-    tooltipBg: 'bg-zinc-950/95',
-    tooltipBorder: 'border-amber-500/20',
-    footerText: 'text-slate-500',
-  } : {
-    shellBg: 'from-stone-50/95 via-amber-50/90 to-stone-50/95',
-    border: 'border-amber-200/40',
-    overlay: 'bg-slate-900/30',
-    sectionCard: 'from-white/60 to-amber-50/40',
-    textPrimary: 'text-stone-700',
-    textSecondary: 'text-amber-700',
-    textMuted: 'text-slate-500',
-    buttonIdle: 'bg-stone-100/80 hover:bg-stone-200/80',
-    menuIdle: 'hover:bg-amber-50/80 hover:border-amber-200/60',
-    tooltipBg: 'bg-white/95',
-    tooltipBorder: 'border-amber-200/60',
-    footerText: 'text-amber-700/60',
-  };
 
   return (
     <>
@@ -281,7 +269,7 @@ const LandlordSideBar = ({ onSectionChange }) => {
         {/* Soft static background glow — no continuous animation */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className={`absolute -top-32 -left-32 w-64 h-64 ${isDark ? 'bg-amber-500/5' : 'bg-amber-200/15'} rounded-full blur-3xl`} />
-          <div className={`absolute -bottom-32 -right-32 w-64 h-64 ${isDark ? 'bg-amber-500/5' : 'bg-amber-200/15'} rounded-full blur-3xl`} />
+          <div className={`absolute -bottom-32 -right-32 w-64 h-64 ${isDark ? 'bg-amber-600/5' : 'bg-amber-100/20'} rounded-full blur-3xl`} />
         </div>
 
         <SidebarHeader />
@@ -335,7 +323,7 @@ const LandlordSideBar = ({ onSectionChange }) => {
                           transition={{ duration: 0.3 }}
                           className="flex-1 ml-4 text-left"
                         >
-                          <div className={`font-bold text-lg transition-all duration-300 group-hover:translate-x-1 ${isItemActive(item) ? 'text-white group-hover:text-white/90' : `${themeClasses.textPrimary} group-hover:text-amber-500`}`}>
+                          <div className={`font-black text-lg transition-all duration-300 group-hover:translate-x-1 ${isItemActive(item) ? 'text-white group-hover:text-white/90' : `${themeClasses.textPrimary} group-hover:text-amber-600`}`}>
                             {t(item.labelKey)}
                           </div>
                           <div className={`text-sm transition-all duration-300 group-hover:translate-x-1 ${isItemActive(item) ? 'text-white/80 group-hover:text-white/70' : `${themeClasses.textMuted} group-hover:text-slate-600`}`}>

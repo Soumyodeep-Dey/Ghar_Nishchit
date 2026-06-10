@@ -10,7 +10,7 @@ export function useAdminData() {
   const EMPTY = {
     success: false,
     users: [], properties: [], contracts: [],
-    maintenance: [], payments: [], inquiries: [],
+    maintenance: [], payments: [], inquiries: [], supportRequests: [],
     analytics: {
       totalUsers: 0, totalLandlords: 0, totalTenants: 0,
       totalRevenue: 0, pendingPayments: 0, failedPayments: 0,
@@ -121,6 +121,30 @@ export function useAdminData() {
     showSuccessToast(`Sent to ${result.sent} users`);
   };
 
+  const updateSupportStatus = async (id, status) => {
+    try {
+      const res = await fetch(`${API}/api/admin/support-status/${id}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      const result = await res.json();
+      if (result.success) { showSuccessToast('Support request updated'); await fetchData(); }
+      else showErrorToast(result.message || 'Update failed');
+    } catch (e) { console.error(e); showErrorToast('Network error'); }
+  };
+
+  const replyToSupport = async (id, content) => {
+    try {
+      const res = await fetch(`${API}/api/admin/support/${id}/reply`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content }),
+      });
+      const result = await res.json();
+      if (result.success) { showSuccessToast('Reply sent'); await fetchData(); }
+      else showErrorToast(result.message || 'Reply failed');
+    } catch (e) { console.error(e); showErrorToast('Network error'); }
+  };
+
   return {
     data, loading, fetchData,
     deleteUser, updateUserStatus,
@@ -128,5 +152,7 @@ export function useAdminData() {
     deleteContract,
     updateMaintenanceStatus,
     broadcast,
+    updateSupportStatus,
+    replyToSupport,
   };
 }

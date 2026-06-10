@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Languages, Check } from 'lucide-react';
 import { useDarkMode } from '../useDarkMode.js';
 import { useLanguage } from '../i18n/LanguageContext.jsx';
@@ -29,12 +30,12 @@ const LanguageDialog = ({ open, onClose }) => {
     : 'border-gray-200 hover:bg-gray-50';
 
   const optionActive = darkMode
-    ? 'border-cyan-500 bg-cyan-900/30 ring-2 ring-cyan-500/40'
-    : 'border-blue-500 bg-blue-50 ring-2 ring-blue-500/30';
+    ? 'border-amber-500 bg-amber-900/30 ring-2 ring-amber-500/40'
+    : 'border-amber-500 bg-amber-50 ring-2 ring-amber-500/30';
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby="language-dialog-title"
@@ -45,7 +46,10 @@ const LanguageDialog = ({ open, onClose }) => {
         onClick={onClose}
         aria-label={t('common.close')}
       />
-      <div className={`relative w-full max-w-md rounded-2xl border shadow-2xl ${panelCls} animate-fadeIn`}>
+      <div
+        className={`relative z-10 w-full max-w-md max-h-[min(90vh,520px)] overflow-y-auto rounded-2xl border shadow-2xl ${panelCls}`}
+        style={{ animation: 'languageDialogIn 0.2s ease-out' }}
+      >
         <div className="flex items-start justify-between p-6 border-b border-inherit">
           <div className="flex items-center gap-3">
             <div className={`p-2 rounded-xl ${darkMode ? 'bg-yellow-900/40' : 'bg-yellow-100'}`}>
@@ -88,7 +92,7 @@ const LanguageDialog = ({ open, onClose }) => {
                   <div className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>{lang.label}</div>
                 </div>
                 {selected && (
-                  <Check className={`h-5 w-5 flex-shrink-0 ${darkMode ? 'text-cyan-400' : 'text-blue-600'}`} />
+                  <Check className={`h-5 w-5 flex-shrink-0 ${darkMode ? 'text-amber-400' : 'text-amber-600'}`} />
                 )}
               </button>
             );
@@ -99,7 +103,14 @@ const LanguageDialog = ({ open, onClose }) => {
           {t('language.current')}: {languages.find((l) => l.code === language)?.nativeLabel}
         </p>
       </div>
-    </div>
+      <style>{`
+        @keyframes languageDialogIn {
+          from { opacity: 0; transform: scale(0.96) translateY(8px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+      `}</style>
+    </div>,
+    document.body
   );
 };
 

@@ -14,9 +14,9 @@ import landlordPaymentRoutes    from './routes/landlordPayment.routes.js';
 import visitRoutes              from './routes/visit.routes.js';
 import adminRoutes              from './routes/admin.routes.js';
 import contractRoutes           from './routes/contract.routes.js';
+import supportRoutes            from './routes/support.routes.js';
 import { handleWebhook }        from './controllers/payment.controller.js';
 import { handleLandlordWebhook } from './controllers/landlordPayment.controller.js';
-import { globalErrorHandler }    from './middlewares/error.middleware.js';
 dotenv.config();
 
 const app = express();
@@ -61,6 +61,11 @@ app.use('/api/landlord-payments', landlordPaymentRoutes);   // landlord subscrip
 app.use('/api/visits',            visitRoutes);
 app.use('/api/admin',         adminRoutes);
 app.use('/api/contracts',         contractRoutes);
-app.use(globalErrorHandler);
+app.use('/api/support',           supportRoutes);
+
+app.use((err, _req, res, _next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: 'Something went wrong!' });
+});
 
 export { app };

@@ -1,18 +1,73 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import {
+  getAccessToken,
+  getStoredUser,
+  isAdminSession,
+  isTokenExpired,
+  hasValidRefreshToken,
+  refreshSession,
+  clearAuthSession,
+} from '../services/authService.js';
+
+const RouteLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-200">
+    Loading...
+  </div>
+);
 
 const ProtectedRoute = ({ children, requiredRole = null }) => {
-  const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const [status, setStatus] = useState('loading');
+  const [user, setUser] = useState(null);
 
-  // Check if user is authenticated (token presence is sufficient)
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
+  useEffect(() => {
+    let active = true;
 
-  // Check if user has the required role (case-insensitive, supports arrays)
+    (async () => {
+      if (isAdminSession()) {
+        if (active) {
+          setUser(getStoredUser() || {});
+          setStatus('authorized');
+        }
+        return;
+      }
+
+      const accessToken = getAccessToken();
+      if (accessToken && !isTokenExpired(accessToken)) {
+        if (active) {
+          setUser(getStoredUser() || {});
+          setStatus('authorized');
+        }
+        return;
+      }
+
+      if (hasValidRefreshToken()) {
+        try {
+          const data = await refreshSession();
+          if (active) {
+            setUser(data.user || getStoredUser() || {});
+            setStatus('authorized');
+          }
+          return;
+        } catch {
+          // fall through to unauthorized
+        }
+      }
+
+      clearAuthSession();
+      if (active) setStatus('unauthorized');
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (status === 'loading') return <RouteLoader />;
+  if (status === 'unauthorized') return <Navigate to="/login" replace />;
+
   if (requiredRole) {
-    const userRole = (user.role || (Array.isArray(user.roles) && user.roles[0]) || '').toLowerCase();
+    const userRole = (user?.role || (Array.isArray(user?.roles) && user.roles[0]) || '').toLowerCase();
     if (userRole !== String(requiredRole).toLowerCase()) {
       return <Navigate to="/" replace />;
     }
