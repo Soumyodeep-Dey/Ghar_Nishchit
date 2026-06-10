@@ -478,33 +478,33 @@ export default function UpdateLandlordProfile() {
   };
 
   const themeClasses = {
-    bg: darkMode ? 'bg-gradient-to-br from-blue-950 via-slate-900 to-cyan-900' : 'bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100',
-    cardBg: darkMode ? 'bg-gradient-to-br from-slate-900 via-blue-950 to-cyan-900 bg-opacity-95' : 'bg-white',
-    textPrimary: darkMode ? 'text-cyan-100' : 'text-gray-700',
-    textSecondary: darkMode ? 'text-cyan-200' : 'text-gray-500',
-    textAccent: darkMode ? 'text-cyan-300' : 'text-indigo-700',
-    inputBg: darkMode ? 'bg-slate-900' : 'bg-white',
-    inputBorder: darkMode ? 'border-cyan-700' : 'border-gray-300',
-    inputText: darkMode ? 'text-cyan-100' : 'text-gray-900',
-    inputPlaceholder: darkMode ? 'placeholder-cyan-300' : 'placeholder-gray-500',
-    inputFocusRing: darkMode ? 'focus:ring-cyan-400' : 'focus:ring-indigo-400',
-    buttonPrimaryBg: darkMode ? 'bg-gradient-to-r from-cyan-500 via-blue-700 to-slate-900' : 'bg-indigo-600',
-    buttonPrimaryText: 'text-white',
-    buttonPrimaryHover: darkMode ? 'hover:from-blue-900 hover:via-cyan-700 hover:to-slate-800' : 'hover:bg-indigo-700',
+    bg: darkMode ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950' : 'bg-gradient-to-br from-[#fafaf9] via-white to-[#fafaf9]',
+    cardBg: darkMode ? 'bg-slate-900/95 border border-slate-800' : 'bg-white border border-slate-100',
+    textPrimary: darkMode ? 'text-slate-100' : 'text-slate-900',
+    textSecondary: darkMode ? 'text-slate-400' : 'text-slate-500',
+    textAccent: darkMode ? 'text-amber-400' : 'text-amber-600',
+    inputBg: darkMode ? 'bg-slate-800/50' : 'bg-slate-50/80',
+    inputBorder: darkMode ? 'border-slate-700' : 'border-slate-100',
+    inputText: darkMode ? 'text-slate-100' : 'text-slate-900',
+    inputPlaceholder: darkMode ? 'placeholder-slate-400' : 'placeholder-slate-400',
+    inputFocusRing: 'focus:border-amber-500 focus:ring-amber-500/20',
+    buttonPrimaryBg: darkMode ? 'bg-amber-500 hover:bg-amber-400' : 'bg-slate-900 hover:bg-slate-800',
+    buttonPrimaryText: darkMode ? 'text-slate-950' : 'text-white',
+    buttonPrimaryHover: '',
     buttonDangerBg: 'bg-red-600',
     buttonDangerHover: 'hover:bg-red-700',
     buttonDangerText: 'text-white',
-    backButtonBg: darkMode ? 'bg-cyan-400' : 'bg-white',
-    backButtonText: darkMode ? 'text-blue-950' : 'text-indigo-600',
-    backButtonHover: darkMode ? 'hover:bg-cyan-300' : 'hover:bg-indigo-100',
+    backButtonBg: darkMode ? 'bg-slate-800' : 'bg-white',
+    backButtonText: darkMode ? 'text-amber-400' : 'text-amber-600',
+    backButtonHover: darkMode ? 'hover:bg-slate-700' : 'hover:bg-amber-50',
   };
 
   return (
     <div className={`min-h-screen flex relative overflow-hidden ${themeClasses.bg}`}>
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className={`absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-purple-500/10 to-pink-500/10' : 'bg-gradient-to-r from-indigo-500/20 to-cyan-500/20'}`} />
-        <div className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10' : 'bg-gradient-to-r from-pink-500/20 to-purple-500/20'}`} />
+        <div className={`absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-amber-500/10 to-amber-600/10' : 'bg-gradient-to-r from-amber-500/20 to-amber-600/10'}`} />
+        <div className={`absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl ${darkMode ? 'bg-gradient-to-r from-amber-500/10 to-amber-600/10' : 'bg-gradient-to-r from-amber-100/20 to-amber-50/20'}`} />
       </div>
 
       {/* Server status indicator */}
@@ -516,7 +516,7 @@ export default function UpdateLandlordProfile() {
         {serverStatus === 'offline' && (
           <button
             onClick={retryConnection}
-            className="ml-2 text-xs bg-blue-500 hover:bg-blue-600 text-white px-2.5 py-0.5 rounded-full transition-colors shadow-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
+            className="ml-2 text-xs bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-0.5 rounded-full transition-colors shadow-sm font-medium focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-opacity-50"
             title="Try to reconnect to the server"
             aria-label="Retry connection to server"
           >
@@ -671,7 +671,7 @@ export default function UpdateLandlordProfile() {
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${darkMode ? 'text-gray-400 hover:text-cyan-300' : 'text-gray-400 hover:text-gray-700'}`}
+                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${darkMode ? 'text-gray-400 hover:text-amber-300' : 'text-gray-400 hover:text-gray-700'}`}
                     tabIndex={-1}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >

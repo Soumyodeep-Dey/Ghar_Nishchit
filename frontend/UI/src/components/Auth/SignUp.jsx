@@ -223,7 +223,7 @@ export default function SignUp() {
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 transition-all outline-none font-bold text-sm ${darkMode ? 'bg-slate-800/50 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
+                      className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 transition-all outline-none font-bold text-sm ${darkMode ? 'bg-slate-900/80 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
                       placeholder="John Doe"
                       required
                     />
@@ -239,7 +239,7 @@ export default function SignUp() {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 transition-all outline-none font-bold text-sm ${darkMode ? 'bg-slate-800/50 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
+                      className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 transition-all outline-none font-bold text-sm ${darkMode ? 'bg-slate-900/80 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
                       placeholder="you@example.com"
                       required
                     />
@@ -255,7 +255,7 @@ export default function SignUp() {
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 transition-all outline-none font-bold text-sm ${darkMode ? 'bg-slate-800/50 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
+                      className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 transition-all outline-none font-bold text-sm ${darkMode ? 'bg-slate-900/80 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
                       placeholder="+91 00000 00000"
                       required
                     />
@@ -283,7 +283,7 @@ export default function SignUp() {
                       name="password"
                       value={formData.password}
                       onChange={handlePasswordChange}
-                      className={`w-full pl-12 pr-12 py-4 rounded-2xl border-2 transition-all outline-none font-bold text-sm ${darkMode ? 'bg-slate-800/50 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
+                      className={`w-full pl-12 pr-12 py-4 rounded-2xl border-2 transition-all outline-none font-bold text-sm ${darkMode ? 'bg-slate-900/80 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
                       placeholder="••••••••"
                       required
                     />

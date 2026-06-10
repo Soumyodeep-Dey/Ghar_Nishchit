@@ -16,7 +16,7 @@ const StatusBadge = ({ status }) => {
   const cfg = {
     pending:   { label: 'Awaiting Your Signature', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Clock },
     active:    { label: 'Active Lease',             color: 'bg-green-100  text-green-800  border-green-200',  icon: CheckCircle },
-    completed: { label: 'Completed',                color: 'bg-blue-100   text-blue-800   border-blue-200',   icon: CheckCircle },
+    completed: { label: 'Completed',                color: 'bg-amber-50   text-amber-800   border-amber-200',   icon: CheckCircle },
     cancelled: { label: 'Cancelled',                color: 'bg-red-100    text-red-800    border-red-200',    icon: XCircle },
   }[status?.toLowerCase()] || { label: status, color: 'bg-gray-100 text-gray-700 border-gray-200', icon: FileText };
 
@@ -57,7 +57,7 @@ const ContractModal = ({ contract, onClose, onAccept, onDecline, accepting }) =>
         {/* Header */}
         <div className={`sticky top-0 ${bg} p-6 border-b ${border} rounded-t-3xl flex items-center justify-between`}>
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl">
+            <div className="p-2.5 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl">
               <FileText className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -190,8 +190,8 @@ const ContractCard = ({ contract, onView }) => {
       <div className="p-6">
         {/* Top row */}
         <div className="flex items-start gap-4 mb-5">
-          <div className={`p-3 rounded-xl flex-shrink-0 ${isPending ? 'bg-amber-100' : 'bg-blue-100'}`}>
-            <Home className={`w-6 h-6 ${isPending ? 'text-amber-600' : 'text-blue-600'}`} />
+          <div className={`p-3 rounded-xl flex-shrink-0 ${isPending ? 'bg-amber-100' : 'bg-amber-50'}`}>
+            <Home className={`w-6 h-6 ${isPending ? 'text-amber-600' : 'text-amber-600'}`} />
           </div>
           <div className="flex-1 min-w-0">
             <h3 className={`font-bold text-lg truncate ${darkMode ? 'text-white' : 'text-gray-900'}`}>
@@ -300,8 +300,8 @@ const TenantContracts = () => {
   const [accepting, setAccepting]           = useState(false);
 
   const bgClass = darkMode
-    ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950'
-    : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400';
+    ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950'
+    : 'bg-gradient-to-r from-[#fafaf9] via-white to-[#fafaf9]';
 
   // Fetch contracts from API
   const fetchContracts = useCallback(async () => {
@@ -391,8 +391,8 @@ const TenantContracts = () => {
           <main className="flex-1 flex items-center justify-center">
             <div className="text-center">
               <div className="relative w-20 h-20 mx-auto mb-6">
-                <div className="w-20 h-20 border-4 border-indigo-200 rounded-full animate-spin" />
-                <div className="absolute inset-0 w-20 h-20 border-4 border-t-indigo-600 rounded-full animate-spin" />
+                <div className="w-20 h-20 border-4 border-slate-100 rounded-full animate-spin" />
+                <div className="absolute inset-0 w-20 h-20 border-4 border-t-amber-500 rounded-full animate-spin" />
               </div>
               <p className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Loading Contracts…</p>
             </div>
@@ -429,7 +429,7 @@ const TenantContracts = () => {
                 {[
                   { label: 'Awaiting Signature', value: pending,   icon: Clock,        color: 'from-amber-500 to-orange-500',  warn: pending > 0 },
                   { label: 'Active Leases',       value: active,    icon: CheckCircle,  color: 'from-green-500 to-emerald-500', warn: false },
-                  { label: 'Completed',           value: completed, icon: FileText,     color: 'from-blue-500 to-indigo-500',   warn: false },
+                  { label: 'Completed',           value: completed, icon: FileText,     color: 'from-amber-500 to-amber-600',   warn: false },
                 ].map(({ label, value, icon: Icon, color, warn }) => (
                   <div key={label} className={`${cardBg} backdrop-blur-sm border rounded-2xl p-5 flex items-center gap-4 ${warn && value > 0 ? 'ring-2 ring-amber-400/50' : ''}`}>
                     <div className={`p-3 rounded-xl bg-gradient-to-br ${color} flex-shrink-0`}>

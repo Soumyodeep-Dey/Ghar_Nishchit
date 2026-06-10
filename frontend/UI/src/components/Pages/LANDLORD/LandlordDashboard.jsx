@@ -464,7 +464,7 @@ const ScheduleInspectionModal = ({ isOpen, onClose, isDark }) => {
       bg: 'bg-slate-900/95',
       border: 'border-slate-800',
       text: 'text-white',
-      inputBg: 'bg-slate-800/50',
+      inputBg: 'bg-slate-900/80',
       inputBorder: 'border-slate-700',
       inputPlaceholder: 'placeholder-slate-400',
       focusBorder: 'focus:border-amber-500',
@@ -529,7 +529,7 @@ const ScheduleInspectionModal = ({ isOpen, onClose, isDark }) => {
                   value="in-person"
                   checked={type === 'in-person'}
                   onChange={() => setType('in-person')}
-                  className="form-radio h-4 w-4 text-blue-600 transition-colors duration-200"
+                  className="form-radio h-4 w-4 text-amber-600 transition-colors duration-200"
                 />
                 <span className="ml-2">In-person</span>
               </label>
@@ -539,7 +539,7 @@ const ScheduleInspectionModal = ({ isOpen, onClose, isDark }) => {
                   value="virtual"
                   checked={type === 'virtual'}
                   onChange={() => setType('virtual')}
-                  className="form-radio h-4 w-4 text-blue-600 transition-colors duration-200"
+                  className="form-radio h-4 w-4 text-amber-600 transition-colors duration-200"
                 />
                 <span className="ml-2">Virtual Tour</span>
               </label>

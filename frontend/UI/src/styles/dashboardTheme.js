@@ -118,3 +118,27 @@ export const sidebarMenuColors = {
   messages: 'from-amber-500 to-amber-600',
   contracts: 'from-amber-600 to-orange-600',
 };
+
+/** Standard page wrapper classes for portal pages */
+export const portalPageShell = (isDark) => {
+  const t = getDashboardTheme(isDark);
+  return {
+    root: `min-h-screen bg-gradient-to-br ${t.pageBgGradient} flex relative transition-colors duration-500`,
+    dotOverlay: 'absolute inset-0 opacity-[0.25] dark:opacity-[0.12] pointer-events-none',
+    glow: 'absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-amber-400/10 rounded-full blur-[120px] pointer-events-none',
+    main: 'flex-1 flex flex-col relative z-10 transition-all duration-700',
+    content: 'flex-1 overflow-y-auto',
+    section: 'p-6 space-y-8',
+    card: `${t.cardBg} backdrop-blur-xl border ${t.cardBorder} rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.04)]`,
+    cardPadding: 'p-8',
+    heading: `text-3xl font-black tracking-tighter ${t.headerTitle}`,
+    subheading: `text-lg ${t.textSecondary} font-medium`,
+    btnPrimary: `bg-gradient-to-r ${t.buttonPrimary} text-white font-black uppercase tracking-widest rounded-2xl shadow-[0_20px_50px_rgba(245,158,11,0.3)] hover:-translate-y-0.5 transition-all`,
+    btnSecondary: `border-2 ${isDark ? 'border-slate-800 bg-slate-900/50 text-white hover:bg-slate-800' : 'border-slate-100 bg-white text-slate-900 hover:bg-slate-50'} font-black rounded-2xl transition-all`,
+    input: isDark
+      ? 'w-full px-4 py-3 rounded-2xl border-2 bg-slate-800/50 border-slate-700 focus:border-amber-500 text-white outline-none font-medium'
+      : 'w-full px-4 py-3 rounded-2xl border-2 bg-slate-50/80 border-slate-100 focus:border-amber-500 text-slate-900 outline-none font-medium',
+    badge: 'px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full bg-amber-500 text-white',
+    spinner: `w-12 h-12 border-4 ${t.spinnerBorder} rounded-full animate-spin`,
+  };
+};

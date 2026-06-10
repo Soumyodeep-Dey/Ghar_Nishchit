@@ -29,8 +29,8 @@ const LanguageDialog = ({ open, onClose }) => {
     : 'border-gray-200 hover:bg-gray-50';
 
   const optionActive = darkMode
-    ? 'border-cyan-500 bg-cyan-900/30 ring-2 ring-cyan-500/40'
-    : 'border-blue-500 bg-blue-50 ring-2 ring-blue-500/30';
+    ? 'border-amber-500 bg-amber-900/30 ring-2 ring-amber-500/40'
+    : 'border-amber-500 bg-amber-50 ring-2 ring-amber-500/30';
 
   return (
     <div
@@ -88,7 +88,7 @@ const LanguageDialog = ({ open, onClose }) => {
                   <div className={`text-sm ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>{lang.label}</div>
                 </div>
                 {selected && (
-                  <Check className={`h-5 w-5 flex-shrink-0 ${darkMode ? 'text-cyan-400' : 'text-blue-600'}`} />
+                  <Check className={`h-5 w-5 flex-shrink-0 ${darkMode ? 'text-amber-400' : 'text-amber-600'}`} />
                 )}
               </button>
             );

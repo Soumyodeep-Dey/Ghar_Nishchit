@@ -131,17 +131,17 @@ const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete, dar
   const getCardIcon = (type) => {
     switch (type?.toLowerCase()) {
       case 'visa':
-        return <div className="text-blue-600 font-bold text-lg">VISA</div>;
+        return <div className="text-amber-600 font-bold text-lg">VISA</div>;
       case 'mastercard':
         return <div className="text-red-600 font-bold text-lg">MC</div>;
       case 'amex':
-        return <div className="text-blue-800 font-bold text-lg">AMEX</div>;
+        return <div className="text-amber-800 font-bold text-lg">AMEX</div>;
       case 'paypal':
-        return <div className="text-blue-500 font-bold text-lg">PP</div>;
+        return <div className="text-amber-500 font-bold text-lg">PP</div>;
       case 'bank':
         return <Building2 className="w-6 h-6 text-emerald-600" />;
       case 'upi':
-        return <div className="text-purple-600 font-bold text-lg">UPI</div>;
+        return <div className="text-amber-600 font-bold text-lg">UPI</div>;
       default:
         return <CreditCard className={`w-6 h-6 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`} />;
     }
@@ -155,17 +155,17 @@ const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete, dar
       onClick={() => onSelect(method.id)}
       className={`relative p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer overflow-hidden ${isSelected
         ? darkMode
-          ? 'border-cyan-400 bg-cyan-400/10 shadow-lg shadow-cyan-400/20'
-          : 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/20'
+          ? 'border-amber-500 bg-amber-500/10 shadow-lg shadow-amber-500/20'
+          : 'border-amber-500 bg-amber-500/10 shadow-lg shadow-amber-500/20'
         : darkMode
-          ? 'border-slate-700 bg-slate-800/50 hover:border-slate-600 hover:bg-slate-800/70'
-          : 'border-indigo-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/50'
+          ? 'border-slate-700 bg-slate-900/80 hover:border-slate-600 hover:bg-slate-800/70'
+          : 'border-slate-100 bg-white hover:border-amber-200 hover:bg-amber-50/50'
         }`}
     >
       {/* Background pattern */}
       <div className="absolute inset-0 opacity-5">
-        <div className={`absolute -top-4 -right-4 w-32 h-32 ${darkMode ? 'bg-gradient-to-br from-cyan-400' : 'bg-gradient-to-br from-indigo-500'} to-transparent rounded-full`} />
-        <div className={`absolute -bottom-4 -left-4 w-24 h-24 ${darkMode ? 'bg-gradient-to-tr from-cyan-400' : 'bg-gradient-to-tr from-indigo-500'} to-transparent rounded-full`} />
+        <div className={`absolute -top-4 -right-4 w-32 h-32 ${darkMode ? 'bg-gradient-to-br from-amber-400' : 'bg-gradient-to-br from-amber-500'} to-transparent rounded-full`} />
+        <div className={`absolute -bottom-4 -left-4 w-24 h-24 ${darkMode ? 'bg-gradient-to-tr from-amber-400' : 'bg-gradient-to-tr from-amber-500'} to-transparent rounded-full`} />
       </div>
 
       <div className="relative z-10">
@@ -187,7 +187,7 @@ const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete, dar
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className={`w-6 h-6 ${darkMode ? 'bg-cyan-400' : 'bg-indigo-500'} rounded-full flex items-center justify-center`}
+                className={`w-6 h-6 ${darkMode ? 'bg-amber-400' : 'bg-amber-500'} rounded-full flex items-center justify-center`}
               >
                 <Check className="w-4 h-4 text-white" />
               </motion.div>
@@ -196,11 +196,11 @@ const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete, dar
         </div>
 
         <div className="space-y-2">
-          <div className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-medium`}>
+          <div className={`${darkMode ? 'text-slate-100' : 'text-amber-700'} font-medium`}>
             {method.type === 'bank' ? method.bankName : method.type === 'upi' ? method.id : `•••• •••• •••• ${method.last4}`}
           </div>
 
-          <div className={`flex items-center justify-between ${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>
+          <div className={`flex items-center justify-between ${darkMode ? 'text-amber-200' : 'text-gray-600'} text-sm`}>
             <span>{method.name || method.holderName}</span>
             {method.expiryDate && (
               <span>{method.expiryDate}</span>
@@ -208,7 +208,7 @@ const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete, dar
           </div>
 
           {method.type === 'bank' && (
-            <div className={`${darkMode ? 'text-cyan-100' : 'text-gray-500'} text-xs`}>
+            <div className={`${darkMode ? 'text-slate-100' : 'text-gray-500'} text-xs`}>
               Account: •••••••{method.accountNumber?.slice(-4)}
             </div>
           )}
@@ -230,9 +230,9 @@ const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete, dar
                   e.stopPropagation();
                   onEdit(method);
                 }}
-                className={`p-1 ${darkMode ? 'bg-slate-600/70 hover:bg-slate-600' : 'bg-indigo-100/70 hover:bg-indigo-200'} rounded-lg transition-colors`}
+                className={`p-1 ${darkMode ? 'bg-slate-600/70 hover:bg-slate-600' : 'bg-amber-50/70 hover:bg-amber-100'} rounded-lg transition-colors`}
               >
-                <Edit className={`w-3 h-3 ${darkMode ? 'text-cyan-300' : 'text-indigo-600'}`} />
+                <Edit className={`w-3 h-3 ${darkMode ? 'text-amber-300' : 'text-amber-600'}`} />
               </motion.button>
 
               {!method.isDefault && (
@@ -270,13 +270,13 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
       onMouseLeave={() => setIsHovered(false)}
       className={`relative p-8 rounded-3xl border-2 transition-all duration-500 overflow-hidden ${popular
         ? darkMode
-          ? 'border-cyan-400 bg-gradient-to-br from-cyan-400/10 to-blue-500/10'
-          : 'border-pink-500 bg-gradient-to-br from-pink-300/20 via-purple-300/20 to-indigo-400/20'
+          ? 'border-amber-500 bg-gradient-to-br from-amber-400/10 to-amber-500/10'
+          : 'border-amber-500 bg-gradient-to-br from-amber-100/20 via-amber-50/20 to-amber-100/20'
         : isCurrentPlan
           ? 'border-emerald-500 bg-emerald-500/10'
           : darkMode
-            ? 'border-slate-700 bg-slate-800/50 hover:border-slate-600 hover:bg-slate-800/70'
-            : 'border-indigo-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/50'
+            ? 'border-slate-700 bg-slate-900/80 hover:border-slate-600 hover:bg-slate-800/70'
+            : 'border-slate-100 bg-white hover:border-amber-200 hover:bg-amber-50/50'
         }`}
     >
       {/* Popular badge */}
@@ -285,8 +285,8 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           className={`absolute -top-3 left-1/2 transform -translate-x-1/2 px-6 py-2 ${darkMode
-            ? 'bg-gradient-to-r from-cyan-500 to-blue-500'
-            : 'bg-gradient-to-r from-pink-500 to-purple-500'
+            ? 'bg-gradient-to-r from-amber-500 to-amber-600'
+            : 'bg-gradient-to-r from-amber-500 to-amber-600'
             } rounded-full`}
         >
           <span className="text-white text-sm font-bold flex items-center space-x-1">
@@ -313,8 +313,8 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
           animate={{ rotate: 360 }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           className={`absolute -top-10 -right-10 w-40 h-40 ${darkMode
-            ? 'bg-gradient-to-br from-cyan-500 to-blue-500'
-            : 'bg-gradient-to-br from-indigo-500 to-purple-500'
+            ? 'bg-gradient-to-br from-amber-500 to-amber-600'
+            : 'bg-gradient-to-br from-amber-500 to-amber-600'
             } rounded-full blur-2xl`}
         />
       </div>
@@ -324,25 +324,25 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
         <div className="text-center mb-8">
           <div
             className={`w-16 h-16 mx-auto mb-4 rounded-2xl ${darkMode
-              ? 'bg-gradient-to-br from-cyan-500 to-blue-600'
-              : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+              ? 'bg-gradient-to-br from-amber-500 to-amber-600'
+              : 'bg-gradient-to-br from-amber-500 to-amber-600'
               } flex items-center justify-center`}
           >
             {plan.icon}
           </div>
 
-          <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-2`}>{plan.name}</h3>
-          <p className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>{plan.description}</p>
+          <h3 className={`text-2xl font-bold ${darkMode ? 'text-slate-100' : 'text-amber-700'} mb-2`}>{plan.name}</h3>
+          <p className={`${darkMode ? 'text-amber-200' : 'text-gray-600'} text-sm`}>{plan.description}</p>
         </div>
 
         {/* Pricing */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-2 mb-2">
-            <span className={`text-4xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'}`}>
+            <span className={`text-4xl font-bold ${darkMode ? 'text-slate-100' : 'text-amber-700'}`}>
               ₹{plan.price.toLocaleString('en-IN')}
             </span>
           </div>
-          <div className={`text-sm ${darkMode ? 'text-blue-300' : 'text-gray-500'}`}>
+          <div className={`text-sm ${darkMode ? 'text-amber-300' : 'text-gray-500'}`}>
             {plan.validity}
           </div>
         </div>
@@ -360,21 +360,21 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
               <div className="w-5 h-5 bg-emerald-500/20 rounded-full flex items-center justify-center flex-shrink-0">
                 <Check className="w-3 h-3 text-emerald-400" />
               </div>
-              <span className={`${darkMode ? 'text-blue-200' : 'text-gray-700'} text-sm`}>{feature}</span>
+              <span className={`${darkMode ? 'text-amber-200' : 'text-gray-700'} text-sm`}>{feature}</span>
             </motion.div>
           ))}
         </div>
 
         {/* Plan limits */}
-        <div className={`${darkMode ? 'bg-slate-800/50' : 'bg-indigo-50/50'} rounded-xl p-4 mb-8`}>
+        <div className={`${darkMode ? 'bg-slate-900/80' : 'bg-amber-50/50'} rounded-xl p-4 mb-8`}>
           <div className="grid grid-cols-2 gap-4 text-center">
             <div>
-              <div className={`text-2xl font-bold ${darkMode ? 'text-cyan-400' : 'text-indigo-500'}`}>{plan.propertyLimit}</div>
-              <div className={`text-xs ${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Properties</div>
+              <div className={`text-2xl font-bold ${darkMode ? 'text-amber-400' : 'text-amber-600'}`}>{plan.propertyLimit}</div>
+              <div className={`text-xs ${darkMode ? 'text-amber-200' : 'text-gray-600'}`}>Properties</div>
             </div>
             <div>
-              <div className={`text-2xl font-bold ${darkMode ? 'text-blue-400' : 'text-purple-500'}`}>{plan.supportLevel}</div>
-              <div className={`text-xs ${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Support</div>
+              <div className={`text-2xl font-bold ${darkMode ? 'text-amber-400' : 'text-amber-500'}`}>{plan.supportLevel}</div>
+              <div className={`text-xs ${darkMode ? 'text-amber-200' : 'text-gray-600'}`}>Support</div>
             </div>
           </div>
         </div>
@@ -393,15 +393,15 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
             ? 'bg-gray-500/20 text-gray-400 cursor-not-allowed'
             : popular
               ? darkMode
-                ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-600 hover:to-blue-600 shadow-lg shadow-cyan-500/25'
-                : 'bg-gradient-to-r from-pink-500 to-purple-500 text-white hover:from-pink-600 hover:to-purple-600 shadow-lg shadow-pink-500/25'
+                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 shadow-lg shadow-amber-500/25'
+                : 'bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 shadow-lg shadow-amber-500/25'
               : canUpgrade
                 ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 shadow-lg shadow-emerald-500/25'
                 : canDowngrade
                   ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 shadow-lg shadow-orange-500/25'
                   : darkMode
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-600 hover:to-blue-700 shadow-lg shadow-cyan-500/25'
-                    : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25'
+                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 shadow-lg shadow-amber-500/25'
+                    : 'bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 shadow-lg shadow-amber-500/25'
             }`}
         >
           {isCurrentPlan
@@ -429,7 +429,7 @@ const PaymentHistoryItem = ({ payment, onDownloadReceipt, onViewDetails, darkMod
       case 'failed':
         return <XCircle className="w-5 h-5 text-red-400" />;
       case 'refunded':
-        return <RotateCcw className="w-5 h-5 text-blue-400" />;
+        return <RotateCcw className="w-5 h-5 text-amber-400" />;
       default:
         return <AlertCircle className="w-5 h-5 text-gray-400" />;
     }
@@ -444,7 +444,7 @@ const PaymentHistoryItem = ({ payment, onDownloadReceipt, onViewDetails, darkMod
       case 'failed':
         return 'bg-red-500/20 text-red-400 border-red-500/30';
       case 'refunded':
-        return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+        return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
       default:
         return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     }
@@ -456,8 +456,8 @@ const PaymentHistoryItem = ({ payment, onDownloadReceipt, onViewDetails, darkMod
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ scale: 1.01, boxShadow: darkMode ? "0 10px 30px rgba(0,0,0,0.4)" : "0 10px 30px rgba(0,0,0,0.1)" }}
       className={`${darkMode
-        ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700 hover:border-slate-600'
-        : 'bg-white/90 backdrop-blur-xl border border-indigo-200 hover:border-indigo-300'
+        ? 'bg-slate-900/80 backdrop-blur-xl border border-slate-700 hover:border-slate-600'
+        : 'bg-white/90 backdrop-blur-xl border border-slate-100 hover:border-amber-200'
         } rounded-xl p-6 transition-all duration-300`}
     >
       <div className="flex items-center justify-between mb-4">
@@ -465,23 +465,23 @@ const PaymentHistoryItem = ({ payment, onDownloadReceipt, onViewDetails, darkMod
           <motion.div
             whileHover={{ scale: 1.1, rotate: 5 }}
             className={`w-12 h-12 ${darkMode
-              ? 'bg-gradient-to-br from-cyan-500 to-blue-600'
-              : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+              ? 'bg-gradient-to-br from-amber-500 to-amber-600'
+              : 'bg-gradient-to-br from-amber-500 to-amber-600'
               } rounded-xl flex items-center justify-center`}
           >
             <Receipt className="w-6 h-6 text-white" />
           </motion.div>
 
           <div>
-            <h4 className={`font-semibold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'}`}>{payment.description}</h4>
-            <p className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>
+            <h4 className={`font-semibold ${darkMode ? 'text-slate-100' : 'text-amber-700'}`}>{payment.description}</h4>
+            <p className={`${darkMode ? 'text-amber-200' : 'text-gray-600'} text-sm`}>
               {new Date(payment.date).toLocaleDateString()} • {payment.method}
             </p>
           </div>
         </div>
 
         <div className="text-right">
-          <div className={`text-xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>
+          <div className={`text-xl font-bold ${darkMode ? 'text-slate-100' : 'text-amber-700'} mb-1`}>
             ₹{payment.amount.toFixed(2)}
           </div>
           <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs border ${getStatusColor(payment.status)}`}>
@@ -492,8 +492,8 @@ const PaymentHistoryItem = ({ payment, onDownloadReceipt, onViewDetails, darkMod
       </div>
 
       {payment.invoiceId && (
-        <div className={`flex items-center justify-between pt-4 border-t ${darkMode ? 'border-slate-700' : 'border-indigo-200'}`}>
-          <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>
+        <div className={`flex items-center justify-between pt-4 border-t ${darkMode ? 'border-slate-700' : 'border-slate-100'}`}>
+          <div className={`${darkMode ? 'text-amber-200' : 'text-gray-600'} text-sm`}>
             Invoice #{payment.invoiceId}
           </div>
 
@@ -503,8 +503,8 @@ const PaymentHistoryItem = ({ payment, onDownloadReceipt, onViewDetails, darkMod
               whileTap={{ scale: 0.95 }}
               onClick={() => onViewDetails(payment)}
               className={`px-3 py-1 ${darkMode
-                ? 'bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30'
-                : 'bg-indigo-500/20 text-indigo-600 hover:bg-indigo-500/30'
+                ? 'bg-amber-500/20 text-amber-300 hover:bg-amber-500/30'
+                : 'bg-amber-500/20 text-amber-600 hover:bg-amber-500/30'
                 } rounded-lg transition-colors text-sm`}
             >
               View Details
@@ -541,8 +541,8 @@ const BillingSummary = ({ summary, onPayNow, darkMode }) => {
         : isDueSoon
           ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/50'
           : darkMode
-            ? 'bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-2 border-cyan-500/50'
-            : 'bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border-2 border-indigo-500/50'
+            ? 'bg-gradient-to-br from-amber-500/20 to-amber-600/10 border-2 border-amber-500/50'
+            : 'bg-gradient-to-br from-amber-500/20 to-amber-600/10 border-2 border-amber-500/50'
         }`}
     >
       {/* Background animation */}
@@ -558,8 +558,8 @@ const BillingSummary = ({ summary, onPayNow, darkMode }) => {
             ease: "easeInOut"
           }}
           className={`absolute -top-20 -right-20 w-40 h-40 ${darkMode
-            ? 'bg-gradient-to-br from-cyan-400'
-            : 'bg-gradient-to-br from-indigo-400'
+            ? 'bg-gradient-to-br from-amber-400'
+            : 'bg-gradient-to-br from-amber-400'
             } to-transparent rounded-full`}
         />
       </div>
@@ -567,30 +567,30 @@ const BillingSummary = ({ summary, onPayNow, darkMode }) => {
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-2`}>Current Bill</h3>
-            <p className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>
+            <h3 className={`text-2xl font-bold ${darkMode ? 'text-slate-100' : 'text-amber-700'} mb-2`}>Current Bill</h3>
+            <p className={`${darkMode ? 'text-amber-200' : 'text-gray-600'}`}>
               {summary.planName} • {summary.propertiesCount} {summary.propertiesCount === 1 ? 'property' : 'properties'}
             </p>
           </div>
 
           <motion.div
             whileHover={{ scale: 1.05, rotate: 5 }}
-            className={`w-16 h-16 ${darkMode ? 'bg-slate-700/50' : 'bg-indigo-100/50'} rounded-2xl flex items-center justify-center`}
+            className={`w-16 h-16 ${darkMode ? 'bg-slate-700/50' : 'bg-amber-50/50'} rounded-2xl flex items-center justify-center`}
           >
-            <IndianRupee className={`w-8 h-8 ${darkMode ? 'text-cyan-300' : 'text-indigo-600'}`} />
+            <IndianRupee className={`w-8 h-8 ${darkMode ? 'text-amber-300' : 'text-amber-600'}`} />
           </motion.div>
         </div>
 
         <div className="space-y-4 mb-6">
           <div className="flex justify-between">
-            <span className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Subscription Fee</span>
-            <span className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-semibold`}>₹{summary.subscriptionFee.toFixed(2)}</span>
+            <span className={`${darkMode ? 'text-amber-200' : 'text-gray-600'}`}>Subscription Fee</span>
+            <span className={`${darkMode ? 'text-slate-100' : 'text-amber-700'} font-semibold`}>₹{summary.subscriptionFee.toFixed(2)}</span>
           </div>
 
           {summary.additionalFees > 0 && (
             <div className="flex justify-between">
-              <span className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Additional Features</span>
-              <span className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-semibold`}>₹{summary.additionalFees.toFixed(2)}</span>
+              <span className={`${darkMode ? 'text-amber-200' : 'text-gray-600'}`}>Additional Features</span>
+              <span className={`${darkMode ? 'text-slate-100' : 'text-amber-700'} font-semibold`}>₹{summary.additionalFees.toFixed(2)}</span>
             </div>
           )}
 
@@ -602,32 +602,32 @@ const BillingSummary = ({ summary, onPayNow, darkMode }) => {
           )}
 
           <div className="flex justify-between">
-            <span className={`${darkMode ? 'text-blue-200' : 'text-gray-600'}`}>Tax (18% GST)</span>
-            <span className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-semibold`}>₹{summary.tax.toFixed(2)}</span>
+            <span className={`${darkMode ? 'text-amber-200' : 'text-gray-600'}`}>Tax (18% GST)</span>
+            <span className={`${darkMode ? 'text-slate-100' : 'text-amber-700'} font-semibold`}>₹{summary.tax.toFixed(2)}</span>
           </div>
 
-          <div className={`h-px ${darkMode ? 'bg-slate-600' : 'bg-indigo-200'}`}></div>
+          <div className={`h-px ${darkMode ? 'bg-slate-600' : 'bg-amber-100'}`}></div>
 
           <div className="flex justify-between text-xl">
-            <span className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-bold`}>Total Amount</span>
-            <span className={`${darkMode ? 'text-cyan-100' : 'text-indigo-700'} font-bold`}>₹{summary.totalAmount.toFixed(2)}</span>
+            <span className={`${darkMode ? 'text-slate-100' : 'text-amber-700'} font-bold`}>Total Amount</span>
+            <span className={`${darkMode ? 'text-slate-100' : 'text-amber-700'} font-bold`}>₹{summary.totalAmount.toFixed(2)}</span>
           </div>
         </div>
 
         <div className="flex items-center justify-between mb-6">
           <div>
-            <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Due Date</div>
-            <div className={`text-lg font-semibold ${isOverdue ? 'text-red-400' : isDueSoon ? 'text-yellow-400' : darkMode ? 'text-cyan-100' : 'text-indigo-700'
+            <div className={`${darkMode ? 'text-amber-200' : 'text-gray-600'} text-sm`}>Due Date</div>
+            <div className={`text-lg font-semibold ${isOverdue ? 'text-red-400' : isDueSoon ? 'text-yellow-400' : darkMode ? 'text-slate-100' : 'text-amber-700'
               }`}>
               {new Date(summary.dueDate).toLocaleDateString()}
             </div>
           </div>
 
           <div className="text-right">
-            <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>
+            <div className={`${darkMode ? 'text-amber-200' : 'text-gray-600'} text-sm`}>
               {isOverdue ? 'Overdue by' : 'Due in'}
             </div>
-            <div className={`text-lg font-semibold ${isOverdue ? 'text-red-400' : isDueSoon ? 'text-yellow-400' : darkMode ? 'text-cyan-100' : 'text-indigo-700'
+            <div className={`text-lg font-semibold ${isOverdue ? 'text-red-400' : isDueSoon ? 'text-yellow-400' : darkMode ? 'text-slate-100' : 'text-amber-700'
               }`}>
               {Math.abs(daysUntilDue)} days
             </div>
@@ -643,8 +643,8 @@ const BillingSummary = ({ summary, onPayNow, darkMode }) => {
             : isDueSoon
               ? 'bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 shadow-lg shadow-yellow-500/25'
               : darkMode
-                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg shadow-cyan-500/25'
-                : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg shadow-indigo-500/25'
+                ? 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-lg shadow-amber-500/25'
+                : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-lg shadow-amber-500/25'
             }`}
         >
           {isOverdue ? 'Pay Overdue Amount' : 'Pay Now'}
@@ -675,8 +675,8 @@ const NotificationToast = ({ notifications, onRemove, darkMode }) => {
               notification.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-400' :
                 notification.type === 'warning' ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-400' :
                   darkMode
-                    ? 'bg-cyan-500/20 border-cyan-500/30 text-cyan-400'
-                    : 'bg-indigo-500/20 border-indigo-500/30 text-indigo-600'
+                    ? 'bg-amber-500/20 border-amber-500/30 text-amber-400'
+                    : 'bg-amber-500/20 border-amber-500/30 text-amber-600'
               }`}
           >
             <div className="flex items-start space-x-3">
@@ -747,20 +747,20 @@ const AddPaymentMethodModal = ({ isOpen, onClose, onAdd, darkMode }) => {
         exit={{ scale: 0.9, opacity: 0 }}
         className={`${darkMode
           ? 'bg-slate-800/90 backdrop-blur-xl border border-slate-700'
-          : 'bg-white/90 backdrop-blur-xl border border-indigo-200'
+          : 'bg-white/90 backdrop-blur-xl border border-slate-100'
           } rounded-2xl w-full max-w-md overflow-hidden`}
         onClick={e => e.stopPropagation()}
       >
-        <div className={`p-6 border-b ${darkMode ? 'border-slate-700' : 'border-indigo-200'}`}>
+        <div className={`p-6 border-b ${darkMode ? 'border-slate-700' : 'border-slate-100'}`}>
           <div className="flex items-center justify-between">
-            <h2 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'}`}>Add Payment Method</h2>
+            <h2 className={`text-2xl font-bold ${darkMode ? 'text-slate-100' : 'text-amber-700'}`}>Add Payment Method</h2>
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={onClose}
-              className={`p-2 rounded-lg ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-indigo-100'} transition-colors`}
+              className={`p-2 rounded-lg ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-amber-50'} transition-colors`}
             >
-              <X className={`w-6 h-6 ${darkMode ? 'text-cyan-300' : 'text-indigo-600'}`} />
+              <X className={`w-6 h-6 ${darkMode ? 'text-amber-300' : 'text-amber-600'}`} />
             </motion.button>
           </div>
         </div>
@@ -770,8 +770,8 @@ const AddPaymentMethodModal = ({ isOpen, onClose, onAdd, darkMode }) => {
             <button
               onClick={() => setPaymentType('card')}
               className={`flex-1 py-2 text-center font-semibold rounded-l-lg transition-all ${paymentType === 'card'
-                ? darkMode ? 'bg-cyan-500 text-white' : 'bg-indigo-500 text-white'
-                : darkMode ? 'bg-slate-700 text-blue-200' : 'bg-gray-200 text-gray-600'
+                ? darkMode ? 'bg-amber-500 text-white' : 'bg-amber-500 text-white'
+                : darkMode ? 'bg-slate-700 text-amber-200' : 'bg-gray-200 text-gray-600'
                 }`}
             >
               Card
@@ -779,8 +779,8 @@ const AddPaymentMethodModal = ({ isOpen, onClose, onAdd, darkMode }) => {
             <button
               onClick={() => setPaymentType('upi')}
               className={`flex-1 py-2 text-center font-semibold rounded-r-lg transition-all ${paymentType === 'upi'
-                ? darkMode ? 'bg-cyan-500 text-white' : 'bg-indigo-500 text-white'
-                : darkMode ? 'bg-slate-700 text-blue-200' : 'bg-gray-200 text-gray-600'
+                ? darkMode ? 'bg-amber-500 text-white' : 'bg-amber-500 text-white'
+                : darkMode ? 'bg-slate-700 text-amber-200' : 'bg-gray-200 text-gray-600'
                 }`}
             >
               UPI
@@ -797,22 +797,22 @@ const AddPaymentMethodModal = ({ isOpen, onClose, onAdd, darkMode }) => {
                 className="space-y-4"
               >
                 <div>
-                  <label className={`block ${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm mb-2`}>Card Number</label>
-                  <input type="text" placeholder="1234 5678 9012 3456" onChange={e => setCardDetails({ ...cardDetails, number: e.target.value })} className={`w-full p-3 ${darkMode ? 'bg-slate-700/50 border border-slate-600 text-cyan-100' : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700'} rounded-lg focus:outline-none`} />
+                  <label className={`block ${darkMode ? 'text-amber-200' : 'text-gray-600'} text-sm mb-2`}>Card Number</label>
+                  <input type="text" placeholder="1234 5678 9012 3456" onChange={e => setCardDetails({ ...cardDetails, number: e.target.value })} className={`w-full p-3 ${darkMode ? 'bg-slate-700/50 border border-slate-600 text-slate-100' : 'bg-amber-50/50 border border-slate-100 text-amber-700'} rounded-lg focus:outline-none`} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className={`block ${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm mb-2`}>Expiry Date</label>
-                    <input type="text" placeholder="MM/YY" onChange={e => setCardDetails({ ...cardDetails, expiry: e.target.value })} className={`w-full p-3 ${darkMode ? 'bg-slate-700/50 border border-slate-600 text-cyan-100' : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700'} rounded-lg focus:outline-none`} />
+                    <label className={`block ${darkMode ? 'text-amber-200' : 'text-gray-600'} text-sm mb-2`}>Expiry Date</label>
+                    <input type="text" placeholder="MM/YY" onChange={e => setCardDetails({ ...cardDetails, expiry: e.target.value })} className={`w-full p-3 ${darkMode ? 'bg-slate-700/50 border border-slate-600 text-slate-100' : 'bg-amber-50/50 border border-slate-100 text-amber-700'} rounded-lg focus:outline-none`} />
                   </div>
                   <div>
-                    <label className={`block ${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm mb-2`}>CVV</label>
-                    <input type="password" placeholder="•••" onChange={e => setCardDetails({ ...cardDetails, cvv: e.target.value })} className={`w-full p-3 ${darkMode ? 'bg-slate-700/50 border border-slate-600 text-cyan-100' : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700'} rounded-lg focus:outline-none`} />
+                    <label className={`block ${darkMode ? 'text-amber-200' : 'text-gray-600'} text-sm mb-2`}>CVV</label>
+                    <input type="password" placeholder="•••" onChange={e => setCardDetails({ ...cardDetails, cvv: e.target.value })} className={`w-full p-3 ${darkMode ? 'bg-slate-700/50 border border-slate-600 text-slate-100' : 'bg-amber-50/50 border border-slate-100 text-amber-700'} rounded-lg focus:outline-none`} />
                   </div>
                 </div>
                 <div>
-                  <label className={`block ${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm mb-2`}>Cardholder Name</label>
-                  <input type="text" placeholder="John Doe" onChange={e => setCardDetails({ ...cardDetails, name: e.target.value })} className={`w-full p-3 ${darkMode ? 'bg-slate-700/50 border border-slate-600 text-cyan-100' : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700'} rounded-lg focus:outline-none`} />
+                  <label className={`block ${darkMode ? 'text-amber-200' : 'text-gray-600'} text-sm mb-2`}>Cardholder Name</label>
+                  <input type="text" placeholder="John Doe" onChange={e => setCardDetails({ ...cardDetails, name: e.target.value })} className={`w-full p-3 ${darkMode ? 'bg-slate-700/50 border border-slate-600 text-slate-100' : 'bg-amber-50/50 border border-slate-100 text-amber-700'} rounded-lg focus:outline-none`} />
                 </div>
               </motion.div>
             ) : (
@@ -822,21 +822,21 @@ const AddPaymentMethodModal = ({ isOpen, onClose, onAdd, darkMode }) => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
               >
-                <label className={`block ${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm mb-2`}>UPI ID</label>
-                <input type="text" placeholder="yourname@bank" onChange={e => setUpiId(e.target.value)} className={`w-full p-3 ${darkMode ? 'bg-slate-700/50 border border-slate-600 text-cyan-100' : 'bg-indigo-50/50 border border-indigo-200 text-indigo-700'} rounded-lg focus:outline-none`} />
+                <label className={`block ${darkMode ? 'text-amber-200' : 'text-gray-600'} text-sm mb-2`}>UPI ID</label>
+                <input type="text" placeholder="yourname@bank" onChange={e => setUpiId(e.target.value)} className={`w-full p-3 ${darkMode ? 'bg-slate-700/50 border border-slate-600 text-slate-100' : 'bg-amber-50/50 border border-slate-100 text-amber-700'} rounded-lg focus:outline-none`} />
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        <div className={`p-6 border-t ${darkMode ? 'border-slate-700' : 'border-indigo-200'}`}>
+        <div className={`p-6 border-t ${darkMode ? 'border-slate-700' : 'border-slate-100'}`}>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleAdd}
             className={`w-full py-3 ${darkMode
-              ? 'bg-gradient-to-r from-cyan-500 to-blue-600'
-              : 'bg-gradient-to-r from-indigo-500 to-purple-600'
+              ? 'bg-gradient-to-r from-amber-500 to-amber-600'
+              : 'bg-gradient-to-r from-amber-500 to-amber-600'
               } text-white rounded-xl font-bold`}
           >
             Save Payment Method
@@ -1243,8 +1243,8 @@ const LandlordPayment = () => {
 
   return (
     <div className={`min-h-screen ${darkMode
-      ? 'bg-gradient-to-br from-gray-900 via-slate-900 to-blue-950'
-      : 'bg-gradient-to-br from-white via-indigo-50 to-purple-100'
+      ? 'bg-gradient-to-br from-gray-900 via-slate-900 to-slate-950'
+      : 'bg-gradient-to-br from-[#fafaf9] via-white to-[#fafaf9]'
       } flex relative overflow-hidden`}>
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
@@ -1252,16 +1252,16 @@ const LandlordPayment = () => {
           animate={{ rotate: 360, scale: [1, 1.1, 1] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           className={`absolute -top-40 -right-40 w-80 h-80 ${darkMode
-            ? 'bg-gradient-to-r from-cyan-500/10 to-blue-500/10'
-            : 'bg-gradient-to-r from-indigo-300/20 to-purple-300/20'
+            ? 'bg-gradient-to-r from-amber-500/10 to-amber-600/10'
+            : 'bg-gradient-to-r from-amber-100/30 to-amber-50/30'
             } rounded-full blur-3xl`}
         />
         <motion.div
           animate={{ rotate: -360, scale: [1.1, 1, 1.1] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
           className={`absolute -bottom-40 -left-40 w-80 h-80 ${darkMode
-            ? 'bg-gradient-to-r from-blue-500/10 to-cyan-500/10'
-            : 'bg-gradient-to-r from-purple-300/20 to-pink-300/20'
+            ? 'bg-gradient-to-r from-amber-500/10 to-amber-600/10'
+            : 'bg-gradient-to-r from-amber-100/30 to-amber-50/30'
             } rounded-full blur-3xl`}
         />
       </div>
@@ -1282,8 +1282,8 @@ const LandlordPayment = () => {
             >
               <motion.h1
                 className={`text-5xl font-bold mb-4 ${darkMode
-                  ? 'bg-gradient-to-r from-cyan-300 via-blue-300 to-cyan-300 bg-clip-text text-transparent'
-                  : 'bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent'
+                  ? 'bg-gradient-to-r from-amber-300 via-amber-300 to-amber-300 bg-clip-text text-transparent'
+                  : 'bg-gradient-to-r from-slate-900 via-slate-800 to-amber-600 bg-clip-text text-transparent'
                   }`}
               >
                 Payment &amp; Billing
@@ -1292,7 +1292,7 @@ const LandlordPayment = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.6 }}
-                className={`text-xl ${darkMode ? 'text-blue-200' : 'text-gray-600'} max-w-2xl mx-auto`}
+                className={`text-xl ${darkMode ? 'text-amber-200' : 'text-gray-600'} max-w-2xl mx-auto`}
               >
                 Manage your subscription, payments, and billing with Ghar_Nishchit
               </motion.p>
@@ -1303,31 +1303,31 @@ const LandlordPayment = () => {
               <AnimatedCard
                 darkMode={darkMode}
                 className={`${darkMode
-                  ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700'
-                  : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
+                  ? 'bg-slate-900/80 backdrop-blur-xl border border-slate-700'
+                  : 'bg-white/70 backdrop-blur-xl border border-slate-100'
                   } rounded-2xl p-6 text-center`}
               >
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className={`w-12 h-12 mx-auto mb-4 rounded-xl ${darkMode
-                    ? 'bg-gradient-to-br from-cyan-500 to-blue-600'
-                    : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+                    ? 'bg-gradient-to-br from-amber-500 to-amber-600'
+                    : 'bg-gradient-to-br from-amber-500 to-amber-600'
                     } flex items-center justify-center`}
                 >
                   <IndianRupee className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>
+                <div className={`text-2xl font-bold ${darkMode ? 'text-slate-100' : 'text-amber-700'} mb-1`}>
                   ₹{Math.round(animatedTotalPaid).toLocaleString('en-IN')}
                 </div>
-                <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Total Paid</div>
+                <div className={`${darkMode ? 'text-amber-200' : 'text-gray-600'} text-sm`}>Total Paid</div>
               </AnimatedCard>
 
               <AnimatedCard
                 delay={0.1}
                 darkMode={darkMode}
                 className={`${darkMode
-                  ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700'
-                  : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
+                  ? 'bg-slate-900/80 backdrop-blur-xl border border-slate-700'
+                  : 'bg-white/70 backdrop-blur-xl border border-slate-100'
                   } rounded-2xl p-6 text-center`}
               >
                 <motion.div
@@ -1336,39 +1336,39 @@ const LandlordPayment = () => {
                 >
                   <TrendingUp className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>
+                <div className={`text-2xl font-bold ${darkMode ? 'text-slate-100' : 'text-amber-700'} mb-1`}>
                   ₹{Math.round(animatedAvgSpend).toLocaleString('en-IN')}
                 </div>
-                <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Avg Monthly</div>
+                <div className={`${darkMode ? 'text-amber-200' : 'text-gray-600'} text-sm`}>Avg Monthly</div>
               </AnimatedCard>
 
               <AnimatedCard
                 delay={0.2}
                 darkMode={darkMode}
                 className={`${darkMode
-                  ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700'
-                  : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
+                  ? 'bg-slate-900/80 backdrop-blur-xl border border-slate-700'
+                  : 'bg-white/70 backdrop-blur-xl border border-slate-100'
                   } rounded-2xl p-6 text-center`}
               >
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className={`w-12 h-12 mx-auto mb-4 rounded-xl ${darkMode
-                    ? 'bg-gradient-to-br from-blue-500 to-purple-600'
-                    : 'bg-gradient-to-br from-purple-500 to-pink-600'
+                    ? 'bg-gradient-to-br from-amber-500 to-amber-600'
+                    : 'bg-gradient-to-br from-slate-800 to-slate-900'
                     } flex items-center justify-center`}
                 >
                   <Crown className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className={`text-lg font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>{currentPlan?.name || 'None'}</div>
-                <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Current Plan</div>
+                <div className={`text-lg font-bold ${darkMode ? 'text-slate-100' : 'text-amber-700'} mb-1`}>{currentPlan?.name || 'None'}</div>
+                <div className={`${darkMode ? 'text-amber-200' : 'text-gray-600'} text-sm`}>Current Plan</div>
               </AnimatedCard>
 
               <AnimatedCard
                 delay={0.3}
                 darkMode={darkMode}
                 className={`${darkMode
-                  ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700'
-                  : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
+                  ? 'bg-slate-900/80 backdrop-blur-xl border border-slate-700'
+                  : 'bg-white/70 backdrop-blur-xl border border-slate-100'
                   } rounded-2xl p-6 text-center`}
               >
                 <motion.div
@@ -1377,29 +1377,29 @@ const LandlordPayment = () => {
                 >
                   <Calendar className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>{daysUntilPayment}</div>
-                <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Days to Payment</div>
+                <div className={`text-2xl font-bold ${darkMode ? 'text-slate-100' : 'text-amber-700'} mb-1`}>{daysUntilPayment}</div>
+                <div className={`${darkMode ? 'text-amber-200' : 'text-gray-600'} text-sm`}>Days to Payment</div>
               </AnimatedCard>
 
               <AnimatedCard
                 delay={0.4}
                 darkMode={darkMode}
                 className={`${darkMode
-                  ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700'
-                  : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
+                  ? 'bg-slate-900/80 backdrop-blur-xl border border-slate-700'
+                  : 'bg-white/70 backdrop-blur-xl border border-slate-100'
                   } rounded-2xl p-6 text-center`}
               >
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
                   className={`w-12 h-12 mx-auto mb-4 rounded-xl ${darkMode
-                    ? 'bg-gradient-to-br from-cyan-500 to-blue-600'
-                    : 'bg-gradient-to-br from-indigo-500 to-purple-600'
+                    ? 'bg-gradient-to-br from-amber-500 to-amber-600'
+                    : 'bg-gradient-to-br from-amber-500 to-amber-600'
                     } flex items-center justify-center`}
                 >
                   <CreditCard className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-1`}>{paymentMethods.length}</div>
-                <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Payment Methods</div>
+                <div className={`text-2xl font-bold ${darkMode ? 'text-slate-100' : 'text-amber-700'} mb-1`}>{paymentMethods.length}</div>
+                <div className={`${darkMode ? 'text-amber-200' : 'text-gray-600'} text-sm`}>Payment Methods</div>
               </AnimatedCard>
             </div>
 
@@ -1409,8 +1409,8 @@ const LandlordPayment = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
               className={`flex space-x-1 mb-8 ${darkMode
-                ? 'bg-slate-800/50 border border-slate-700'
-                : 'bg-white/50 border border-indigo-200'
+                ? 'bg-slate-900/80 border border-slate-700'
+                : 'bg-white/50 border border-slate-100'
                 } p-1 rounded-2xl backdrop-blur-xl`}
             >
               {[
@@ -1427,11 +1427,11 @@ const LandlordPayment = () => {
                   onClick={() => setActiveTab(key)}
                   className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${activeTab === key
                     ? darkMode
-                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
-                      : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
+                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg'
+                      : 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg'
                     : darkMode
-                      ? 'text-blue-200 hover:text-cyan-100 hover:bg-slate-700/50'
-                      : 'text-gray-600 hover:text-indigo-700 hover:bg-indigo-100/50'
+                      ? 'text-amber-200 hover:text-slate-100 hover:bg-slate-700/50'
+                      : 'text-gray-600 hover:text-amber-700 hover:bg-amber-50/50'
                     }`}
                 >
                   {React.createElement(icon, { className: "w-5 h-5" })}
@@ -1464,30 +1464,30 @@ const LandlordPayment = () => {
                     delay={0.2}
                     darkMode={darkMode}
                     className={`${darkMode
-                      ? 'bg-slate-800/50 backdrop-blur-xl border border-slate-700'
-                      : 'bg-white/70 backdrop-blur-xl border border-indigo-200'
+                      ? 'bg-slate-900/80 backdrop-blur-xl border border-slate-700'
+                      : 'bg-white/70 backdrop-blur-xl border border-slate-100'
                       } rounded-2xl p-8`}
                   >
-                    <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'} mb-6`}>Usage This Month</h3>
+                    <h3 className={`text-2xl font-bold ${darkMode ? 'text-slate-100' : 'text-amber-700'} mb-6`}>Usage This Month</h3>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className={`${darkMode ? 'bg-slate-700/50' : 'bg-indigo-50/50'} rounded-xl p-4 text-center`}>
-                        <div className={`text-3xl font-bold ${darkMode ? 'text-cyan-400' : 'text-indigo-500'} mb-2`}>{properties.length}</div>
-                        <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Active Properties</div>
+                      <div className={`${darkMode ? 'bg-slate-700/50' : 'bg-amber-50/50'} rounded-xl p-4 text-center`}>
+                        <div className={`text-3xl font-bold ${darkMode ? 'text-amber-400' : 'text-amber-600'} mb-2`}>{properties.length}</div>
+                        <div className={`${darkMode ? 'text-amber-200' : 'text-gray-600'} text-sm`}>Active Properties</div>
                       </div>
 
-                      <div className={`${darkMode ? 'bg-slate-700/50' : 'bg-indigo-50/50'} rounded-xl p-4 text-center`}>
+                      <div className={`${darkMode ? 'bg-slate-700/50' : 'bg-amber-50/50'} rounded-xl p-4 text-center`}>
                         <div className={`text-3xl font-bold ${darkMode ? 'text-emerald-400' : 'text-emerald-500'} mb-2`}>
                           {paymentHistory.filter(p => p.status === 'completed').length}
                         </div>
-                        <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Payments Completed</div>
+                        <div className={`${darkMode ? 'text-amber-200' : 'text-gray-600'} text-sm`}>Payments Completed</div>
                       </div>
 
-                      <div className={`${darkMode ? 'bg-slate-700/50' : 'bg-indigo-50/50'} rounded-xl p-4 text-center`}>
+                      <div className={`${darkMode ? 'bg-slate-700/50' : 'bg-amber-50/50'} rounded-xl p-4 text-center`}>
                         <div className={`text-3xl font-bold ${darkMode ? 'text-yellow-400' : 'text-yellow-500'} mb-2`}>
                           {paymentHistory.filter(p => p.status === 'pending').length}
                         </div>
-                        <div className={`${darkMode ? 'text-blue-200' : 'text-gray-600'} text-sm`}>Pending Payments</div>
+                        <div className={`${darkMode ? 'text-amber-200' : 'text-gray-600'} text-sm`}>Pending Payments</div>
                       </div>
                     </div>
                   </AnimatedCard>
@@ -1528,14 +1528,14 @@ const LandlordPayment = () => {
                   className="space-y-6"
                 >
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'}`}>Saved Payment Methods</h3>
+                    <h3 className={`text-2xl font-bold ${darkMode ? 'text-slate-100' : 'text-amber-700'}`}>Saved Payment Methods</h3>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setShowAddPaymentModal(true)}
                       className={`flex items-center space-x-2 px-4 py-2 ${darkMode
-                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600'
-                        : 'bg-gradient-to-r from-indigo-500 to-purple-600'
+                        ? 'bg-gradient-to-r from-amber-500 to-amber-600'
+                        : 'bg-gradient-to-r from-amber-500 to-amber-600'
                         } text-white rounded-xl font-semibold`}
                     >
                       <Plus className="w-5 h-5" />
@@ -1572,7 +1572,7 @@ const LandlordPayment = () => {
                   className="space-y-4"
                 >
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'}`}>
+                    <h3 className={`text-2xl font-bold ${darkMode ? 'text-slate-100' : 'text-amber-700'}`}>
                       Rent Received from Tenants
                     </h3>
                     <motion.button
@@ -1580,7 +1580,7 @@ const LandlordPayment = () => {
                       whileTap={{ scale: 0.95 }}
                       onClick={fetchTenantRentPayments}
                       className={`flex items-center space-x-2 px-4 py-2 ${
-                        darkMode ? 'bg-slate-700 text-cyan-300 hover:bg-slate-600' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
+                        darkMode ? 'bg-slate-700 text-amber-300 hover:bg-slate-600' : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
                       } rounded-xl text-sm font-semibold transition-colors`}
                     >
                       <RotateCcw className={`w-4 h-4 ${tenantRentLoading ? 'animate-spin' : ''}`} />
@@ -1603,7 +1603,7 @@ const LandlordPayment = () => {
                         <div
                           key={p.id}
                           className={`flex flex-wrap items-center justify-between gap-4 p-5 rounded-2xl border ${
-                            darkMode ? 'bg-slate-800/50 border-slate-700' : 'bg-white/80 border-indigo-100'
+                            darkMode ? 'bg-slate-900/80 border-slate-700' : 'bg-white/80 border-slate-100'
                           }`}
                         >
                           <div>
@@ -1644,7 +1644,7 @@ const LandlordPayment = () => {
                   className="space-y-4"
                 >
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className={`text-2xl font-bold ${darkMode ? 'text-cyan-100' : 'text-indigo-700'}`}>
+                    <h3 className={`text-2xl font-bold ${darkMode ? 'text-slate-100' : 'text-amber-700'}`}>
                       Payment History
                     </h3>
                     <motion.button
@@ -1652,7 +1652,7 @@ const LandlordPayment = () => {
                       whileTap={{ scale: 0.95 }}
                       onClick={() => { fetchPaymentHistory(); fetchStats(); }}
                       className={`flex items-center space-x-2 px-4 py-2 ${
-                        darkMode ? 'bg-slate-700 text-cyan-300 hover:bg-slate-600' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
+                        darkMode ? 'bg-slate-700 text-amber-300 hover:bg-slate-600' : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
                       } rounded-xl text-sm font-semibold transition-colors`}
                     >
                       <RotateCcw className={`w-4 h-4 ${historyLoading ? 'animate-spin' : ''}`} />
@@ -1661,7 +1661,7 @@ const LandlordPayment = () => {
                   </div>
 
                   {historyLoading && (
-                    <div className={`text-center py-12 ${darkMode ? 'text-blue-200' : 'text-gray-500'}`}>
+                    <div className={`text-center py-12 ${darkMode ? 'text-amber-200' : 'text-gray-500'}`}>
                       <Loader className="w-8 h-8 mx-auto mb-3 animate-spin" />
                       <p>Loading payment history…</p>
                     </div>
@@ -1675,7 +1675,7 @@ const LandlordPayment = () => {
                   )}
 
                   {!historyLoading && !historyError && paymentHistory.length === 0 && (
-                    <div className={`text-center py-16 ${darkMode ? 'text-blue-200' : 'text-gray-500'}`}>
+                    <div className={`text-center py-16 ${darkMode ? 'text-amber-200' : 'text-gray-500'}`}>
                       <Receipt className="w-12 h-12 mx-auto mb-4 opacity-40" />
                       <p className="text-lg font-medium">No payment history yet</p>
                       <p className="text-sm mt-1">Your subscription payments will appear here once processed.</p>
@@ -1715,23 +1715,23 @@ const LandlordPayment = () => {
               className={`${
                 darkMode
                   ? 'bg-slate-800/95 border border-slate-700'
-                  : 'bg-white/95 border border-indigo-200'
+                  : 'bg-white/95 border border-slate-100'
               } rounded-2xl w-full max-w-md overflow-hidden shadow-2xl`}
               onClick={e => e.stopPropagation()}
             >
               {/* Modal header */}
               <div className={`flex items-center justify-between p-5 border-b ${
-                darkMode ? 'border-slate-700' : 'border-indigo-100'
+                darkMode ? 'border-slate-700' : 'border-slate-100'
               }`}>
                 <h2 className={`text-xl font-bold ${
-                  darkMode ? 'text-cyan-100' : 'text-indigo-700'
+                  darkMode ? 'text-slate-100' : 'text-amber-700'
                 }`}>
                   Complete Payment
                 </h2>
                 <button
                   onClick={() => setShowRazorpay(false)}
                   className={`p-2 rounded-lg transition-colors ${
-                    darkMode ? 'hover:bg-slate-700 text-slate-300' : 'hover:bg-indigo-50 text-gray-500'
+                    darkMode ? 'hover:bg-slate-700 text-slate-300' : 'hover:bg-amber-50 text-gray-500'
                   }`}
                 >
                   <X className="w-5 h-5" />

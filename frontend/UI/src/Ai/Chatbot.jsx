@@ -145,7 +145,7 @@ Always be polite, concise, and helpful!`;
                 initial={{ opacity: 0, y: 10, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="mb-4 relative bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 px-4 py-3 rounded-2xl shadow-xl border border-indigo-100 dark:border-indigo-900 font-medium text-sm flex items-center space-x-2 cursor-pointer hover:bg-gray-50"
+                className="mb-4 relative bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 px-4 py-3 rounded-2xl shadow-xl border border-amber-100 dark:border-slate-800 font-medium text-sm flex items-center space-x-2 cursor-pointer hover:bg-amber-50 dark:hover:bg-slate-800"
                 onClick={toggleChat}
               >
                 <span className="animate-pulse">Hi! Need help?</span>
@@ -156,7 +156,7 @@ Always be polite, concise, and helpful!`;
                   <X size={14} />
                 </button>
                 {/* Small triangle pointer */}
-                <div className="absolute -bottom-2 right-5 w-4 h-4 bg-white dark:bg-gray-800 border-b border-r border-indigo-100 dark:border-indigo-900 transform rotate-45"></div>
+                <div className="absolute -bottom-2 right-5 w-4 h-4 bg-white dark:bg-slate-900 border-b border-r border-amber-100 dark:border-slate-800 transform rotate-45"></div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -164,7 +164,7 @@ Always be polite, concise, and helpful!`;
             onClick={toggleChat}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="p-4 bg-indigo-600 text-white rounded-full shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
+            className="p-4 bg-amber-500 text-white rounded-full shadow-[0_8px_20px_rgba(217,119,6,0.35)] hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:ring-offset-2 transition-colors"
           >
             <Home size={24} />
           </motion.button>
@@ -179,10 +179,10 @@ Always be polite, concise, and helpful!`;
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-6 right-6 w-[400px] h-[600px] max-h-[85vh] bg-white dark:bg-gray-800 rounded-3xl shadow-2xl flex flex-col z-50 border border-gray-100 dark:border-gray-700 overflow-hidden"
+            className="fixed bottom-6 right-6 w-[400px] h-[600px] max-h-[85vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col z-50 border border-slate-100 dark:border-slate-800 overflow-hidden"
           >
             {/* Header */}
-            <div className="bg-[#2d2d5f] p-4 text-white flex justify-between items-center">
+            <div className="bg-slate-900 p-4 text-white flex justify-between items-center">
               <div className="flex items-center space-x-3">
                 <div className="bg-white/10 p-2 rounded-xl">
                   <Bot size={24} className="text-white" />
@@ -190,21 +190,21 @@ Always be polite, concise, and helpful!`;
                 <h3 className="font-bold text-xl tracking-tight">Landmark Ai Assistant</h3>
               </div>
               <div className="flex items-center space-x-4">
-                <RotateCcw size={20} className="cursor-pointer hover:text-indigo-200 transition-colors" onClick={() => setMessages([{ role: 'model', content: "Hi there, I'm here to help! Let's get started!", timestamp: 'Today 06:46 pm' }])} />
-                <div onClick={() => setIsMuted(!isMuted)} className="cursor-pointer hover:text-indigo-200 transition-colors">
+                <RotateCcw size={20} className="cursor-pointer hover:text-amber-300 transition-colors" onClick={() => setMessages([{ role: 'model', content: "Hi there, I'm here to help! Let's get started!", timestamp: 'Today 06:46 pm' }])} />
+                <div onClick={() => setIsMuted(!isMuted)} className="cursor-pointer hover:text-amber-300 transition-colors">
                   {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
                 </div>
-                <X size={24} className="cursor-pointer hover:text-indigo-200 transition-colors" onClick={toggleChat} />
+                <X size={24} className="cursor-pointer hover:text-amber-300 transition-colors" onClick={toggleChat} />
               </div>
             </div>
 
             {/* Privacy Disclaimer */}
             <div className="px-6 py-3 text-[13px] leading-relaxed text-gray-500 bg-white border-b border-gray-50">
-              The information you provide to the chatbot will be collected to improve your experience. Please read our <span className="text-indigo-600 font-semibold cursor-pointer hover:underline">privacy policy</span> to see how we are storing and protecting your data
+              The information you provide to the chatbot will be collected to improve your experience. Please read our <span className="text-amber-600 font-semibold cursor-pointer hover:underline">privacy policy</span> to see how we are storing and protecting your data
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 p-6 overflow-y-auto space-y-6 bg-white dark:bg-gray-900 scroll-smooth">
+            <div className="flex-1 p-6 overflow-y-auto space-y-6 bg-[#fafaf9] dark:bg-slate-950 scroll-smooth">
               {/* Message Group with Timestamp */}
               <div className="flex flex-col space-y-4">
                 <div className="text-center">
@@ -220,8 +220,8 @@ Always be polite, concise, and helpful!`;
                       <div
                         className={`p-4 rounded-2xl text-[15px] leading-relaxed shadow-sm ${
                           msg.role === 'user'
-                            ? 'bg-[#2d2d5f] text-white rounded-tr-none'
-                            : 'bg-[#f4f7ff] text-[#2d2d5f] border border-[#e8efff] rounded-tl-none'
+                            ? 'bg-amber-500 text-white rounded-tr-none'
+                            : 'bg-amber-50 text-slate-900 border border-amber-100 rounded-tl-none dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700'
                         }`}
                       >
                         <p className="whitespace-pre-wrap">{msg.content}</p>
@@ -232,13 +232,13 @@ Always be polite, concise, and helpful!`;
                         <div className="flex flex-wrap gap-2 mt-2">
                           <button 
                             onClick={() => setInput("Explore Jobs")}
-                            className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:border-indigo-600 hover:text-indigo-600 transition-all shadow-sm"
+                            className="px-4 py-2 bg-white border border-slate-100 rounded-full text-sm font-medium text-slate-700 hover:border-amber-500 hover:text-amber-600 transition-all shadow-sm dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200"
                           >
                             Explore Jobs
                           </button>
                           <button 
                             onClick={() => setInput("Ask a question")}
-                            className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:border-indigo-600 hover:text-indigo-600 transition-all shadow-sm"
+                            className="px-4 py-2 bg-white border border-slate-100 rounded-full text-sm font-medium text-slate-700 hover:border-amber-500 hover:text-amber-600 transition-all shadow-sm dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200"
                           >
                             Ask a question
                           </button>
@@ -251,8 +251,8 @@ Always be polite, concise, and helpful!`;
 
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="p-4 bg-[#f4f7ff] rounded-2xl rounded-tl-none border border-[#e8efff] flex items-center shadow-sm">
-                    <Loader2 className="w-5 h-5 animate-spin text-indigo-600" />
+                  <div className="p-4 bg-amber-50 dark:bg-slate-800 rounded-2xl rounded-tl-none border border-amber-100 dark:border-slate-700 flex items-center shadow-sm">
+                    <Loader2 className="w-5 h-5 animate-spin text-amber-600" />
                   </div>
                 </div>
               )}
@@ -260,9 +260,9 @@ Always be polite, concise, and helpful!`;
             </div>
 
             {/* Input Area */}
-            <div className="p-6 bg-white dark:bg-gray-800">
+            <div className="p-6 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
               <form onSubmit={handleSendMessage} className="relative flex items-center">
-                <div className="flex-1 flex items-center bg-white border border-gray-100 rounded-2xl px-4 py-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] focus-within:border-indigo-200 transition-all">
+                <div className="flex-1 flex items-center bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] focus-within:border-amber-500 transition-all">
                   <Menu size={20} className="text-gray-400 mr-3 cursor-pointer hover:text-gray-600" />
                   <input
                     type="text"
@@ -275,7 +275,7 @@ Always be polite, concise, and helpful!`;
                   <button
                     type="submit"
                     disabled={isLoading || !input.trim()}
-                    className={`ml-2 transition-all ${input.trim() ? 'text-[#2d2d5f] hover:scale-110' : 'text-gray-300'}`}
+                    className={`ml-2 transition-all ${input.trim() ? 'text-amber-600 hover:scale-110' : 'text-gray-300'}`}
                   >
                     <Send size={24} fill={input.trim() ? 'currentColor' : 'none'} />
                   </button>

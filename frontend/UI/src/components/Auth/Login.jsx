@@ -215,7 +215,7 @@ export default function Login() {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 transition-all outline-none font-bold ${darkMode ? 'bg-slate-800/50 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
+                      className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 transition-all outline-none font-bold ${darkMode ? 'bg-slate-900/80 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
                       placeholder="you@example.com"
                       required
                     />
@@ -234,7 +234,7 @@ export default function Login() {
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
-                      className={`w-full pl-12 pr-12 py-4 rounded-2xl border-2 transition-all outline-none font-bold ${darkMode ? 'bg-slate-800/50 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
+                      className={`w-full pl-12 pr-12 py-4 rounded-2xl border-2 transition-all outline-none font-bold ${darkMode ? 'bg-slate-900/80 border-slate-700 focus:border-amber-500 text-white' : 'bg-slate-50/50 border-slate-100 focus:border-amber-500 text-slate-900'}`}
                       placeholder="••••••••"
                       required
                     />

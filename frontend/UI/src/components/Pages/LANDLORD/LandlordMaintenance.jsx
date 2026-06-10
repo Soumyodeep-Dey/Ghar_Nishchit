@@ -89,7 +89,7 @@ const ProgressBar = ({ progress, status, animated = true }) => {
 
   const getProgressColor = () => {
     if (status === 'Completed') return 'from-green-500 to-emerald-600';
-    if (status === 'In Progress') return 'from-blue-500 to-purple-600';
+    if (status === 'In Progress') return 'from-amber-500 to-amber-600';
     if (status === 'On Hold') return 'from-yellow-500 to-orange-600';
     return 'from-gray-400 to-gray-500';
   };
@@ -119,9 +119,9 @@ const StatusBadge = ({ status, priority, darkMode }) => { // Added darkMode prop
         };
       case 'In Progress':
         return {
-          bg: darkMode ? 'bg-blue-600' : 'bg-blue-100',
-          text: darkMode ? 'text-white' : 'text-blue-800',
-          border: darkMode ? 'border-blue-600' : 'border-blue-100',
+          bg: darkMode ? 'bg-amber-600' : 'bg-amber-50',
+          text: darkMode ? 'text-white' : 'text-amber-800',
+          border: darkMode ? 'border-amber-600' : 'border-amber-100',
           icon: Play
         };
       case 'On Hold':
@@ -242,11 +242,11 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
   const getCategoryIcon = (category) => {
     switch (category?.toLowerCase()) {
       case 'plumbing':
-        return <Droplets className="w-5 h-5 text-blue-400" />;
+        return <Droplets className="w-5 h-5 text-amber-400" />;
       case 'electrical':
         return <Zap className="w-5 h-5 text-yellow-400" />;
       case 'hvac':
-        return <AirVent className="w-5 h-5 text-purple-400" />;
+        return <AirVent className="w-5 h-5 text-amber-400" />;
       case 'appliance':
         return <Monitor className="w-5 h-5 text-green-400" />;
       case 'structural':
@@ -262,7 +262,7 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
     const daysSince = Math.floor((Date.now() - new Date(request.createdAt)) / (1000 * 60 * 60 * 24));
     if (request.priority === 'High' && daysSince > 1) return 'border-red-500/50 bg-red-500/5';
     if (request.priority === 'Medium' && daysSince > 3) return 'border-yellow-500/50 bg-yellow-500/5';
-    return darkMode ? 'border-white/20' : 'border-indigo-200/50';
+    return darkMode ? 'border-white/20' : 'border-slate-100';
   };
 
   const isHighlighted = request.title === "Heating System Malfunction";
@@ -289,21 +289,21 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
                   overflow-hidden`}
     >
       {/* Background Gradient Effect */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${darkMode ? 'from-white/5' : 'from-indigo-200/20'} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+      <div className={`absolute inset-0 bg-gradient-to-br ${darkMode ? 'from-white/5' : 'from-amber-100/20'} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
 
       {/* Header */}
       <div className="relative z-10 flex items-start justify-between mb-4">
         <div className="flex items-start space-x-3">
           <motion.div
             whileHover={{ scale: 1.1, rotate: 5 }}
-            className={`p-2 rounded-lg ${darkMode ? 'bg-white/10' : 'bg-indigo-100/50'}`}
+            className={`p-2 rounded-lg ${darkMode ? 'bg-white/10' : 'bg-amber-50/50'}`}
           >
             {getCategoryIcon(request.category)}
           </motion.div>
 
           <div className="flex-1">
             <div className="flex items-center space-x-2 mb-1">
-              <h3 className={`text-lg font-bold ${darkMode ? 'text-white group-hover:text-blue-300' : 'text-indigo-900 group-hover:text-blue-600'} transition-colors`}>
+              <h3 className={`text-lg font-bold ${darkMode ? 'text-white group-hover:text-amber-300' : 'text-slate-900 group-hover:text-amber-600'} transition-colors`}>
                 {request.title}
               </h3>
               {request.isEmergency && (
@@ -317,11 +317,11 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
               )}
             </div>
 
-            <p className={`text-sm mb-2 line-clamp-2 ${darkMode ? 'text-white/70' : 'text-indigo-700/80'}`}>
+            <p className={`text-sm mb-2 line-clamp-2 ${darkMode ? 'text-white/70' : 'text-amber-700/80'}`}>
               {request.description}
             </p>
 
-            <div className={`flex items-center space-x-4 text-xs ${darkMode ? 'text-white/60' : 'text-indigo-600/70'}`}>
+            <div className={`flex items-center space-x-4 text-xs ${darkMode ? 'text-white/60' : 'text-amber-600/70'}`}>
               <div className="flex items-center space-x-1">
                 <Building2 className="w-3 h-3" />
                 <span>{request.property}</span>
@@ -343,9 +343,9 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setShowMenu(!showMenu)}
-            className={`p-2 rounded-lg ${darkMode ? 'hover:bg-white/10' : 'hover:bg-indigo-100/50'} transition-colors opacity-0 group-hover:opacity-100`}
+            className={`p-2 rounded-lg ${darkMode ? 'hover:bg-white/10' : 'hover:bg-amber-50/50'} transition-colors opacity-0 group-hover:opacity-100`}
           >
-            <MoreVertical className={`w-4 h-4 ${darkMode ? 'text-white/70' : 'text-indigo-600/70'}`} />
+            <MoreVertical className={`w-4 h-4 ${darkMode ? 'text-white/70' : 'text-amber-600/70'}`} />
           </motion.button>
 
           <AnimatePresence>
@@ -354,28 +354,28 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
                 initial={{ opacity: 0, scale: 0.95, y: -10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                className={`absolute right-0 top-full mt-2 w-56 ${darkMode ? 'bg-white/20 border-white/30' : 'bg-white/90 border-indigo-200/50'} backdrop-blur-xl border rounded-xl shadow-xl z-50`}
+                className={`absolute right-0 top-full mt-2 w-56 ${darkMode ? 'bg-white/20 border-white/30' : 'bg-white/90 border-slate-100'} backdrop-blur-xl border rounded-xl shadow-xl z-50`}
               >
                 <div className="p-2">
                   <button
                     onClick={() => { onView(request); setShowMenu(false); }}
-                    className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-indigo-100/50 text-indigo-700'} transition-colors`}
+                    className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-amber-50/50 text-amber-700'} transition-colors`}
                   >
                     <Eye className="w-4 h-4" />
                     <span>View Details</span>
                   </button>
                   <button
                     onClick={() => { onEdit(request); setShowMenu(false); }}
-                    className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-indigo-100/50 text-indigo-700'} transition-colors`}
+                    className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-amber-50/50 text-amber-700'} transition-colors`}
                   >
                     <Edit className="w-4 h-4" />
                     <span>Edit Request</span>
                   </button>
-                  <button className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-indigo-100/50 text-indigo-700'} transition-colors`}>
+                  <button className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-amber-50/50 text-amber-700'} transition-colors`}>
                     <MessageCircle className="w-4 h-4" />
                     <span>Contact Tenant</span>
                   </button>
-                  <button className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-indigo-100/50 text-indigo-700'} transition-colors`}>
+                  <button className={`w-full flex items-center space-x-2 px-3 py-2 rounded-lg ${darkMode ? 'hover:bg-white/10 text-white/80' : 'hover:bg-amber-50/50 text-amber-700'} transition-colors`}>
                     <Share2 className="w-4 h-4" />
                     <span>Share Report</span>
                   </button>
@@ -402,37 +402,37 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
       {/* Progress Bar */}
       <div className="relative z-10 mb-4">
         <div className="flex items-center justify-between mb-2">
-          <span className={`text-xs ${darkMode ? 'text-white/60' : 'text-indigo-600/70'}`}>Progress</span>
-          <span className={`text-xs font-medium ${darkMode ? 'text-white/80' : 'text-indigo-800'}`}>{request.progress}%</span>
+          <span className={`text-xs ${darkMode ? 'text-white/60' : 'text-amber-600/70'}`}>Progress</span>
+          <span className={`text-xs font-medium ${darkMode ? 'text-white/80' : 'text-amber-800'}`}>{request.progress}%</span>
         </div>
         <ProgressBar progress={request.progress} status={request.status} />
       </div>
 
       {/* Assignment */}
       {request.assignedTo && (
-        <div className={`relative z-10 mb-4 p-3 rounded-lg border ${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-50/50 border-indigo-100'}`}>
+        <div className={`relative z-10 mb-4 p-3 rounded-lg border ${darkMode ? 'bg-white/5 border-white/10' : 'bg-amber-50/50 border-slate-100'}`}>
           <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xs text-white font-semibold">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-xs text-white font-semibold">
               {request.assignedTo.charAt(0)}
             </div>
             <div>
-              <div className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-indigo-900'}`}>Assigned to</div>
-              <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-indigo-600/70'}`}>{request.assignedTo}</div>
+              <div className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-slate-900'}`}>Assigned to</div>
+              <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-amber-600/70'}`}>{request.assignedTo}</div>
             </div>
             <div className="ml-auto flex items-center space-x-1">
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                className={`p-1 rounded ${darkMode ? 'hover:bg-white/10' : 'hover:bg-indigo-100/70'}`}
+                className={`p-1 rounded ${darkMode ? 'hover:bg-white/10' : 'hover:bg-amber-50/70'}`}
               >
-                <Phone className={`w-3 h-3 ${darkMode ? 'text-white/60' : 'text-indigo-600/70'}`} />
+                <Phone className={`w-3 h-3 ${darkMode ? 'text-white/60' : 'text-amber-600/70'}`} />
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                className={`p-1 rounded ${darkMode ? 'hover:bg-white/10' : 'hover:bg-indigo-100/70'}`}
+                className={`p-1 rounded ${darkMode ? 'hover:bg-white/10' : 'hover:bg-amber-50/70'}`}
               >
-                <MessageCircle className={`w-3 h-3 ${darkMode ? 'text-white/60' : 'text-indigo-600/70'}`} />
+                <MessageCircle className={`w-3 h-3 ${darkMode ? 'text-white/60' : 'text-amber-600/70'}`} />
               </motion.button>
             </div>
           </div>
@@ -442,13 +442,13 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
       {/* Attachments Preview */}
       {request.attachments && request.attachments.length > 0 && (
         <div className="relative z-10 mb-4">
-          <div className={`text-xs mb-2 ${darkMode ? 'text-white/60' : 'text-indigo-600/70'}`}>Attachments ({request.attachments.length})</div>
+          <div className={`text-xs mb-2 ${darkMode ? 'text-white/60' : 'text-amber-600/70'}`}>Attachments ({request.attachments.length})</div>
           <div className="flex space-x-2">
             {request.attachments.slice(0, 3).map((attachment, index) => (
               <motion.div
                 key={index}
                 whileHover={{ scale: 1.05 }}
-                className={`w-12 h-12 rounded-lg flex items-center justify-center cursor-pointer ${darkMode ? 'bg-white/10' : 'bg-indigo-100/50'}`}
+                className={`w-12 h-12 rounded-lg flex items-center justify-center cursor-pointer ${darkMode ? 'bg-white/10' : 'bg-amber-50/50'}`}
               >
                 {attachment.type === 'image' ? (
                   <img
@@ -457,12 +457,12 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
                     className="w-full h-full object-cover rounded-lg"
                   />
                 ) : (
-                  <FileText className={`w-5 h-5 ${darkMode ? 'text-white/60' : 'text-indigo-600/70'}`} />
+                  <FileText className={`w-5 h-5 ${darkMode ? 'text-white/60' : 'text-amber-600/70'}`} />
                 )}
               </motion.div>
             ))}
             {request.attachments.length > 3 && (
-              <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-xs ${darkMode ? 'bg-white/10 text-white/60' : 'bg-indigo-100/50 text-indigo-600/70'}`}>
+              <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-xs ${darkMode ? 'bg-white/10 text-white/60' : 'bg-amber-50/50 text-amber-600/70'}`}>
                 +{request.attachments.length - 3}
               </div>
             )}
@@ -479,7 +479,7 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
             onClick={() => onView(request)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${darkMode
               ? 'bg-sky-500/20 text-sky-300 hover:bg-sky-500/30'
-              : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
+              : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
               }`}
           >
             View Details
@@ -501,7 +501,7 @@ const MaintenanceRequestCard = ({ request, onEdit, onView, onDelete, onStatusCha
         </div>
 
         <div className="flex items-center space-x-2">
-          <div className={`text-xs ${darkMode ? 'text-white/40' : 'text-indigo-500/60'}`}>
+          <div className={`text-xs ${darkMode ? 'text-white/40' : 'text-amber-600/60'}`}>
             {Math.floor((Date.now() - new Date(request.createdAt)) / (1000 * 60 * 60 * 24))}d ago
           </div>
           {request.isUrgent && (
@@ -681,19 +681,19 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className={`${darkMode ? 'bg-white/10 border-white/20' : 'bg-white/90 border-indigo-200/50'} backdrop-blur-xl border rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden`}
+        className={`${darkMode ? 'bg-white/10 border-white/20' : 'bg-white/90 border-slate-100'} backdrop-blur-xl border rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden`}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className={`p-6 border-b ${darkMode ? 'border-white/20' : 'border-indigo-200/50'}`}>
+        <div className={`p-6 border-b ${darkMode ? 'border-white/20' : 'border-slate-100'}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className={`p-3 rounded-xl ${darkMode ? 'bg-white/10' : 'bg-indigo-100/50'}`}>
-                <Wrench className="w-8 h-8 text-blue-400" />
+              <div className={`p-3 rounded-xl ${darkMode ? 'bg-white/10' : 'bg-amber-50/50'}`}>
+                <Wrench className="w-8 h-8 text-amber-400" />
               </div>
               <div>
-                <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{request.title}</h2>
-                <div className={`flex items-center space-x-4 mt-1 ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>
+                <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{request.title}</h2>
+                <div className={`flex items-center space-x-4 mt-1 ${darkMode ? 'text-white/60' : 'text-amber-700/70'}`}>
                   <span>Request #{request.id}</span>
                   <span>•</span>
                   <span>Created {new Date(request.createdAt).toLocaleDateString()}</span>
@@ -707,15 +707,15 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}
-                className={`p-2 rounded-lg ${darkMode ? 'hover:bg-white/10' : 'hover:bg-indigo-100'} transition-colors`}
+                className={`p-2 rounded-lg ${darkMode ? 'hover:bg-white/10' : 'hover:bg-amber-50'} transition-colors`}
               >
-                <X className={`w-6 h-6 ${darkMode ? 'text-white/70' : 'text-indigo-700'}`} />
+                <X className={`w-6 h-6 ${darkMode ? 'text-white/70' : 'text-amber-700'}`} />
               </motion.button>
             </div>
           </div>
 
           {/* Tab Navigation */}
-          <div className={`flex space-x-1 mt-6 ${darkMode ? 'bg-white/5' : 'bg-indigo-100/70'} p-1 rounded-xl`}>
+          <div className={`flex space-x-1 mt-6 ${darkMode ? 'bg-white/5' : 'bg-amber-50/70'} p-1 rounded-xl`}>
             {[
               { key: 'overview', label: 'Overview', icon: Eye },
               { key: 'comments', label: 'Comments', icon: MessageCircle },
@@ -728,10 +728,10 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveTab(key)}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${activeTab === key
-                  ? 'bg-blue-500 text-white shadow-lg'
+                  ? 'bg-amber-500 text-white shadow-lg'
                   : darkMode
                     ? 'text-white/70 hover:text-white hover:bg-white/10'
-                    : 'text-indigo-700 hover:text-indigo-900 hover:bg-indigo-200/70'
+                    : 'text-amber-700 hover:text-slate-900 hover:bg-amber-100'
                   }`}
               >
                 {React.createElement(icon, { className: "w-4 h-4" })}
@@ -747,75 +747,75 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Request Details */}
               <div className="space-y-6">
-                <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-xl p-6 border`}>
-                  <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-indigo-900'} mb-4`}>Request Details</h3>
+                <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-amber-50 border-slate-100'} rounded-xl p-6 border`}>
+                  <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-slate-900'} mb-4`}>Request Details</h3>
 
                   <div className="space-y-4">
                     <div>
-                      <label className={`text-sm font-medium ${darkMode ? 'text-white/70' : 'text-indigo-700/70'}`}>Description</label>
-                      <p className={`${darkMode ? 'text-white' : 'text-indigo-900'} mt-1`}>{request.description}</p>
+                      <label className={`text-sm font-medium ${darkMode ? 'text-white/70' : 'text-amber-700/70'}`}>Description</label>
+                      <p className={`${darkMode ? 'text-white' : 'text-slate-900'} mt-1`}>{request.description}</p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className={`text-sm font-medium ${darkMode ? 'text-white/70' : 'text-indigo-700/70'}`}>Property</label>
+                        <label className={`text-sm font-medium ${darkMode ? 'text-white/70' : 'text-amber-700/70'}`}>Property</label>
                         <div className="flex items-center space-x-2 mt-1">
-                          <Building2 className={`w-4 h-4 ${darkMode ? 'text-white/60' : 'text-indigo-600/70'}`} />
-                          <span className={`${darkMode ? 'text-white' : 'text-indigo-900'}`}>{request.property}</span>
+                          <Building2 className={`w-4 h-4 ${darkMode ? 'text-white/60' : 'text-amber-600/70'}`} />
+                          <span className={`${darkMode ? 'text-white' : 'text-slate-900'}`}>{request.property}</span>
                         </div>
                       </div>
 
                       <div>
-                        <label className={`text-sm font-medium ${darkMode ? 'text-white/70' : 'text-indigo-700/70'}`}>Tenant</label>
+                        <label className={`text-sm font-medium ${darkMode ? 'text-white/70' : 'text-amber-700/70'}`}>Tenant</label>
                         <div className="flex items-center space-x-2 mt-1">
-                          <User className={`w-4 h-4 ${darkMode ? 'text-white/60' : 'text-indigo-600/70'}`} />
-                          <span className={`${darkMode ? 'text-white' : 'text-indigo-900'}`}>{request.tenant}</span>
+                          <User className={`w-4 h-4 ${darkMode ? 'text-white/60' : 'text-amber-600/70'}`} />
+                          <span className={`${darkMode ? 'text-white' : 'text-slate-900'}`}>{request.tenant}</span>
                         </div>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className={`text-sm font-medium ${darkMode ? 'text-white/70' : 'text-indigo-700/70'}`}>Priority</label>
+                        <label className={`text-sm font-medium ${darkMode ? 'text-white/70' : 'text-amber-700/70'}`}>Priority</label>
                         <div className="mt-1">
                           <PriorityIndicator priority={request.priority} />
                         </div>
                       </div>
 
                       <div>
-                        <label className={`text-sm font-medium ${darkMode ? 'text-white/70' : 'text-indigo-700/70'}`}>Category</label>
-                        <p className={`${darkMode ? 'text-white' : 'text-indigo-900'} mt-1 capitalize`}>{request.category || 'General'}</p>
+                        <label className={`text-sm font-medium ${darkMode ? 'text-white/70' : 'text-amber-700/70'}`}>Category</label>
+                        <p className={`${darkMode ? 'text-white' : 'text-slate-900'} mt-1 capitalize`}>{request.category || 'General'}</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Progress Section */}
-                <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-xl p-6 border`}>
-                  <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-indigo-900'} mb-4`}>Progress Tracking</h3>
+                <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-amber-50 border-slate-100'} rounded-xl p-6 border`}>
+                  <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-slate-900'} mb-4`}>Progress Tracking</h3>
 
                   <div className="space-y-4">
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className={`text-sm ${darkMode ? 'text-white/70' : 'text-indigo-700/70'}`}>Completion</span>
-                        <span className={`text-sm ${darkMode ? 'text-white' : 'text-indigo-900'} font-medium`}>{request.progress}%</span>
+                        <span className={`text-sm ${darkMode ? 'text-white/70' : 'text-amber-700/70'}`}>Completion</span>
+                        <span className={`text-sm ${darkMode ? 'text-white' : 'text-slate-900'} font-medium`}>{request.progress}%</span>
                       </div>
                       <ProgressBar progress={request.progress} status={request.status} />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 pt-4">
-                      <div className={`text-center p-4 ${darkMode ? 'bg-white/5' : 'bg-indigo-100'} rounded-lg`}>
-                        <div className={`text-2xl font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                      <div className={`text-center p-4 ${darkMode ? 'bg-white/5' : 'bg-amber-50'} rounded-lg`}>
+                        <div className={`text-2xl font-bold ${darkMode ? 'text-amber-400' : 'text-amber-600'}`}>
                           {Math.floor((Date.now() - new Date(request.createdAt)) / (1000 * 60 * 60 * 24))}
                         </div>
-                        <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Days Open</div>
+                        <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-amber-700/70'}`}>Days Open</div>
                       </div>
 
-                      <div className={`text-center p-4 ${darkMode ? 'bg-white/5' : 'bg-indigo-100'} rounded-lg`}>
+                      <div className={`text-center p-4 ${darkMode ? 'bg-white/5' : 'bg-amber-50'} rounded-lg`}>
                         <div className={`text-2xl font-bold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
                           ${request.estimatedCost || '0'}
                         </div>
-                        <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Est. Cost</div>
+                        <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-amber-700/70'}`}>Est. Cost</div>
                       </div>
                     </div>
                   </div>
@@ -825,18 +825,18 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
               {/* Assignment and Actions */}
               <div className="space-y-6">
                 {/* Status Update */}
-                <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-xl p-6 border`}>
-                  <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-indigo-900'} mb-4`}>Update Status</h3>
+                <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-amber-50 border-slate-100'} rounded-xl p-6 border`}>
+                  <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-slate-900'} mb-4`}>Update Status</h3>
 
                   <div className="space-y-4">
                     <div>
-                      <label className={`block text-sm font-medium ${darkMode ? 'text-white/70' : 'text-indigo-700/70'} mb-2`}>
+                      <label className={`block text-sm font-medium ${darkMode ? 'text-white/70' : 'text-amber-700/70'} mb-2`}>
                         Current Status
                       </label>
                       <select
                         value={newStatus}
                         onChange={(e) => setNewStatus(e.target.value)}
-                        className={`w-full p-3 ${darkMode ? 'bg-white/10 border-white/20 text-white' : 'bg-white border-indigo-200 text-indigo-900'} border rounded-lg focus:border-blue-500 focus:outline-none`}
+                        className={`w-full p-3 ${darkMode ? 'bg-white/10 border-white/20 text-white' : 'bg-white border-slate-100 text-slate-900'} border rounded-lg focus:border-amber-500 focus:outline-none`}
                       >
                         <option value="Pending">Pending</option>
                         <option value="In Progress">In Progress</option>
@@ -851,7 +851,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                       whileTap={{ scale: 0.95 }}
                       onClick={handleStatusUpdate}
                       disabled={newStatus === request.status}
-                      className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-amber-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Update Status
                     </motion.button>
@@ -859,17 +859,17 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                 </div>
 
                 {/* Assignment */}
-                <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-xl p-6 border`}>
-                  <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-indigo-900'} mb-4`}>Assignment</h3>
+                <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-amber-50 border-slate-100'} rounded-xl p-6 border`}>
+                  <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-slate-900'} mb-4`}>Assignment</h3>
 
                   {request.assignedTo ? (
-                    <div className={`flex items-center space-x-3 p-4 ${darkMode ? 'bg-white/5' : 'bg-indigo-100'} rounded-lg`}>
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                    <div className={`flex items-center space-x-3 p-4 ${darkMode ? 'bg-white/5' : 'bg-amber-50'} rounded-lg`}>
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white font-semibold">
                         {request.assignedTo.charAt(0)}
                       </div>
                       <div className="flex-1">
-                        <div className={`${darkMode ? 'text-white' : 'text-indigo-900'} font-medium`}>{request.assignedTo}</div>
-                        <div className={`${darkMode ? 'text-white/60' : 'text-indigo-700/70'} text-sm`}>Service Provider</div>
+                        <div className={`${darkMode ? 'text-white' : 'text-slate-900'} font-medium`}>{request.assignedTo}</div>
+                        <div className={`${darkMode ? 'text-white/60' : 'text-amber-700/70'} text-sm`}>Service Provider</div>
                       </div>
                       <div className="flex space-x-2">
                         <motion.button
@@ -890,20 +890,20 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                             const email = request?.assignedToContact?.email?.trim();
                             if (email) window.open(`mailto:${email}`);
                           }}
-                          className={`p-2 ${darkMode ? 'bg-blue-500/20 hover:bg-blue-500/30' : 'bg-blue-100 hover:bg-blue-200'} rounded-lg transition-colors`}
+                          className={`p-2 ${darkMode ? 'bg-amber-500/20 hover:bg-amber-500/30' : 'bg-amber-50 hover:bg-amber-100'} rounded-lg transition-colors`}
                         >
-                          <MessageCircle className={`w-4 h-4 ${darkMode ? 'text-blue-300' : 'text-blue-600'}`} />
+                          <MessageCircle className={`w-4 h-4 ${darkMode ? 'text-amber-300' : 'text-amber-600'}`} />
                         </motion.button>
                       </div>
                     </div>
                   ) : (
                     <div className="text-center py-8">
-                      <Users className={`w-12 h-12 mx-auto ${darkMode ? 'text-white/30' : 'text-indigo-400/30'} mb-4`} />
-                      <p className={`${darkMode ? 'text-white/60' : 'text-indigo-700/70'} mb-4`}>No one assigned yet</p>
+                      <Users className={`w-12 h-12 mx-auto ${darkMode ? 'text-white/30' : 'text-amber-400/30'} mb-4`} />
+                      <p className={`${darkMode ? 'text-white/60' : 'text-amber-700/70'} mb-4`}>No one assigned yet</p>
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-pink-700 transition-all duration-300 shadow-md"
+                        className="px-6 py-3 bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-amber-700 transition-all duration-300 shadow-md"
                       >
                         Assign Technician
                       </motion.button>
@@ -916,28 +916,28 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                       placeholder="Technician name"
                       value={technicianName}
                       onChange={(e) => setTechnicianName(e.target.value)}
-                      className={`w-full p-3 ${darkMode ? 'bg-white/10 border-white/20 text-white placeholder-white/50' : 'bg-white border-indigo-200 text-indigo-900 placeholder-indigo-400/50'} border rounded-lg focus:border-blue-500 focus:outline-none`}
+                      className={`w-full p-3 ${darkMode ? 'bg-white/10 border-white/20 text-white placeholder-white/50' : 'bg-white border-slate-100 text-slate-900 placeholder-slate-400/50'} border rounded-lg focus:border-amber-500 focus:outline-none`}
                     />
                     <input
                       type="text"
                       placeholder="Phone (optional)"
                       value={technicianPhone}
                       onChange={(e) => setTechnicianPhone(e.target.value)}
-                      className={`w-full p-3 ${darkMode ? 'bg-white/10 border-white/20 text-white placeholder-white/50' : 'bg-white border-indigo-200 text-indigo-900 placeholder-indigo-400/50'} border rounded-lg focus:border-blue-500 focus:outline-none`}
+                      className={`w-full p-3 ${darkMode ? 'bg-white/10 border-white/20 text-white placeholder-white/50' : 'bg-white border-slate-100 text-slate-900 placeholder-slate-400/50'} border rounded-lg focus:border-amber-500 focus:outline-none`}
                     />
                     <input
                       type="email"
                       placeholder="Email (optional)"
                       value={technicianEmail}
                       onChange={(e) => setTechnicianEmail(e.target.value)}
-                      className={`w-full p-3 ${darkMode ? 'bg-white/10 border-white/20 text-white placeholder-white/50' : 'bg-white border-indigo-200 text-indigo-900 placeholder-indigo-400/50'} border rounded-lg focus:border-blue-500 focus:outline-none`}
+                      className={`w-full p-3 ${darkMode ? 'bg-white/10 border-white/20 text-white placeholder-white/50' : 'bg-white border-slate-100 text-slate-900 placeholder-slate-400/50'} border rounded-lg focus:border-amber-500 focus:outline-none`}
                     />
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={handleAssignTechnician}
                       disabled={!technicianName.trim() || isAssigning}
-                      className="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-pink-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-3 bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-amber-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isAssigning
                         ? (request.assignedTo ? 'Reassigning...' : 'Assigning...')
@@ -947,18 +947,18 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                 </div>
 
                 {/* Quick Actions */}
-                <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-xl p-6 border`}>
-                  <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-indigo-900'} mb-4`}>Quick Actions</h3>
+                <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-amber-50 border-slate-100'} rounded-xl p-6 border`}>
+                  <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-slate-900'} mb-4`}>Quick Actions</h3>
 
                   <div className="grid grid-cols-2 gap-3">
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={handleMessageTenant}
-                      className={`flex items-center justify-center space-x-2 p-3 ${darkMode ? 'bg-blue-500/20 hover:bg-blue-500/30' : 'bg-blue-100 hover:bg-blue-200'} rounded-lg transition-colors`}
+                      className={`flex items-center justify-center space-x-2 p-3 ${darkMode ? 'bg-amber-500/20 hover:bg-amber-500/30' : 'bg-amber-50 hover:bg-amber-100'} rounded-lg transition-colors`}
                     >
-                      <MessageCircle className={`w-4 h-4 ${darkMode ? 'text-blue-300' : 'text-blue-600'}`} />
-                      <span className={`${darkMode ? 'text-blue-300' : 'text-blue-600'} text-sm`}>Message Tenant</span>
+                      <MessageCircle className={`w-4 h-4 ${darkMode ? 'text-amber-300' : 'text-amber-600'}`} />
+                      <span className={`${darkMode ? 'text-amber-300' : 'text-amber-600'} text-sm`}>Message Tenant</span>
                     </motion.button>
 
                     <motion.button
@@ -975,10 +975,10 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={handleShareReport}
-                      className={`flex items-center justify-center space-x-2 p-3 ${darkMode ? 'bg-purple-500/20 hover:bg-purple-500/30' : 'bg-purple-100 hover:bg-purple-200'} rounded-lg transition-colors`}
+                      className={`flex items-center justify-center space-x-2 p-3 ${darkMode ? 'bg-amber-500/20 hover:bg-amber-500/30' : 'bg-amber-100 hover:bg-amber-100'} rounded-lg transition-colors`}
                     >
-                      <MessageCircle className={`w-4 h-4 ${darkMode ? 'text-purple-300' : 'text-purple-600'}`} />
-                      <span className={`${darkMode ? 'text-purple-300' : 'text-purple-600'} text-sm`}>Share Report</span>
+                      <MessageCircle className={`w-4 h-4 ${darkMode ? 'text-amber-300' : 'text-amber-600'}`} />
+                      <span className={`${darkMode ? 'text-amber-300' : 'text-amber-600'} text-sm`}>Share Report</span>
                     </motion.button>
 
                     <motion.button
@@ -1006,26 +1006,26 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className={`flex space-x-4 p-4 ${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-lg border`}
+                    className={`flex space-x-4 p-4 ${darkMode ? 'bg-white/5 border-white/10' : 'bg-amber-50 border-slate-100'} rounded-lg border`}
                   >
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
                       {comment.author?.charAt(0) || 'L'}
                     </div>
 
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-2">
-                        <span className={`font-semibold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{comment.author}</span>
-                        <span className={`text-xs ${darkMode ? 'text-white/50' : 'text-indigo-700/50'}`}>
+                        <span className={`font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{comment.author}</span>
+                        <span className={`text-xs ${darkMode ? 'text-white/50' : 'text-amber-700/50'}`}>
                           {new Date(comment.timestamp).toLocaleString()}
                         </span>
                       </div>
 
-                      <p className={`${darkMode ? 'text-white/80' : 'text-indigo-800/80'}`}>{comment.text}</p>
+                      <p className={`${darkMode ? 'text-white/80' : 'text-amber-800/80'}`}>{comment.text}</p>
 
                       {comment.attachments && comment.attachments.length > 0 && (
                         <div className="flex space-x-2 mt-3">
                           {comment.attachments.map((attachment, idx) => (
-                            <div key={idx} className={`w-16 h-16 rounded-lg ${darkMode ? 'bg-white/10' : 'bg-indigo-100'} flex items-center justify-center`}>
+                            <div key={idx} className={`w-16 h-16 rounded-lg ${darkMode ? 'bg-white/10' : 'bg-amber-50'} flex items-center justify-center`}>
                               {attachment.type === 'image' ? (
                                 <img
                                   src={attachment.url}
@@ -1033,7 +1033,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                                   className="w-full h-full object-cover rounded-lg"
                                 />
                               ) : (
-                                <FileText className={`w-6 h-6 ${darkMode ? 'text-white/60' : 'text-indigo-600/60'}`} />
+                                <FileText className={`w-6 h-6 ${darkMode ? 'text-white/60' : 'text-amber-600/60'}`} />
                               )}
                             </div>
                           ))}
@@ -1045,21 +1045,21 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
 
                 {!request.comments?.length && (
                   <div className="text-center py-12">
-                    <MessageCircle className={`w-16 h-16 mx-auto ${darkMode ? 'text-white/30' : 'text-indigo-400/30'} mb-4`} />
-                    <p className={`${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>No comments yet</p>
-                    <p className={`${darkMode ? 'text-white/40' : 'text-indigo-700/40'} text-sm mt-1`}>Start a conversation with your tenant</p>
+                    <MessageCircle className={`w-16 h-16 mx-auto ${darkMode ? 'text-white/30' : 'text-amber-400/30'} mb-4`} />
+                    <p className={`${darkMode ? 'text-white/60' : 'text-amber-700/70'}`}>No comments yet</p>
+                    <p className={`${darkMode ? 'text-white/40' : 'text-amber-700/40'} text-sm mt-1`}>Start a conversation with your tenant</p>
                   </div>
                 )}
               </div>
 
               {/* Add Comment */}
-              <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-lg p-4 border`}>
+              <div className={`${darkMode ? 'bg-white/5 border-white/10' : 'bg-amber-50 border-slate-100'} rounded-lg p-4 border`}>
                 <div className="space-y-4">
                   <textarea
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                     placeholder="Add a comment or update..."
-                    className={`w-full p-4 ${darkMode ? 'bg-white/10 border-white/20 text-white placeholder-white/50' : 'bg-white border-indigo-200 text-indigo-900 placeholder-indigo-400/50'} border rounded-lg focus:border-blue-500 focus:outline-none resize-none`}
+                    className={`w-full p-4 ${darkMode ? 'bg-white/10 border-white/20 text-white placeholder-white/50' : 'bg-white border-slate-100 text-slate-900 placeholder-slate-400/50'} border rounded-lg focus:border-amber-500 focus:outline-none resize-none`}
                     rows={3}
                   />
 
@@ -1069,7 +1069,7 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                       whileTap={{ scale: 0.95 }}
                       onClick={handleAddComment}
                       disabled={!newComment.trim()}
-                      className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-6 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-amber-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Add Comment
                     </motion.button>
@@ -1087,28 +1087,28 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className={`flex items-start space-x-4 p-4 ${darkMode ? 'bg-white/5 border-white/10' : 'bg-indigo-100 border-indigo-200'} rounded-lg border`}
+                  className={`flex items-start space-x-4 p-4 ${darkMode ? 'bg-white/5 border-white/10' : 'bg-amber-50 border-slate-100'} rounded-lg border`}
                 >
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${event.type === 'status' ? 'bg-blue-500/20' :
-                    event.type === 'assignment' ? 'bg-purple-500/20' :
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${event.type === 'status' ? 'bg-amber-500/20' :
+                    event.type === 'assignment' ? 'bg-amber-500/20' :
                       event.type === 'comment' ? 'bg-green-500/20' :
                         'bg-gray-500/20'
                     }`}>
-                    {event.type === 'status' && <RefreshCw className="w-4 h-4 text-blue-400" />}
-                    {event.type === 'assignment' && <Users className="w-4 h-4 text-purple-400" />}
+                    {event.type === 'status' && <RefreshCw className="w-4 h-4 text-amber-400" />}
+                    {event.type === 'assignment' && <Users className="w-4 h-4 text-amber-400" />}
                     {event.type === 'comment' && <MessageCircle className="w-4 h-4 text-green-400" />}
                     {event.type === 'created' && <Plus className="w-4 h-4 text-yellow-400" />}
                   </div>
 
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
-                      <span className={`font-medium ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{event.description}</span>
-                      <span className={`text-xs ${darkMode ? 'text-white/50' : 'text-indigo-700/50'}`}>
+                      <span className={`font-medium ${darkMode ? 'text-white' : 'text-slate-900'}`}>{event.description}</span>
+                      <span className={`text-xs ${darkMode ? 'text-white/50' : 'text-amber-700/50'}`}>
                         {new Date(event.timestamp).toLocaleString()}
                       </span>
                     </div>
                     {event.details && (
-                      <p className={`text-sm ${darkMode ? 'text-white/70' : 'text-indigo-700/70'} mt-1`}>{event.details}</p>
+                      <p className={`text-sm ${darkMode ? 'text-white/70' : 'text-amber-700/70'} mt-1`}>{event.details}</p>
                     )}
                   </div>
                 </motion.div>
@@ -1116,8 +1116,8 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
 
               {!request.history?.length && (
                 <div className="text-center py-12">
-                  <Clock className={`w-16 h-16 mx-auto ${darkMode ? 'text-white/30' : 'text-indigo-400/30'} mb-4`} />
-                  <p className={`${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>No history available</p>
+                  <Clock className={`w-16 h-16 mx-auto ${darkMode ? 'text-white/30' : 'text-amber-400/30'} mb-4`} />
+                  <p className={`${darkMode ? 'text-white/60' : 'text-amber-700/70'}`}>No history available</p>
                 </div>
               )}
             </div>
@@ -1131,9 +1131,9 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: index * 0.1 }}
-                  className={`${darkMode ? 'bg-white/5 border-white/10 group hover:border-white/30' : 'bg-indigo-100 border-indigo-200 group hover:border-indigo-300'} rounded-lg p-4 border transition-colors`}
+                  className={`${darkMode ? 'bg-white/5 border-white/10 group hover:border-white/30' : 'bg-amber-50 border-slate-100 group hover:border-amber-200'} rounded-lg p-4 border transition-colors`}
                 >
-                  <div className={`aspect-square mb-4 rounded-lg overflow-hidden ${darkMode ? 'bg-white/10' : 'bg-indigo-100'} flex items-center justify-center`}>
+                  <div className={`aspect-square mb-4 rounded-lg overflow-hidden ${darkMode ? 'bg-white/10' : 'bg-amber-50'} flex items-center justify-center`}>
                     {attachment.type === 'image' ? (
                       <img
                         src={attachment.url}
@@ -1141,22 +1141,22 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <FileText className={`w-12 h-12 ${darkMode ? 'text-white/40' : 'text-indigo-600/40'}`} />
+                      <FileText className={`w-12 h-12 ${darkMode ? 'text-white/40' : 'text-amber-600/40'}`} />
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <h4 className={`font-medium ${darkMode ? 'text-white' : 'text-indigo-900'} truncate`}>{attachment.name}</h4>
-                    <p className={`text-xs ${darkMode ? 'text-white/50' : 'text-indigo-700/50'}`}>{attachment.size}</p>
+                    <h4 className={`font-medium ${darkMode ? 'text-white' : 'text-slate-900'} truncate`}>{attachment.name}</h4>
+                    <p className={`text-xs ${darkMode ? 'text-white/50' : 'text-amber-700/50'}`}>{attachment.size}</p>
 
                     <div className="flex space-x-2">
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className={`flex-1 flex items-center justify-center space-x-1 py-2 ${darkMode ? 'bg-blue-500/20 hover:bg-blue-500/30' : 'bg-blue-100 hover:bg-blue-200'} rounded-lg transition-colors`}
+                        className={`flex-1 flex items-center justify-center space-x-1 py-2 ${darkMode ? 'bg-amber-500/20 hover:bg-amber-500/30' : 'bg-amber-50 hover:bg-amber-100'} rounded-lg transition-colors`}
                       >
-                        <Eye className={`w-4 h-4 ${darkMode ? 'text-blue-300' : 'text-blue-600'}`} />
-                        <span className={`text-xs ${darkMode ? 'text-blue-300' : 'text-blue-600'}`}>View</span>
+                        <Eye className={`w-4 h-4 ${darkMode ? 'text-amber-300' : 'text-amber-600'}`} />
+                        <span className={`text-xs ${darkMode ? 'text-amber-300' : 'text-amber-600'}`}>View</span>
                       </motion.button>
 
                       <motion.button
@@ -1174,8 +1174,8 @@ const RequestDetailModal = ({ isOpen, onClose, request, onAddComment, onUpdateSt
 
               {!request.attachments?.length && (
                 <div className="col-span-full text-center py-12">
-                  <ImageIcon className={`w-16 h-16 mx-auto ${darkMode ? 'text-white/30' : 'text-indigo-400/30'} mb-4`} />
-                  <p className={`${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>No attachments</p>
+                  <ImageIcon className={`w-16 h-16 mx-auto ${darkMode ? 'text-white/30' : 'text-amber-400/30'} mb-4`} />
+                  <p className={`${darkMode ? 'text-white/60' : 'text-amber-700/70'}`}>No attachments</p>
                 </div>
               )}
             </div>
@@ -1200,7 +1200,7 @@ const NotificationToast = ({ notifications, onRemove }) => {
             className={`p-4 rounded-lg shadow-lg backdrop-blur-xl border max-w-sm ${notification.type === 'success' ? 'bg-green-500/20 border-green-500/30 text-green-300' :
               notification.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-300' :
                 notification.type === 'warning' ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-300' :
-                  'bg-blue-500/20 border-blue-500/30 text-blue-300'
+                  'bg-amber-500/20 border-amber-500/30 text-amber-300'
               }`}
           >
             <div className="flex items-start space-x-3">
@@ -1567,18 +1567,18 @@ const LandlordMaintenance = () => {
   };
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'} flex relative overflow-hidden`}>
+    <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950' : 'bg-gradient-to-r from-[#fafaf9] via-white to-[#fafaf9]'} flex relative overflow-hidden`}>
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
           animate={{ rotate: 360, scale: [1, 1.1, 1] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className={`absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r ${darkMode ? 'from-purple-500/10 to-pink-500/10' : 'from-indigo-600/20 to-purple-600/20'} rounded-full blur-3xl`}
+          className={`absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r ${darkMode ? 'from-amber-500/10 to-amber-600/10' : 'from-amber-500/20 to-amber-600/20'} rounded-full blur-3xl`}
         />
         <motion.div
           animate={{ rotate: -360, scale: [1.1, 1, 1.1] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className={`absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r ${darkMode ? 'from-blue-500/10 to-cyan-500/10' : 'from-pink-500/20 to-orange-500/20'} rounded-full blur-3xl`}
+          className={`absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r ${darkMode ? 'from-amber-500/10 to-amber-600/10' : 'from-pink-500/20 to-orange-500/20'} rounded-full blur-3xl`}
         />
       </div>
 
@@ -1597,7 +1597,7 @@ const LandlordMaintenance = () => {
               className="text-center mb-12"
             >
               <motion.h1
-                className={`text-5xl font-bold mb-4 bg-gradient-to-r ${darkMode ? 'from-white via-purple-200 to-white' : 'from-indigo-800 via-purple-800 to-indigo-800'} bg-clip-text text-transparent`}
+                className={`text-5xl font-bold mb-4 bg-gradient-to-r ${darkMode ? 'from-white via-amber-200 to-white' : 'from-slate-900 via-slate-800 to-amber-700'} bg-clip-text text-transparent`}
               >
                 Maintenance Management
               </motion.h1>
@@ -1605,7 +1605,7 @@ const LandlordMaintenance = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.6 }}
-                className={`text-xl ${darkMode ? 'text-white/70' : 'text-indigo-900/80'} max-w-2xl mx-auto`}
+                className={`text-xl ${darkMode ? 'text-white/70' : 'text-slate-900/80'} max-w-2xl mx-auto`}
               >
                 Streamline your property maintenance with intelligent request management and real-time tracking
               </motion.p>
@@ -1613,95 +1613,95 @@ const LandlordMaintenance = () => {
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-6 mb-8">
-              <AnimatedCard className={`xl:col-span-2 backdrop-blur-xl rounded-2xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
+              <AnimatedCard className={`xl:col-span-2 backdrop-blur-xl rounded-2xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-slate-100 shadow-md'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
-                  className="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600"
+                  className="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600"
                 >
                   <Wrench className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className={`text-3xl font-bold mb-1 ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.total}</div>
-                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Total Requests</div>
-                <div className={`text-xs mt-1 ${darkMode ? 'text-white/40' : 'text-indigo-600/50'}`}>+12% this month</div>
+                <div className={`text-3xl font-bold mb-1 ${darkMode ? 'text-white' : 'text-slate-900'}`}>{stats.total}</div>
+                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-amber-700/70'}`}>Total Requests</div>
+                <div className={`text-xs mt-1 ${darkMode ? 'text-white/40' : 'text-amber-600/50'}`}>+12% this month</div>
               </AnimatedCard>
 
-              <AnimatedCard delay={0.1} className={`xl:col-span-2 backdrop-blur-xl rounded-2xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
+              <AnimatedCard delay={0.1} className={`xl:col-span-2 backdrop-blur-xl rounded-2xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-slate-100 shadow-md'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   className="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600"
                 >
                   <CheckCircle className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className={`text-3xl font-bold mb-1 ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.completed}</div>
-                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Completed</div>
-                <div className={`text-xs mt-1 ${darkMode ? 'text-white/40' : 'text-indigo-600/50'}`}>{stats.completionRate}% rate</div>
+                <div className={`text-3xl font-bold mb-1 ${darkMode ? 'text-white' : 'text-slate-900'}`}>{stats.completed}</div>
+                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-amber-700/70'}`}>Completed</div>
+                <div className={`text-xs mt-1 ${darkMode ? 'text-white/40' : 'text-amber-600/50'}`}>{stats.completionRate}% rate</div>
               </AnimatedCard>
 
-              <AnimatedCard delay={0.2} className={`xl:col-span-2 backdrop-blur-xl rounded-2xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
+              <AnimatedCard delay={0.2} className={`xl:col-span-2 backdrop-blur-xl rounded-2xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-slate-100 shadow-md'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   className="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-600"
                 >
                   <Clock className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className={`text-3xl font-bold mb-1 ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.pending}</div>
-                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Pending</div>
-                <div className={`text-xs mt-1 ${darkMode ? 'text-white/40' : 'text-indigo-600/50'}`}>Need attention</div>
+                <div className={`text-3xl font-bold mb-1 ${darkMode ? 'text-white' : 'text-slate-900'}`}>{stats.pending}</div>
+                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-amber-700/70'}`}>Pending</div>
+                <div className={`text-xs mt-1 ${darkMode ? 'text-white/40' : 'text-amber-600/50'}`}>Need attention</div>
               </AnimatedCard>
 
-              <AnimatedCard delay={0.3} className={`xl:col-span-2 backdrop-blur-xl rounded-2xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
+              <AnimatedCard delay={0.3} className={`xl:col-span-2 backdrop-blur-xl rounded-2xl p-6 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-slate-100 shadow-md'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   className="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-red-500 to-pink-600"
                 >
                   <AlertCircle className="w-6 h-6 text-white" />
                 </motion.div>
-                <div className={`text-3xl font-bold mb-1 ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.highPriority}</div>
-                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>High Priority</div>
-                <div className={`text-xs mt-1 ${darkMode ? 'text-white/40' : 'text-indigo-600/50'}`}>Urgent attention</div>
+                <div className={`text-3xl font-bold mb-1 ${darkMode ? 'text-white' : 'text-slate-900'}`}>{stats.highPriority}</div>
+                <div className={`text-sm ${darkMode ? 'text-white/60' : 'text-amber-700/70'}`}>High Priority</div>
+                <div className={`text-xs mt-1 ${darkMode ? 'text-white/40' : 'text-amber-600/50'}`}>Urgent attention</div>
               </AnimatedCard>
             </div>
 
             {/* Additional Stats Row */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <AnimatedCard delay={0.4} className={`backdrop-blur-xl rounded-xl p-4 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
-                <Activity className={`w-6 h-6 mx-auto mb-2 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`} />
-                <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.inProgress}</div>
-                <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>In Progress</div>
+              <AnimatedCard delay={0.4} className={`backdrop-blur-xl rounded-xl p-4 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-slate-100 shadow-md'}`}>
+                <Activity className={`w-6 h-6 mx-auto mb-2 ${darkMode ? 'text-amber-400' : 'text-amber-600'}`} />
+                <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{stats.inProgress}</div>
+                <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-amber-700/70'}`}>In Progress</div>
               </AnimatedCard>
 
-              <AnimatedCard delay={0.5} className={`backdrop-blur-xl rounded-xl p-4 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
-                <Clock className={`w-6 h-6 mx-auto mb-2 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
-                <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.avgResponseTime}h</div>
-                <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Avg Response</div>
+              <AnimatedCard delay={0.5} className={`backdrop-blur-xl rounded-xl p-4 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-slate-100 shadow-md'}`}>
+                <Clock className={`w-6 h-6 mx-auto mb-2 ${darkMode ? 'text-amber-400' : 'text-amber-600'}`} />
+                <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{stats.avgResponseTime}h</div>
+                <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-amber-700/70'}`}>Avg Response</div>
               </AnimatedCard>
 
-              <AnimatedCard delay={0.6} className={`backdrop-blur-xl rounded-xl p-4 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
+              <AnimatedCard delay={0.6} className={`backdrop-blur-xl rounded-xl p-4 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-slate-100 shadow-md'}`}>
                 <IndianRupee className={`w-6 h-6 mx-auto mb-2 ${darkMode ? 'text-green-400' : 'text-green-600'}`} />
-                <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>₹{stats.totalCost}</div>
-                <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Total Cost</div>
+                <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>₹{stats.totalCost}</div>
+                <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-amber-700/70'}`}>Total Cost</div>
               </AnimatedCard>
 
-              <AnimatedCard delay={0.7} className={`backdrop-blur-xl rounded-xl p-4 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
-                <TrendingUp className={`w-6 h-6 mx-auto mb-2 ${darkMode ? 'text-cyan-400' : 'text-cyan-600'}`} />
-                <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-indigo-900'}`}>{stats.completionRate}%</div>
-                <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>Success Rate</div>
+              <AnimatedCard delay={0.7} className={`backdrop-blur-xl rounded-xl p-4 text-center ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-slate-100 shadow-md'}`}>
+                <TrendingUp className={`w-6 h-6 mx-auto mb-2 ${darkMode ? 'text-amber-400' : 'text-amber-600'}`} />
+                <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>{stats.completionRate}%</div>
+                <div className={`text-xs ${darkMode ? 'text-white/60' : 'text-amber-700/70'}`}>Success Rate</div>
               </AnimatedCard>
             </div>
 
             {/* Filters and Controls */}
-            <AnimatedCard delay={0.8} className={`backdrop-blur-xl rounded-2xl p-6 ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-indigo-200/50 shadow-md'}`}>
+            <AnimatedCard delay={0.8} className={`backdrop-blur-xl rounded-2xl p-6 ${darkMode ? 'bg-white/10 border border-white/20' : 'bg-white/80 border border-slate-100 shadow-md'}`}>
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
                   {/* Search */}
                   <div className="relative">
-                    <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${darkMode ? 'text-white/50' : 'text-indigo-400/70'}`} />
+                    <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${darkMode ? 'text-white/50' : 'text-amber-400/70'}`} />
                     <input
                       type="text"
                       placeholder="Search requests..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className={`pl-10 pr-4 py-3 w-64 rounded-xl focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white placeholder-white/50' : 'bg-white/70 border border-indigo-200/50 text-indigo-900 placeholder-indigo-400/70'}`}
+                      className={`pl-10 pr-4 py-3 w-64 rounded-xl focus:border-amber-500 focus:outline-none transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white placeholder-white/50' : 'bg-white/70 border border-slate-100 text-slate-900 placeholder-slate-400/70'}`}
                     />
                   </div>
 
@@ -1711,7 +1711,7 @@ const LandlordMaintenance = () => {
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
                       style={{ colorScheme: darkMode ? 'dark' : 'light' }}
-                      className={`px-4 py-3 rounded-xl focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white' : 'bg-white/70 border border-indigo-200/50 text-indigo-900'}`}
+                      className={`px-4 py-3 rounded-xl focus:border-amber-500 focus:outline-none transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white' : 'bg-white/70 border border-slate-100 text-slate-900'}`}
                     >
                       <option style={{ backgroundColor: darkMode ? '#0f172a' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }} value="All">All Status</option>
                       <option style={{ backgroundColor: darkMode ? '#0f172a' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }} value="Pending">Pending</option>
@@ -1725,7 +1725,7 @@ const LandlordMaintenance = () => {
                       value={priorityFilter}
                       onChange={(e) => setPriorityFilter(e.target.value)}
                       style={{ colorScheme: darkMode ? 'dark' : 'light' }}
-                      className={`px-4 py-3 rounded-xl focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white' : 'bg-white/70 border border-indigo-200/50 text-indigo-900'}`}
+                      className={`px-4 py-3 rounded-xl focus:border-amber-500 focus:outline-none transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white' : 'bg-white/70 border border-slate-100 text-slate-900'}`}
                     >
                       <option style={{ backgroundColor: darkMode ? '#0f172a' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }} value="All">All Priority</option>
                       <option style={{ backgroundColor: darkMode ? '#0f172a' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }} value="High">High Priority</option>
@@ -1736,7 +1736,7 @@ const LandlordMaintenance = () => {
                     <select
                       value={propertyFilter}
                       onChange={(e) => setPropertyFilter(e.target.value)}
-                      className={`px-4 py-3 rounded-xl focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white' : 'bg-white/70 border border-indigo-200/50 text-indigo-900'}`}
+                      className={`px-4 py-3 rounded-xl focus:border-amber-500 focus:outline-none transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white' : 'bg-white/70 border border-slate-100 text-slate-900'}`}
                     >
                       <option value="All">All Properties</option>
                       {properties.map((property) => (
@@ -1753,7 +1753,7 @@ const LandlordMaintenance = () => {
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
                       style={{ colorScheme: darkMode ? 'dark' : 'light' }}
-                      className={`px-3 py-2 rounded-lg text-sm focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white' : 'bg-white/70 border border-indigo-200/50 text-indigo-900'}`}
+                      className={`px-3 py-2 rounded-lg text-sm focus:border-amber-500 focus:outline-none transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white' : 'bg-white/70 border border-slate-100 text-slate-900'}`}
                     >
                       <option className={darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'} value="createdAt">Date Created</option>
                       <option className={darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'} value="updatedAt">Last Updated</option>
@@ -1766,7 +1766,7 @@ const LandlordMaintenance = () => {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                      className={`p-2 rounded-lg transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white hover:bg-white/20' : 'bg-white/70 border border-indigo-200/50 text-indigo-900 hover:bg-indigo-100/70'}`}
+                      className={`p-2 rounded-lg transition-colors ${darkMode ? 'bg-white/10 border border-white/20 text-white hover:bg-white/20' : 'bg-white/70 border border-slate-100 text-slate-900 hover:bg-amber-50/70'}`}
                     >
                       {sortOrder === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
                     </motion.button>
@@ -1784,7 +1784,7 @@ const LandlordMaintenance = () => {
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full"
+                    className="w-12 h-12 border-4 border-amber-500/30 border-t-blue-500 rounded-full"
                   />
                 </div>
               ) : filteredRequests.length === 0 ? (
@@ -1794,9 +1794,9 @@ const LandlordMaintenance = () => {
                     animate={{ scale: 1 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <Wrench className={`w-20 h-20 mx-auto mb-6 ${darkMode ? 'text-white/30' : 'text-indigo-300/50'}`} />
-                    <h3 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-indigo-900'}`}>No Maintenance Requests Found</h3>
-                    <p className={`mb-8 ${darkMode ? 'text-white/60' : 'text-indigo-700/70'}`}>
+                    <Wrench className={`w-20 h-20 mx-auto mb-6 ${darkMode ? 'text-white/30' : 'text-amber-300/50'}`} />
+                    <h3 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-slate-900'}`}>No Maintenance Requests Found</h3>
+                    <p className={`mb-8 ${darkMode ? 'text-white/60' : 'text-amber-700/70'}`}>
                       {searchTerm || statusFilter !== 'All' || priorityFilter !== 'All' || propertyFilter !== 'All'
                         ? 'Try adjusting your search criteria or filters'
                         : 'All your maintenance requests will appear here'
@@ -1806,7 +1806,7 @@ const LandlordMaintenance = () => {
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className={`px-8 py-4 text-white rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 mx-auto ${darkMode ? 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700' : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700'}`}
+                        className={`px-8 py-4 text-white rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 mx-auto ${darkMode ? 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700' : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700'}`}
                       >
                         <Plus className="w-5 h-5" />
                         <span>Create First Request</span>

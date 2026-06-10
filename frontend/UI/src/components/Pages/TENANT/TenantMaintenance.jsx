@@ -80,14 +80,14 @@ const FloatingCard = ({ children, delay = 0, className = '' }) => (
 
 const GlowingButton = ({ children, onClick, className = '', glowColor = 'blue', disabled = false, type = 'button' }) => {
   const glowClasses = glowColor === 'blue'
-    ? 'bg-gradient-to-r from-blue-500 to-purple-600'
+    ? 'bg-gradient-to-r from-amber-500 to-amber-600'
     : glowColor === 'red'
       ? 'bg-gradient-to-r from-red-500 to-pink-600'
       : glowColor === 'green'
         ? 'bg-gradient-to-r from-green-500 to-emerald-600'
         : glowColor === 'orange'
           ? 'bg-gradient-to-r from-orange-500 to-yellow-600'
-          : 'bg-gradient-to-r from-blue-500 to-purple-600';
+          : 'bg-gradient-to-r from-amber-500 to-amber-600';
 
   return (
     <button
@@ -110,7 +110,7 @@ const RequestCard = React.memo(({ request, onEdit, onDelete, isEditing, editData
   const getStatusIcon = (status) => {
     switch (status) {
       case 'Completed': return <CheckCircleIcon className="h-5 w-5 text-green-600" />;
-      case 'In Progress': return <ClockIcon className="h-5 w-5 text-blue-600 animate-spin" />;
+      case 'In Progress': return <ClockIcon className="h-5 w-5 text-amber-600 animate-spin" />;
       case 'Pending': return <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600 animate-pulse" />;
       default: return <DocumentTextIcon className="h-5 w-5 text-gray-600" />;
     }
@@ -119,7 +119,7 @@ const RequestCard = React.memo(({ request, onEdit, onDelete, isEditing, editData
   const getStatusColor = (status) => {
     const colors = {
       Completed: 'from-green-500 to-emerald-600 text-white',
-      'In Progress': 'from-blue-500 to-indigo-600 text-white',
+      'In Progress': 'from-amber-500 to-amber-600 text-white',
       Pending: 'from-yellow-500 to-orange-600 text-white',
       default: 'from-gray-500 to-gray-600 text-white'
     };
@@ -153,7 +153,7 @@ const RequestCard = React.memo(({ request, onEdit, onDelete, isEditing, editData
                     type="text"
                     value={editData.title}
                     onChange={e => onEditDataChange({ ...editData, title: e.target.value })}
-                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
+                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-amber-500/30/20 focus:border-amber-500 transition-all duration-300"
                   />
                 </div>
                 <div>
@@ -161,7 +161,7 @@ const RequestCard = React.memo(({ request, onEdit, onDelete, isEditing, editData
                   <textarea
                     value={editData.description}
                     onChange={e => onEditDataChange({ ...editData, description: e.target.value })}
-                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 h-24 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
+                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 h-24 focus:outline-none focus:ring-4 focus:ring-amber-500/30/20 focus:border-amber-500 transition-all duration-300"
                   />
                 </div>
                 <div>
@@ -169,7 +169,7 @@ const RequestCard = React.memo(({ request, onEdit, onDelete, isEditing, editData
                   <select
                     value={editData.priority}
                     onChange={e => onEditDataChange({ ...editData, priority: e.target.value })}
-                    className="border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
+                    className="border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-amber-500/30/20 focus:border-amber-500 transition-all duration-300"
                   >
                     <option value="Low">Low Priority</option>
                     <option value="Medium">Medium Priority</option>
@@ -179,7 +179,7 @@ const RequestCard = React.memo(({ request, onEdit, onDelete, isEditing, editData
               </div>
               <div className="flex space-x-3 pt-4">
                 <GlowingButton
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl"
+                  className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-3 rounded-xl"
                   onClick={() => onSaveEdit(request.id)}
                   glowColor="blue"
                 >
@@ -209,7 +209,7 @@ const RequestCard = React.memo(({ request, onEdit, onDelete, isEditing, editData
               </div>
 
               <div className="mb-4">
-                <h3 className="font-bold text-xl text-gray-800 mb-2 group-hover:text-blue-600 transition-colors duration-300">
+                <h3 className="font-bold text-xl text-gray-800 mb-2 group-hover:text-amber-600 transition-colors duration-300">
                   {request.title}
                 </h3>
                 <p className="text-gray-600 leading-relaxed">{request.description}</p>
@@ -228,7 +228,7 @@ const RequestCard = React.memo(({ request, onEdit, onDelete, isEditing, editData
                           href={url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-blue-600 shadow-sm hover:text-blue-800"
+                          className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm text-amber-600 shadow-sm hover:text-amber-800"
                         >
                           <PaperClipIcon className="h-4 w-4" />
                           {label}
@@ -250,7 +250,7 @@ const RequestCard = React.memo(({ request, onEdit, onDelete, isEditing, editData
                     className={`h-2 rounded-full transition-all duration-1000 ${request.status === 'Completed'
                       ? 'bg-gradient-to-r from-green-500 to-emerald-600 w-full'
                       : request.status === 'In Progress'
-                        ? 'bg-gradient-to-r from-blue-500 to-indigo-600 w-2/3'
+                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 w-2/3'
                         : 'bg-gradient-to-r from-yellow-500 to-orange-600 w-1/3'
                       }`}
                   ></div>
@@ -269,7 +269,7 @@ const RequestCard = React.memo(({ request, onEdit, onDelete, isEditing, editData
                 </div>
                 <div className="flex space-x-2">
                   <button
-                    className="text-blue-600 hover:text-blue-800 p-2 hover:bg-blue-50 rounded-full transition-all duration-200 hover:scale-110"
+                    className="text-amber-600 hover:text-amber-800 p-2 hover:bg-amber-50 rounded-full transition-all duration-200 hover:scale-110"
                     onClick={() => onEdit(request)}
                   >
                     <PencilIcon className="h-5 w-5" />
@@ -506,7 +506,7 @@ const TenantMaintenance = () => {
         <TenantSideBar />
         <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
           <TenantNavBar currentSection="Maintenance" />
-          <main className={`flex-1 flex items-center justify-center ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'}`}>
+          <main className={`flex-1 flex items-center justify-center ${darkMode ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950' : 'bg-gradient-to-r from-[#fafaf9] via-white to-[#fafaf9]'}`}>
             <div className="text-center">
               <div className="relative">
                 <div className="w-20 h-20 border-4 border-orange-200 rounded-full animate-spin"></div>
@@ -522,7 +522,7 @@ const TenantMaintenance = () => {
   }
 
   return (
-    <div className={`flex h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400'}`}>
+    <div className={`flex h-screen ${darkMode ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950' : 'bg-gradient-to-r from-[#fafaf9] via-white to-[#fafaf9]'}`}>
       <TenantSideBar />
       <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <TenantNavBar currentSection="Maintenance" />
@@ -542,9 +542,9 @@ const TenantMaintenance = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            <StatsCard title="Total Requests" value={stats.total} icon={<DocumentTextIcon className="h-6 w-6 text-blue-600" />} gradient="from-blue-50 to-indigo-100" delay={0} />
+            <StatsCard title="Total Requests" value={stats.total} icon={<DocumentTextIcon className="h-6 w-6 text-amber-600" />} gradient="from-amber-50 to-amber-100" delay={0} />
             <StatsCard title="Pending" value={stats.pending} icon={<ClockIcon className="h-6 w-6 text-yellow-600" />} gradient="from-yellow-50 to-orange-100" delay={100} />
-            <StatsCard title="In Progress" value={stats.inProgress} icon={<WrenchScrewdriverIcon className="h-6 w-6 text-blue-600" />} gradient="from-blue-50 to-cyan-100" delay={200} />
+            <StatsCard title="In Progress" value={stats.inProgress} icon={<WrenchScrewdriverIcon className="h-6 w-6 text-amber-600" />} gradient="from-amber-50 to-amber-100" delay={200} />
             <StatsCard title="Completed" value={stats.completed} icon={<CheckCircleIcon className="h-6 w-6 text-green-600" />} gradient="from-green-50 to-emerald-100" delay={300} />
           </div>
 
@@ -556,7 +556,7 @@ const TenantMaintenance = () => {
                   placeholder="Search requests..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className={`w-full border-2 rounded-xl px-6 py-4 pl-12 focus:outline-none focus:ring-4 transition-all duration-300 text-lg ${darkMode ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:ring-cyan-500/20 focus:border-cyan-500' : 'bg-white border-gray-200 text-gray-800 placeholder-gray-500 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                  className={`w-full border-2 rounded-xl px-6 py-4 pl-12 focus:outline-none focus:ring-4 transition-all duration-300 text-lg ${darkMode ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:ring-amber-500/30/20 focus:border-amber-500' : 'bg-white border-gray-200 text-gray-800 placeholder-gray-500 focus:ring-amber-500/30/20 focus:border-amber-500'}`}
                 />
                 <MagnifyingGlassIcon className={`h-6 w-6 absolute left-4 top-5 ${darkMode ? 'text-slate-400' : 'text-gray-400'}`} />
               </div>
@@ -566,7 +566,7 @@ const TenantMaintenance = () => {
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                   style={{ colorScheme: darkMode ? 'dark' : 'light' }}
-                  className={`border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-cyan-500/20 focus:border-cyan-500' : 'bg-white border-gray-200 text-gray-800 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                  className={`border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-amber-500/30/20 focus:border-amber-500' : 'bg-white border-gray-200 text-gray-800 focus:ring-amber-500/30/20 focus:border-amber-500'}`}
                 >
                   <option className={darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'} value="All">All Status</option>
                   <option className={darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'} value="Pending">Pending</option>
@@ -578,7 +578,7 @@ const TenantMaintenance = () => {
                   value={priorityFilter}
                   onChange={(e) => setPriorityFilter(e.target.value)}
                   style={{ colorScheme: darkMode ? 'dark' : 'light' }}
-                  className={`border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-cyan-500/20 focus:border-cyan-500' : 'bg-white border-gray-200 text-gray-800 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                  className={`border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-amber-500/30/20 focus:border-amber-500' : 'bg-white border-gray-200 text-gray-800 focus:ring-amber-500/30/20 focus:border-amber-500'}`}
                 >
                   <option className={darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'} value="All">All Priority</option>
                   <option className={darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-900'} value="High">High Priority</option>
@@ -613,7 +613,7 @@ const TenantMaintenance = () => {
                         type="text"
                         value={newRequest.title}
                         onChange={(e) => setNewRequest(prev => ({ ...prev, title: e.target.value }))}
-                        className="w-full border-2 border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
+                        className="w-full border-2 border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:ring-4 focus:ring-amber-500/30/20 focus:border-amber-500 transition-all duration-300"
                         placeholder="Brief description of the issue"
                       />
                     </div>
@@ -622,7 +622,7 @@ const TenantMaintenance = () => {
                       <select
                         value={newRequest.priority}
                         onChange={(e) => setNewRequest(prev => ({ ...prev, priority: e.target.value }))}
-                        className="w-full border-2 border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
+                        className="w-full border-2 border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:ring-4 focus:ring-amber-500/30/20 focus:border-amber-500 transition-all duration-300"
                       >
                         <option value="Low">Low Priority</option>
                         <option value="Medium">Medium Priority</option>
@@ -631,7 +631,7 @@ const TenantMaintenance = () => {
                     </div>
                     <div>
                       <label className={`block text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-3`}>Attachments</label>
-                      <label className={`flex cursor-pointer items-center justify-center rounded-xl border-2 border-dashed px-4 py-6 text-center transition-all duration-300 ${darkMode ? 'border-slate-600 bg-slate-700/40 text-slate-200 hover:border-cyan-500' : 'border-gray-300 bg-gray-50 text-gray-700 hover:border-orange-500'}`}>
+                      <label className={`flex cursor-pointer items-center justify-center rounded-xl border-2 border-dashed px-4 py-6 text-center transition-all duration-300 ${darkMode ? 'border-slate-600 bg-slate-700/40 text-slate-200 hover:border-amber-500' : 'border-gray-300 bg-gray-50 text-gray-700 hover:border-orange-500'}`}>
                         <input
                           type="file"
                           multiple
@@ -663,7 +663,7 @@ const TenantMaintenance = () => {
                     <textarea
                       value={newRequest.description}
                       onChange={(e) => setNewRequest(prev => ({ ...prev, description: e.target.value }))}
-                      className="w-full h-32 border-2 border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
+                      className="w-full h-32 border-2 border-gray-200 rounded-xl px-4 py-4 focus:outline-none focus:ring-4 focus:ring-amber-500/30/20 focus:border-amber-500 transition-all duration-300"
                       placeholder="Provide detailed description of the issue..."
                     />
                   </div>
@@ -692,7 +692,7 @@ const TenantMaintenance = () => {
           <div className={`${darkMode ? 'bg-slate-800/80' : 'bg-white/80'} backdrop-blur-sm rounded-3xl shadow-2xl p-8 border ${darkMode ? 'border-gray-700/50' : 'border-white/50'}`}>
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center">
-                <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mr-4">
+                <div className="p-3 bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl mr-4">
                   <ChartBarIcon className="h-8 w-8 text-white" />
                 </div>
                 <div>

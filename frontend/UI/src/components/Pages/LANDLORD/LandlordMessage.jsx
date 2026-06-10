@@ -74,7 +74,7 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
       {showAvatar && !isOwn && (
         <motion.div
           whileHover={{ scale: 1.1 }}
-          className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 dark:from-cyan-500 dark:to-cyan-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0"
+          className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 dark:from-amber-500 dark:to-amber-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0"
         >
           {message.sender?.charAt(0) || 'T'}
         </motion.div>
@@ -85,13 +85,13 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
         <motion.div
           whileHover={{ scale: 1.02 }}
           className={`relative p-4 rounded-2xl shadow-lg ${isOwn
-            ? 'bg-gradient-to-br from-indigo-500 to-indigo-600 dark:from-cyan-500 dark:to-cyan-600 text-white'
-            : 'bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-indigo-200 dark:border-slate-700 text-indigo-700 dark:text-cyan-100'
-            } ${message.isForwarded ? 'border-l-4 border-pink-400 dark:border-pink-500' : ''}`}
+            ? 'bg-gradient-to-br from-amber-500 to-amber-600 dark:from-amber-500 dark:to-amber-600 text-white'
+            : 'bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-slate-100 dark:border-slate-700 text-amber-700 dark:text-slate-100'
+            } ${message.isForwarded ? 'border-l-4 border-pink-400 dark:border-amber-500' : ''}`}
         >
           {/* Forwarded indicator */}
           {message.isForwarded && (
-            <div className="flex items-center space-x-1 text-xs text-pink-400 dark:text-pink-300 mb-2">
+            <div className="flex items-center space-x-1 text-xs text-amber-400 dark:text-pink-300 mb-2">
               <Forward className="w-3 h-3" />
               <span>Forwarded</span>
             </div>
@@ -99,9 +99,9 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
 
           {/* Reply indicator */}
           {message.replyTo && (
-            <div className="bg-black/10 dark:bg-black/20 rounded-lg p-2 mb-3 border-l-2 border-indigo-300 dark:border-cyan-300">
-              <div className="text-xs text-indigo-600 dark:text-cyan-200">{message.replyTo.sender}</div>
-              <div className="text-sm text-indigo-700 dark:text-cyan-100 truncate">{message.replyTo.content}</div>
+            <div className="bg-black/10 dark:bg-black/20 rounded-lg p-2 mb-3 border-l-2 border-amber-200 dark:border-amber-400">
+              <div className="text-xs text-amber-600 dark:text-amber-200">{message.replyTo.sender}</div>
+              <div className="text-sm text-amber-700 dark:text-slate-100 truncate">{message.replyTo.content}</div>
             </div>
           )}
 
@@ -134,15 +134,15 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
                       </div>
                     ) : (
                       <div className="flex items-center space-x-2 flex-1">
-                        <File className="w-5 h-5 text-indigo-400 dark:text-cyan-400" />
+                        <File className="w-5 h-5 text-amber-400 dark:text-amber-400" />
                         <div className="flex-1">
                           <div className="text-sm font-medium">{attachment.name}</div>
-                          <div className="text-xs text-indigo-600 dark:text-cyan-200">{attachment.size}</div>
+                          <div className="text-xs text-amber-600 dark:text-amber-200">{attachment.size}</div>
                         </div>
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          className="p-1 hover:bg-indigo-100 dark:hover:bg-cyan-500/20 rounded"
+                          className="p-1 hover:bg-amber-50 dark:hover:bg-amber-500/20 rounded"
                         >
                           <Download className="w-4 h-4" />
                         </motion.button>
@@ -161,7 +161,7 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
                     key={index}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="px-3 py-1 bg-indigo-100 dark:bg-cyan-500/20 text-indigo-700 dark:text-cyan-300 rounded-full text-xs font-medium hover:bg-indigo-200 dark:hover:bg-cyan-500/30 transition-colors"
+                    className="px-3 py-1 bg-amber-50 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 rounded-full text-xs font-medium hover:bg-amber-100 dark:hover:bg-amber-500/30 transition-colors"
                   >
                     {action.label}
                   </motion.button>
@@ -171,18 +171,18 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
           </div>
 
           {/* Message metadata */}
-          <div className={`flex items-center justify-between mt-3 text-xs ${isOwn ? 'text-white/70' : 'text-gray-500 dark:text-blue-300'
+          <div className={`flex items-center justify-between mt-3 text-xs ${isOwn ? 'text-white/70' : 'text-gray-500 dark:text-amber-300'
             }`}>
             <span>{message.time}</span>
             <div className="flex items-center space-x-1">
               {message.edited && <Edit3 className="w-3 h-3" />}
               {message.priority === 'high' && <AlertCircle className="w-3 h-3 text-red-400" />}
-              {message.pinned && <Pin className="w-3 h-3 text-pink-400 dark:text-pink-300" />}
+              {message.pinned && <Pin className="w-3 h-3 text-amber-400 dark:text-pink-300" />}
               {isOwn && (
                 <div className="flex items-center">
                   {message.status === 'sent' && <Check className="w-3 h-3" />}
                   {message.status === 'delivered' && <CheckCheck className="w-3 h-3" />}
-                  {message.status === 'read' && <CheckCheck className="w-3 h-3 text-indigo-400 dark:text-cyan-400" />}
+                  {message.status === 'read' && <CheckCheck className="w-3 h-3 text-amber-400 dark:text-amber-400" />}
                 </div>
               )}
             </div>
@@ -196,7 +196,7 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
                   key={emoji}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  className="flex items-center space-x-1 px-2 py-1 bg-indigo-100 dark:bg-cyan-500/20 rounded-full text-xs"
+                  className="flex items-center space-x-1 px-2 py-1 bg-amber-50 dark:bg-amber-500/20 rounded-full text-xs"
                   onClick={() => onReact(message.id, emoji)}
                 >
                   <span>{emoji}</span>
@@ -222,7 +222,7 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
                 onClick={() => setShowReactions(!showReactions)}
                 className="p-2 bg-white/80 dark:bg-slate-700/80 rounded-full hover:bg-white dark:hover:bg-slate-600 transition-colors"
               >
-                <Smile className="w-4 h-4 text-indigo-600 dark:text-cyan-300" />
+                <Smile className="w-4 h-4 text-amber-600 dark:text-amber-300" />
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.1 }}
@@ -230,7 +230,7 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
                 onClick={() => onReply(message)}
                 className="p-2 bg-white/80 dark:bg-slate-700/80 rounded-full hover:bg-white dark:hover:bg-slate-600 transition-colors"
               >
-                <Reply className="w-4 h-4 text-indigo-600 dark:text-cyan-300" />
+                <Reply className="w-4 h-4 text-amber-600 dark:text-amber-300" />
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.1 }}
@@ -238,7 +238,7 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
                 onClick={() => onForward(message)}
                 className="p-2 bg-white/80 dark:bg-slate-700/80 rounded-full hover:bg-white dark:hover:bg-slate-600 transition-colors"
               >
-                <Forward className="w-4 h-4 text-indigo-600 dark:text-cyan-300" />
+                <Forward className="w-4 h-4 text-amber-600 dark:text-amber-300" />
               </motion.button>
               {isOwn && (
                 <motion.button
@@ -261,7 +261,7 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
               initial={{ opacity: 0, scale: 0.8, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8, y: 10 }}
-              className="flex items-center space-x-2 mt-2 p-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-full border border-indigo-200 dark:border-slate-700"
+              className="flex items-center space-x-2 mt-2 p-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-full border border-slate-100 dark:border-slate-700"
             >
               {reactions.map(({ emoji, label }) => (
                 <motion.button
@@ -272,7 +272,7 @@ const MessageBubble = ({ message, isOwn, showAvatar = true, onReact, onReply, on
                     onReact(message.id, emoji);
                     setShowReactions(false);
                   }}
-                  className="p-2 hover:bg-indigo-100 dark:hover:bg-cyan-500/20 rounded-full transition-colors"
+                  className="p-2 hover:bg-amber-50 dark:hover:bg-amber-500/20 rounded-full transition-colors"
                   title={label}
                 >
                   <span className="text-lg">{emoji}</span>
@@ -306,8 +306,8 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
       whileHover={{ scale: 1.02, x: 5 }}
       onClick={onClick}
       className={`relative p-4 rounded-xl cursor-pointer transition-all duration-200 group ${showMenu ? 'z-50' : 'hover:z-40 z-10'} ${isActive
-        ? 'bg-gradient-to-r from-indigo-500/20 to-indigo-600/20 dark:from-cyan-500/20 dark:to-cyan-600/20 border border-indigo-500/30 dark:border-cyan-500/30'
-        : 'hover:bg-indigo-50 dark:hover:bg-slate-800/50 border border-transparent'
+        ? 'bg-gradient-to-r from-amber-500/20 to-amber-600/20 dark:from-amber-500/20 dark:to-amber-600/20 border border-amber-500/30 dark:border-amber-500/30'
+        : 'hover:bg-amber-50 dark:hover:bg-slate-900/80 border border-transparent'
         }`}
     >
       <div className="flex items-center space-x-3">
@@ -315,7 +315,7 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
         <div className="relative">
           <motion.div
             whileHover={{ scale: 1.1 }}
-            className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 dark:from-cyan-500 dark:to-cyan-600 flex items-center justify-center text-white font-semibold flex-shrink-0"
+            className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 dark:from-amber-500 dark:to-amber-600 flex items-center justify-center text-white font-semibold flex-shrink-0"
           >
             {conversation.avatar || conversation.name?.charAt(0) || 'T'}
           </motion.div>
@@ -336,14 +336,14 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
         {/* Conversation info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
-            <h3 className={`font-semibold truncate ${isActive ? 'text-indigo-700 dark:text-cyan-100' : 'text-indigo-700 dark:text-cyan-100'
+            <h3 className={`font-semibold truncate ${isActive ? 'text-amber-700 dark:text-slate-100' : 'text-amber-700 dark:text-slate-100'
               }`}>
               {conversation.name}
-              {conversation.isPinned && <Pin className="w-3 h-3 inline ml-1 text-pink-400 dark:text-pink-300" />}
+              {conversation.isPinned && <Pin className="w-3 h-3 inline ml-1 text-amber-400 dark:text-pink-300" />}
               {conversation.isMuted && <VolumeX className="w-3 h-3 inline ml-1 text-gray-400 dark:text-gray-500" />}
             </h3>
             <div className="flex items-center space-x-1">
-              <span className={`text-xs ${conversation.unread > 0 ? 'text-indigo-600 dark:text-cyan-300 font-medium' : 'text-gray-500 dark:text-blue-300'
+              <span className={`text-xs ${conversation.unread > 0 ? 'text-amber-600 dark:text-amber-300 font-medium' : 'text-gray-500 dark:text-amber-300'
                 }`}>
                 {conversation.time}
               </span>
@@ -354,7 +354,7 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
           </div>
 
           <div className="flex items-center justify-between">
-            <p className={`text-sm truncate ${conversation.unread > 0 ? 'text-indigo-600 dark:text-cyan-200 font-medium' : 'text-gray-600 dark:text-blue-200'
+            <p className={`text-sm truncate ${conversation.unread > 0 ? 'text-amber-600 dark:text-amber-200 font-medium' : 'text-gray-600 dark:text-amber-200'
               }`}>
               {conversation.lastMessage}
             </p>
@@ -366,20 +366,20 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
                   <motion.div
                     animate={{ scale: [1, 1.2, 1] }}
                     transition={{ repeat: Infinity, duration: 1, delay: 0 }}
-                    className="w-1 h-1 bg-indigo-400 dark:bg-cyan-400 rounded-full"
+                    className="w-1 h-1 bg-amber-400 dark:bg-amber-400 rounded-full"
                   />
                   <motion.div
                     animate={{ scale: [1, 1.2, 1] }}
                     transition={{ repeat: Infinity, duration: 1, delay: 0.2 }}
-                    className="w-1 h-1 bg-indigo-400 dark:bg-cyan-400 rounded-full"
+                    className="w-1 h-1 bg-amber-400 dark:bg-amber-400 rounded-full"
                   />
                   <motion.div
                     animate={{ scale: [1, 1.2, 1] }}
                     transition={{ repeat: Infinity, duration: 1, delay: 0.4 }}
-                    className="w-1 h-1 bg-indigo-400 dark:bg-cyan-400 rounded-full"
+                    className="w-1 h-1 bg-amber-400 dark:bg-amber-400 rounded-full"
                   />
                 </div>
-                <span className="text-xs text-indigo-400 dark:text-cyan-400">typing...</span>
+                <span className="text-xs text-amber-400 dark:text-amber-400">typing...</span>
               </div>
             )}
           </div>
@@ -387,8 +387,8 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
           {/* Property info */}
           {conversation.property && (
             <div className="flex items-center space-x-1 mt-1">
-              <Building2 className="w-3 h-3 text-pink-400 dark:text-pink-300" />
-              <span className="text-xs text-pink-400 dark:text-pink-300">{conversation.property}</span>
+              <Building2 className="w-3 h-3 text-amber-400 dark:text-pink-300" />
+              <span className="text-xs text-amber-400 dark:text-pink-300">{conversation.property}</span>
             </div>
           )}
         </div>
@@ -402,9 +402,9 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
               e.stopPropagation();
               setShowMenu(!showMenu);
             }}
-            className="p-1 rounded-lg hover:bg-indigo-100 dark:hover:bg-slate-700 transition-colors opacity-0 group-hover:opacity-100"
+            className="p-1 rounded-lg hover:bg-amber-50 dark:hover:bg-slate-700 transition-colors opacity-0 group-hover:opacity-100"
           >
-            <MoreVertical className="w-4 h-4 text-indigo-600 dark:text-cyan-300" />
+            <MoreVertical className="w-4 h-4 text-amber-600 dark:text-amber-300" />
           </motion.button>
 
           <AnimatePresence>
@@ -413,7 +413,7 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
                 initial={{ opacity: 0, scale: 0.95, y: -10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                className="absolute right-0 top-full mt-2 w-48 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-indigo-200 dark:border-slate-700 rounded-xl shadow-xl z-50"
+                className="absolute right-0 top-full mt-2 w-48 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-slate-100 dark:border-slate-700 rounded-xl shadow-xl z-50"
               >
                 <div className="p-2">
                   <button
@@ -421,7 +421,7 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
                       // Toggle pin
                       setShowMenu(false);
                     }}
-                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-indigo-100 dark:hover:bg-slate-700 transition-colors text-indigo-700 dark:text-cyan-100"
+                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-amber-50 dark:hover:bg-slate-700 transition-colors text-amber-700 dark:text-slate-100"
                   >
                     <Pin className="w-4 h-4" />
                     <span>{conversation.isPinned ? 'Unpin' : 'Pin'} Chat</span>
@@ -431,7 +431,7 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
                       // Toggle mute
                       setShowMenu(false);
                     }}
-                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-indigo-100 dark:hover:bg-slate-700 transition-colors text-indigo-700 dark:text-cyan-100"
+                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-amber-50 dark:hover:bg-slate-700 transition-colors text-amber-700 dark:text-slate-100"
                   >
                     {conversation.isMuted ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
                     <span>{conversation.isMuted ? 'Unmute' : 'Mute'}</span>
@@ -441,7 +441,7 @@ const ConversationItem = ({ conversation, isActive, onClick, onArchive, onDelete
                       onArchive(conversation.id);
                       setShowMenu(false);
                     }}
-                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-indigo-100 dark:hover:bg-slate-700 transition-colors text-indigo-700 dark:text-cyan-100"
+                    className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-amber-50 dark:hover:bg-slate-700 transition-colors text-amber-700 dark:text-slate-100"
                   >
                     <Archive className="w-4 h-4" />
                     <span>Archive</span>
@@ -500,25 +500,25 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
   };
 
   return (
-    <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-indigo-200 dark:border-slate-700 rounded-2xl p-4 space-y-4">
+    <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl border border-slate-100 dark:border-slate-700 rounded-2xl p-4 space-y-4">
       {/* Reply indicator */}
       {replyTo && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between p-3 bg-indigo-50 dark:bg-cyan-500/10 rounded-lg border-l-4 border-indigo-500 dark:border-cyan-400"
+          className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-500/10 rounded-lg border-l-4 border-amber-500 dark:border-amber-500"
         >
           <div className="flex-1">
-            <div className="text-sm text-indigo-600 dark:text-cyan-400 font-medium">Replying to {replyTo.sender}</div>
-            <div className="text-sm text-gray-600 dark:text-blue-200 truncate">{replyTo.content}</div>
+            <div className="text-sm text-amber-600 dark:text-amber-400 font-medium">Replying to {replyTo.sender}</div>
+            <div className="text-sm text-gray-600 dark:text-amber-200 truncate">{replyTo.content}</div>
           </div>
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={onCancelReply}
-            className="p-1 hover:bg-indigo-100 dark:hover:bg-cyan-500/20 rounded"
+            className="p-1 hover:bg-amber-50 dark:hover:bg-amber-500/20 rounded"
           >
-            <X className="w-4 h-4 text-indigo-600 dark:text-cyan-300" />
+            <X className="w-4 h-4 text-amber-600 dark:text-amber-300" />
           </motion.button>
         </motion.div>
       )}
@@ -537,7 +537,7 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
               }}
               onKeyPress={handleKeyPress}
               placeholder={placeholder}
-              className="w-full p-3 bg-indigo-50 dark:bg-slate-700 border border-indigo-200 dark:border-slate-600 rounded-xl text-indigo-700 dark:text-cyan-100 placeholder-gray-500 dark:placeholder-blue-300 focus:border-indigo-500 dark:focus:border-cyan-400 focus:outline-none transition-colors resize-none"
+              className="w-full p-3 bg-amber-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 rounded-xl text-amber-700 dark:text-slate-100 placeholder-gray-500 dark:placeholder-blue-300 focus:border-amber-500 dark:focus:border-amber-500 focus:outline-none transition-colors resize-none"
               rows={1}
               style={{ minHeight: '48px' }}
             />
@@ -550,8 +550,8 @@ const MessageInput = ({ onSend, onTyping, replyTo, onCancelReply, placeholder = 
             onClick={message.trim() ? handleSend : undefined}
             disabled={!message.trim()}
             className={`p-3 rounded-xl font-semibold transition-all duration-300 ${message.trim()
-              ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 dark:from-cyan-500 dark:to-cyan-600 text-white hover:from-indigo-600 hover:to-indigo-700 dark:hover:from-cyan-600 dark:hover:to-cyan-700 shadow-lg'
-              : 'bg-indigo-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+              ? 'bg-gradient-to-r from-amber-500 to-amber-600 dark:from-amber-500 dark:to-amber-600 text-white hover:from-amber-600 hover:to-amber-700 dark:hover:from-amber-600 dark:hover:to-amber-700 shadow-lg'
+              : 'bg-amber-50 dark:bg-slate-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
               }`}
           >
             <Send className="w-5 h-5" />
@@ -919,18 +919,18 @@ const LandlordMessage = () => {
 
   return (
     <>
-    <div className="h-screen bg-gradient-to-br from-white via-indigo-50 to-purple-100 dark:from-gray-900 dark:via-slate-900 dark:to-blue-950 flex relative overflow-hidden">
+    <div className="h-screen bg-gradient-to-br from-[#fafaf9] via-white to-[#fafaf9] dark:from-gray-900 dark:via-slate-900 dark:to-slate-950 flex relative overflow-hidden">
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
           animate={{ rotate: 360, scale: [1, 1.1, 1] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-indigo-300/20 to-pink-300/20 dark:from-cyan-500/10 dark:to-blue-500/10 rounded-full blur-3xl"
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-amber-200/20 to-amber-100/20 dark:from-amber-500/10 dark:to-amber-500/10 rounded-full blur-3xl"
         />
         <motion.div
           animate={{ rotate: -360, scale: [1.1, 1, 1.1] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-purple-300/20 to-indigo-300/20 dark:from-blue-500/10 dark:to-cyan-500/10 rounded-full blur-3xl"
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-amber-200/20 to-amber-100/20 dark:from-amber-500/10 dark:to-amber-600/10 rounded-full blur-3xl"
         />
       </div>
 
@@ -942,26 +942,26 @@ const LandlordMessage = () => {
         <main className="flex-1 overflow-hidden">
           <div className="h-full flex">
             {/* Conversations Sidebar */}
-            <div className="w-80 bg-white/70 dark:bg-slate-800/50 backdrop-blur-xl border-r border-indigo-200 dark:border-slate-700 flex flex-col">
+            <div className="w-80 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl border-r border-slate-100 dark:border-slate-700 flex flex-col">
               {/* Header */}
-              <div className="p-6 border-b border-indigo-200 dark:border-slate-700">
+              <div className="p-6 border-b border-slate-100 dark:border-slate-700">
                 <motion.h1
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-2xl font-bold text-indigo-700 dark:text-cyan-100 mb-4"
+                  className="text-2xl font-bold text-amber-700 dark:text-slate-100 mb-4"
                 >
                   Messages
                 </motion.h1>
 
                 {/* Search */}
                 <div className="relative mb-4">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-blue-300" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-amber-300" />
                   <input
                     type="text"
                     placeholder="Search conversations..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-indigo-50 dark:bg-slate-700 border border-indigo-200 dark:border-slate-600 rounded-xl text-indigo-700 dark:text-cyan-100 placeholder-gray-500 dark:placeholder-blue-300 focus:border-indigo-500 dark:focus:border-cyan-400 focus:outline-none transition-colors"
+                    className="w-full pl-10 pr-4 py-2 bg-amber-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 rounded-xl text-amber-700 dark:text-slate-100 placeholder-gray-500 dark:placeholder-blue-300 focus:border-amber-500 dark:focus:border-amber-500 focus:outline-none transition-colors"
                   />
                 </div>
 
@@ -979,8 +979,8 @@ const LandlordMessage = () => {
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setFilterStatus(key)}
                       className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${filterStatus === key
-                        ? 'bg-indigo-500 dark:bg-cyan-500 text-white'
-                        : 'bg-indigo-100 dark:bg-slate-700 text-indigo-700 dark:text-cyan-200 hover:bg-indigo-200 dark:hover:bg-slate-600'
+                        ? 'bg-amber-500 dark:bg-amber-500 text-white'
+                        : 'bg-amber-50 dark:bg-slate-700 text-amber-700 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-slate-600'
                         }`}
                     >
                       {label}
@@ -1025,14 +1025,14 @@ const LandlordMessage = () => {
               {activeConversation ? (
                 <>
                   {/* Chat Header */}
-                  <div className="p-6 bg-white/70 dark:bg-slate-800/50 backdrop-blur-xl border-b border-indigo-200 dark:border-slate-700">
+                  <div className="p-6 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-100 dark:border-slate-700">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <motion.div
                           whileHover={{ scale: 1.1 }}
                           className="relative"
                         >
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 dark:from-cyan-500 dark:to-cyan-600 flex items-center justify-center text-white font-semibold">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 dark:from-amber-500 dark:to-amber-600 flex items-center justify-center text-white font-semibold">
                             {activeConversation.avatar || activeConversation.name?.charAt(0)}
                           </div>
                           {activeConversation.online && (
@@ -1041,12 +1041,12 @@ const LandlordMessage = () => {
                         </motion.div>
 
                         <div>
-                          <h2 className="text-xl font-bold text-indigo-700 dark:text-cyan-100 flex items-center space-x-2">
+                          <h2 className="text-xl font-bold text-amber-700 dark:text-slate-100 flex items-center space-x-2">
                             <span>{activeConversation.name}</span>
-                            {activeConversation.isPinned && <Pin className="w-4 h-4 text-pink-400 dark:text-pink-300" />}
+                            {activeConversation.isPinned && <Pin className="w-4 h-4 text-amber-400 dark:text-pink-300" />}
                             {activeConversation.isMuted && <VolumeX className="w-4 h-4 text-gray-400" />}
                           </h2>
-                          <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-blue-200">
+                          <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-amber-200">
                             <span className={activeConversation.online ? 'text-emerald-500' : ''}>
                               {activeConversation.online ? 'Online' : 'Last seen 2 hours ago'}
                             </span>
@@ -1064,23 +1064,23 @@ const LandlordMessage = () => {
                             <motion.div
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
-                              className="flex items-center space-x-1 text-sm text-indigo-400 dark:text-cyan-400"
+                              className="flex items-center space-x-1 text-sm text-amber-400 dark:text-amber-400"
                             >
                               <div className="flex space-x-1">
                                 <motion.div
                                   animate={{ scale: [1, 1.2, 1] }}
                                   transition={{ repeat: Infinity, duration: 1, delay: 0 }}
-                                  className="w-1 h-1 bg-indigo-400 dark:bg-cyan-400 rounded-full"
+                                  className="w-1 h-1 bg-amber-400 dark:bg-amber-400 rounded-full"
                                 />
                                 <motion.div
                                   animate={{ scale: [1, 1.2, 1] }}
                                   transition={{ repeat: Infinity, duration: 1, delay: 0.2 }}
-                                  className="w-1 h-1 bg-indigo-400 dark:bg-cyan-400 rounded-full"
+                                  className="w-1 h-1 bg-amber-400 dark:bg-amber-400 rounded-full"
                                 />
                                 <motion.div
                                   animate={{ scale: [1, 1.2, 1] }}
                                   transition={{ repeat: Infinity, duration: 1, delay: 0.4 }}
-                                  className="w-1 h-1 bg-indigo-400 dark:bg-cyan-400 rounded-full"
+                                  className="w-1 h-1 bg-amber-400 dark:bg-amber-400 rounded-full"
                                 />
                               </div>
                               <span>typing...</span>
@@ -1092,7 +1092,7 @@ const LandlordMessage = () => {
                       {/* Send Lease Button */}
                       <button
                         onClick={handleOpenLeaseModal}
-                        className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 dark:from-cyan-500 dark:to-cyan-600 text-white rounded-lg hover:shadow-lg transition-all"
+                        className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 dark:from-amber-500 dark:to-amber-600 text-white rounded-lg hover:shadow-lg transition-all"
                       >
                         <FileText className="w-4 h-4" />
                         <span className="font-medium text-sm">Send Lease</span>
@@ -1120,7 +1120,7 @@ const LandlordMessage = () => {
                   </div>
 
                   {/* Message Input */}
-                  <div className="p-6 bg-white/70 dark:bg-slate-800/50 backdrop-blur-xl border-t border-indigo-200 dark:border-slate-700">
+                  <div className="p-6 bg-white/70 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-100 dark:border-slate-700">
                     <MessageInput
                       onSend={handleSendMessage}
                       onTyping={handleTyping}
@@ -1134,8 +1134,8 @@ const LandlordMessage = () => {
                 <div className="flex-1 flex items-center justify-center">
                   <div className="text-center">
                     <MessageSquare className="w-20 h-20 mx-auto text-gray-400 dark:text-gray-600 mb-6" />
-                    <h3 className="text-2xl font-bold text-indigo-700 dark:text-cyan-100 mb-4">Select a Conversation</h3>
-                    <p className="text-gray-600 dark:text-blue-200">Choose a conversation from the sidebar to start messaging</p>
+                    <h3 className="text-2xl font-bold text-amber-700 dark:text-slate-100 mb-4">Select a Conversation</h3>
+                    <p className="text-gray-600 dark:text-amber-200">Choose a conversation from the sidebar to start messaging</p>
                   </div>
                 </div>
               )}
@@ -1156,7 +1156,7 @@ const LandlordMessage = () => {
         >
           <div className="p-6 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <FileText className="h-6 w-6 text-indigo-500 dark:text-cyan-500" />
+              <FileText className="h-6 w-6 text-amber-600 dark:text-amber-500" />
               Create Lease Agreement
             </h3>
             <button onClick={() => setShowLeaseModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
@@ -1171,7 +1171,7 @@ const LandlordMessage = () => {
                   required
                   value={leaseForm.type}
                   onChange={(e) => setLeaseForm({...leaseForm, type: e.target.value})}
-                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 border"
+                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-amber-500 focus:border-amber-500 p-2 border"
                 >
                   <option value="residential">Residential</option>
                   <option value="commercial">Commercial</option>
@@ -1184,7 +1184,7 @@ const LandlordMessage = () => {
                   required
                   value={leaseForm.rentAmount}
                   onChange={(e) => setLeaseForm({...leaseForm, rentAmount: e.target.value})}
-                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 border"
+                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-amber-500 focus:border-amber-500 p-2 border"
                 />
               </div>
               <div>
@@ -1194,7 +1194,7 @@ const LandlordMessage = () => {
                   required
                   value={leaseForm.startDate}
                   onChange={(e) => setLeaseForm({...leaseForm, startDate: e.target.value})}
-                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 border"
+                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-amber-500 focus:border-amber-500 p-2 border"
                 />
               </div>
               <div>
@@ -1204,7 +1204,7 @@ const LandlordMessage = () => {
                   required
                   value={leaseForm.endDate}
                   onChange={(e) => setLeaseForm({...leaseForm, endDate: e.target.value})}
-                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 border"
+                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-amber-500 focus:border-amber-500 p-2 border"
                 />
               </div>
               <div className="col-span-2">
@@ -1214,7 +1214,7 @@ const LandlordMessage = () => {
                   required
                   value={leaseForm.securityDeposit}
                   onChange={(e) => setLeaseForm({...leaseForm, securityDeposit: e.target.value})}
-                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 border"
+                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-amber-500 focus:border-amber-500 p-2 border"
                 />
               </div>
               <div className="col-span-2">
@@ -1224,7 +1224,7 @@ const LandlordMessage = () => {
                   rows="3"
                   value={leaseForm.terms}
                   onChange={(e) => setLeaseForm({...leaseForm, terms: e.target.value})}
-                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-2 border"
+                  className="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg shadow-sm focus:ring-amber-500 focus:border-amber-500 p-2 border"
                 ></textarea>
               </div>
             </div>
@@ -1239,7 +1239,7 @@ const LandlordMessage = () => {
               <button
                 type="submit"
                 disabled={isSending}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                className="px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 disabled:opacity-50"
               >
                 {isSending ? 'Sending...' : 'Send Agreement'}
               </button>

@@ -40,8 +40,8 @@ const UpcomingPaymentCard = ({ payment, onPayNow }) => {
       )}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <div className="p-3 rounded-2xl bg-blue-50">
-            <Banknote className="h-6 w-6 text-blue-600" />
+          <div className="p-3 rounded-2xl bg-amber-50">
+            <Banknote className="h-6 w-6 text-amber-600" />
           </div>
           <div>
             <h4 className="font-semibold text-gray-800">{payment.type || 'Rent'}</h4>
@@ -90,7 +90,7 @@ const PaymentHistoryRow = ({ payment, onDownloadReceipt }) => {
       </td>
       <td className="py-4 px-6">
         <div className="flex items-center">
-          <div className="p-2 rounded-lg bg-blue-100 mr-3"><Banknote className="h-4 w-4 text-blue-600" /></div>
+          <div className="p-2 rounded-lg bg-amber-50 mr-3"><Banknote className="h-4 w-4 text-amber-600" /></div>
           {payment.type || 'Rent'}
         </div>
       </td>
@@ -114,7 +114,7 @@ const PaymentHistoryRow = ({ payment, onDownloadReceipt }) => {
       <td className="py-4 px-6">
         {payment.status === 'Paid' ? (
           <button
-            className="text-blue-600 hover:text-blue-800 flex items-center text-sm bg-blue-50 px-3 py-2 rounded-lg"
+            className="text-amber-600 hover:text-amber-800 flex items-center text-sm bg-amber-50 px-3 py-2 rounded-lg"
             onClick={() => onDownloadReceipt(payment)}
           >
             <Download className="h-4 w-4 mr-2" />Download
@@ -303,8 +303,8 @@ const TenantPayment = () => {
       };
 
   const bgClass   = darkMode
-    ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950'
-    : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400';
+    ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950'
+    : 'bg-gradient-to-r from-[#fafaf9] via-white to-[#fafaf9]';
   const cardBg    = darkMode ? 'bg-slate-800/80 border-gray-700/50' : 'bg-white/80 border-white/50';
   const textHead  = darkMode ? 'text-white'     : 'text-gray-800';
   const textSub   = darkMode ? 'text-gray-300'  : 'text-gray-600';
@@ -410,16 +410,16 @@ const TenantPayment = () => {
               icon={<Clock className="h-8 w-8 text-yellow-600" />}
               subtitle={`₹${calculations.pendingAmount.toLocaleString('en-IN')} total`} />
             <PaymentSummaryCard title="Next Payment Due" value={calculations.nextDue}
-              icon={<Calendar className="h-8 w-8 text-blue-600" />} />
+              icon={<Calendar className="h-8 w-8 text-amber-600" />} />
             <PaymentSummaryCard title="Payment Success Rate" value={calculations.successRate}
-              icon={<Star className="h-8 w-8 text-purple-600" />}
+              icon={<Star className="h-8 w-8 text-amber-600" />}
               subtitle={calculations.successRate !== 'N/A' ? 'Based on your history' : 'No history yet'} />
           </div>
 
           {/* Make Payment Section */}
           <div className={`${cardBg} backdrop-blur-sm rounded-3xl shadow-2xl p-8 mb-8 border`}>
             <div className="flex items-center mb-8">
-              <div className="p-3 bg-gradient-to-r from-green-500 to-blue-600 rounded-2xl mr-4">
+              <div className="p-3 bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl mr-4">
                 <CreditCard className="h-8 w-8 text-white" />
               </div>
               <div>
@@ -432,7 +432,7 @@ const TenantPayment = () => {
               {/* Left: upcoming OR all-clear */}
               <div>
                 <h3 className={`font-semibold ${textHead} mb-6 flex items-center text-lg`}>
-                  <Clock className="h-6 w-6 mr-2 text-blue-600" />
+                  <Clock className="h-6 w-6 mr-2 text-amber-600" />
                   Upcoming Payments
                 </h3>
                 {upcomingPayments.length === 0 ? (
@@ -461,8 +461,8 @@ const TenantPayment = () => {
                 <div className="space-y-3">
                   {[
                     { label: 'UPI (GPay, PhonePe, Paytm…)', icon: <IndianRupee className="h-5 w-5 text-green-600"  /> },
-                    { label: 'Credit / Debit Card',            icon: <CreditCard  className="h-5 w-5 text-blue-600"   /> },
-                    { label: 'Net Banking',                    icon: <Banknote    className="h-5 w-5 text-purple-600" /> },
+                    { label: 'Credit / Debit Card',            icon: <CreditCard  className="h-5 w-5 text-amber-600"   /> },
+                    { label: 'Net Banking',                    icon: <Banknote    className="h-5 w-5 text-amber-600" /> },
                     { label: 'Wallets (Mobikwik, Freecharge)', icon: <ShieldCheck className="h-5 w-5 text-orange-500" /> },
                   ].map(({ label, icon }) => (
                     <div key={label}
@@ -494,7 +494,7 @@ const TenantPayment = () => {
             <div className={`p-8 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <div className="p-3 bg-purple-600 rounded-2xl mr-4">
+                  <div className="p-3 bg-amber-600 rounded-2xl mr-4">
                     <BarChart3 className="h-8 w-8 text-white" />
                   </div>
                   <div>
@@ -516,7 +516,7 @@ const TenantPayment = () => {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gradient-to-r from-gray-50 to-blue-50">
+                  <thead className="bg-gradient-to-r from-gray-50 to-amber-50">
                     <tr>
                       {['Date','Type','Amount','Method','Status','Receipt'].map(h => (
                         <th key={h} className="text-left py-4 px-6 font-semibold text-gray-700">{h}</th>
@@ -570,8 +570,8 @@ const TenantPayment = () => {
                     </div>
                   )}
                   <div className="text-center mb-6">
-                    <div className="p-4 bg-blue-100 rounded-2xl w-fit mx-auto mb-4">
-                      <IndianRupee className="h-12 w-12 text-blue-600" />
+                    <div className="p-4 bg-amber-50 rounded-2xl w-fit mx-auto mb-4">
+                      <IndianRupee className="h-12 w-12 text-amber-600" />
                     </div>
                     <h4 className="text-2xl font-bold text-gray-800">
                       ₹{Number(selectedPayment.amount).toLocaleString('en-IN')}
@@ -659,7 +659,7 @@ const TenantPayment = () => {
                         <p className="text-gray-500 text-sm mt-1">{manualNote}</p>
                         <button
                           onClick={() => setManualReady(false)}
-                          className="text-xs text-blue-500 underline mt-1"
+                          className="text-xs text-amber-500 underline mt-1"
                         >
                           ← Edit amount
                         </button>

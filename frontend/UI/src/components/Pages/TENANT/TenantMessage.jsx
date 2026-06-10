@@ -18,7 +18,7 @@ import {
 // ── Typing dots ───────────────────────────────────────────────────────────────
 const TypingIndicator = () => (
   <div className="flex justify-start mb-4 animate-fadeIn">
-    <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-semibold mr-2">…</div>
+    <div className="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-white text-xs font-semibold mr-2">…</div>
     <div className="bg-white px-4 py-3 rounded-lg border border-gray-200 rounded-bl-none">
       <div className="flex space-x-1">
         {[0, 0.1, 0.2].map((d, i) => (
@@ -38,33 +38,33 @@ const MessageBubble = ({ msg, darkMode }) => {
   return (
     <div className={`flex mb-4 ${msg.isOwn ? 'justify-end' : 'justify-start'}`}>
       {!msg.isOwn && (
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-semibold mr-3 shadow-lg flex-shrink-0">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white text-xs font-semibold mr-3 shadow-lg flex-shrink-0">
           {(msg.senderName || '?').charAt(0).toUpperCase()}
         </div>
       )}
       <div
         className={`max-w-xs md:max-w-md px-4 py-3 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl
           ${msg.isOwn
-            ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-br-md'
+            ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-br-md'
             : darkMode
               ? 'bg-gray-800 text-gray-100 rounded-bl-md border border-gray-700'
               : 'bg-white text-gray-800 rounded-bl-md border border-gray-200'
           }`}
       >
         {!msg.isOwn && (
-          <p className={`text-xs font-semibold mb-1 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+          <p className={`text-xs font-semibold mb-1 ${darkMode ? 'text-amber-400' : 'text-amber-600'}`}>
             {msg.senderName || (msg.role === 'landlord' ? 'Landlord' : 'Tenant')}
           </p>
         )}
         <p className="leading-relaxed">{msg.content}</p>
         <div className="flex items-center justify-between mt-2">
-          <p className={`text-xs ${msg.isOwn ? 'text-blue-200' : darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+          <p className={`text-xs ${msg.isOwn ? 'text-amber-200' : darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
             {time}
           </p>
           {msg.isOwn && (
             <div className="flex items-center ml-2">
-              <CheckIcon className="h-3 w-3 text-blue-200" />
-              <CheckIcon className="h-3 w-3 text-blue-200 -ml-1" />
+              <CheckIcon className="h-3 w-3 text-amber-200" />
+              <CheckIcon className="h-3 w-3 text-amber-200 -ml-1" />
             </div>
           )}
         </div>
@@ -89,12 +89,12 @@ const ConversationItem = ({ inquiry, isActive, onClick, darkMode }) => {
         ${darkMode ? 'border-gray-700 hover:bg-gray-700' : 'border-gray-100 hover:bg-gray-50'}
         ${isActive
           ? darkMode
-            ? 'bg-gradient-to-r from-blue-900 to-purple-900 border-l-4 border-blue-500'
-            : 'bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-blue-500'
+            ? 'bg-gradient-to-r from-slate-900 to-slate-950 border-l-4 border-amber-500'
+            : 'bg-gradient-to-r from-amber-50 to-amber-50/30 border-l-4 border-amber-500'
           : ''
         }`}
     >
-      <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-lg flex-shrink-0 ${isActive ? 'ring-4 ring-blue-300' : ''}`}>
+      <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white font-semibold shadow-lg flex-shrink-0 ${isActive ? 'ring-4 ring-blue-300' : ''}`}>
         {name.charAt(0).toUpperCase()}
       </div>
       <div className="ml-3 flex-1 min-w-0">
@@ -102,7 +102,7 @@ const ConversationItem = ({ inquiry, isActive, onClick, darkMode }) => {
           <h3 className={`font-medium truncate ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>{name}</h3>
           <span className={`text-xs flex-shrink-0 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{time}</span>
         </div>
-        <p className={`text-xs flex items-center gap-1 mb-1 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>
+        <p className={`text-xs flex items-center gap-1 mb-1 ${darkMode ? 'text-amber-400' : 'text-amber-600'}`}>
           <BuildingOfficeIcon className="h-3 w-3" />{property}
         </p>
         <p className={`text-sm truncate ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{lastReply}</p>
@@ -116,7 +116,7 @@ const StatusBadge = ({ status }) => {
   const cfg = {
     pending:   { label: 'Awaiting Your Signature', color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Clock },
     active:    { label: 'Active Lease',             color: 'bg-green-100  text-green-800  border-green-200',  icon: CheckCircle },
-    completed: { label: 'Completed',                color: 'bg-blue-100   text-blue-800   border-blue-200',   icon: CheckCircle },
+    completed: { label: 'Completed',                color: 'bg-amber-50   text-amber-800   border-amber-200',   icon: CheckCircle },
     cancelled: { label: 'Cancelled',                color: 'bg-red-100    text-red-800    border-red-200',    icon: XCircle },
   }[status?.toLowerCase()] || { label: status, color: 'bg-gray-100 text-gray-700 border-gray-200', icon: FileText };
 
@@ -157,7 +157,7 @@ const ContractModal = ({ contract, onClose, onAccept, onDecline, accepting }) =>
         {/* Header */}
         <div className={`sticky top-0 ${bg} p-6 border-b ${border} rounded-t-3xl flex items-center justify-between`}>
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-gradient-to-br from-blue-50 to-indigo-600 rounded-xl">
+            <div className="p-2.5 bg-gradient-to-br from-amber-50 to-amber-600 rounded-xl">
               <FileText className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -516,11 +516,11 @@ const TenantMessage = () => {
         <TenantSideBar />
         <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
           <TenantNavBar currentSection="Messages" />
-          <main className={`flex-1 flex items-center justify-center ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-br from-blue-50 to-purple-50'}`}>
+          <main className={`flex-1 flex items-center justify-center ${darkMode ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950' : 'bg-gradient-to-br from-amber-50 to-amber-50/30'}`}>
             <div className="text-center">
               <div className="relative w-20 h-20 mx-auto">
-                <div className={`w-20 h-20 border-4 ${darkMode ? 'border-blue-900' : 'border-blue-200'} rounded-full animate-spin`} />
-                <div className={`absolute inset-0 w-20 h-20 border-4 ${darkMode ? 'border-t-cyan-500' : 'border-t-blue-600'} rounded-full animate-spin`} />
+                <div className={`w-20 h-20 border-4 ${darkMode ? 'border-amber-900' : 'border-amber-200'} rounded-full animate-spin`} />
+                <div className={`absolute inset-0 w-20 h-20 border-4 ${darkMode ? 'border-t-amber-500' : 'border-t-amber-500'} rounded-full animate-spin`} />
               </div>
               <h2 className={`text-xl font-bold ${darkMode ? 'text-slate-100' : 'text-gray-800'} mt-6 animate-pulse`}>{t('pages.loadingMessages')}</h2>
               <p className={`${darkMode ? 'text-slate-300' : 'text-gray-600'} mt-2`}>Connecting to your conversations</p>
@@ -532,7 +532,7 @@ const TenantMessage = () => {
   }
 
   return (
-    <div className={`flex h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950' : 'bg-gradient-to-br from-gray-50 to-blue-50'}`}>
+    <div className={`flex h-screen ${darkMode ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950' : 'bg-gradient-to-br from-gray-50 to-amber-50'}`}>
       <TenantSideBar />
       <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <TenantNavBar currentSection="Messages" />
@@ -541,7 +541,7 @@ const TenantMessage = () => {
           {/* ── Conversations list ── */}
           <div className={`w-1/3 border-r ${darkMode ? 'border-gray-700' : 'border-gray-200'} flex flex-col ${darkMode ? 'bg-slate-800/80' : 'bg-white/80'} backdrop-blur-sm`}>
             {/* Header */}
-            <div className={`p-6 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'} bg-gradient-to-r from-blue-600 to-purple-600 text-white`}>
+            <div className={`p-6 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'} bg-gradient-to-r from-amber-500 to-amber-600 text-white`}>
               <h2 className="text-2xl font-bold mb-4 flex items-center">
                 <ChatBubbleLeftRightIcon className="h-8 w-8 mr-3" />
                 Messages
@@ -587,16 +587,16 @@ const TenantMessage = () => {
             {activeInquiry ? (
               <>
                 {/* Chat header */}
-                <div className={`p-4 border-b ${darkMode ? 'border-gray-700 bg-gradient-to-r from-gray-800 to-blue-900' : 'border-gray-200 bg-gradient-to-r from-white to-blue-50'}`}>
+                <div className={`p-4 border-b ${darkMode ? 'border-gray-700 bg-gradient-to-r from-gray-800 to-slate-900' : 'border-gray-200 bg-gradient-to-r from-white to-amber-50'}`}>
                   <div className="flex items-center">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold shadow-lg mr-4">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white font-semibold shadow-lg mr-4">
                       {(activeInquiry.landlord?.name || activeInquiry.property?.postedBy?.name || 'L').charAt(0).toUpperCase()}
                     </div>
                     <div>
                       <h3 className={`font-semibold text-lg ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
                         {activeInquiry.landlord?.name || activeInquiry.property?.postedBy?.name || 'Landlord'}
                       </h3>
-                      <p className={`text-sm flex items-center gap-1 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>
+                      <p className={`text-sm flex items-center gap-1 ${darkMode ? 'text-amber-400' : 'text-amber-600'}`}>
                         <BuildingOfficeIcon className="h-4 w-4" />
                         {activeInquiry.property?.title || 'Property'}
                       </p>
@@ -668,7 +668,7 @@ const TenantMessage = () => {
                         value={newMessage}
                         onChange={e => setNewMessage(e.target.value)}
                         placeholder="Type a message..."
-                        className={`w-full border-2 ${darkMode ? 'border-gray-700 bg-gray-800 text-gray-200 placeholder-gray-500' : 'border-gray-200 bg-white text-gray-800 placeholder-gray-400'} rounded-2xl px-6 py-4 pr-16 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 resize-none`}
+                        className={`w-full border-2 ${darkMode ? 'border-gray-700 bg-gray-800 text-gray-200 placeholder-gray-500' : 'border-gray-200 bg-white text-gray-800 placeholder-gray-400'} rounded-2xl px-6 py-4 pr-16 focus:outline-none focus:ring-4 focus:ring-amber-500/30/20 focus:border-amber-500 transition-all duration-300 resize-none`}
                         rows="1"
                         style={{ minHeight: '56px', maxHeight: '120px' }}
                         onKeyPress={e => {
@@ -695,7 +695,7 @@ const TenantMessage = () => {
                     {/* Send */}
                     <button
                       className={`p-4 rounded-2xl transition-all hover:scale-110 ${newMessage.trim()
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl'
+                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg hover:shadow-xl'
                         : darkMode ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                       }`}
                       onClick={sendMessage}

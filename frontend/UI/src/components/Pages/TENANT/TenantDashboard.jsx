@@ -67,19 +67,19 @@ const PropertyCard = React.memo(({ property, onRemove, removeConfirmId, onConfir
   const { darkMode } = useDarkMode();
   return (
     <div className={`rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden group hover:scale-105 border ${
-      darkMode ? 'bg-slate-800 border-slate-700 hover:shadow-blue-500/10' : 'bg-white border-gray-100 hover:shadow-blue-500/20'
+      darkMode ? 'bg-slate-800 border-slate-700 hover:shadow-amber-500/10' : 'bg-white border-gray-100 hover:shadow-amber-500/20'
     }`}>
       <div className="relative overflow-hidden">
         <img src={property.image} alt={property.title}
           className="w-full h-48 object-cover transition-all duration-700 group-hover:scale-110" loading="lazy" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         <div className={`absolute bottom-4 left-4 px-4 py-2 rounded-full font-semibold shadow-lg text-white ${
-          darkMode ? 'bg-gradient-to-r from-blue-700 to-purple-800' : 'bg-gradient-to-r from-blue-600 to-purple-600'
+          darkMode ? 'bg-gradient-to-r from-amber-500 to-amber-600' : 'bg-gradient-to-r from-amber-500 to-amber-600'
         }`}>{property.price}</div>
       </div>
       <div className="p-6">
         <h3 className={`font-bold text-xl mb-2 transition-colors duration-300 ${
-          darkMode ? 'text-slate-100 group-hover:text-blue-400' : 'text-gray-800 group-hover:text-blue-600'
+          darkMode ? 'text-slate-100 group-hover:text-amber-400' : 'text-gray-800 group-hover:text-amber-600'
         }`}>{property.title}</h3>
         <p className={`mb-3 flex items-center ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>
           <Star className={`h-4 w-4 mr-2 ${darkMode ? 'text-yellow-400' : 'text-yellow-500'}`} />
@@ -121,7 +121,7 @@ const NotificationItem = React.memo(({ notification, onMarkAsRead, onDelete }) =
   const { darkMode } = useDarkMode();
   const typeIcon = {
     maintenance: <Wrench className={`h-6 w-6 ${darkMode ? 'text-orange-400' : 'text-orange-500'}`} />,
-    payment:     <CreditCard className={`h-6 w-6 ${darkMode ? 'text-purple-400' : 'text-purple-500'}`} />,
+    payment:     <CreditCard className={`h-6 w-6 ${darkMode ? 'text-amber-400' : 'text-amber-500'}`} />,
     general:     <Bell className={`h-6 w-6 ${darkMode ? 'text-yellow-400' : 'text-yellow-500'}`} />,
   };
   return (
@@ -131,7 +131,7 @@ const NotificationItem = React.memo(({ notification, onMarkAsRead, onDelete }) =
       } ${
         notification.read
           ? (darkMode ? 'border-slate-600' : 'border-gray-300')
-          : (darkMode ? 'border-blue-400' : 'border-blue-500')
+          : (darkMode ? 'border-amber-500' : 'border-amber-500')
       } hover:scale-105 group`}
       onClick={() => onMarkAsRead(notification.id)}
     >
@@ -145,7 +145,7 @@ const NotificationItem = React.memo(({ notification, onMarkAsRead, onDelete }) =
           <div className="flex justify-between items-center mt-2">
             <span className={`text-xs ${darkMode ? 'text-slate-400' : 'text-gray-500'}`}>{notification.time}</span>
             {!notification.read && (
-              <div className="w-2.5 h-2.5 bg-blue-500 rounded-full" aria-label="Unread" />
+              <div className="w-2.5 h-2.5 bg-amber-500 rounded-full" aria-label="Unread" />
             )}
           </div>
         </div>
@@ -367,7 +367,7 @@ const TenantDashboard = () => {
     return (
       <div className={`min-h-screen bg-gradient-to-br ${tc.loadingBg} flex relative`}>
         <div className="absolute inset-0 opacity-[0.25]" style={dotPatternStyle} />
-        <div className={`w-[4.5rem] ${darkMode ? 'bg-slate-950/60' : 'bg-white/60'}`} />
+        <div className={`w-[4.5rem] ${darkMode ? 'bg-slate-950/60' : 'bg-white'}`} />
         <div className="flex-1 flex flex-col relative z-10">
           <div className={`h-16 border-b ${darkMode ? 'bg-slate-950/60 border-slate-800' : 'bg-white/80 border-amber-100'}`} />
           <main className="flex-1 p-6 space-y-6">

@@ -149,7 +149,7 @@ const ScheduleVisitModal = ({ property, isOpen, onClose }) => {
         <div className={`flex items-center justify-between px-6 py-4 border-b ${darkMode ? 'border-slate-700' : 'border-gray-200'}`}>
           <div>
             <h3 className="text-2xl font-bold flex items-center gap-2">
-              <CalendarIcon className="h-6 w-6 text-blue-500" />
+              <CalendarIcon className="h-6 w-6 text-amber-500" />
               Schedule Visit
             </h3>
             <p className={`${darkMode ? 'text-slate-300' : 'text-gray-600'} text-sm mt-1`}>
@@ -176,7 +176,7 @@ const ScheduleVisitModal = ({ property, isOpen, onClose }) => {
                   min={today}
                   value={formData.visitDate}
                   onChange={handleChange}
-                  className={`w-full rounded-xl border pl-10 pr-4 py-3 focus:outline-none focus:ring-2 ${darkMode ? 'bg-slate-800 border-slate-600 text-white focus:ring-cyan-500' : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500'}`}
+                  className={`w-full rounded-xl border pl-10 pr-4 py-3 focus:outline-none focus:ring-2 ${darkMode ? 'bg-slate-800 border-slate-600 text-white focus:ring-amber-500/30' : 'bg-white border-gray-300 text-gray-900 focus:ring-amber-500/30'}`}
                   required
                 />
               </div>
@@ -191,7 +191,7 @@ const ScheduleVisitModal = ({ property, isOpen, onClose }) => {
                   name="visitTime"
                   value={formData.visitTime}
                   onChange={handleChange}
-                  className={`w-full rounded-xl border pl-10 pr-4 py-3 focus:outline-none focus:ring-2 ${darkMode ? 'bg-slate-800 border-slate-600 text-white focus:ring-cyan-500' : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500'}`}
+                  className={`w-full rounded-xl border pl-10 pr-4 py-3 focus:outline-none focus:ring-2 ${darkMode ? 'bg-slate-800 border-slate-600 text-white focus:ring-amber-500/30' : 'bg-white border-gray-300 text-gray-900 focus:ring-amber-500/30'}`}
                   required
                 />
               </div>
@@ -209,7 +209,7 @@ const ScheduleVisitModal = ({ property, isOpen, onClose }) => {
                   placeholder="Enter your name"
                   value={formData.fullName}
                   onChange={handleChange}
-                  className={`w-full rounded-xl border pl-10 pr-4 py-3 focus:outline-none focus:ring-2 ${darkMode ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:ring-cyan-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-blue-500'}`}
+                  className={`w-full rounded-xl border pl-10 pr-4 py-3 focus:outline-none focus:ring-2 ${darkMode ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:ring-amber-500/30' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-amber-500/30'}`}
                   required
                 />
               </div>
@@ -225,7 +225,7 @@ const ScheduleVisitModal = ({ property, isOpen, onClose }) => {
                   placeholder="Enter phone number"
                   value={formData.phoneNumber}
                   onChange={handleChange}
-                  className={`w-full rounded-xl border pl-10 pr-4 py-3 focus:outline-none focus:ring-2 ${darkMode ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:ring-cyan-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-blue-500'}`}
+                  className={`w-full rounded-xl border pl-10 pr-4 py-3 focus:outline-none focus:ring-2 ${darkMode ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:ring-amber-500/30' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-amber-500/30'}`}
                   required
                 />
               </div>
@@ -241,7 +241,7 @@ const ScheduleVisitModal = ({ property, isOpen, onClose }) => {
                 placeholder="Enter email address"
                 value={formData.email}
                 onChange={handleChange}
-                className={`w-full rounded-xl border px-4 py-3 focus:outline-none focus:ring-2 ${darkMode ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:ring-cyan-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-blue-500'}`}
+                className={`w-full rounded-xl border px-4 py-3 focus:outline-none focus:ring-2 ${darkMode ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:ring-amber-500/30' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-amber-500/30'}`}
               />
             </div>
 
@@ -251,7 +251,7 @@ const ScheduleVisitModal = ({ property, isOpen, onClose }) => {
                 name="guests"
                 value={formData.guests}
                 onChange={handleChange}
-                className={`w-full rounded-xl border px-4 py-3 focus:outline-none focus:ring-2 ${darkMode ? 'bg-slate-800 border-slate-600 text-white focus:ring-cyan-500' : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-500'}`}
+                className={`w-full rounded-xl border px-4 py-3 focus:outline-none focus:ring-2 ${darkMode ? 'bg-slate-800 border-slate-600 text-white focus:ring-amber-500/30' : 'bg-white border-gray-300 text-gray-900 focus:ring-amber-500/30'}`}
               >
                 <option value="1">1 Person</option>
                 <option value="2">2 People</option>
@@ -271,7 +271,7 @@ const ScheduleVisitModal = ({ property, isOpen, onClose }) => {
                 placeholder="Any special request or note for the landlord"
                 value={formData.notes}
                 onChange={handleChange}
-                className={`w-full rounded-xl border pl-10 pr-4 py-3 focus:outline-none focus:ring-2 ${darkMode ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:ring-cyan-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-blue-500'}`}
+                className={`w-full rounded-xl border pl-10 pr-4 py-3 focus:outline-none focus:ring-2 ${darkMode ? 'bg-slate-800 border-slate-600 text-white placeholder-slate-400 focus:ring-amber-500/30' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-amber-500/30'}`}
               />
             </div>
           </div>
@@ -287,7 +287,7 @@ const ScheduleVisitModal = ({ property, isOpen, onClose }) => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition disabled:opacity-70 disabled:cursor-not-allowed"
+              className="flex-1 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 transition disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Booking...' : 'Book Schedule'}
             </button>
@@ -312,7 +312,7 @@ const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, on
     >
       <FloatingCard delay={index * 200}>
         <div
-          className={`${darkMode ? 'bg-slate-800 text-white' : 'bg-white'} rounded-xl shadow-lg overflow-hidden transition-all duration-500 hover:shadow-2xl hover:scale-105 cursor-pointer group ${isHovered ? `ring-2 ${darkMode ? 'ring-cyan-400' : 'ring-blue-400'} ring-opacity-50` : ''}`}
+          className={`${darkMode ? 'bg-slate-800 text-white' : 'bg-white'} rounded-xl shadow-lg overflow-hidden transition-all duration-500 hover:shadow-2xl hover:scale-105 cursor-pointer group ${isHovered ? `ring-2 ${darkMode ? 'ring-amber-400' : 'ring-amber-400'} ring-opacity-50` : ''}`}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
@@ -351,14 +351,14 @@ const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, on
               </div>
             )}
 
-            <div className="absolute bottom-3 right-3 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold backdrop-blur-sm">
+            <div className="absolute bottom-3 right-3 bg-amber-600 text-white px-3 py-1 rounded-full text-sm font-semibold backdrop-blur-sm">
               {property.price}
             </div>
           </div>
 
           <div className="p-5">
             <div className="flex items-start justify-between mb-2">
-              <h3 className={`font-bold text-lg mb-1 group-hover:${darkMode ? 'text-cyan-400' : 'text-blue-600'} transition-colors duration-300 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+              <h3 className={`font-bold text-lg mb-1 group-hover:${darkMode ? 'text-amber-400' : 'text-amber-600'} transition-colors duration-300 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                 {property.title}
               </h3>
             </div>
@@ -396,7 +396,7 @@ const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, on
                     <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">Pets OK</span>
                   )}
                   {property.furnished && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">Furnished</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">Furnished</span>
                   )}
                 </div>
               )}
@@ -405,7 +405,7 @@ const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, on
             <div className="flex justify-between items-center">
               <button
                 onClick={() => onViewDetails(property)}
-                className={`flex items-center ${darkMode ? 'text-cyan-400 hover:text-cyan-300' : 'text-blue-600 hover:text-blue-800'} transition-colors duration-200 font-medium`}
+                className={`flex items-center ${darkMode ? 'text-amber-400 hover:text-amber-300' : 'text-amber-600 hover:text-amber-800'} transition-colors duration-200 font-medium`}
               >
                 <EyeIcon className="h-5 w-5 mr-1" />
                 View Details
@@ -415,7 +415,7 @@ const PropertyCard = React.memo(({ property, onToggleFavorite, onViewDetails, on
                   e.stopPropagation();
                   onContactLandlord(property);
                 }}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center"
+                className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-4 py-2 rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center"
               >
                 <CurrencyDollarIcon className="h-4 w-4 mr-1" />
                 Contact
@@ -510,7 +510,7 @@ const PropertyModal = ({ property, isOpen, onClose, onToggleFavorite, onContactL
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                      <BuildingOfficeIcon className="h-6 w-6 mr-2 text-blue-600" />
+                      <BuildingOfficeIcon className="h-6 w-6 mr-2 text-amber-600" />
                       Property Details
                     </h3>
                     <div className="space-y-3">
@@ -555,7 +555,7 @@ const PropertyModal = ({ property, isOpen, onClose, onToggleFavorite, onContactL
                   <div className="space-y-3">
                     <button
                       onClick={() => onOpenScheduleVisit(property)}
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center justify-center font-semibold"
+                      className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white py-4 rounded-xl hover:from-amber-600 hover:to-amber-700 transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center justify-center font-semibold"
                     >
                       <CalendarIcon className="h-5 w-5 mr-2" />
                       Schedule Visit
@@ -655,8 +655,8 @@ const TenantProperty = () => {
   const [favoriteUpdatingIds, setFavoriteUpdatingIds] = useState([]);
 
   const selectCls = darkMode
-    ? 'bg-slate-700 border-slate-600 text-white focus:ring-cyan-500/20 focus:border-cyan-500'
-    : 'bg-white border-gray-200 text-gray-800 focus:ring-blue-500/20 focus:border-blue-500';
+    ? 'bg-slate-700 border-slate-600 text-white focus:ring-amber-500/30/20 focus:border-amber-500'
+    : 'bg-white border-gray-200 text-gray-800 focus:ring-amber-500/30/20 focus:border-amber-500';
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -894,7 +894,7 @@ const TenantProperty = () => {
         <TenantSideBar />
         <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
           <TenantNavBar currentSection="Properties" />
-          <main className={`flex-1 p-6 overflow-y-auto ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100' : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 text-gray-900'}`}>
+          <main className={`flex-1 p-6 overflow-y-auto ${darkMode ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100' : 'bg-gradient-to-r from-[#fafaf9] via-white to-[#fafaf9] text-gray-900'}`}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, index) => (
                 <PropertyCardSkeleton key={index} />
@@ -911,7 +911,7 @@ const TenantProperty = () => {
       <TenantSideBar />
       <div className="flex flex-col flex-1" style={{ marginLeft: 'var(--sidebar-width, 4.5rem)' }}>
         <TenantNavBar currentSection="Properties" />
-        <main className={`flex-1 p-6 overflow-y-auto ${darkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100' : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 text-gray-900'}`}>
+        <main className={`flex-1 p-6 overflow-y-auto ${darkMode ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100' : 'bg-gradient-to-r from-[#fafaf9] via-white to-[#fafaf9] text-gray-900'}`}>
           <div className="mb-8 animate-fadeIn">
             <div className="text-center mb-6">
               <h1 className={`text-4xl font-bold mb-2 animate-slideDown ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>
@@ -932,7 +932,7 @@ const TenantProperty = () => {
                     placeholder={t('tenant.searchByNameLocation')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className={`w-full border-2 rounded-xl px-6 py-4 focus:outline-none focus:ring-4 transition-all duration-300 pl-12 text-lg ${darkMode ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:ring-cyan-500/20 focus:border-cyan-500' : 'bg-white border-gray-200 text-gray-800 placeholder-gray-500 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                    className={`w-full border-2 rounded-xl px-6 py-4 focus:outline-none focus:ring-4 transition-all duration-300 pl-12 text-lg ${darkMode ? 'bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:ring-amber-500/30/20 focus:border-amber-500' : 'bg-white border-gray-200 text-gray-800 placeholder-gray-500 focus:ring-amber-500/30/20 focus:border-amber-500'}`}
                   />
                   <MagnifyingGlassIcon className={`h-6 w-6 absolute left-4 top-5 ${darkMode ? 'text-slate-400' : 'text-gray-400'}`} />
                 </div>
@@ -942,7 +942,7 @@ const TenantProperty = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className={`border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-cyan-500/20 focus:border-cyan-500' : 'bg-white border-gray-200 text-gray-800 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                  className={`border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all duration-300 ${darkMode ? 'bg-slate-700 border-slate-600 text-white focus:ring-amber-500/30/20 focus:border-amber-500' : 'bg-white border-gray-200 text-gray-800 focus:ring-amber-500/30/20 focus:border-amber-500'}`}
                 >
                   <option value="title">{t('tenant.sortByName')}</option>
                   <option value="price">{t('tenant.sortPriceLow')}</option>
@@ -954,7 +954,7 @@ const TenantProperty = () => {
 
                 <button
                   onClick={() => setFilter('all')}
-                  className={`px-6 py-3 rounded-xl transition-all duration-300 ${filter === 'all' ? `${darkMode ? 'bg-cyan-600' : 'bg-blue-600'} text-white shadow-lg scale-105` : darkMode ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:scale-105' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105'}`}
+                  className={`px-6 py-3 rounded-xl transition-all duration-300 ${filter === 'all' ? `${darkMode ? 'bg-amber-600' : 'bg-amber-600'} text-white shadow-lg scale-105` : darkMode ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:scale-105' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105'}`}
                 >
                   {t('common.allProperties')}
                 </button>
@@ -972,11 +972,11 @@ const TenantProperty = () => {
               <button
                 type="button"
                 onClick={() => setShowAdvancedFilters(v => !v)}
-                className={`text-sm font-semibold flex items-center gap-2 ${darkMode ? 'text-cyan-400 hover:text-cyan-300' : 'text-blue-600 hover:text-blue-800'}`}
+                className={`text-sm font-semibold flex items-center gap-2 ${darkMode ? 'text-amber-400 hover:text-amber-300' : 'text-amber-600 hover:text-amber-800'}`}
               >
                 {showAdvancedFilters ? t('common.hideFilters') : t('common.showFilters')}
                 {activeFilterCount > 0 && (
-                  <span className={`px-2 py-0.5 rounded-full text-xs ${darkMode ? 'bg-cyan-600 text-white' : 'bg-blue-600 text-white'}`}>
+                  <span className={`px-2 py-0.5 rounded-full text-xs ${darkMode ? 'bg-amber-600 text-white' : 'bg-amber-600 text-white'}`}>
                     {activeFilterCount}
                   </span>
                 )}
@@ -1044,27 +1044,27 @@ const TenantProperty = () => {
                   </div>
                   <div className="flex flex-wrap items-end gap-4 sm:col-span-2">
                     <label className={`flex items-center gap-2 cursor-pointer ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
-                      <input type="checkbox" checked={petFriendlyOnly} onChange={(e) => setPetFriendlyOnly(e.target.checked)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4" />
+                      <input type="checkbox" checked={petFriendlyOnly} onChange={(e) => setPetFriendlyOnly(e.target.checked)} className="rounded border-gray-300 text-amber-600 focus:ring-amber-500/30 w-4 h-4" />
                       <span className="text-sm font-medium">{t('filters.petFriendly')}</span>
                     </label>
                     <label className={`flex items-center gap-2 cursor-pointer ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
-                      <input type="checkbox" checked={furnishedOnly} onChange={(e) => setFurnishedOnly(e.target.checked)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4" />
+                      <input type="checkbox" checked={furnishedOnly} onChange={(e) => setFurnishedOnly(e.target.checked)} className="rounded border-gray-300 text-amber-600 focus:ring-amber-500/30 w-4 h-4" />
                       <span className="text-sm font-medium">{t('filters.furnished')}</span>
                     </label>
                     <label className={`flex items-center gap-2 cursor-pointer ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
-                      <input type="checkbox" checked={swimmingPoolOnly} onChange={(e) => setSwimmingPoolOnly(e.target.checked)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4" />
+                      <input type="checkbox" checked={swimmingPoolOnly} onChange={(e) => setSwimmingPoolOnly(e.target.checked)} className="rounded border-gray-300 text-amber-600 focus:ring-amber-500/30 w-4 h-4" />
                       <span className="text-sm font-medium">{t('filters.swimmingPool')}</span>
                     </label>
                     <label className={`flex items-center gap-2 cursor-pointer ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
-                      <input type="checkbox" checked={gardenOnly} onChange={(e) => setGardenOnly(e.target.checked)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4" />
+                      <input type="checkbox" checked={gardenOnly} onChange={(e) => setGardenOnly(e.target.checked)} className="rounded border-gray-300 text-amber-600 focus:ring-amber-500/30 w-4 h-4" />
                       <span className="text-sm font-medium">{t('filters.garden')}</span>
                     </label>
                     <label className={`flex items-center gap-2 cursor-pointer ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
-                      <input type="checkbox" checked={nearTransitOnly} onChange={(e) => setNearTransitOnly(e.target.checked)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4" />
+                      <input type="checkbox" checked={nearTransitOnly} onChange={(e) => setNearTransitOnly(e.target.checked)} className="rounded border-gray-300 text-amber-600 focus:ring-amber-500/30 w-4 h-4" />
                       <span className="text-sm font-medium">{t('filters.nearTransit')}</span>
                     </label>
                     <label className={`flex items-center gap-2 cursor-pointer ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
-                      <input type="checkbox" checked={availableOnly} onChange={(e) => setAvailableOnly(e.target.checked)} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4" />
+                      <input type="checkbox" checked={availableOnly} onChange={(e) => setAvailableOnly(e.target.checked)} className="rounded border-gray-300 text-amber-600 focus:ring-amber-500/30 w-4 h-4" />
                       <span className="text-sm font-medium">{t('filters.availableOnly')}</span>
                     </label>
                   </div>
@@ -1124,7 +1124,7 @@ const TenantProperty = () => {
                   </p>
                   <button
                     onClick={resetAllFilters}
-                    className={`${darkMode ? 'bg-cyan-600 hover:bg-cyan-700' : 'bg-blue-600 hover:bg-blue-700'} text-white px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105`}
+                    className={`${darkMode ? 'bg-amber-600 hover:bg-amber-700' : 'bg-amber-600 hover:bg-amber-700'} text-white px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105`}
                   >
                     {t('common.resetFilters')}
                   </button>
@@ -1149,8 +1149,8 @@ const TenantProperty = () => {
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20 animate-slideUp">
             <h3 className="text-2xl font-bold text-center mb-6">Property Statistics</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center p-6 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 hover:scale-105 transition-transform duration-300">
-                <div className="text-3xl font-bold text-blue-600">{properties.length}</div>
+              <div className="text-center p-6 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100 hover:scale-105 transition-transform duration-300">
+                <div className="text-3xl font-bold text-amber-600">{properties.length}</div>
                 <div className="text-gray-600">Total Properties</div>
               </div>
               <div className="text-center p-6 rounded-xl bg-gradient-to-br from-red-50 to-red-100 hover:scale-105 transition-transform duration-300">

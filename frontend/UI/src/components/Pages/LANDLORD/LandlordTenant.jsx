@@ -96,7 +96,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
       case 'Pending':
         return <Clock className={`w-4 h-4 ${darkMode ? 'text-white' : 'text-yellow-800'}`} />;
       case 'Prospect':
-        return <User className={`w-4 h-4 ${darkMode ? 'text-white' : 'text-indigo-800'}`} />;
+        return <User className={`w-4 h-4 ${darkMode ? 'text-white' : 'text-amber-800'}`} />;
       case 'Inactive':
         return <XCircle className={`w-4 h-4 ${darkMode ? 'text-white' : 'text-slate-800'}`} />;
       case 'Overdue':
@@ -113,7 +113,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
       case 'Pending':
         return darkMode ? 'bg-yellow-600 text-white' : 'bg-yellow-100 text-yellow-800';
       case 'Prospect':
-        return darkMode ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-800';
+        return darkMode ? 'bg-amber-600 text-white' : 'bg-amber-50 text-amber-800';
       case 'Inactive':
         return darkMode ? 'bg-slate-600 text-white' : 'bg-slate-100 text-slate-800';
       case 'Overdue':
@@ -159,7 +159,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
                   className="w-16 h-16 rounded-xl object-cover"
                 />
               ) : (
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl">
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white font-bold text-xl">
                   {tenant.name.split(' ').map(n => n[0]).join('')}
                 </div>
               )}
@@ -169,7 +169,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
               )}
 
               {tenant.isVerified && (
-                <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center">
                   <BadgeCheck className="w-3 h-3 text-white" />
                 </div>
               )}
@@ -177,7 +177,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
 
             <div className="flex-1">
               <div className="flex items-center space-x-2 mb-1">
-                <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'} group-hover:text-blue-300 transition-colors`}>
+                <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'} group-hover:text-amber-300 transition-colors`}>
                   {tenant.name}
                 </h3>
                 {tenant.isPremium && (
@@ -323,16 +323,16 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
 
         {/* Visit Requests */}
         {tenant.visitRequests && tenant.visitRequests.length > 0 && (
-          <div className={`mb-4 flex items-center justify-between p-3 rounded-xl border ${darkMode ? 'bg-blue-900/20 border-blue-500/20' : 'bg-blue-50 border-blue-100'}`}>
+          <div className={`mb-4 flex items-center justify-between p-3 rounded-xl border ${darkMode ? 'bg-amber-900/20 border-amber-500/20' : 'bg-amber-50 border-amber-100'}`}>
             <div className="flex items-center space-x-3">
-              <div className={`p-2 rounded-lg ${darkMode ? 'bg-blue-500/20' : 'bg-blue-100'}`}>
-                <Calendar className={`w-4 h-4 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+              <div className={`p-2 rounded-lg ${darkMode ? 'bg-amber-500/20' : 'bg-amber-50'}`}>
+                <Calendar className={`w-4 h-4 ${darkMode ? 'text-amber-400' : 'text-amber-600'}`} />
               </div>
               <div>
                 <span className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                   {tenant.visitRequests.length} Visit Request{tenant.visitRequests.length > 1 ? 's' : ''}
                 </span>
-                <div className={`text-xs ${darkMode ? 'text-blue-200' : 'text-blue-600'}`}>
+                <div className={`text-xs ${darkMode ? 'text-amber-200' : 'text-amber-600'}`}>
                   Latest: {new Date(tenant.visitRequests[0].requestedDate).toLocaleDateString()}
                 </div>
               </div>
@@ -358,7 +358,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => onScheduleVisit(tenant)}
-              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl text-sm font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center space-x-2"
+              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl text-sm font-semibold hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg shadow-amber-500/30 flex items-center justify-center space-x-2"
             >
               <Calendar className="w-4 h-4" />
               <span>Schedule</span>
@@ -368,7 +368,7 @@ const TenantCard = ({ tenant, onEdit, onView, onDelete, onMessage, onScheduleVis
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => onView(tenant)}
-              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-xl text-sm font-semibold hover:from-purple-600 hover:to-pink-700 transition-all shadow-lg shadow-purple-500/30 flex items-center justify-center space-x-2"
+              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-xl text-sm font-semibold hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg shadow-amber-500/30 flex items-center justify-center space-x-2"
             >
               <Eye className="w-4 h-4" />
               <span>View Profile</span>
@@ -494,7 +494,7 @@ const VisitRequestModal = ({ isOpen, onClose, tenant, onSchedule }) => {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setVisitType('in-person')}
                 className={`p-3 rounded-lg border-2 transition-all ${visitType === 'in-person'
-                  ? 'border-blue-500 bg-blue-500/10 text-blue-300'
+                  ? 'border-amber-500 bg-amber-500/10 text-amber-300'
                   : 'border-white/20 text-white/70 hover:border-white/40'
                   }`}
               >
@@ -507,7 +507,7 @@ const VisitRequestModal = ({ isOpen, onClose, tenant, onSchedule }) => {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setVisitType('virtual')}
                 className={`p-3 rounded-lg border-2 transition-all ${visitType === 'virtual'
-                  ? 'border-blue-500 bg-blue-500/10 text-blue-300'
+                  ? 'border-amber-500 bg-amber-500/10 text-amber-300'
                   : 'border-white/20 text-white/70 hover:border-white/40'
                   }`}
               >
@@ -524,7 +524,7 @@ const VisitRequestModal = ({ isOpen, onClose, tenant, onSchedule }) => {
               value={selectedProperty}
               disabled={!!tenant?.property}
               onChange={(e) => setSelectedProperty(e.target.value)}
-              className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:border-blue-500 focus:outline-none disabled:opacity-75 disabled:cursor-not-allowed [&>option]:bg-slate-800 [&>option]:text-white"
+              className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:border-amber-500 focus:outline-none disabled:opacity-75 disabled:cursor-not-allowed [&>option]:bg-slate-800 [&>option]:text-white"
             >
               <option value="" className="bg-slate-800 text-white">Select a property</option>
               {tenant?.property && !properties.find(p => p.title === tenant.property) && (
@@ -544,7 +544,7 @@ const VisitRequestModal = ({ isOpen, onClose, tenant, onSchedule }) => {
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               min={new Date().toISOString().split('T')[0]}
-              className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+              className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:border-amber-500 focus:outline-none"
             />
           </div>
 
@@ -559,7 +559,7 @@ const VisitRequestModal = ({ isOpen, onClose, tenant, onSchedule }) => {
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setSelectedTime(time)}
                   className={`p-2 rounded-lg text-sm font-medium transition-all ${selectedTime === time
-                    ? 'bg-blue-500 text-white'
+                    ? 'bg-amber-500 text-white'
                     : 'bg-white/10 text-white/70 hover:bg-white/20'
                     }`}
                 >
@@ -576,7 +576,7 @@ const VisitRequestModal = ({ isOpen, onClose, tenant, onSchedule }) => {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any special requirements or notes..."
-              className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-blue-500 focus:outline-none resize-none"
+              className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-amber-500 focus:outline-none resize-none"
               rows={3}
             />
           </div>
@@ -597,7 +597,7 @@ const VisitRequestModal = ({ isOpen, onClose, tenant, onSchedule }) => {
               whileTap={{ scale: 0.98 }}
               onClick={handleSchedule}
               disabled={!selectedDate || !selectedTime || !selectedProperty}
-              className="flex-1 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-medium hover:from-amber-600 hover:to-amber-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Schedule Visit
             </motion.button>
@@ -717,7 +717,7 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setContractType(key)}
                   className={`p-3 rounded-lg border-2 transition-all ${contractType === key
-                    ? 'border-blue-500 bg-blue-500/10 text-blue-300'
+                    ? 'border-amber-500 bg-amber-500/10 text-amber-300'
                     : 'border-white/20 text-white/70 hover:border-white/40'
                     }`}
                 >
@@ -736,7 +736,7 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
                 value={selectedProperty}
                 disabled={!!tenant?.property}
                 onChange={(e) => setSelectedProperty(e.target.value)}
-                className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:border-blue-500 focus:outline-none disabled:opacity-75 disabled:cursor-not-allowed [&>option]:bg-slate-800 [&>option]:text-white"
+                className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:border-amber-500 focus:outline-none disabled:opacity-75 disabled:cursor-not-allowed [&>option]:bg-slate-800 [&>option]:text-white"
               >
                 <option value="" className="bg-slate-800 text-white">Select property</option>
                 {tenant?.property && !properties.find(p => p.title === tenant.property) && (
@@ -753,7 +753,7 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
               <select
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
-                className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:border-blue-500 focus:outline-none [&>option]:bg-slate-800 [&>option]:text-white"
+                className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:border-amber-500 focus:outline-none [&>option]:bg-slate-800 [&>option]:text-white"
               >
                 <option value="6" className="bg-slate-800 text-white">6 months</option>
                 <option value="12" className="bg-slate-800 text-white">12 months</option>
@@ -772,7 +772,7 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
                 value={rentAmount}
                 onChange={(e) => setRentAmount(e.target.value)}
                 placeholder="25000"
-                className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
+                className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-amber-500 focus:outline-none"
               />
             </div>
 
@@ -783,7 +783,7 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
                 value={securityDeposit}
                 onChange={(e) => setSecurityDeposit(e.target.value)}
                 placeholder="50000"
-                className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
+                className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-amber-500 focus:outline-none"
               />
             </div>
 
@@ -794,7 +794,7 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+                className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white focus:border-amber-500 focus:outline-none"
               />
             </div>
           </div>
@@ -814,7 +814,7 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
                     type="checkbox"
                     checked={terms[key]}
                     onChange={(e) => setTerms(prev => ({ ...prev, [key]: e.target.checked }))}
-                    className="w-4 h-4 rounded border-2 border-white/20 bg-white/10 text-blue-500 focus:ring-blue-500 focus:ring-2"
+                    className="w-4 h-4 rounded border-2 border-white/20 bg-white/10 text-amber-500 focus:ring-amber-500/30 focus:ring-2"
                   />
                   <span className="text-sm">{label}</span>
                 </label>
@@ -829,7 +829,7 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
               value={customClauses}
               onChange={(e) => setCustomClauses(e.target.value)}
               placeholder="Add any custom terms or conditions..."
-              className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-blue-500 focus:outline-none resize-none"
+              className="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-amber-500 focus:outline-none resize-none"
               rows={4}
             />
           </div>
@@ -921,7 +921,7 @@ const TenantDetailModal = ({ isOpen, onClose, tenant, initialTab = 'profile' }) 
         <div className="p-6 border-b border-white/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl">
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white font-bold text-xl">
                 {tenant.name.split(' ').map(n => n[0]).join('')}
               </div>
               <div>
@@ -954,7 +954,7 @@ const TenantDetailModal = ({ isOpen, onClose, tenant, initialTab = 'profile' }) 
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveTab(key)}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${activeTab === key
-                  ? 'bg-blue-500 text-white shadow-lg'
+                  ? 'bg-amber-500 text-white shadow-lg'
                   : 'text-white/70 hover:text-white hover:bg-white/10'
                   }`}
               >
@@ -1037,7 +1037,7 @@ const TenantDetailModal = ({ isOpen, onClose, tenant, initialTab = 'profile' }) 
                         <div className="text-white/60 text-sm">{visit.property}</div>
                       </div>
                       <span className={`px-2 py-1 rounded-full text-xs ${visit.status === 'completed' ? 'bg-green-500/20 text-green-300' :
-                        visit.status === 'scheduled' ? 'bg-blue-500/20 text-blue-300' :
+                        visit.status === 'scheduled' ? 'bg-amber-500/20 text-amber-300' :
                           'bg-yellow-500/20 text-yellow-300'
                         }`}>
                         {visit.status}
@@ -1099,7 +1099,7 @@ const TenantDetailModal = ({ isOpen, onClose, tenant, initialTab = 'profile' }) 
                 {messages.map((msg, index) => (
                   <div key={index} className={`flex ${msg.sender === 'You' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-xs p-3 rounded-lg ${msg.sender === 'You'
-                      ? 'bg-blue-500 text-white'
+                      ? 'bg-amber-500 text-white'
                       : 'bg-white/10 text-white'
                       }`}>
                       <div className="text-sm">{msg.message}</div>
@@ -1117,12 +1117,12 @@ const TenantDetailModal = ({ isOpen, onClose, tenant, initialTab = 'profile' }) 
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={handleKeyPress}
-                  className="flex-1 p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-blue-500 focus:outline-none"
+                  className="flex-1 p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:border-amber-500 focus:outline-none"
                 />
                 <button 
                   onClick={handleSendMessage}
                   disabled={!newMessage.trim()}
-                  className="px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  className="px-4 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                   <Send className="w-4 h-4" />
                 </button>
               </div>
@@ -1148,7 +1148,7 @@ const NotificationToast = ({ notifications, onRemove }) => {
             className={`p-4 rounded-lg shadow-lg backdrop-blur-xl border max-w-sm ${notification.type === 'success' ? 'bg-green-500/20 border-green-500/30 text-green-300' :
               notification.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-300' :
                 notification.type === 'warning' ? 'bg-yellow-500/20 border-yellow-500/30 text-yellow-300' :
-                  'bg-blue-500/20 border-blue-500/30 text-blue-300'
+                  'bg-amber-500/20 border-amber-500/30 text-amber-300'
               }`}
           >
             <div className="flex items-start space-x-3">
@@ -1465,20 +1465,20 @@ const LandlordTenant = () => {
 
   return (
     <div className={`min-h-screen transition-colors duration-500 ${darkMode
-      ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-blue-950 text-slate-100'
-      : 'bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 text-gray-900'
+      ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100'
+      : 'bg-gradient-to-r from-[#fafaf9] via-white to-[#fafaf9] text-gray-900'
       } flex relative overflow-hidden`}>
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
           animate={{ rotate: 360, scale: [1, 1.1, 1] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-3xl"
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-amber-500/10 to-amber-600/10 rounded-full blur-3xl"
         />
         <motion.div
           animate={{ rotate: -360, scale: [1.1, 1, 1.1] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-full blur-3xl"
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-amber-500/10 to-amber-600/10 rounded-full blur-3xl"
         />
       </div>
 
@@ -1497,7 +1497,7 @@ const LandlordTenant = () => {
               className="text-center mb-12"
             >
               <motion.h1
-                className="text-5xl font-bold text-white mb-4 bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent"
+                className="text-5xl font-bold text-white mb-4 bg-gradient-to-r from-white via-amber-200 to-white bg-clip-text text-transparent"
               >
                 Tenant Management
               </motion.h1>
@@ -1516,7 +1516,7 @@ const LandlordTenant = () => {
               <AnimatedCard className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
-                  className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center"
+                  className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center"
                 >
                   <Users className="w-6 h-6 text-white" />
                 </motion.div>
@@ -1538,7 +1538,7 @@ const LandlordTenant = () => {
               <AnimatedCard delay={0.2} className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
-                  className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center"
+                  className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center"
                 >
                   <UserPlus className="w-6 h-6 text-white" />
                 </motion.div>
@@ -1571,7 +1571,7 @@ const LandlordTenant = () => {
               <AnimatedCard delay={0.5} className={`xl:col-span-1 rounded-2xl p-6 text-center ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-800'}`}>
                 <motion.div
                   whileHover={{ scale: 1.05, rotate: 5 }}
-                  className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center"
+                  className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center"
                 >
                   <IndianRupee className="w-6 h-6 text-white" />
                 </motion.div>
@@ -1603,7 +1603,7 @@ const LandlordTenant = () => {
                       placeholder="Search tenants..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className={`pl-10 pr-4 py-3 w-64 rounded-xl focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'}`}
+                      className={`pl-10 pr-4 py-3 w-64 rounded-xl focus:border-amber-500 focus:outline-none transition-colors ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'}`}
                     />
                   </div>
 
@@ -1612,7 +1612,7 @@ const LandlordTenant = () => {
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className={`px-4 py-3 rounded-xl focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+                      className={`px-4 py-3 rounded-xl focus:border-amber-500 focus:outline-none transition-colors ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                     >
                       <option value="All">All Status</option>
                       <option value="Active">Active</option>
@@ -1625,7 +1625,7 @@ const LandlordTenant = () => {
                     <select
                       value={propertyFilter}
                       onChange={(e) => setPropertyFilter(e.target.value)}
-                      className={`px-4 py-3 rounded-xl focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+                      className={`px-4 py-3 rounded-xl focus:border-amber-500 focus:outline-none transition-colors ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                     >
                       <option value="All">All Properties</option>
                       {properties.map((property) => (
@@ -1641,7 +1641,7 @@ const LandlordTenant = () => {
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className={`px-3 py-2 rounded-lg text-sm focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+                      className={`px-3 py-2 rounded-lg text-sm focus:border-amber-500 focus:outline-none transition-colors ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
                     >
                       <option value="name">Name</option>
                       <option value="status">Status</option>
@@ -1673,7 +1673,7 @@ const LandlordTenant = () => {
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full"
+                    className="w-12 h-12 border-4 border-amber-500/30 border-t-blue-500 rounded-full"
                   />
                 </div>
               ) : filteredTenants.length === 0 ? (
