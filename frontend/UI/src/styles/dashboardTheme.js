@@ -117,6 +117,7 @@ export const sidebarMenuColors = {
   maintenance: 'from-amber-400 to-amber-500',
   messages: 'from-amber-500 to-amber-600',
   contracts: 'from-amber-600 to-orange-600',
+  help: 'from-indigo-500 to-violet-600',
 };
 
 /** Standard page wrapper classes for portal pages */

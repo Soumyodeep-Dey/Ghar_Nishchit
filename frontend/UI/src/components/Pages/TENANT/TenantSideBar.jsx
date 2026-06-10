@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Building2, Wallet, Settings, ChevronLeft, Crown, Sparkles, LogOut, MessageSquare, FileText } from 'lucide-react';
+import { Home, Building2, Wallet, Settings, ChevronLeft, Crown, Sparkles, LogOut, MessageSquare, FileText, LifeBuoy } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDarkMode } from '../../../useDarkMode.js';
@@ -31,6 +31,7 @@ const MENU_ITEMS = [
     { id: 'payments', labelKey: 'sidebar.payments', descKey: 'sidebar.descPayments', icon: Wallet, route: '/tenant/payment', badge: null, color: sidebarMenuColors.payments, premium: true },
     { id: 'messages', labelKey: 'sidebar.messages', descKey: 'sidebar.descMessages', icon: MessageSquare, route: '/tenant/messages', badge: 'messages', color: sidebarMenuColors.messages, premium: false },
     { id: 'contracts', labelKey: 'sidebar.contracts', descKey: 'sidebar.descContracts', icon: FileText, route: '/tenant/contracts', badge: null, color: sidebarMenuColors.contracts, premium: false },
+    { id: 'help', labelKey: 'sidebar.help', descKey: 'sidebar.descHelp', icon: LifeBuoy, route: '/tenant/help', badge: null, color: sidebarMenuColors.help, premium: false },
 ];
 
 // Fix 6: Removed onSectionChange prop — it was never passed by any parent. Navigation

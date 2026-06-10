@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Building2, Users, Wallet, Settings, MessageSquare, ChevronLeft, Crown, Sparkles, LogOut } from 'lucide-react';
+import { Home, Building2, Users, Wallet, Settings, MessageSquare, ChevronLeft, Crown, Sparkles, LogOut, LifeBuoy } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDarkMode } from '../../../useDarkMode.js';
@@ -30,6 +30,7 @@ const MENU_ITEMS = [
   { id: 'payments', labelKey: 'sidebar.payments', descKey: 'sidebar.descLandlordPayments', icon: Wallet, route: '/landlord/payment', badge: null, color: sidebarMenuColors.payments, premium: true },
   { id: 'maintenance', labelKey: 'sidebar.maintenance', descKey: 'sidebar.descMaintenance', icon: Settings, route: '/landlord/maintenance', badge: null, color: sidebarMenuColors.maintenance, premium: false },
   { id: 'messages', labelKey: 'sidebar.messages', descKey: 'sidebar.descMessages', icon: MessageSquare, route: '/landlord/messages', badge: null, color: sidebarMenuColors.messages, premium: false },
+  { id: 'help', labelKey: 'sidebar.help', descKey: 'sidebar.descHelp', icon: LifeBuoy, route: '/landlord/help', badge: null, color: sidebarMenuColors.help, premium: false },
 ];
 
 const LandlordSideBar = ({ onSectionChange }) => {

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../../useDarkMode';
 import {
   LayoutDashboard, Users, Home, FileText, Wrench,
-  IndianRupee, Megaphone, Shield, LogOut, Menu, X, AlertTriangle
+  IndianRupee, Megaphone, Shield, LogOut, Menu, X, AlertTriangle, LifeBuoy
 } from 'lucide-react';
 
 import { useAdminData } from './Admin/useAdminData';
@@ -14,6 +14,7 @@ import AdminMaintenance from './Admin/AdminMaintenance';
 import AdminPayments    from './Admin/AdminPayments';
 import AdminContracts   from './Admin/AdminContracts';
 import AdminBroadcast   from './Admin/AdminBroadcast';
+import AdminSupport     from './Admin/AdminSupport';
 import { clearAuthSession } from '../../services/authService.js';
 
 const NAV = [
@@ -24,6 +25,7 @@ const NAV = [
   { id: 'maintenance',  label: 'Maintenance',   icon: Wrench },
   { id: 'payments',     label: 'Payments',      icon: IndianRupee },
   { id: 'broadcast',    label: 'Broadcast',     icon: Megaphone },
+  { id: 'support',      label: 'Help Requests', icon: LifeBuoy },
 ];
 
 export default function AdminDashboard() {
@@ -39,6 +41,8 @@ export default function AdminDashboard() {
     deleteContract,
     updateMaintenanceStatus,
     broadcast,
+    updateSupportStatus,
+    replyToSupport,
   } = useAdminData();
 
   // Guard — only admin can view
@@ -52,9 +56,13 @@ export default function AdminDashboard() {
     navigate('/login');
   };
 
-  const actions = { deleteUser, updateUserStatus, deleteProperty, updateProperty, deleteContract, updateMaintenanceStatus, broadcast };
+  const actions = {
+    deleteUser, updateUserStatus, deleteProperty, updateProperty, deleteContract,
+    updateMaintenanceStatus, broadcast, updateSupportStatus, replyToSupport,
+  };
 
   const slaBreaches = data?.analytics?.slaBreaches || 0;
+  const openSupport = data?.analytics?.openSupportRequests || 0;
 
   const Sidebar = ({ mobile }) => (
     <aside className={`${mobile ? 'w-full' : 'w-60 hidden lg:flex'} flex-col bg-[#1e1b4b] text-white h-full`}>
@@ -73,7 +81,8 @@ export default function AdminDashboard() {
       {/* Nav */}
       <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
         {NAV.map(({ id, label, icon: Icon }) => {
-          const badge = id === 'maintenance' && slaBreaches > 0 ? slaBreaches : null;
+          const badge = id === 'maintenance' && slaBreaches > 0 ? slaBreaches
+            : id === 'support' && openSupport > 0 ? openSupport : null;
           return (
             <button
               key={id}
@@ -153,6 +162,7 @@ export default function AdminDashboard() {
               {activeTab === 'maintenance' && <AdminMaintenance maintenance={data?.maintenance} analytics={data?.analytics} actions={actions} />}
               {activeTab === 'payments'    && <AdminPayments   payments={data?.payments}      analytics={data?.analytics} />}
               {activeTab === 'broadcast'   && <AdminBroadcast  inquiries={data?.inquiries}    broadcast={broadcast} />}
+              {activeTab === 'support'     && <AdminSupport    supportRequests={data?.supportRequests} actions={actions} />}
             </>
           )}
         </main>

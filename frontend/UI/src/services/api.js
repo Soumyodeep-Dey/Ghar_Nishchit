@@ -226,6 +226,16 @@ const api = {
     deleteMessage:        (id, messageId) => request(`/inquiries/${id}/messages/${messageId}`, { method: 'DELETE' }),
     deleteInquiry:        (id)    => request(`/inquiries/${id}`, { method: 'DELETE' }),
 
+    // -------------------------------------------------------------------------
+    // Help / Support (user → admin)
+    // -------------------------------------------------------------------------
+    createSupportRequest:   (data) => request('/support', { method: 'POST', body: JSON.stringify(data) }),
+    getMySupportRequests: ()     => request('/support/mine', { method: 'GET' }),
+    getSupportRequest:    (id)   => request(`/support/${id}`, { method: 'GET' }),
+    replyToSupportRequest:(id, content) => request(`/support/${id}/reply`, {
+        method: 'POST',
+        body: JSON.stringify({ content }),
+    }),
 
     // -------------------------------------------------------------------------
     // Notifications
