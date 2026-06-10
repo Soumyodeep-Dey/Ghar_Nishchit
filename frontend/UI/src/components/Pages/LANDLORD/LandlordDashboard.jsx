@@ -12,6 +12,7 @@ import { useDarkMode } from '../../../useDarkMode.js';
 import api from '../../../services/api.js';
 import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import { getDashboardTheme, dotPatternStyle } from '../../../styles/dashboardTheme.js';
+import { getStoredUser } from '../../../services/authService.js';
 
 // Simplified Animated Card Wrapper (no framer-motion)
 const AnimatedCard = React.memo(({ children, className = '', ...props }) => {
@@ -84,6 +85,7 @@ const LandlordDashboard = () => {
   });
   // Monthly revenue from active lease contracts (via /tenants/stats)
   const [monthlyRevenue, setMonthlyRevenue] = useState(null);
+  const [profile, setProfile] = useState(() => getStoredUser());
 
   const updateSection = useCallback((path) => {
     if (path === '/landlord' || path === '/landlord/') {
@@ -158,10 +160,11 @@ const LandlordDashboard = () => {
         let profile = null;
         try {
           profile = await api.getProfile();
+          if (mounted && profile) setProfile(profile);
         } catch {
           // not authenticated or endpoint failed
         }
-        
+
         const userId = profile?._id || profile?.id || profile?.userId;
         let remote = [];
 
@@ -268,7 +271,7 @@ const LandlordDashboard = () => {
             {/* Header Section - simplified */}
             <div className="text-center mb-12">
               <h1 className={`text-4xl md:text-5xl font-black tracking-tighter mb-4 ${themeConfig.headerTitle}`}>
-                {t('landlord.welcomeBackLandlord')}
+                {t('tenant.welcomeBack')}{profile?.name ? `, ${profile.name.split(' ')[0]}` : ''}!
               </h1>
               <div className="w-24 h-1.5 bg-amber-500 mx-auto rounded-full mb-4" />
               <p className={`text-lg ${themeConfig.textSecondary} max-w-2xl mx-auto leading-relaxed font-medium`}>
