@@ -1,5 +1,6 @@
 import { Suspense, lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -44,9 +45,20 @@ const AppLoader = () => (
   </div>
 );
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 10000, // 10 seconds cache validity
+      refetchOnWindowFocus: false, // Prevents tab-switch fetching storms
+      retry: 1
+    }
+  }
+});
+
 export default function App() {
   return (
-    <DarkModeProvider>
+    <QueryClientProvider client={queryClient}>
+      <DarkModeProvider>
       <LanguageProvider>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
         <ToastContainer
@@ -208,6 +220,7 @@ export default function App() {
         <Chatbot />
       </div>
       </LanguageProvider>
-    </DarkModeProvider>
+      </DarkModeProvider>
+    </QueryClientProvider>
   );
 }

@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Visit from '../models/visit.model.js';
 import Property from '../models/property.model.js';
 import User from '../models/user.model.js';
@@ -36,18 +37,44 @@ const syncVisitToNeon = async (v) => {
 
 export const scheduleVisit = async (req, res) => {
     try {
-        const { tenantId, date, time, property, type, notes } = req.body;
-        const landlordId = req.user.id || req.user._id || req.user.userId;
+        const { tenantId: bodyTenantId, date, time, property, type, notes } = req.body;
+        const loggedInUserId = req.user.id || req.user._id || req.user.userId;
 
-        if (!tenantId || !date || !time || !property) {
+        if (!date || !time || !property) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 
-        // Find property by title and landlordId since frontend sends title
-        let propertyId = property;
-        const propDoc = await Property.findOne({ title: property, postedBy: landlordId });
-        if (propDoc) {
-            propertyId = propDoc._id;
+        // Try to find the property first
+        let propertyDoc = null;
+        if (mongoose.Types.ObjectId.isValid(property)) {
+            propertyDoc = await Property.findById(property);
+        }
+        if (!propertyDoc) {
+            propertyDoc = await Property.findOne({ title: property });
+        }
+
+        if (!propertyDoc) {
+            return res.status(404).json({ message: 'Property not found' });
+        }
+
+        const propertyId = propertyDoc._id;
+        const propertyLandlordId = propertyDoc.postedBy;
+
+        let tenantId = bodyTenantId;
+        let landlordId = propertyLandlordId;
+
+        // If the logged in user is the landlord, then they specify the tenantId in body
+        if (loggedInUserId.toString() === propertyLandlordId.toString()) {
+            tenantId = bodyTenantId;
+            landlordId = loggedInUserId;
+        } else {
+            // Otherwise, the logged in user is the tenant
+            tenantId = loggedInUserId;
+            landlordId = propertyLandlordId;
+        }
+
+        if (!tenantId) {
+            return res.status(400).json({ message: 'Tenant ID is required' });
         }
 
         const visit = new Visit({

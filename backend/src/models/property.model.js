@@ -33,7 +33,9 @@ const propertySchema = new mongoose.Schema({
   policies: {
     petFriendly: { type: Boolean, default: false },
     smokingAllowed: { type: Boolean, default: false },
-    furnished: { type: Boolean, default: false }
+    furnished: { type: Boolean, default: false },
+    sublettingAllowed: { type: Boolean, default: false },
+    earlyTermination: { type: Boolean, default: false }
   },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }

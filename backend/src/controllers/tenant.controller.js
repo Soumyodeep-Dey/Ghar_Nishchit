@@ -5,6 +5,7 @@ import Contract from '../models/contract.model.js';
 import Visit from '../models/visit.model.js';
 import Payment from '../models/payment.model.js';
 import mongoose from 'mongoose';
+import { filterLandlordPayments } from './payment.controller.js';
 
 // Helper to resolve user id
 const resolveUserId = (user) => {
@@ -288,11 +289,12 @@ export const getTenantStats = async (req, res) => {
 
         let collectedThisMonth = 0;
         if (paidQuery.$or.length > 0) {
-            const paidThisMonth = await Payment.find(paidQuery).select('amount').lean();
+            const rawPaidThisMonth = await Payment.find(paidQuery).lean();
+            const paidThisMonth = await filterLandlordPayments(rawPaidThisMonth, authUserId, propertyIds);
             collectedThisMonth = paidThisMonth.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
         }
 
-        const monthlyRevenue = contractMonthlyRevenue + collectedThisMonth;
+        const monthlyRevenue = contractMonthlyRevenue;
 
         const stats = {
             totalProperties:  myProperties.length,
