@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useDarkMode } from '../../../useDarkMode.js';
 import { showConfirmToast } from '../../../utils/toast.jsx';
 import { useLanguage } from '../../../i18n/LanguageContext.jsx';
+import { getDashboardTheme, sidebarMenuColors } from '../../../styles/dashboardTheme.js';
 
 // Constants
 const SIDEBAR_WIDTHS = { collapsed: '4.5rem', expanded: '24rem' };
@@ -23,12 +24,12 @@ const DEFAULT_STATS = {
 // Menu configuration
 // Fix 2: Messages route is now uncommented and active.
 const MENU_ITEMS = [
-    { id: 'dashboard', labelKey: 'sidebar.dashboard', descKey: 'sidebar.descDashboard', icon: Home, route: '/tenant', badge: null, color: 'from-sky-400 via-sky-500 to-blue-500', premium: true },
-    { id: 'properties', labelKey: 'sidebar.properties', descKey: 'sidebar.descProperties', icon: Building2, route: '/tenant/properties', badge: null, color: 'from-emerald-400 via-emerald-500 to-green-500', premium: true },
-    { id: 'maintenance', labelKey: 'sidebar.maintenance', descKey: 'sidebar.descMaintenance', icon: Settings, route: '/tenant/maintenance', badge: 'maintenance', color: 'from-rose-400 via-pink-400 to-pink-500', premium: false },
-    { id: 'payments', labelKey: 'sidebar.payments', descKey: 'sidebar.descPayments', icon: Wallet, route: '/tenant/payment', badge: null, color: 'from-indigo-400 via-indigo-500 to-purple-500', premium: true },
-    { id: 'messages', labelKey: 'sidebar.messages', descKey: 'sidebar.descMessages', icon: MessageSquare, route: '/tenant/messages', badge: 'messages', color: 'from-violet-400 via-purple-400 to-purple-500', premium: false },
-    { id: 'contracts', labelKey: 'sidebar.contracts', descKey: 'sidebar.descContracts', icon: FileText, route: '/tenant/contracts', badge: null, color: 'from-teal-400 via-cyan-400 to-cyan-500', premium: false },
+    { id: 'dashboard', labelKey: 'sidebar.dashboard', descKey: 'sidebar.descDashboard', icon: Home, route: '/tenant', badge: null, color: sidebarMenuColors.dashboard, premium: true },
+    { id: 'properties', labelKey: 'sidebar.properties', descKey: 'sidebar.descProperties', icon: Building2, route: '/tenant/properties', badge: null, color: sidebarMenuColors.properties, premium: true },
+    { id: 'maintenance', labelKey: 'sidebar.maintenance', descKey: 'sidebar.descMaintenance', icon: Settings, route: '/tenant/maintenance', badge: 'maintenance', color: sidebarMenuColors.maintenance, premium: false },
+    { id: 'payments', labelKey: 'sidebar.payments', descKey: 'sidebar.descPayments', icon: Wallet, route: '/tenant/payment', badge: null, color: sidebarMenuColors.payments, premium: true },
+    { id: 'messages', labelKey: 'sidebar.messages', descKey: 'sidebar.descMessages', icon: MessageSquare, route: '/tenant/messages', badge: 'messages', color: sidebarMenuColors.messages, premium: false },
+    { id: 'contracts', labelKey: 'sidebar.contracts', descKey: 'sidebar.descContracts', icon: FileText, route: '/tenant/contracts', badge: null, color: sidebarMenuColors.contracts, premium: false },
 ];
 
 // Fix 6: Removed onSectionChange prop — it was never passed by any parent. Navigation
@@ -140,34 +141,19 @@ const TenantSideBar = ({ userStats = DEFAULT_STATS }) => {
         );
     };
 
-    // Fix 1: themeClasses is now declared BEFORE SidebarHeader so the sub-component
-    // can safely reference it without a ReferenceError.
-    const themeClasses = isDark ? {
-        shellBg: 'from-gray-900/95 via-slate-900/95 to-gray-900/95',
-        border: 'border-slate-800/60',
-        overlay: 'bg-slate-900/40',
-        sectionCard: 'from-gray-800/70 to-slate-800/70',
-        textPrimary: 'text-slate-100',
-        textSecondary: 'text-slate-300',
-        textMuted: 'text-slate-400',
-        buttonIdle: 'bg-slate-800/70 hover:bg-slate-700/60',
-        menuIdle: 'hover:bg-slate-800/70 hover:border-slate-700/60',
-        tooltipBg: 'bg-slate-900/95',
-        tooltipBorder: 'border-slate-700/60',
-        footerText: 'text-slate-400',
-    } : {
-        shellBg: 'from-slate-50/95 via-indigo-50/95 to-slate-50/95',
-        border: 'border-slate-200/60',
-        overlay: 'bg-slate-900/30',
-        sectionCard: 'from-white/60 to-slate-50/60',
-        textPrimary: 'text-slate-700',
-        textSecondary: 'text-slate-600',
-        textMuted: 'text-slate-500',
-        buttonIdle: 'bg-slate-100/80 hover:bg-slate-200/80',
-        menuIdle: 'hover:bg-slate-100/80 hover:border-slate-200/60',
-        tooltipBg: 'bg-white/95',
-        tooltipBorder: 'border-slate-200/60',
-        footerText: 'text-slate-400',
+    const portalTheme = getDashboardTheme(isDark);
+    const themeClasses = {
+        shellBg: portalTheme.shellBg,
+        border: portalTheme.shellBorder,
+        overlay: isDark ? 'bg-slate-900/40' : 'bg-slate-900/30',
+        textPrimary: portalTheme.textPrimary,
+        textSecondary: portalTheme.textSecondary,
+        textMuted: isDark ? 'text-slate-500' : 'text-slate-400',
+        buttonIdle: isDark ? 'bg-slate-800/70 hover:bg-slate-700/60' : 'bg-white hover:bg-amber-50',
+        menuIdle: portalTheme.menuIdle,
+        tooltipBg: isDark ? 'bg-slate-900/95' : 'bg-white/95',
+        tooltipBorder: isDark ? 'border-slate-800' : 'border-amber-100',
+        footerText: portalTheme.textSecondary,
     };
 
     // SidebarHeader defined AFTER themeClasses — safe to reference it now (Fix 1).
@@ -189,21 +175,21 @@ const TenantSideBar = ({ userStats = DEFAULT_STATS }) => {
                         transition={{ duration: 0.4 }}
                         className="relative"
                     >
-                        <div className="w-14 h-14 rounded-3xl bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-500 flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:shadow-blue-500/20 transition-all duration-300">
+                        <div className="w-14 h-14 rounded-[14px] bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-[0_8px_20px_rgba(217,119,6,0.3)] group-hover:shadow-xl group-hover:shadow-amber-500/20 transition-all duration-300">
                             <Building2 className="w-8 h-8 text-white group-hover:scale-105 transition-transform duration-300" />
                         </div>
-                        <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-500 opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300 -z-10" />
+                        <div className="absolute inset-0 rounded-[14px] bg-gradient-to-br from-amber-400 to-amber-600 opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-300 -z-10" />
                     </motion.div>
                     {!isCollapsed && (
                         <div className="flex flex-col">
                             <h1
-                                className={`text-2xl font-bold ${isDark ? 'text-slate-200' : 'text-slate-700'} transition-colors duration-300`}
+                                className={`text-2xl font-black tracking-tighter ${isDark ? 'text-white' : 'text-slate-900'} transition-colors duration-300`}
                             >
                                 {t('common.brandName')}
                             </h1>
                             <div className="flex items-center space-x-2">
                                 <Crown className="w-3 h-3 text-amber-500" />
-                                <span className={`text-sm ${themeClasses.textSecondary} font-medium transition-colors duration-300`}>{t('common.tenantPortal')}</span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-amber-600">{t('common.tenantPortal')}</span>
                             </div>
                         </div>
                     )}
@@ -224,7 +210,7 @@ const TenantSideBar = ({ userStats = DEFAULT_STATS }) => {
                         transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
                         className="group-hover:scale-110 transition-transform duration-300"
                     >
-                        <ChevronLeft className={`w-5 h-5 ${themeClasses.textSecondary} group-hover:text-blue-500 transition-colors duration-300`} />
+                        <ChevronLeft className={`w-5 h-5 ${themeClasses.textSecondary} group-hover:text-amber-500 transition-colors duration-300`} />
                     </motion.div>
                 </motion.button>
             </div>
@@ -276,18 +262,10 @@ const TenantSideBar = ({ userStats = DEFAULT_STATS }) => {
                 className={`fixed left-0 top-0 h-screen bg-gradient-to-br ${themeClasses.shellBg} backdrop-blur-3xl border-r ${themeClasses.border} shadow-2xl z-40 flex flex-col transition-all duration-700`}
                 style={{ width: sidebarWidth, height: '100vh', maxHeight: '100vh', overflow: 'hidden', '--sidebar-width': sidebarWidth }}
             >
-                {/* Soft background particles */}
+                {/* Soft background glow */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <motion.div
-                        animate={{ scale: [1, 1.2, 1], rotate: [0, 360], x: [-30, 30, -30], y: [-30, 30, -30] }}
-                        transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-                        className={`absolute -top-32 -left-32 w-64 h-64 ${isDark ? 'bg-gradient-radial from-blue-500/10 via-cyan-400/5 to-transparent' : 'bg-gradient-radial from-blue-200/20 via-cyan-200/10 to-transparent'} rounded-full blur-2xl`}
-                    />
-                    <motion.div
-                        animate={{ scale: [1.2, 1, 1.2], rotate: [360, 0], x: [30, -30, 30], y: [30, -30, 30] }}
-                        transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
-                        className={`absolute -bottom-32 -right-32 w-64 h-64 ${isDark ? 'bg-gradient-radial from-emerald-500/10 via-green-400/5 to-transparent' : 'bg-gradient-radial from-emerald-200/20 via-green-200/10 to-transparent'} rounded-full blur-2xl`}
-                    />
+                    <div className={`absolute -top-32 -left-32 w-64 h-64 ${isDark ? 'bg-amber-500/5' : 'bg-amber-200/15'} rounded-full blur-3xl`} />
+                    <div className={`absolute -bottom-32 -right-32 w-64 h-64 ${isDark ? 'bg-amber-600/5' : 'bg-amber-100/20'} rounded-full blur-3xl`} />
                 </div>
 
                 <SidebarHeader />
@@ -329,7 +307,7 @@ const TenantSideBar = ({ userStats = DEFAULT_STATS }) => {
                                         )}
 
                                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 ${isItemActive(item) ? 'bg-white/20 group-hover:bg-white/30' : 'bg-slate-100/80 group-hover:bg-slate-200/90'}`}>
-                                            <item.icon className={`w-6 h-6 transition-all duration-300 group-hover:scale-110 ${isItemActive(item) ? 'text-white group-hover:text-white/90' : `${themeClasses.textPrimary} group-hover:text-blue-500`}`} />
+                                            <item.icon className={`w-6 h-6 transition-all duration-300 group-hover:scale-110 ${isItemActive(item) ? 'text-white group-hover:text-white/90' : `${themeClasses.textPrimary} group-hover:text-amber-500`}`} />
                                             {item.premium && (
                                                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full flex items-center justify-center group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">
                                                     <Sparkles className="w-2 h-2 text-white group-hover:animate-pulse" />
@@ -346,7 +324,7 @@ const TenantSideBar = ({ userStats = DEFAULT_STATS }) => {
                                                     transition={{ duration: 0.3 }}
                                                     className="flex-1 ml-4 text-left"
                                                 >
-                                                    <div className={`font-bold text-lg transition-all duration-300 group-hover:translate-x-1 ${isItemActive(item) ? 'text-white group-hover:text-white/90' : `${themeClasses.textPrimary} group-hover:text-blue-500`}`}>
+                                                    <div className={`font-black text-lg transition-all duration-300 group-hover:translate-x-1 ${isItemActive(item) ? 'text-white group-hover:text-white/90' : `${themeClasses.textPrimary} group-hover:text-amber-600`}`}>
                                                         {t(item.labelKey)}
                                                     </div>
                                                     <div className={`text-sm transition-all duration-300 group-hover:translate-x-1 ${isItemActive(item) ? 'text-white/80 group-hover:text-white/70' : `${themeClasses.textMuted} group-hover:text-slate-600`}`}>

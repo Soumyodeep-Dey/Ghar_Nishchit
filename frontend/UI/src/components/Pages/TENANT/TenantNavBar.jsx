@@ -6,6 +6,7 @@ import api from '../../../services/api.js';
 import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import LanguageDialog from '../../LanguageDialog.jsx';
 import { showConfirmToast } from '../../../utils/toast.jsx';
+import { getDashboardTheme } from '../../../styles/dashboardTheme.js';
 
 // Safe user reader — returns null if localStorage is missing or malformed.
 const readUserFromStorage = () => {
@@ -194,22 +195,23 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
   };
 
   const CurrentSectionIcon = getCurrentSectionIcon();
+  const theme = getDashboardTheme(isDarkMode);
   if (!user) return null;
 
   return (
-    <nav className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
+    <nav className={`sticky top-0 z-50 backdrop-blur-xl border-b transition-colors duration-500 ${theme.navbar}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
           {/* Current Section Display */}
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-500 rounded-lg">
+              <div className={`p-2 rounded-[14px] shadow-[0_8px_20px_rgba(217,119,6,0.25)] ${theme.avatar}`}>
                 <CurrentSectionIcon className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">{t(`sections.${currentSection}`)}</h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <h1 className={`text-xl font-black tracking-tight ${theme.textPrimary}`}>{t(`sections.${currentSection}`)}</h1>
+                <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${theme.textSecondary}`}>
                   {t(SECTION_SUBTITLE_KEYS[currentSection] || 'sections.overviewAnalytics')}
                 </p>
               </div>
@@ -230,7 +232,7 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
                 placeholder={t('common.searchProperties')}
-                className="w-full pl-11 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                className={`w-full pl-11 pr-4 py-2.5 border-2 rounded-2xl focus:outline-none transition-all font-medium ${theme.searchBg} ${theme.searchFocus} ${theme.textPrimary} placeholder-slate-400`}
               />
               {searchQuery && (
                 <button
@@ -241,12 +243,12 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
                 </button>
               )}
               {isSearchFocused && filteredSuggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                <div className={`absolute top-full left-0 right-0 mt-2 rounded-2xl shadow-xl border z-50 ${theme.dropdown}`}>
                   {filteredSuggestions.map((suggestion, index) => (
                     <button
                       key={index}
                       onClick={() => handleSuggestionClick(suggestion)}
-                      className="w-full px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm flex items-center justify-between"
+                      className={`w-full px-4 py-3 text-left text-sm font-medium flex items-center justify-between ${theme.textPrimary} ${theme.dropdownHover}`}
                     >
                       <span>{t(suggestion.labelKey)}</span>
                       <span className="text-xs text-gray-400 dark:text-gray-500">{t('common.go')}</span>
@@ -267,28 +269,28 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
                   setIsNotificationsOpen(prev => !prev);
                   if (!isNotificationsOpen) fetchNotifications();
                 }}
-                className="relative p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                className={`relative p-2.5 rounded-full transition-all ${isDarkMode ? 'text-slate-400 hover:text-amber-400 hover:bg-slate-800' : 'text-slate-600 hover:text-amber-600 hover:bg-amber-50'}`}
                 aria-label="Notifications"
               >
                 <Bell className="h-5 w-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-semibold">
+                  <span className="absolute -top-1 -right-1 h-5 w-5 bg-amber-500 text-slate-950 text-xs rounded-full flex items-center justify-center font-black">
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
               </button>
 
               {isNotificationsOpen && (
-                <div className="absolute right-0 mt-3 w-96 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                <div className={`absolute right-0 mt-3 w-96 rounded-2xl shadow-2xl border z-50 ${theme.dropdown}`}>
 
                   {/* Header */}
-                  <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">{t('common.notifications')}</h3>
+                  <div className={`p-4 border-b flex items-center justify-between ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
+                    <h3 className={`font-black ${theme.textPrimary}`}>{t('common.notifications')}</h3>
                     <div className="flex items-center gap-3">
                       {unreadCount > 0 && (
                         <button
                           onClick={markAllAsRead}
-                          className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
+                          className="text-sm text-amber-600 dark:text-amber-400 hover:text-amber-500 font-black uppercase tracking-widest"
                         >
                           {t('common.markAllRead')}
                         </button>
@@ -320,17 +322,15 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
                       notifications.map((notification) => {
                         const IconComponent = notification.icon;
                         const colorClasses = {
-                          success: 'text-green-600 bg-green-100 dark:bg-green-900/30',
-                          warning: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30',
-                          primary: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30',
+                          success: 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30',
+                          warning: 'text-amber-600 bg-amber-100 dark:bg-amber-900/30',
+                          primary: 'text-amber-600 bg-amber-100 dark:bg-amber-900/30',
                         };
                         return (
                           <div
                             key={notification.id}
-                            className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer border-l-4 ${
-                              notification.isRead
-                                ? 'border-transparent'
-                                : 'border-blue-500 bg-blue-50/30 dark:bg-blue-900/10'
+                            className={`p-4 cursor-pointer border-l-4 ${theme.dropdownHover} ${
+                              notification.isRead ? 'border-transparent' : theme.unreadBorder
                             }`}
                             onClick={() => markAsRead(notification)}
                           >
@@ -339,8 +339,8 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
                                 <IconComponent className="h-4 w-4" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className={`font-medium truncate ${
-                                  notification.isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'
+                                <p className={`font-bold truncate ${
+                                  notification.isRead ? theme.textSecondary : theme.textPrimary
                                 }`}>
                                   {notification.title}
                                 </p>
@@ -350,7 +350,7 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
                                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">{notification.time}</p>
                               </div>
                               {!notification.isRead && (
-                                <div className="h-2 w-2 bg-blue-600 rounded-full flex-shrink-0 mt-1" />
+                                <div className={`h-2 w-2 rounded-full flex-shrink-0 mt-1 ${theme.unreadDot}`} />
                               )}
                             </div>
                           </div>
@@ -366,7 +366,7 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
             {/* Theme Toggle */}
             <button
               onClick={toggleDarkMode}
-              className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+              className={`p-2.5 rounded-full transition-all shadow-md active:scale-90 ${isDarkMode ? 'bg-slate-800 text-amber-400 hover:bg-slate-700' : 'bg-amber-50 text-amber-600 hover:bg-amber-100 border border-amber-200'}`}
               aria-label="Toggle theme"
             >
               {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
@@ -376,28 +376,28 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
             <div className="relative" ref={profileDropdownRef}>
               <button
                 onClick={() => setIsProfileDropdownOpen(prev => !prev)}
-                className="flex items-center space-x-3 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                className={`flex items-center space-x-3 p-2 rounded-2xl transition-all ${theme.dropdownHover}`}
               >
-                <div className="h-8 w-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                <div className={`h-8 w-8 rounded-xl flex items-center justify-center shadow-md ${theme.avatar}`}>
                   <User className="h-4 w-4 text-white" />
                 </div>
                 <div className="hidden md:block text-left">
-                  <p className="font-semibold text-gray-900 dark:text-white">{user.name}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
+                  <p className={`font-black text-sm ${theme.textPrimary}`}>{user.name}</p>
+                  <p className={`text-xs ${theme.textSecondary}`}>{user.email}</p>
                 </div>
-                <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`h-4 w-4 ${theme.textSecondary} transition-transform duration-200 ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {isProfileDropdownOpen && (
-                <div className="absolute right-0 mt-3 w-64 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
-                  <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                <div className={`absolute right-0 mt-3 w-64 rounded-2xl shadow-2xl border z-50 ${theme.dropdown}`}>
+                  <div className={`p-4 border-b ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
                     <div className="flex items-center space-x-3">
-                      <div className="h-12 w-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                      <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shadow-lg ${theme.avatar}`}>
                         <User className="h-6 w-6 text-white" />
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-900 dark:text-white">{user.name}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
+                        <p className={`font-black ${theme.textPrimary}`}>{user.name}</p>
+                        <p className={`text-sm ${theme.textSecondary}`}>{user.email}</p>
                       </div>
                     </div>
                   </div>
@@ -405,30 +405,30 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
                   <div className="p-2">
                     <Link
                       to="/tenant/profile"
-                      className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                      className={`w-full flex items-center space-x-3 px-4 py-3 text-left rounded-xl transition-all ${theme.textPrimary} ${theme.dropdownHover}`}
                       onClick={() => setIsProfileDropdownOpen(false)}
                     >
-                      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                        <Settings className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                        <Settings className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                       </div>
-                      <span className="font-medium">{t('common.updateProfile')}</span>
+                      <span className="font-bold">{t('common.updateProfile')}</span>
                     </Link>
 
                     <button
                       onClick={handleLanguages}
-                      className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                      className={`w-full flex items-center space-x-3 px-4 py-3 text-left rounded-xl transition-all ${theme.textPrimary} ${theme.dropdownHover}`}
                     >
-                      <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
-                        <Languages className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                      <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                        <Languages className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                       </div>
-                      <span className="font-medium">{t('common.languages')}</span>
+                      <span className="font-bold">{t('common.languages')}</span>
                     </button>
 
-                    <hr className="my-2 border-gray-200 dark:border-gray-700" />
+                    <hr className={`my-2 ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`} />
 
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center space-x-3 px-4 py-3 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+                      className="w-full flex items-center space-x-3 px-4 py-3 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl"
                     >
                       <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
                         <LogOut className="h-4 w-4" />
@@ -454,7 +454,7 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search..."
-            className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+            className={`w-full pl-10 pr-4 py-2.5 border-2 rounded-2xl focus:outline-none transition-all font-medium ${theme.searchBg} ${theme.searchFocus} ${theme.textPrimary} placeholder-slate-400`}
           />
           {searchQuery && (
             <button

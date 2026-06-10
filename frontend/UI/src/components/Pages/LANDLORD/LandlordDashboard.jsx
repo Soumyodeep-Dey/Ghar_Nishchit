@@ -11,6 +11,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../../../useDarkMode.js';
 import api from '../../../services/api.js';
 import { useLanguage } from '../../../i18n/LanguageContext.jsx';
+import { getDashboardTheme, dotPatternStyle } from '../../../styles/dashboardTheme.js';
 
 // Simplified Animated Card Wrapper (no framer-motion)
 const AnimatedCard = React.memo(({ children, className = '', ...props }) => {
@@ -21,12 +22,12 @@ const AnimatedCard = React.memo(({ children, className = '', ...props }) => {
   );
 });
 
-// Enhanced Floating Particles - Smaller Size (converted to regular div without animation)
+// Enhanced Floating Particles - amber accent
 const FloatingParticle = React.memo(({ delay = 0, index = 0, isDark = true }) => (
   <div
     className={`absolute w-0.5 h-0.5 ${isDark
-      ? 'bg-gradient-to-r from-cyan-400 to-indigo-500'
-      : 'bg-gradient-to-r from-indigo-400 to-purple-500'
+      ? 'bg-gradient-to-r from-amber-400 to-amber-600'
+      : 'bg-gradient-to-r from-amber-400 to-amber-500'
       } rounded-full opacity-60`}
     style={{
       left: `${20 + (index * 15) % 60}%`,
@@ -36,50 +37,26 @@ const FloatingParticle = React.memo(({ delay = 0, index = 0, isDark = true }) =>
   />
 ));
 
-// Lightweight StatCard (no framer-motion)
 const StatCard = React.memo(({ icon: Icon, title, value, change, trend, color, prefix = '', suffix = '', isDark = true }) => {
   const TrendIcon = trend === 'up' ? TrendingUp : TrendingDown;
-
-  const themeStyles = isDark
-    ? {
-      cardBg: 'bg-slate-800/80',
-      cardBorder: 'border-slate-700/50',
-      iconBg: 'from-cyan-500/20 to-indigo-500/20',
-      iconBorder: 'border-cyan-400/30',
-      iconColor: 'text-cyan-300',
-      textPrimary: 'text-slate-100',
-      textSecondary: 'text-slate-300',
-      trendUp: 'bg-cyan-400/20 text-cyan-300 border-cyan-400/40',
-      trendDown: 'bg-pink-400/20 text-pink-300 border-pink-400/40'
-    }
-    : {
-      cardBg: 'bg-white/80',
-      cardBorder: 'border-indigo-200/50',
-      iconBg: 'from-indigo-100/80 to-purple-100/80',
-      iconBorder: 'border-indigo-300/50',
-      iconColor: 'text-indigo-700',
-      textPrimary: 'text-gray-900',
-      textSecondary: 'text-indigo-600',
-      trendUp: 'bg-indigo-100/60 text-indigo-700 border-indigo-300/60',
-      trendDown: 'bg-pink-100/60 text-pink-700 border-pink-300/60'
-    };
+  const th = getDashboardTheme(isDark).statCard;
 
   return (
-    <div className={`group relative overflow-hidden ${themeStyles.cardBg} border ${themeStyles.cardBorder} rounded-2xl p-5 shadow-sm ${color}`}>
+    <div className={`group relative overflow-hidden ${th.cardBg} border ${th.cardBorder} rounded-3xl p-6 shadow-[0_10px_40px_rgba(0,0,0,0.04)] transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 ${color}`}>
       <div className="relative z-20">
         <div className="flex items-center justify-between mb-4">
-          <div className={`p-3 rounded-xl bg-gradient-to-br ${themeStyles.iconBg} backdrop-blur-sm border ${themeStyles.iconBorder}`}>
-            {Icon && <Icon className={`w-6 h-6 ${themeStyles.iconColor}`} />}
+          <div className={`p-3 rounded-2xl bg-gradient-to-br ${th.iconBg} backdrop-blur-sm border ${th.iconBorder}`}>
+            {Icon && <Icon className={`w-6 h-6 ${th.iconColor}`} />}
           </div>
-          <div className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm border ${trend === 'up' ? themeStyles.trendUp : themeStyles.trendDown}`}>
+          <div className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-widest backdrop-blur-sm border ${trend === 'up' ? th.trendUp : th.trendDown}`}>
             <TrendIcon className="w-3 h-3" />
             <span>{change}</span>
           </div>
         </div>
-        <h3 className={`text-2xl font-bold ${themeStyles.textPrimary} mb-2`}>
+        <h3 className={`text-3xl font-black ${th.textPrimary} mb-2`}>
           {prefix}{parseInt(value).toLocaleString()}{suffix}
         </h3>
-        <p className={`${themeStyles.textSecondary} font-medium text-sm`}>
+        <p className={`${th.textSecondary} font-bold text-xs uppercase tracking-widest`}>
           {title}
         </p>
       </div>
@@ -143,7 +120,7 @@ const LandlordDashboard = () => {
         value: properties.length || 0,
         change: '+0%',
         trend: properties.length > 0 ? 'up' : 'down',
-        color: isDarkMode ? 'from-cyan-500 to-indigo-600' : 'from-indigo-500 to-purple-600'
+        color: isDarkMode ? 'from-amber-500 to-amber-600' : 'from-amber-500 to-amber-600'
       },
       {
         icon: IndianRupee,
@@ -151,7 +128,7 @@ const LandlordDashboard = () => {
         value: revenueValue,
         change: '+0%',
         trend: revenueValue > 0 ? 'up' : 'down',
-        color: isDarkMode ? 'from-indigo-500 to-purple-600' : 'from-purple-500 to-pink-500',
+        color: isDarkMode ? 'from-amber-600 to-orange-600' : 'from-amber-500 to-orange-500',
         prefix: '₹'
       },
       {
@@ -160,7 +137,7 @@ const LandlordDashboard = () => {
         value: tenantStats.activeTenants || 0,
         change: '+0%',
         trend: 'up',
-        color: isDarkMode ? 'from-purple-500 to-pink-600' : 'from-pink-400 to-rose-500'
+        color: isDarkMode ? 'from-amber-500 to-amber-700' : 'from-amber-400 to-amber-600'
       },
       {
         icon: Wrench,
@@ -168,7 +145,7 @@ const LandlordDashboard = () => {
         value: properties.reduce((acc, p) => acc + (p.maintenanceRequests || 0), 0) || 0,
         change: '-0%',
         trend: 'down',
-        color: isDarkMode ? 'from-pink-500 to-rose-600' : 'from-rose-400 to-pink-500'
+        color: isDarkMode ? 'from-slate-700 to-slate-800' : 'from-slate-800 to-slate-900'
       }
     ];
   }, [isDarkMode, properties, tenantStats.activeTenants, monthlyRevenue]);
@@ -233,67 +210,7 @@ const LandlordDashboard = () => {
     return () => { mounted = false; };
   }, []);
 
-  const themeConfig = isDarkMode
-    ? {
-      mainBg: 'from-gray-900 via-slate-800 to-blue-950',
-      loadingBg: 'from-gray-900 via-slate-800 to-blue-950',
-      cardBg: 'bg-slate-800/50',
-      cardBorder: 'border-slate-700/50',
-      textPrimary: 'text-slate-100',
-      textSecondary: 'text-slate-200',
-      textAccent: 'text-cyan-300',
-      headerGradient: 'from-cyan-300 via-purple-300 to-pink-300',
-      tabBg: 'bg-slate-800/50',
-      tabBorder: 'border-slate-700/50',
-      tabActive: 'from-cyan-500 to-indigo-600',
-      tabActiveText: 'text-blue-950',
-      tabInactive: 'text-slate-300 hover:text-slate-100 hover:bg-slate-700/50',
-      buttonPrimary: 'from-cyan-500 to-indigo-600',
-      buttonSecondary: 'from-purple-500 to-pink-600',
-      iconColors: {
-        flame: 'text-pink-400',
-        trend: 'text-cyan-400',
-        building: 'text-cyan-400',
-        wrench: 'text-pink-400'
-      },
-      backgroundParticles: [
-        'from-purple-500/15 to-pink-500/15',
-        'from-cyan-500/15 to-indigo-500/15',
-        'from-indigo-500/10 to-purple-500/10'
-      ],
-      spinnerBorder: 'border-cyan-500/30 border-t-cyan-400',
-      loadingText: 'text-cyan-200'
-    }
-    : {
-      mainBg: 'from-pink-300 via-purple-300 to-indigo-400',
-      loadingBg: 'from-pink-300 via-purple-300 to-indigo-400',
-      cardBg: 'bg-white/60',
-      cardBorder: 'border-indigo-200/50',
-      textPrimary: 'text-gray-900',
-      textSecondary: 'text-indigo-600',
-      textAccent: 'text-indigo-700',
-      headerGradient: 'from-indigo-700 via-purple-700 to-pink-700',
-      tabBg: 'bg-white/30',
-      tabBorder: 'border-indigo-200/50',
-      tabActive: 'from-indigo-600 to-purple-600',
-      tabActiveText: 'text-white',
-      tabInactive: 'text-indigo-600 hover:text-indigo-800 hover:bg-white/40',
-      buttonPrimary: 'from-indigo-600 to-purple-600',
-      buttonSecondary: 'from-purple-600 to-pink-600',
-      iconColors: {
-        flame: 'text-pink-600',
-        trend: 'text-indigo-600',
-        building: 'text-indigo-600',
-        wrench: 'text-pink-600'
-      },
-      backgroundParticles: [
-        'from-purple-300/20 to-pink-300/20',
-        'from-indigo-300/20 to-purple-300/20',
-        'from-pink-300/15 to-indigo-300/15'
-      ],
-      spinnerBorder: 'border-indigo-400/40 border-t-indigo-600',
-      loadingText: 'text-indigo-700'
-    };
+  const themeConfig = getDashboardTheme(isDarkMode);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 800);
@@ -325,18 +242,21 @@ const LandlordDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className={`min-h-screen bg-gradient-to-br ${themeConfig.loadingBg} flex items-center justify-center`}>
-        <div className="text-center">
+      <div className={`min-h-screen bg-gradient-to-br ${themeConfig.loadingBg} flex items-center justify-center relative`}>
+        <div className="absolute inset-0 opacity-[0.3]" style={dotPatternStyle} />
+        <div className="text-center relative z-10">
           <div className={`w-12 h-12 border-4 ${themeConfig.spinnerBorder} rounded-full mx-auto mb-4 animate-spin`} />
-          <h2 className={`text-xl font-bold ${themeConfig.textPrimary} mb-1`}>{t('pages.loadingDashboard')}</h2>
-          <p className={`${themeConfig.loadingText} text-sm`}>Preparing your property insights</p>
+          <h2 className={`text-xl font-black ${themeConfig.textPrimary} mb-1`}>{t('pages.loadingDashboard')}</h2>
+          <p className={`${themeConfig.loadingText} text-sm font-medium`}>Preparing your property insights</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${themeConfig.mainBg} flex relative`}>
+    <div className={`min-h-screen bg-gradient-to-br ${themeConfig.pageBgGradient} flex relative transition-colors duration-500`}>
+      <div className="absolute inset-0 opacity-[0.25] dark:opacity-[0.12] pointer-events-none" style={dotPatternStyle} />
+      <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-amber-400/10 rounded-full blur-[120px] pointer-events-none" />
 
       <LandlordSideBar currentSection={currentSection} onSectionChange={setCurrentSection} />
 
@@ -347,14 +267,15 @@ const LandlordDashboard = () => {
           <div className="p-6 space-y-8">
             {/* Header Section - simplified */}
             <div className="text-center mb-12">
-              <h1 className={`text-4xl font-bold ${themeConfig.textPrimary} mb-4 bg-gradient-to-r ${themeConfig.headerGradient} bg-clip-text text-transparent`}>
+              <h1 className={`text-4xl md:text-5xl font-black tracking-tighter mb-4 ${themeConfig.headerTitle}`}>
                 {t('landlord.welcomeBackLandlord')}
               </h1>
-              <p className={`text-lg ${themeConfig.textSecondary} max-w-2xl mx-auto leading-relaxed`}>
+              <div className="w-24 h-1.5 bg-amber-500 mx-auto rounded-full mb-4" />
+              <p className={`text-lg ${themeConfig.textSecondary} max-w-2xl mx-auto leading-relaxed font-medium`}>
                 Your comprehensive property management dashboard with real-time insights and advanced analytics
               </p>
               {properties.length > 0 && properties.every(p => p.status !== 'Occupied') && (
-                <p className={`text-sm ${isDarkMode ? 'text-cyan-400' : 'text-indigo-500'} mt-3 flex items-center justify-center gap-2`}>
+                <p className={`text-sm ${themeConfig.textAccent} mt-3 flex items-center justify-center gap-2 font-bold`}>
                   💡 Tip: Your properties are listed! Check your <strong>Messages</strong> tab for tenant inquiries.
                 </p>
               )}
@@ -390,8 +311,8 @@ const LandlordDashboard = () => {
                       navigate(route);
                     }
                   }}
-                  className={`flex items-center space-x-3 px-6 py-3 rounded-2xl font-bold text-sm relative overflow-hidden group ${activeTab === key && action === 'tab'
-                    ? `bg-gradient-to-r ${themeConfig.tabActive} ${themeConfig.tabActiveText}`
+                  className={`flex items-center space-x-3 px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-widest relative overflow-hidden group ${activeTab === key && action === 'tab'
+                    ? `${themeConfig.tabActive} ${themeConfig.tabActiveText} shadow-[0_10px_30px_rgba(245,158,11,0.3)]`
                     : `${themeConfig.tabInactive}`
                     }`}
                 >
@@ -405,9 +326,9 @@ const LandlordDashboard = () => {
             {activeTab === 'overview' && (
               <div className="space-y-10">
                 {/* Enhanced Quick Actions */}
-                <AnimatedCard className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-3xl p-8 relative overflow-hidden`}>
-                  <h2 className={`text-3xl font-bold ${themeConfig.textPrimary} mb-8 flex items-center space-x-4 relative z-10`}>
-                    <span className="bg-gradient-to-r from-current to-transparent bg-clip-text">Quick Actions</span>
+                <AnimatedCard className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-3xl p-8 relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.04)]`}>
+                  <h2 className={`text-3xl font-black ${themeConfig.textPrimary} mb-8 flex items-center space-x-4 relative z-10`}>
+                    <span>Quick Actions</span>
                   </h2>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
@@ -437,7 +358,7 @@ const LandlordDashboard = () => {
                       <button
                         key={action.label}
                         onClick={action.onClick}
-                        className={`group relative p-8 bg-gradient-to-br ${action.color} rounded-2xl text-white font-bold shadow-sm text-base overflow-hidden hover:opacity-95`}
+                        className={`group relative p-8 bg-gradient-to-br ${action.color} rounded-2xl text-white font-black shadow-[0_20px_50px_rgba(245,158,11,0.2)] text-base overflow-hidden hover:-translate-y-1 transition-all duration-300`}
                       >
                         <div className="mb-4 relative z-10">
                           <action.icon className="w-8 h-8 mx-auto" />
@@ -452,9 +373,9 @@ const LandlordDashboard = () => {
                 </AnimatedCard>
 
                 {/* Enhanced Performance Metrics */}
-                <AnimatedCard className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-3xl p-8 relative overflow-hidden`}>
-                  <h2 className={`text-3xl font-bold ${themeConfig.textPrimary} mb-8 flex items-center space-x-4 relative z-10`}>
-                    <TrendingUp className={`w-8 h-8 ${themeConfig.iconColors.trend}`} />
+                <AnimatedCard className={`${themeConfig.cardBg} backdrop-blur-xl border ${themeConfig.cardBorder} rounded-3xl p-8 relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.04)]`}>
+                  <h2 className={`text-3xl font-black ${themeConfig.textPrimary} mb-8 flex items-center space-x-4 relative z-10`}>
+                    <TrendingUp className={`w-8 h-8 ${themeConfig.iconAccent}`} />
                     <span>Performance Overview</span>
                   </h2>
 
@@ -463,33 +384,27 @@ const LandlordDashboard = () => {
                       {
                         value: properties.length > 0 ? `${Math.round((properties.filter(p => p.status === 'Occupied').length / properties.length) * 100)}%` : '0%',
                         label: 'Occupancy Rate',
-                        color: isDarkMode ? 'text-cyan-400' : 'text-indigo-600',
-                        delay: 0,
-                        bgGradient: isDarkMode ? 'from-cyan-500/20 to-indigo-500/20' : 'from-indigo-500/20 to-cyan-500/20'
+                        color: themeConfig.metricColors[0],
                       },
                       {
                         value: '0.0',
                         label: 'Avg Rating',
-                        color: isDarkMode ? 'text-indigo-400' : 'text-purple-600',
-                        delay: 0.15,
-                        bgGradient: isDarkMode ? 'from-indigo-500/20 to-purple-500/20' : 'from-purple-500/20 to-indigo-500/20'
+                        color: themeConfig.metricColors[1],
                       },
                       {
                         value: '0.0',
                         label: 'Avg Response (hrs)',
-                        color: isDarkMode ? 'text-purple-400' : 'text-pink-600',
-                        delay: 0.3,
-                        bgGradient: isDarkMode ? 'from-purple-500/20 to-pink-500/20' : 'from-pink-500/20 to-purple-500/20'
+                        color: themeConfig.metricColors[2],
                       }
                     ].map((metric) => (
                       <div
                         key={metric.label}
-                        className={`relative text-center p-8 ${isDarkMode ? 'bg-slate-900/60' : 'bg-white/60'} rounded-2xl border ${isDarkMode ? 'border-slate-700/50' : 'border-indigo-200/50'} backdrop-blur-sm overflow-hidden group`}
+                        className={`relative text-center p-8 rounded-2xl border backdrop-blur-sm overflow-hidden group ${themeConfig.metricCard}`}
                       >
-                        <div className={`text-4xl font-bold ${metric.color} mb-3 relative z-10`}>
+                        <div className={`text-4xl font-black ${metric.color} mb-3 relative z-10`}>
                           {metric.value}
                         </div>
-                        <div className={`${themeConfig.textSecondary} text-lg font-semibold relative z-10`}>
+                        <div className={`${themeConfig.textSecondary} text-sm font-black uppercase tracking-widest relative z-10`}>
                           {metric.label}
                         </div>
                       </div>
@@ -546,31 +461,31 @@ const ScheduleInspectionModal = ({ isOpen, onClose, isDark }) => {
 
   const modalTheme = isDark
     ? {
-      bg: 'bg-slate-800/90',
-      border: 'border-slate-700/50',
+      bg: 'bg-slate-900/95',
+      border: 'border-slate-800',
       text: 'text-white',
-      inputBg: 'bg-slate-700/50',
-      inputBorder: 'border-slate-600/50',
+      inputBg: 'bg-slate-800/50',
+      inputBorder: 'border-slate-700',
       inputPlaceholder: 'placeholder-slate-400',
-      focusBorder: 'focus:border-cyan-500',
-      buttonPrimaryBg: 'bg-gradient-to-r from-cyan-500 to-indigo-600',
-      buttonPrimaryText: 'text-white',
-      buttonSecondaryBg: 'bg-slate-700/50',
+      focusBorder: 'focus:border-amber-500',
+      buttonPrimaryBg: 'bg-amber-500 hover:bg-amber-400',
+      buttonPrimaryText: 'text-slate-950',
+      buttonSecondaryBg: 'bg-slate-800',
       buttonSecondaryText: 'text-slate-300',
       buttonHover: 'hover:brightness-110',
     }
     : {
-      bg: 'bg-white/90',
-      border: 'border-indigo-200/50',
-      text: 'text-gray-900',
-      inputBg: 'bg-white/70',
-      inputBorder: 'border-indigo-300/50',
-      inputPlaceholder: 'placeholder-indigo-400',
-      focusBorder: 'focus:border-indigo-500',
-      buttonPrimaryBg: 'bg-gradient-to-r from-indigo-600 to-purple-600',
+      bg: 'bg-white',
+      border: 'border-slate-100',
+      text: 'text-slate-900',
+      inputBg: 'bg-slate-50/80',
+      inputBorder: 'border-slate-100',
+      inputPlaceholder: 'placeholder-slate-400',
+      focusBorder: 'focus:border-amber-500',
+      buttonPrimaryBg: 'bg-slate-900 hover:bg-slate-800',
       buttonPrimaryText: 'text-white',
-      buttonSecondaryBg: 'bg-indigo-100/60',
-      buttonSecondaryText: 'text-indigo-700',
+      buttonSecondaryBg: 'bg-amber-50',
+      buttonSecondaryText: 'text-amber-700',
       buttonHover: 'hover:brightness-105',
     };
 
@@ -580,7 +495,7 @@ const ScheduleInspectionModal = ({ isOpen, onClose, isDark }) => {
       onClick={onClose}
     >
       <div
-        className={`${modalTheme.bg} ${modalTheme.border} border rounded-2xl w-full max-w-md p-6 shadow-xl`}
+        className={`${modalTheme.bg} ${modalTheme.border} border rounded-[2rem] w-full max-w-md p-8 shadow-2xl`}
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className={`text-2xl font-bold mb-6 ${modalTheme.text}`}>Schedule Inspection</h2>

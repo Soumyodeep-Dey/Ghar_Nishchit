@@ -6,6 +6,7 @@ import api from '../../../services/api.js';
 import { showErrorToast } from '../../../utils/toast.jsx';
 import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { getDashboardTheme, dotPatternStyle } from '../../../styles/dashboardTheme.js';
 import {
   Wrench, BarChart3, TrendingUp, TrendingDown, Building2, Heart,
   Bell, CreditCard, Star, X, AlertCircle, RefreshCw
@@ -34,39 +35,26 @@ const usePagination = (items, itemsPerPage = ITEMS_PER_PAGE) => {
 // ---------------------------------------------------------------------------
 const StatCard = React.memo(({ icon: Icon, title, value, change, trend, color, prefix = '', suffix = '', isDark = true }) => {
   const TrendIcon = trend === 'up' ? TrendingUp : TrendingDown;
-  const th = isDark
-    ? {
-        cardBg: 'bg-slate-800/80', cardBorder: 'border-slate-700/50',
-        iconBg: 'from-cyan-500/20 to-indigo-500/20', iconBorder: 'border-cyan-400/30',
-        iconColor: 'text-cyan-300', textPrimary: 'text-slate-100', textSecondary: 'text-slate-300',
-        trendUp: 'bg-cyan-400/20 text-cyan-300 border-cyan-400/40',
-        trendDown: 'bg-pink-400/20 text-pink-300 border-pink-400/40',
-      }
-    : {
-        cardBg: 'bg-white/80', cardBorder: 'border-indigo-200/50',
-        iconBg: 'from-indigo-100/80 to-purple-100/80', iconBorder: 'border-indigo-300/50',
-        iconColor: 'text-indigo-700', textPrimary: 'text-gray-900', textSecondary: 'text-indigo-600',
-        trendUp: 'bg-indigo-100/60 text-indigo-700 border-indigo-300/60',
-        trendDown: 'bg-pink-100/60 text-pink-700 border-pink-300/60',
-      };
+  const th = getDashboardTheme(isDark).statCard;
+
   return (
-    <div className={`group relative overflow-hidden ${th.cardBg} border ${th.cardBorder} rounded-2xl p-5 shadow-sm ${color}`}>
+    <div className={`group relative overflow-hidden ${th.cardBg} border ${th.cardBorder} rounded-3xl p-6 shadow-[0_10px_40px_rgba(0,0,0,0.04)] transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 ${color}`}>
       <div className="relative z-20">
         <div className="flex items-center justify-between mb-4">
-          <div className={`p-3 rounded-xl bg-gradient-to-br ${th.iconBg} backdrop-blur-sm border ${th.iconBorder}`}>
+          <div className={`p-3 rounded-2xl bg-gradient-to-br ${th.iconBg} backdrop-blur-sm border ${th.iconBorder}`}>
             {Icon && <Icon className={`w-6 h-6 ${th.iconColor}`} />}
           </div>
-          <div className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-sm border ${
+          <div className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-widest backdrop-blur-sm border ${
             trend === 'up' ? th.trendUp : th.trendDown
           }`}>
             <TrendIcon className="w-3 h-3" />
             <span>{change}</span>
           </div>
         </div>
-        <h3 className={`text-2xl font-bold ${th.textPrimary} mb-2`}>
+        <h3 className={`text-3xl font-black ${th.textPrimary} mb-2`}>
           {prefix}{parseInt(value).toLocaleString()}{suffix}
         </h3>
-        <p className={`${th.textSecondary} font-medium text-sm`}>{title}</p>
+        <p className={`${th.textSecondary} font-bold text-xs uppercase tracking-widest`}>{title}</p>
       </div>
     </div>
   );
@@ -215,8 +203,8 @@ const Modal = React.memo(({ isOpen, onClose, title, children, size = 'md' }) => 
 // Skeleton card — shown while data is fetching
 // ---------------------------------------------------------------------------
 const SkeletonCard = ({ isDark }) => (
-  <div className={`rounded-2xl p-5 border animate-pulse ${
-    isDark ? 'bg-slate-800/80 border-slate-700/50' : 'bg-white/80 border-indigo-200/50'
+  <div className={`rounded-3xl p-6 border animate-pulse ${
+    isDark ? 'bg-slate-900/80 border-slate-800' : 'bg-white border-slate-100'
   }`}>
     <div className={`h-10 w-10 rounded-xl mb-4 ${isDark ? 'bg-slate-700' : 'bg-gray-200'}`} />
     <div className={`h-6 w-24 rounded mb-2 ${isDark ? 'bg-slate-700' : 'bg-gray-200'}`} />
@@ -324,98 +312,71 @@ const TenantDashboard = () => {
       value: favouriteProperties.length,
       change: favouriteProperties.length > 0 ? `+${favouriteProperties.length}` : '0',
       trend: favouriteProperties.length > 0 ? 'up' : 'down',
-      color: darkMode ? 'from-cyan-500 to-indigo-600' : 'from-indigo-500 to-purple-600',
+      color: darkMode ? 'from-amber-500 to-amber-600' : 'from-amber-500 to-amber-600',
     },
     {
       icon: Bell, title: t('tenant.unreadNotifications'),
       value: notifications.filter(n => !n.read).length,
       change: String(notifications.filter(n => !n.read).length),
       trend: 'up',
-      color: darkMode ? 'from-indigo-500 to-purple-600' : 'from-purple-500 to-pink-500',
+      color: darkMode ? 'from-amber-600 to-orange-600' : 'from-amber-500 to-orange-500',
     },
     {
       icon: Wrench, title: t('tenant.maintenanceRequests'),
       value: maintenanceRequests.length,
       change: String(maintenanceRequests.length),
       trend: maintenanceRequests.length > 0 ? 'down' : 'up',
-      color: darkMode ? 'from-purple-500 to-pink-600' : 'from-pink-400 to-rose-500',
+      color: darkMode ? 'from-amber-500 to-amber-700' : 'from-amber-400 to-amber-600',
     },
     {
       icon: CreditCard, title: t('tenant.paymentsMade'),
       value: paymentHistory.filter(p => p.status === 'Paid' || p.status === 'paid').length,
       change: String(paymentHistory.filter(p => p.status === 'Paid' || p.status === 'paid').length),
       trend: 'up',
-      color: darkMode ? 'from-pink-500 to-rose-600' : 'from-rose-400 to-pink-500',
+      color: darkMode ? 'from-slate-700 to-slate-800' : 'from-slate-800 to-slate-900',
     },
   ], [darkMode, favouriteProperties, notifications, maintenanceRequests, paymentHistory, t]);
 
-  const activityMetrics = useMemo(() => [
-    {
-      value: notifications.filter(n => !n.read).length,
-      label: t('tenant.unreadNotifications'),
-      color: darkMode ? 'text-cyan-400'   : 'text-indigo-600',
-    },
-    {
-      value: maintenanceRequests.length,
-      label: t('tenant.totalRequests'),
-      color: darkMode ? 'text-indigo-400' : 'text-purple-600',
-    },
-    {
-      value: favouriteProperties.length,
-      label: t('tenant.savedProperties'),
-      color: darkMode ? 'text-purple-400' : 'text-pink-600',
-    },
-  ], [darkMode, notifications, maintenanceRequests, favouriteProperties, t]);
+  const activityMetrics = useMemo(() => {
+    const theme = getDashboardTheme(darkMode);
+    return [
+      {
+        value: notifications.filter(n => !n.read).length,
+        label: t('tenant.unreadNotifications'),
+        color: theme.metricColors[0],
+      },
+      {
+        value: maintenanceRequests.length,
+        label: t('tenant.totalRequests'),
+        color: theme.metricColors[1],
+      },
+      {
+        value: favouriteProperties.length,
+        label: t('tenant.savedProperties'),
+        color: theme.metricColors[2],
+      },
+    ];
+  }, [darkMode, notifications, maintenanceRequests, favouriteProperties, t]);
 
-  // -------------------------------------------------------------------------
-  // Theme config
-  // -------------------------------------------------------------------------
-  const tc = darkMode
-    ? {
-        mainBg: 'from-gray-900 via-slate-800 to-blue-950',
-        loadingBg: 'from-gray-900 via-slate-800 to-blue-950',
-        cardBg: 'bg-slate-800/50', cardBorder: 'border-slate-700/50',
-        textPrimary: 'text-slate-100', textSecondary: 'text-slate-200',
-        headerGradient: 'from-cyan-300 via-purple-300 to-pink-300',
-        tabBg: 'bg-slate-800/50', tabBorder: 'border-slate-700/50',
-        tabActive: 'from-cyan-500 to-indigo-600', tabActiveText: 'text-blue-950',
-        tabInactive: 'text-slate-300 hover:text-slate-100 hover:bg-slate-700/50',
-        buttonPrimary: 'from-cyan-500 to-indigo-600',
-        buttonSecondary: 'from-purple-500 to-pink-600',
-        iconTrend: 'text-cyan-400',
-        spinnerBorder: 'border-cyan-500/30 border-t-cyan-400',
-      }
-    : {
-        mainBg: 'from-pink-300 via-purple-300 to-indigo-400',
-        loadingBg: 'from-pink-300 via-purple-300 to-indigo-400',
-        cardBg: 'bg-white/60', cardBorder: 'border-indigo-200/50',
-        textPrimary: 'text-gray-900', textSecondary: 'text-indigo-600',
-        headerGradient: 'from-indigo-700 via-purple-700 to-pink-700',
-        tabBg: 'bg-white/30', tabBorder: 'border-indigo-200/50',
-        tabActive: 'from-indigo-600 to-purple-600', tabActiveText: 'text-white',
-        tabInactive: 'text-indigo-600 hover:text-indigo-800 hover:bg-white/40',
-        buttonPrimary: 'from-indigo-600 to-purple-600',
-        buttonSecondary: 'from-purple-600 to-pink-600',
-        iconTrend: 'text-indigo-600',
-        spinnerBorder: 'border-indigo-400/40 border-t-indigo-600',
-      };
+  const tc = getDashboardTheme(darkMode);
 
   // -------------------------------------------------------------------------
   // Loading skeleton
   // -------------------------------------------------------------------------
   if (isLoading) {
     return (
-      <div className={`min-h-screen bg-gradient-to-br ${tc.loadingBg} flex`}>
-        <div className={`w-[4.5rem] ${darkMode ? 'bg-slate-900/60' : 'bg-white/30'}`} />
-        <div className="flex-1 flex flex-col">
-          <div className={`h-16 border-b ${darkMode ? 'bg-slate-900/60 border-slate-700' : 'bg-white/60 border-indigo-200'}`} />
+      <div className={`min-h-screen bg-gradient-to-br ${tc.loadingBg} flex relative`}>
+        <div className="absolute inset-0 opacity-[0.25]" style={dotPatternStyle} />
+        <div className={`w-[4.5rem] ${darkMode ? 'bg-slate-950/60' : 'bg-white/60'}`} />
+        <div className="flex-1 flex flex-col relative z-10">
+          <div className={`h-16 border-b ${darkMode ? 'bg-slate-950/60 border-slate-800' : 'bg-white/80 border-amber-100'}`} />
           <main className="flex-1 p-6 space-y-6">
-            <div className={`h-10 w-64 rounded-xl mx-auto animate-pulse ${darkMode ? 'bg-slate-700' : 'bg-white/60'}`} />
-            <div className={`h-5 w-96 rounded mx-auto animate-pulse ${darkMode ? 'bg-slate-700/60' : 'bg-white/40'}`} />
+            <div className={`h-10 w-64 rounded-xl mx-auto animate-pulse ${darkMode ? 'bg-slate-800' : 'bg-white'}`} />
+            <div className={`h-5 w-96 rounded mx-auto animate-pulse ${darkMode ? 'bg-slate-800/60' : 'bg-slate-100'}`} />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
               {[0,1,2,3].map(i => <SkeletonCard key={i} isDark={darkMode} />)}
             </div>
-            <div className={`h-48 w-full rounded-3xl animate-pulse ${darkMode ? 'bg-slate-800/60' : 'bg-white/50'}`} />
+            <div className={`h-48 w-full rounded-3xl animate-pulse ${darkMode ? 'bg-slate-900/60' : 'bg-white'}`} />
           </main>
         </div>
       </div>
@@ -426,7 +387,9 @@ const TenantDashboard = () => {
   // Render
   // -------------------------------------------------------------------------
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${tc.mainBg} flex relative`}>
+    <div className={`min-h-screen bg-gradient-to-br ${tc.pageBgGradient} flex relative transition-colors duration-500`}>
+      <div className="absolute inset-0 opacity-[0.25] dark:opacity-[0.12] pointer-events-none" style={dotPatternStyle} />
+      <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-amber-400/10 rounded-full blur-[120px] pointer-events-none" />
       <TenantSideBar setCurrentSection={setCurrentSection} />
 
       <div
@@ -445,10 +408,11 @@ const TenantDashboard = () => {
 
             {/* Header — no animate-pulse on text */}
             <div className="text-center mb-12">
-              <h1 className={`text-4xl font-bold bg-gradient-to-r ${tc.headerGradient} bg-clip-text text-transparent mb-4`}>
+              <h1 className={`text-4xl md:text-5xl font-black tracking-tighter mb-4 ${tc.headerTitle}`}>
                 {t('tenant.welcomeBack')}{profile?.name ? `, ${profile.name.split(' ')[0]}` : ''}!
               </h1>
-              <p className={`text-lg ${tc.textSecondary} max-w-2xl mx-auto leading-relaxed`}>
+              <div className="w-24 h-1.5 bg-amber-500 mx-auto rounded-full mb-4" />
+              <p className={`text-lg ${tc.textSecondary} max-w-2xl mx-auto leading-relaxed font-medium`}>
                 {t('tenant.dashboardSubtitle')}
               </p>
             </div>
@@ -473,10 +437,10 @@ const TenantDashboard = () => {
                     if (action === 'tab') { setCurrentSection('Dashboard'); navigate('/tenant'); }
                     else navigate(route);
                   }}
-                  className={`flex items-center space-x-3 px-6 py-3 rounded-2xl font-bold text-sm ${
+                  className={`flex items-center space-x-3 px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-widest ${
                     (action === 'tab' && location.pathname === '/tenant') ||
                     (action === 'navigate' && location.pathname === route)
-                      ? `bg-gradient-to-r ${tc.tabActive} ${tc.tabActiveText}`
+                      ? `${tc.tabActive} ${tc.tabActiveText} shadow-[0_10px_30px_rgba(245,158,11,0.3)]`
                       : tc.tabInactive
                   }`}
                 >
@@ -491,8 +455,8 @@ const TenantDashboard = () => {
               <div className="space-y-10">
 
                 {/* Quick Actions */}
-                <div className={`${tc.cardBg} backdrop-blur-xl border ${tc.cardBorder} rounded-3xl p-8`}>
-                  <h2 className={`text-3xl font-bold ${tc.textPrimary} mb-8`}>{t('tenant.quickActions')}</h2>
+                <div className={`${tc.cardBg} backdrop-blur-xl border ${tc.cardBorder} rounded-3xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.04)]`}>
+                  <h2 className={`text-3xl font-black ${tc.textPrimary} mb-8`}>{t('tenant.quickActions')}</h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {[
                       { id: 'viewProps', labelKey: 'tenant.viewProperties', descKey: 'tenant.browseRentals', icon: Building2, color: tc.buttonPrimary,   onClick: () => navigate('/tenant/properties') },
@@ -500,7 +464,7 @@ const TenantDashboard = () => {
                       { id: 'notif', labelKey: 'tenant.viewNotifications', descKey: 'tenant.checkAlerts', icon: Bell, color: tc.buttonSecondary, onClick: () => setCurrentSection('Notifications') },
                     ].map((action) => (
                       <button key={action.id} onClick={action.onClick}
-                        className={`group relative p-8 bg-gradient-to-br ${action.color} rounded-2xl text-white font-bold shadow-sm text-base hover:opacity-95`}
+                        className={`group relative p-8 bg-gradient-to-br ${action.color} rounded-2xl text-white font-black shadow-[0_20px_50px_rgba(245,158,11,0.2)] text-base hover:-translate-y-1 transition-all duration-300`}
                       >
                         <div className="mb-4"><action.icon className="w-8 h-8 mx-auto" /></div>
                         <div className="text-lg font-bold mb-2">{t(action.labelKey)}</div>
@@ -511,20 +475,18 @@ const TenantDashboard = () => {
                 </div>
 
                 {/* Recent Activity — real counts */}
-                <div className={`${tc.cardBg} backdrop-blur-xl border ${tc.cardBorder} rounded-3xl p-8`}>
-                  <h2 className={`text-3xl font-bold ${tc.textPrimary} mb-8 flex items-center space-x-4`}>
-                    <TrendingUp className={`w-8 h-8 ${tc.iconTrend}`} />
+                <div className={`${tc.cardBg} backdrop-blur-xl border ${tc.cardBorder} rounded-3xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.04)]`}>
+                  <h2 className={`text-3xl font-black ${tc.textPrimary} mb-8 flex items-center space-x-4`}>
+                    <TrendingUp className={`w-8 h-8 ${tc.iconAccent}`} />
                     <span>{t('tenant.recentActivity')}</span>
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {activityMetrics.map((metric) => (
                       <div key={metric.label}
-                        className={`text-center p-8 ${
-                          darkMode ? 'bg-slate-900/60 border-slate-700/50' : 'bg-white/60 border-indigo-200/50'
-                        } rounded-2xl border backdrop-blur-sm`}
+                        className={`text-center p-8 rounded-2xl border backdrop-blur-sm ${tc.metricCard}`}
                       >
-                        <div className={`text-4xl font-bold ${metric.color} mb-3`}>{metric.value}</div>
-                        <div className={`${tc.textSecondary} text-lg font-semibold`}>{metric.label}</div>
+                        <div className={`text-4xl font-black ${metric.color} mb-3`}>{metric.value}</div>
+                        <div className={`${tc.textSecondary} text-sm font-black uppercase tracking-widest`}>{metric.label}</div>
                       </div>
                     ))}
                   </div>
