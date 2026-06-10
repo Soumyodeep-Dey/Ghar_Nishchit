@@ -14,6 +14,7 @@ import AdminMaintenance from './Admin/AdminMaintenance';
 import AdminPayments    from './Admin/AdminPayments';
 import AdminContracts   from './Admin/AdminContracts';
 import AdminBroadcast   from './Admin/AdminBroadcast';
+import { clearAuthSession } from '../../services/authService.js';
 
 const NAV = [
   { id: 'overview',     label: 'Overview',     icon: LayoutDashboard },
@@ -47,8 +48,7 @@ export default function AdminDashboard() {
   }
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    clearAuthSession();
     navigate('/login');
   };
 

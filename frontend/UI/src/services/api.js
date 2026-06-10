@@ -16,22 +16,32 @@ const BASE = (() => {
     return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
 })();
 
-const getAuthHeader = () => {
-    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+import { ensureValidAccessToken, refreshSession, clearAuthSession, getRefreshToken } from './authService.js';
+
+const getAuthHeader = async () => {
+    const token = await ensureValidAccessToken();
     return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-async function request(path, options = {}) {
+async function request(path, options = {}, retried = false) {
     const headers = {
         'Content-Type': 'application/json',
         ...(options.headers || {}),
-        ...getAuthHeader()
+        ...(await getAuthHeader())
     };
 
     try {
         const res = await fetch(`${BASE}${path}`, { ...options, headers });
 
         if (!res.ok) {
+            if (!retried && (res.status === 401 || res.status === 403) && getRefreshToken()) {
+                try {
+                    await refreshSession();
+                    return request(path, options, true);
+                } catch {
+                    clearAuthSession();
+                }
+            }
             let errorData = null;
             const contentType = res.headers.get('content-type') || '';
             try {

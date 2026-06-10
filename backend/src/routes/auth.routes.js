@@ -1,5 +1,5 @@
 import express from "express";
-import { registerUser, loginUser, getUserDetails, getProfile, updateProfile, changePassword } from "../controllers/auth.controller.js";
+import { registerUser, loginUser, refreshAccessToken, getUserDetails, getProfile, updateProfile, changePassword } from "../controllers/auth.controller.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
@@ -9,6 +9,9 @@ router.post("/register", registerUser);
 
 // Login a User
 router.post("/login", loginUser);
+
+// Refresh access token (no auth header required — uses refresh token body)
+router.post("/refresh", refreshAccessToken);
 
 // Get User Details (protected)
 router.get("/user", verifyToken, getUserDetails);

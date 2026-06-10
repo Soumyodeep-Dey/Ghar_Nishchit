@@ -4,6 +4,7 @@ import { User, Mail, Lock, Phone, Eye, EyeOff, ArrowLeft, Home, Sparkles, Shield
 import { useDarkMode } from '../../useDarkMode.js';
 import { signInWithGoogle, handleGoogleRedirectResult } from '../../firebase.js';
 import { showSuccessToast, showErrorToast } from '../../utils/toast.jsx';
+import { setAuthSession, getRoleDashboardPath } from '../../services/authService.js';
 
 const GoogleIcon = () => (
   <span
@@ -96,16 +97,10 @@ export default function SignUp() {
       }
       
       const data = await response.json();
-      const { token, user } = data;
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      const { user } = data;
+      setAuthSession(data);
       showSuccessToast("Registered successfully!");
-      const userRole = user.role || (user.roles && user.roles[0]) || '';
-      setTimeout(() => {
-        if (userRole.toLowerCase() === 'tenant') navigate('/tenant');
-        else if (userRole.toLowerCase() === 'landlord') navigate('/landlord');
-        else navigate('/');
-      }, 1000);
+      setTimeout(() => navigate(getRoleDashboardPath(user)), 1000);
     } catch (err) {
       console.error(err);
       showErrorToast(err.message || "Error during registration.");

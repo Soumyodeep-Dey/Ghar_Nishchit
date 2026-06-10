@@ -6,6 +6,28 @@ import dotenv from "dotenv";
 
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key";
+const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || `${JWT_SECRET}_refresh`;
+const ACCESS_TOKEN_EXPIRY = "1h";
+const REFRESH_TOKEN_EXPIRY = "72h";
+
+const buildUserData = (user) => ({
+  _id: user._id,
+  name: user.name,
+  email: user.email,
+  phone: user.phone,
+  role: user.role,
+});
+
+const generateTokens = (user) => {
+  const payload = { userId: user._id, role: user.role };
+  const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+  const refreshToken = jwt.sign(
+    { ...payload, type: "refresh" },
+    REFRESH_SECRET,
+    { expiresIn: REFRESH_TOKEN_EXPIRY }
+  );
+  return { accessToken, refreshToken, token: accessToken };
+};
 
 // ── NeonDB Sync Helpers ───────────────────────────────────────────────────────
 // Silently syncs a user upsert to NeonDB; never throws — MongoDB is primary.
@@ -67,22 +89,15 @@ export const registerUser = async (req, res) => {
 
     // Dual-write: sync to NeonDB (non-blocking)
     await syncUserToNeon(newUser);
-    // Generate JWT token
-    const token = jwt.sign({ userId: newUser._id, role: newUser.role }, JWT_SECRET, { expiresIn: "7d" });
+    const { accessToken, refreshToken, token } = generateTokens(newUser);
+    const userData = buildUserData(newUser);
 
-    // Return user data without password
-    const userData = {
-      _id: newUser._id,
-      name: newUser.name,
-      email: newUser.email,
-      phone: newUser.phone,
-      role: newUser.role
-    };
-
-    res.status(201).json({ 
+    res.status(201).json({
       message: "User registered successfully",
+      accessToken,
+      refreshToken,
       token,
-      user: userData
+      user: userData,
     });
   } catch (error) {
     console.error("Error in user registration:", error);
@@ -107,26 +122,57 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ error: "Invalid email or password" });
     }
 
-    // Generate JWT token
-    const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: "7d" });
-
-    // Return user data without password
-    const userData = {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      role: user.role
-    };
+    const { accessToken, refreshToken, token } = generateTokens(user);
+    const userData = buildUserData(user);
 
     res.status(200).json({
       message: "Login successful",
+      accessToken,
+      refreshToken,
       token,
-      user: userData
+      user: userData,
     });
   } catch (error) {
     console.error("Error in user login:", error);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+// Refresh access token using a valid refresh token (extends session up to 72h of inactivity)
+export const refreshAccessToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    if (!refreshToken) {
+      return res.status(400).json({ error: "Refresh token is required" });
+    }
+
+    let verified;
+    try {
+      verified = jwt.verify(refreshToken, REFRESH_SECRET);
+    } catch {
+      return res.status(401).json({ error: "Session expired. Please log in again." });
+    }
+
+    if (verified.type !== "refresh") {
+      return res.status(401).json({ error: "Invalid refresh token" });
+    }
+
+    const user = await User.findById(verified.userId);
+    if (!user) {
+      return res.status(401).json({ error: "User not found" });
+    }
+
+    const tokens = generateTokens(user);
+    const userData = buildUserData(user);
+
+    res.status(200).json({
+      message: "Token refreshed",
+      ...tokens,
+      user: userData,
+    });
+  } catch (error) {
+    console.error("Error refreshing token:", error);
+    res.status(500).json({ error: "Failed to refresh session" });
   }
 };
 

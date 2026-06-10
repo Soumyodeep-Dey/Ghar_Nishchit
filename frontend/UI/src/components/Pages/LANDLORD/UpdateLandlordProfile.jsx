@@ -4,6 +4,7 @@ import { useDarkMode } from '../../../useDarkMode.js';
 import { useNavigate } from 'react-router-dom';
 // Removed SidebarContext usage
 import { showConfirmToast, showSuccessToast } from '../../../utils/toast.jsx';
+import { clearAuthSession } from '../../../services/authService.js';
 
 
 export default function UpdateLandlordProfile() {
@@ -465,8 +466,7 @@ export default function UpdateLandlordProfile() {
         try {
           // Simulate API call for account deletion
           await new Promise(resolve => setTimeout(resolve, 1000));
-          localStorage.removeItem('user');
-          localStorage.removeItem('token');
+          clearAuthSession();
           showSuccessToast('Account deleted successfully.');
           navigate('/signup'); // Redirect to signup or home page after deletion
         } catch (error) {

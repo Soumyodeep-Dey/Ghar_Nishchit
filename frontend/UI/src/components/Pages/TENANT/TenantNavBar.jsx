@@ -7,6 +7,7 @@ import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import LanguageDialog from '../../LanguageDialog.jsx';
 import { showConfirmToast } from '../../../utils/toast.jsx';
 import { getDashboardTheme } from '../../../styles/dashboardTheme.js';
+import { clearAuthSession } from '../../../services/authService.js';
 
 // Safe user reader — returns null if localStorage is missing or malformed.
 const readUserFromStorage = () => {
@@ -182,9 +183,7 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
 
   const handleLogout = () => {
     showConfirmToast(t('common.logoutConfirm'), () => {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      clearAuthSession();
       navigate('/');
     });
   };

@@ -4,6 +4,7 @@ import { Mail, Lock, Eye, EyeOff, ArrowLeft, Home, Sparkles } from 'lucide-react
 import { useDarkMode } from '../../useDarkMode.js';
 import { signInWithGoogle, handleGoogleRedirectResult } from '../../firebase.js';
 import { showSuccessToast, showErrorToast } from '../../utils/toast.jsx';
+import { setAuthSession, restoreSession, getRoleDashboardPath } from '../../services/authService.js';
 
 const GoogleIcon = () => (
   <span
@@ -38,17 +39,21 @@ export default function Login() {
 
   useEffect(() => {
     (async () => {
-      const user = await handleGoogleRedirectResult();
-      if (user) {
-        showSuccessToast(`Welcome back, ${user.displayName || user.email}!`);
-        const userRole = (user && (user.role || (user.roles && user.roles[0]))) || '';
-        if (userRole.toLowerCase() === 'tenant') {
-          navigate('/tenant');
-        } else if (userRole.toLowerCase() === 'landlord') {
-          navigate('/landlord');
-        } else {
-          navigate('/');
+      const googleUser = await handleGoogleRedirectResult();
+      if (googleUser) {
+        showSuccessToast(`Welcome back, ${googleUser.displayName || googleUser.email}!`);
+        navigate(getRoleDashboardPath(googleUser));
+        return;
+      }
+
+      try {
+        const user = await restoreSession();
+        if (user) {
+          showSuccessToast(`Welcome back, ${user.name || user.email}!`);
+          navigate(getRoleDashboardPath(user));
         }
+      } catch {
+        // Session expired — stay on login page
       }
     })();
   }, [navigate]);
@@ -95,20 +100,10 @@ export default function Login() {
         return response.json();
       })
       .then((data) => {
-        const { token, user } = data;
-        localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user));
+        const { user } = data;
+        setAuthSession(data);
         showSuccessToast("Login successful!");
-        const userRole = user.role || (user.roles && user.roles[0]) || '';
-        setTimeout(() => {
-          if (userRole.toLowerCase() === 'tenant') {
-            navigate('/tenant');
-          } else if (userRole.toLowerCase() === 'landlord') {
-            navigate('/landlord');
-          } else {
-            navigate('/');
-          }
-        }, 1000);
+        setTimeout(() => navigate(getRoleDashboardPath(user)), 1000);
       })
       .catch((err) => {
         console.error("Login Error Details:", err);

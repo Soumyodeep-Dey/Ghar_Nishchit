@@ -7,6 +7,7 @@ import { useDarkMode } from '../../../useDarkMode.js';
 import { showConfirmToast } from '../../../utils/toast.jsx';
 import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import { getDashboardTheme, sidebarMenuColors } from '../../../styles/dashboardTheme.js';
+import { clearAuthSession } from '../../../services/authService.js';
 
 // Constants
 const SIDEBAR_WIDTHS = { collapsed: '4.5rem', expanded: '24rem' };
@@ -133,9 +134,7 @@ const TenantSideBar = ({ userStats = DEFAULT_STATS }) => {
         showConfirmToast(
             t('common.logoutConfirm'),
             () => {
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
+                clearAuthSession();
                 navigate('/');
             }
         );

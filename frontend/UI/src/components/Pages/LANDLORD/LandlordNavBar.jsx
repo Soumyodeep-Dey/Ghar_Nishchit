@@ -7,6 +7,7 @@ import api from '../../../services/api.js';
 import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import LanguageDialog from '../../LanguageDialog.jsx';
 import { getDashboardTheme } from '../../../styles/dashboardTheme.js';
+import { clearAuthSession } from '../../../services/authService.js';
 
 const LANDLORD_SECTION_SUBTITLE_KEYS = {
   Dashboard: 'sections.overviewAnalytics',
@@ -35,9 +36,7 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
     showConfirmToast(
       'Are you sure you want to logout?',
       () => {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        clearAuthSession();
         window.location.href = '/';
       }
     );
