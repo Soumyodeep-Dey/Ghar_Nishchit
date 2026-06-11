@@ -2,3 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+    @keyframes trust-marquee-scroll {
+        0% {
+            transform: translateX(0);
+        }
+
+        100% {
+            transform: translateX(-50%);
+        }
+    }
+
+    .trust-marquee {
+        mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+        -webkit-mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+    }
+
+    .trust-marquee__track {
+        display: flex;
+        width: max-content;
+        gap: 1.5rem;
+        animation: trust-marquee-scroll 22s linear infinite;
+    }
+
+    .trust-marquee-wrap:hover .trust-marquee__track {
+        animation-play-state: paused;
+    }
+
+    .trust-marquee__item {
+        flex: 0 0 auto;
+        padding: 0.2rem 0.75rem;
+        border-radius: 9999px;
+        background: rgba(255, 255, 255, 0.78);
+        border: 1px solid rgba(99, 102, 241, 0.12);
+    }
+
+    .dark .trust-marquee__item {
+        background: rgba(15, 23, 42, 0.72);
+        border-color: rgba(148, 163, 184, 0.14);
+    }
+}
