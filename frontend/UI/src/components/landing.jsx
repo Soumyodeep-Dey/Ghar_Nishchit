@@ -474,7 +474,7 @@ export default function Landing() {
       {/* Floating Contact Button */}
       <a
         href="#help"
-        className="fixed bottom-8 right-8 z-50 bg-amber-500 text-white p-5 rounded-full shadow-2xl hover:bg-amber-600 focus:outline-none transition-all hover:scale-110 active:scale-90 animate-bounce"
+        className="fixed bottom-8 right-24 z-50 bg-amber-500 text-white p-5 rounded-full shadow-2xl hover:bg-amber-600 focus:outline-none transition-all hover:scale-110 active:scale-90 animate-bounce"
         aria-label="Contact Us"
       >
         <HelpCircle size={24} />
