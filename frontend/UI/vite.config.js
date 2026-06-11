@@ -4,9 +4,12 @@ import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  // Load the Gemini API key from the Ai folder
+  const uiEnv = loadEnv(mode, __dirname, '');
   const aiEnv = loadEnv(mode, path.resolve(__dirname, '../../Ai'), '');
+  const geminiApiKey = aiEnv.VITE_GEMINI_API_KEY || uiEnv.VITE_GEMINI_API_KEY || '';
+  const geminiModel = aiEnv.VITE_GEMINI_MODEL || uiEnv.VITE_GEMINI_MODEL || 'gemini-1.5-flash';
   const uiNodeModules = path.resolve(__dirname, 'node_modules');
+  const aiRoot = path.resolve(__dirname, '../../Ai');
 
   return {
     plugins: [react()],
@@ -14,6 +17,8 @@ export default defineConfig(({ mode }) => {
     // see this app's node_modules (a sibling directory). Pin bare imports to UI dependencies.
     resolve: {
       alias: {
+        '@ai': aiRoot,
+        '@ui': path.resolve(__dirname, 'src'),
         react: path.join(uiNodeModules, 'react'),
         'react-dom': path.join(uiNodeModules, 'react-dom'),
         'lucide-react': path.join(uiNodeModules, 'lucide-react'),
@@ -23,7 +28,8 @@ export default defineConfig(({ mode }) => {
       },
     },
     define: {
-      'import.meta.env.VITE_GEMINI_API_KEY': JSON.stringify(aiEnv.VITE_GEMINI_API_KEY)
+      'import.meta.env.VITE_GEMINI_API_KEY': JSON.stringify(geminiApiKey),
+      'import.meta.env.VITE_GEMINI_MODEL': JSON.stringify(geminiModel),
     },
     server: {
       fs: {
