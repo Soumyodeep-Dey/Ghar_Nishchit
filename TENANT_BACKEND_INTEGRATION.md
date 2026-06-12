@@ -114,17 +114,17 @@ This document outlines the backend integration completed for all Tenant componen
 **Location:** `frontend/UI/src/components/Pages/TENANT/TenantPayment.jsx`
 
 **Changes Made:**
-- Added `showSuccessToast` import
+- Added Razorpay checkout integration through the shared API service
+- Uses `api.createRazorpayOrder()` and `api.verifyRazorpayPayment()`
 - Enhanced payment submission with success notification
 - Improved receipt download with formatted content
-- Payment data still uses localStorage (no backend payment API yet)
 
 **Enhanced Features:**
 - Success toast on payment completion
 - Formatted receipt download with detailed payment information
 - Proper error handling structure in place
 
-**Note:** Payment backend endpoints not yet implemented. Current implementation uses localStorage for demonstration. Ready to integrate when payment API is available.
+**Note:** Payment now uses the backend Razorpay flow exposed by `/api/payments/create-order`, `/api/payments/verify`, and `/api/payments/webhook`.
 
 ---
 
@@ -158,6 +158,18 @@ This document outlines the backend integration completed for all Tenant componen
 - `GET /api/tenants` - Get landlord's tenants
 - `GET /api/tenants/:tenantId` - Get tenant details
 - `GET /api/tenants/stats` - Get tenant statistics
+
+#### Payments
+- `POST /api/payments/create-order` - Create a tenant Razorpay order
+- `POST /api/payments/verify` - Verify a tenant Razorpay payment
+- `GET /api/payments` - Get tenant payment history
+- `GET /api/payments/stats` - Get tenant payment statistics
+
+#### Landlord Payments
+- `POST /api/landlord-payments/create-order` - Create a landlord subscription order
+- `POST /api/landlord-payments/verify` - Verify a landlord payment
+- `GET /api/landlord-payments` - Get landlord payment history
+- `GET /api/landlord-payments/stats` - Get landlord payment statistics
 
 ---
 

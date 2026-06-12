@@ -7,149 +7,82 @@
 
 # Ghar Nishchit 2.0
 
-> **"Ghar Nishchit"** means *Home, Guaranteed* - a promise of trust and simplicity for renters and landlords across emerging urban India.
+Ghar Nishchit is a full-stack rental platform for tenants, landlords, and admins. This README reflects the code that is currently implemented in `backend`, `frontend/UI`, and `Ai`.
 
-Ghar Nishchit is a full-stack rental platform that connects tenants and landlords directly with clear workflows for property discovery, tenancy, payments, maintenance, and communication.
+## What Is Implemented
 
-This **2.0 README** keeps the original 1.0 vision and market positioning, while documenting the project as it exists today across `backend`, `frontend/UI`, and `Ai`.
+### Frontend
 
----
+- Public landing page and authentication screens for login, signup, and forgot password
+- Role-based tenant, landlord, and admin routes
+- Tenant pages for properties, messages, maintenance, payments, profile updates, contracts, and help/support
+- Landlord pages for properties, messages, maintenance, payments, tenants, profile updates, and help/support
+- Global chatbot widget loaded from the `Ai` module
+- Dark mode provider, language provider, toast notifications, and React Query caching
 
-## Table of Contents
+### Backend
 
-- [1.0 Vision, 2.0 Delivery](#10-vision-20-delivery)
-- [What Makes Us Different](#what-makes-us-different)
-- [Current Product Features](#current-product-features)
-- [Tech Stack](#tech-stack)
-- [Repository Structure](#repository-structure)
-- [Quick Start](#quick-start)
-- [Environment Variables](#environment-variables)
-- [Scripts](#scripts)
-- [API Modules](#api-modules)
-- [AI Module](#ai-module)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [License](#license)
-
----
-
-## 1.0 Vision, 2.0 Delivery
-
-### What stays from 1.0
-
-- Focus on underserved Tier-2/Tier-3 and emerging urban markets
-- Minimal, low-friction experience for both landlords and tenants
-- Trust-first rental ecosystem without unnecessary middle layers
-- Long-term plan for regional language support and AI-powered assistance
-
-### What improves in 2.0
-
-- Real module-level documentation for the current codebase
-- Updated stack and scripts for frontend and backend
-- Clear environment setup for local development
-- API module overview aligned with actual route/controller structure
-- AI assistant coverage based on implemented chatbot components
-
----
-
-## What Makes Us Different
-
-Most rental platforms optimize for saturated metro markets. Ghar Nishchit is designed for high-growth markets where users need clarity, speed, and practical workflows.
-
-- **Simple first**: fewer steps from search to contact
-- **Local-first context**: built with Eastern and emerging city behavior in mind
-- **Direct interactions**: tenants and landlords communicate without bloated flows
-- **Trust focus**: verified profiles, structured contracts, and transparent operations
-
----
-
-## Current Product Features
-
-### Tenant-side
-
-- Account authentication and role-based access
-- Property browsing and detail view
-- Favorites and inquiry flow
-- Contract and payment visibility
-- Maintenance request lifecycle
-- Tenant-landlord messaging interface
-
-### Landlord-side
-
-- Property CRUD and listing management
-- Tenant overview and lifecycle operations
-- Payment and contract management
-- Maintenance tracking and updates
-- Notifications and communication workflows
-- Report and dashboard-oriented pages
-
----
+- Express API with route groups for auth, users, properties, favourites, tenants, maintenance, inquiries, notifications, payments, landlord payments, visits, contracts, support, and admin
+- JWT-based authentication and refresh flow
+- MongoDB persistence through Mongoose
+- Neon/Postgres access for the transactional outbox flow
+- Razorpay order creation, payment verification, and webhook handlers for tenant and landlord payments
+- Background outbox worker started with the server
 
 ## Tech Stack
 
 ### Frontend (`frontend/UI`)
 
-- React 19 + Vite 7
+- React 19
+- Vite 7
 - React Router DOM 7
+- React Query
 - Tailwind CSS
 - Firebase
 - Framer Motion
-- Toast notifications (`react-toastify`)
-- Gemini SDK client (`@google/generative-ai`) for chatbot integration
+- React Toastify
+- Google Generative AI SDK
 
 ### Backend (`backend`)
 
 - Node.js + Express 5
 - MongoDB + Mongoose
+- PostgreSQL client via `pg`
 - JWT authentication
-- bcryptjs for password hashing
-- Razorpay integration
+- bcryptjs
+- Razorpay
 - dotenv and CORS
-
-### Tooling
-
-- ESLint + Prettier
-- Nodemon for backend development
-
----
+- Zod
 
 ## Repository Structure
 
 ```text
 Ghar_Nishchit/
 ├── backend/
-│   ├── src/
-│   │   ├── app.js
-│   │   ├── index.js
-│   │   ├── db/
-│   │   ├── controllers/
-│   │   ├── routes/
-│   │   ├── models/
-│   │   ├── middlewares/
-│   │   └── utils/
-│   └── package.json
-│
+│   └── src/
+│       ├── app.js
+│       ├── index.js
+│       ├── controllers/
+│       ├── db/
+│       ├── middlewares/
+│       ├── models/
+│       ├── routes/
+│       ├── utils/
+│       └── validations/
 ├── frontend/
 │   └── UI/
-│       ├── src/
-│       │   ├── components/
-│       │   │   ├── Auth/
-│       │   │   └── Pages/
-│       │   │       ├── LANDLORD/
-│       │   │       └── TENANT/
-│       │   ├── services/
-│       │   ├── utils/
-│       │   ├── App.jsx
-│       │   └── main.jsx
-│       └── package.json
-│
+│       └── src/
+│           ├── App.jsx
+│           ├── components/
+│           ├── services/
+│           ├── styles/
+│           ├── utils/
+│           └── i18n/
 └── Ai/
     ├── Chatbot.jsx
     ├── bot.md
     └── list_models.js
 ```
-
----
 
 ## Quick Start
 
@@ -157,16 +90,10 @@ Ghar_Nishchit/
 
 - Node.js 18+
 - npm
-- MongoDB (local or Atlas)
+- MongoDB connection string
+- Neon database connection string
 
-### 1) Clone and install
-
-```bash
-git clone https://github.com/your-username/Ghar_Nishchit.git
-cd Ghar_Nishchit
-```
-
-### 2) Start backend
+### Backend
 
 ```bash
 cd backend
@@ -174,31 +101,33 @@ npm install
 npm run dev
 ```
 
-### 3) Start frontend
+### Frontend
 
 ```bash
-cd ../frontend/UI
+cd frontend/UI
 npm install
 npm run dev
 ```
 
-### 4) Local URLs
+### Local URLs
 
 - Frontend: `http://localhost:5173`
-- Backend: `http://localhost:5000` (or your configured backend port)
-
----
+- Backend: `http://localhost:5000`
 
 ## Environment Variables
-
-Create a `.env` file in each module where needed.
 
 ### Backend (`backend/.env`)
 
 ```env
 PORT=5000
+FRONTEND_URL=http://localhost:5173
 MONGODB_URI=your_mongodb_connection_string
+NEONDB_URL=your_neon_database_connection_string
 JWT_SECRET=your_jwt_secret
+JWT_REFRESH_SECRET=your_refresh_secret
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+RAZORPAY_WEBHOOK_SECRET=your_razorpay_webhook_secret
 ```
 
 ### Frontend (`frontend/UI/.env`)
@@ -216,90 +145,61 @@ VITE_FIREBASE_APP_ID=your_firebase_app_id
 VITE_FIREBASE_MEASUREMENT_ID=your_firebase_measurement_id
 ```
 
-> If `VITE_GEMINI_API_KEY` is missing, the chatbot will warn users at runtime.
-
----
+If `VITE_GEMINI_API_KEY` is missing, the chatbot will warn at runtime.
 
 ## Scripts
 
 ### Backend
 
-- `npm run dev` - start backend with nodemon
-- `npm start` - run production-like backend start
+- `npm run dev` - start the backend with nodemon
+- `npm start` - start the backend with Node.js
 
 ### Frontend
 
-- `npm run dev` - start Vite dev server
-- `npm run build` - production build
-- `npm run preview` - preview build locally
-- `npm run lint` - run ESLint checks
-
----
+- `npm run dev` - start the Vite dev server
+- `npm run build` - build for production
+- `npm run preview` - preview the production build locally
+- `npm run lint` - run ESLint
 
 ## API Modules
 
-The backend currently exposes route groups for:
+The backend currently mounts these route groups:
 
 - `auth`
-- `user`
-- `property`
-- `tenant`
-- `maintenance`
-- `payment`
-- `contract`
+- `users`
+- `properties`
 - `favourites`
-- `inquiry`
-- `visit`
-- `notification`
-
-For request-level details, refer to backend route and controller files under `backend/src/routes` and `backend/src/controllers`.
-
----
+- `tenants`
+- `maintenance`
+- `inquiries`
+- `notifications`
+- `payments`
+- `landlord-payments`
+- `visits`
+- `contracts`
+- `support`
+- `admin`
 
 ## AI Module
 
-The `Ai` folder currently includes:
+The `Ai` folder currently contains:
 
-- `Chatbot.jsx`: in-app chatbot UI and Gemini model integration
-- `bot.md`: assistant behavior and response baseline
-- `list_models.js`: utility script to list available Gemini models
-
-Current assistant positioning:
-
-- Name: **Landmark AI Assistant**
-- Scope: support guidance for both tenant and landlord journeys
-- Behavior: concise, polite, product-aware responses
-
----
-
-## Roadmap
-
-The product roadmap remains aligned with the 1.0 direction:
-
-- Expansion into more Tier-2 and Tier-3 markets
-- Richer payment and lease workflows
-- Mobile app strategy
-- Deeper AI support (recommendations, smarter intent handling, multilingual support)
-- Advanced trust and verification features
-
----
+- `Chatbot.jsx` - in-app chatbot UI and Gemini integration
+- `bot.md` - assistant behavior baseline
+- `list_models.js` - helper script for listing Gemini models
 
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
-3. Commit changes with clear messages
-4. Push your branch
-5. Open a Pull Request
-
----
+2. Create a feature branch
+3. Commit your changes
+4. Push the branch
+5. Open a pull request
 
 ## License
 
 Licensed under ISC. See [LICENSE](LICENSE).
 
----
-
 <p align="center">
-  <b>Built for Indian renters and landlords who deserve a smoother experience.</b>
+  <b>Built for renters and landlords who need a simpler workflow.</b>
 </p>

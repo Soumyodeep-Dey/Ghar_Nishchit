@@ -55,7 +55,7 @@ fetchMaintenanceRequests();
 const BASE = 'http://localhost:3000/api';
 
 // To match backend port:
-const BASE = 'http://localhost:8000/api';
+const BASE = 'http://localhost:5000/api';
 ```
 
 ### 6. **Added useEffect Hooks**
@@ -121,7 +121,7 @@ const BASE = 'http://localhost:8000/api';
 2. **Check Console:**
    - Open browser console (F12)
    - Look for API request logs
-   - Should see: `API Request: GET http://localhost:8000/api/maintenance/landlord/...`
+   - Should see: `API Request: GET http://localhost:5000/api/maintenance/landlord/...`
 
 3. **Test Features:**
    - [ ] Page loads without errors
@@ -147,7 +147,7 @@ const BASE = 'http://localhost:8000/api';
 
 ### Issue 1: "Failed to load maintenance requests"
 **Solution:**
-- Check if backend is running: `http://localhost:8000/api`
+- Check if backend is running: `http://localhost:5000/api`
 - Check if MongoDB is running: `mongod`
 - Check browser console for CORS errors
 - Verify landlordId exists in localStorage
@@ -198,7 +198,7 @@ const BASE = 'http://localhost:8000/api';
    - Added useEffect hooks
 
 2. **`frontend/UI/src/services/api.js`**
-   - Changed BASE URL from port 3000 → 8000
+   - Changed BASE URL from port 3000 → 5000
 
 ### No Changes Needed:
 - UI components still work the same

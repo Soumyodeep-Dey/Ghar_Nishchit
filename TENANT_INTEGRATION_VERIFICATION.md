@@ -140,10 +140,10 @@ Component Mount → Fetch Profile → Fetch Maintenance → Update State → Dis
 ```
 
 **Current Status:**
-- ✅ Uses localStorage (payment API not yet implemented)
+- ✅ Uses backend Razorpay checkout via the shared API service
 - ✅ Enhanced with success toasts
 - ✅ Improved receipt formatting
-- ✅ Ready for backend integration when API available
+- ✅ Backend payment API is implemented and available
 
 **Features Working:**
 - ✅ Payment summary cards
@@ -167,6 +167,10 @@ Component Mount → Fetch Profile → Fetch Maintenance → Update State → Dis
 | `/api/maintenance` | POST | Maintenance | ✅ Available |
 | `/api/maintenance/:id` | PUT | Maintenance | ✅ Available |
 | `/api/maintenance/:id` | DELETE | Maintenance | ✅ Available |
+| `/api/payments/create-order` | POST | TenantPayment | ✅ Available |
+| `/api/payments/verify` | POST | TenantPayment | ✅ Available |
+| `/api/landlord-payments/create-order` | POST | LandlordPayment | ✅ Available |
+| `/api/landlord-payments/verify` | POST | LandlordPayment | ✅ Available |
 
 ### Backend Routes Configuration:
 ```javascript
@@ -415,9 +419,9 @@ Delete Request
 ## ⚠️ Known Limitations
 
 ### 1. Payment System
-- ⚠️ Currently uses localStorage
-- 📋 TODO: Implement payment backend API
-- 📋 TODO: Connect to payment gateway
+- ✅ Backend payment API implemented
+- ✅ Razorpay gateway connected for tenant and landlord flows
+- ⚠️ Some UI state still persists locally for display, but payment creation and verification are server-backed
 
 ### 2. Favorites System
 - ⚠️ Favorite toggle is local only
@@ -489,7 +493,7 @@ Delete Request
 1. ✅ **TenantDashboard** - Fully integrated with backend
 2. ✅ **TenantProperty** - Fetches and displays all properties
 3. ✅ **TenantMaintenance** - Complete CRUD operations
-4. ✅ **TenantPayment** - Enhanced UI (awaiting backend API)
+4. ✅ **TenantPayment** - Razorpay checkout and verification integrated
 
 ### API Endpoints Integrated ✅
 - ✅ Authentication & Profile
@@ -500,8 +504,7 @@ Delete Request
 ### Still Using LocalStorage ⚠️
 - ⚠️ Favorite properties (in TenantProperty)
 - ⚠️ Notifications (in TenantDashboard)
-- ⚠️ Payment history (in TenantPayment)
-- ⚠️ Upcoming payments (in TenantPayment)
+- ⚠️ Some session and profile state used by auth and profile screens
 
 ### Next Steps 📋
 1. Implement Favorites backend API
