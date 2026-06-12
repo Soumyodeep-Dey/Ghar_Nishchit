@@ -2,7 +2,13 @@
 
 ## Overview
 
-In this folder, write the code for AI.
+This folder contains the Ghar Nishchit AI chatbot module.
+
+## Setup
+
+1. Copy `.env.example` to `.env` in this folder.
+2. Set `VITE_GEMINI_API_KEY` to your [Google AI Studio](https://aistudio.google.com/apikey) key.
+3. You can also set the same variable in `frontend/UI/.env` — Vite merges both locations.
 
 ## About Landmark AI Assistant
 

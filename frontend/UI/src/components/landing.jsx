@@ -30,6 +30,15 @@ const properties = [
   { id: 10, name: 'Modern Bungalow', image: p10, location: 'Suburbs', price: 2100, type: 'Bungalow' },
 ];
 
+const trustSignals = [
+  'Trusted by 10,000+ landlords',
+  'Secure rent collection',
+  'Verified tenants',
+  '24/7 support',
+  'Safe digital contracts',
+  'Property protection you can trust',
+];
+
 const featuredProperties = [
   { id: 11, name: 'Exclusive Villa', image: p3, location: 'Beachside', price: 7000, type: 'Villa' },
   { id: 12, name: 'Downtown Apartment', image: p6, location: 'City Center', price: 2300, type: 'Apartment' },
@@ -128,9 +137,9 @@ function PricingCard({ title, price, features, buttonClass, onClick, highlight, 
       `}>
       <h3 className={`text-2xl font-black mb-2 ${highlight ? 'text-white' : darkMode ? 'text-amber-400' : 'text-slate-900'}`}>{title}</h3>
       <div className={`w-12 h-1 mx-auto mb-6 rounded-full ${highlight ? 'bg-white/40' : 'bg-amber-500/40'}`}></div>
-      
+
       <p className={`mb-10 text-4xl font-black ${highlight ? 'text-white' : darkMode ? 'text-white' : 'text-slate-900'}`}>{price}</p>
-      
+
       <ul className={`${highlight ? 'text-white' : 'text-slate-600 dark:text-slate-400'} mb-10 space-y-4 text-left flex-grow`}>
         {features.map((f, i) => (
           <li key={i} className="flex items-start space-x-3">
@@ -465,7 +474,7 @@ export default function Landing() {
       {/* Floating Contact Button */}
       <a
         href="#help"
-        className="fixed bottom-8 right-8 z-50 bg-amber-500 text-white p-5 rounded-full shadow-2xl hover:bg-amber-600 focus:outline-none transition-all hover:scale-110 active:scale-90 animate-bounce"
+        className="fixed bottom-8 right-24 z-50 bg-amber-500 text-white p-5 rounded-full shadow-2xl hover:bg-amber-600 focus:outline-none transition-all hover:scale-110 active:scale-90 animate-bounce"
         aria-label="Contact Us"
       >
         <HelpCircle size={24} />
@@ -475,7 +484,7 @@ export default function Landing() {
       <div className={`relative pt-40 pb-32 overflow-hidden ${darkMode ? 'bg-slate-950' : 'bg-[#fafaf9]'}`}>
         {/* Advanced Decorative Background */}
         <div className="absolute inset-0 opacity-[0.4] dark:opacity-[0.2]" style={{ backgroundImage: 'radial-gradient(#d97706 0.5px, transparent 0.5px)', backgroundSize: '24px 24px' }}></div>
-        
+
         {/* Mesh Gradients */}
         <div className="absolute top-[-10%] right-[-10%] w-[70%] h-[70%] bg-amber-400/20 rounded-full blur-[120px] animate-pulse pointer-events-none"></div>
         <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-amber-600/10 rounded-full blur-[100px] pointer-events-none"></div>
@@ -483,10 +492,20 @@ export default function Landing() {
 
         <div className="container mx-auto px-6 relative z-10">
           <div className="flex flex-col items-center text-center max-w-5xl mx-auto">
-            <div className="inline-block px-4 py-1.5 mb-8 rounded-full bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 shadow-sm">
-              <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">
-                <Users size={12} /> Trusted by 10,000+ Landlords
-              </span>
+            <div className="trust-marquee-wrap mb-8 w-full max-w-6xl rounded-full border border-indigo-200 bg-gradient-to-r from-white via-indigo-50 to-white px-6 py-4 shadow-[0_18px_45px_rgba(79,70,229,0.12)] backdrop-blur-md dark:border-slate-700 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+              <div className="trust-marquee overflow-hidden" aria-label="Trust highlights">
+                <div className="trust-marquee__track">
+                  {[...trustSignals, ...trustSignals].map((signal, index) => (
+                    <span
+                      key={`${signal}-${index}`}
+                      className="trust-marquee__item flex items-center gap-3 whitespace-nowrap text-xs font-black uppercase tracking-[0.28em] text-indigo-700 dark:text-indigo-200"
+                    >
+                      <Users size={14} className="shrink-0 text-amber-500" aria-hidden="true" />
+                      {signal}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <h1 className={`text-6xl sm:text-7xl md:text-8xl font-black mb-8 leading-[1.05] tracking-tight ${darkMode ? 'text-white' : 'text-[#1c1c1c]'}`}>
@@ -722,7 +741,7 @@ export default function Landing() {
                 At Ghar_Nishchit, we believe finding a home should be as exciting as moving in. Our platform bridges the gap between landlords and tenants with transparency, speed, and cutting-edge technology.
               </p>
             </div>
-            
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               {[
                 { title: 'Verified Listings', desc: 'Every property is manually checked for authenticity.' },
