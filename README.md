@@ -84,6 +84,12 @@ Ghar_Nishchit/
     └── list_models.js
 ```
 
+## Visual Diagram
+
+For a quicker high-level view of the system structure, open the architecture diagram here:
+
+[Eraser Git Diagrammer](https://eraser.io/git-diagrammer?diagramId=CwHRAeH2658QdmUqyfq6)
+
 ## Quick Start
 
 ### Prerequisites
