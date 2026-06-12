@@ -1,7 +1,6 @@
 # Razorpay Payment Gateway — Setup Guide
 
-This guide explains how to activate the Razorpay payment gateway
-already integrated into the `dev` branch of Ghar Nishchit.
+This guide explains the Razorpay payment gateway that is currently implemented in the backend and used by the tenant and landlord payment flows.
 
 ---
 
@@ -16,7 +15,7 @@ npm install razorpay
 
 ## 2. Configure Environment Variables
 
-Copy `backend/.env.example` to `backend/.env` and fill in your keys:
+Create `backend/.env` and fill in your keys:
 
 ```env
 RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxxxxxxxxxx
@@ -34,11 +33,12 @@ Get API keys from: https://dashboard.razorpay.com/app/keys
 
 | File | Change |
 |---|---|
-| `backend/src/models/payment.model.js` | Added `razorpayOrderId`, `razorpayPaymentId` fields + `'Razorpay'` enum |
-| `backend/src/controllers/payment.controller.js` | Added `createOrder`, `verifyPayment`, `handleWebhook` |
-| `backend/src/routes/payment.routes.js` | Added `POST /create-order`, `POST /verify`, `POST /webhook` |
-| `frontend/UI/src/components/Pages/TENANT/RazorpayCheckout.jsx` | New drop-in component |
-| `frontend/UI/src/components/Pages/TENANT/RazorpayCheckout.css` | Teal-themed styles, dark mode |
+| `backend/src/controllers/payment.controller.js` | Tenant payment order creation, verification, and webhook handling |
+| `backend/src/controllers/landlordPayment.controller.js` | Landlord subscription order creation, verification, and webhook handling |
+| `backend/src/routes/payment.routes.js` | `POST /create-order`, `POST /verify`, `POST /webhook` |
+| `backend/src/app.js` | Raw webhook routes mounted before JSON parsing |
+| `frontend/UI/src/components/Pages/TENANT/RazorpayCheckout.jsx` | Tenant checkout component |
+| `frontend/UI/src/components/Pages/TENANT/TenantPayment.jsx` | Uses the shared Razorpay checkout flow |
 
 ---
 
@@ -72,6 +72,8 @@ import RazorpayCheckout from './RazorpayCheckout';
 2. URL: `https://yourdomain.com/api/payments/webhook`
 3. Enable events: `payment.captured` and `payment.failed`
 4. Copy the **Webhook Secret** shown → paste into `.env` as `RAZORPAY_WEBHOOK_SECRET`
+
+Use the same webhook secret for the landlord payment flow as well.
 
 The webhook acts as a safety net — if the user closes their browser
 before the frontend calls `/verify`, the webhook will still update
