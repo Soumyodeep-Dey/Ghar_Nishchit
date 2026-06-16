@@ -131,7 +131,7 @@ const ScheduleVisitModal = ({ property, isOpen, onClose }) => {
       });
       showSuccessToast('Visit request sent successfully');
       onClose();
-    } catch (err) {
+    } catch {
       showErrorToast('Failed to book schedule visit');
     } finally {
       setIsSubmitting(false);
@@ -587,19 +587,41 @@ const PROPERTY_TYPE_OPTIONS = [
   { value: 'commercial', labelKey: 'filters.commercial' },
 ];
 
-const BEDROOM_OPTIONS = [
-  { value: '0', labelKey: 'filters.anyBeds' },
-  { value: '1', labelKey: 'filters.bed1' },
-  { value: '2', labelKey: 'filters.bed2' },
-  { value: '3', labelKey: 'filters.bed3' },
-  { value: '4', labelKey: 'filters.bed4' },
+const CITY_PIN_RULES = {
+  kolkata: { label: 'Kolkata', pinPrefix: '700', pinRange: '700001-700157', centralPin: '700001', aliases: ['kolkata'] },
+  bhubaneswar: { label: 'Bhubaneswar', pinPrefix: '751', pinRange: '751001-751031', centralPin: '751001', aliases: ['bhubaneswar', 'bhubaneshwar'] },
+  delhi: { label: 'Delhi', pinPrefix: '110', pinRange: '110001-110096', centralPin: '110001', aliases: ['delhi'] },
+  mumbai: { label: 'Mumbai', pinPrefix: '400', pinRange: '400001-400104', centralPin: '400001', aliases: ['mumbai'] },
+  bengaluru: { label: 'Bengaluru', pinPrefix: '560', pinRange: '560001-560114', centralPin: '560001', aliases: ['bengaluru', 'bangalore'] },
+  hyderabad: { label: 'Hyderabad', pinPrefix: '500', pinRange: '500001-500104', centralPin: '500001', aliases: ['hyderabad'] },
+  chennai: { label: 'Chennai', pinPrefix: '600', pinRange: '600001-600130', centralPin: '600001', aliases: ['chennai'] },
+  pune: { label: 'Pune', pinPrefix: '411', pinRange: '411001-411060', centralPin: '411001', aliases: ['pune'] },
+  ahmedabad: { label: 'Ahmedabad', pinPrefix: '380', pinRange: '380001-380061', centralPin: '380001', aliases: ['ahmedabad'] },
+  jaipur: { label: 'Jaipur', pinPrefix: '302', pinRange: '302001-302033', centralPin: '302001', aliases: ['jaipur'] },
+  lucknow: { label: 'Lucknow', pinPrefix: '226', pinRange: '226001-226028', centralPin: '226001', aliases: ['lucknow'] },
+};
+
+const CITY_OPTIONS = [
+  { value: 'all', label: 'All Cities' },
+  { value: 'Kolkata', label: 'Kolkata' },
+  { value: 'Bhubaneswar', label: 'Bhubaneswar' },
+  { value: 'Delhi', label: 'Delhi' },
+  { value: 'Mumbai', label: 'Mumbai' },
+  { value: 'Bengaluru', label: 'Bengaluru' },
+  { value: 'Hyderabad', label: 'Hyderabad' },
+  { value: 'Chennai', label: 'Chennai' },
+  { value: 'Pune', label: 'Pune' },
+  { value: 'Ahmedabad', label: 'Ahmedabad' },
+  { value: 'Jaipur', label: 'Jaipur' },
+  { value: 'Lucknow', label: 'Lucknow' },
 ];
 
-const BATHROOM_OPTIONS = [
-  { value: '0', labelKey: 'filters.anyBaths' },
-  { value: '1', labelKey: 'filters.bath1' },
-  { value: '2', labelKey: 'filters.bath2' },
-  { value: '3', labelKey: 'filters.bath3' },
+const BHK_OPTIONS = [
+  { value: 'all', label: 'Any BHK' },
+  { value: '1', label: '1 BHK' },
+  { value: '2', label: '2 BHK' },
+  { value: '3', label: '3 BHK' },
+  { value: '4plus', label: '4+ BHK' },
 ];
 
 const propertySearchText = (property) =>
@@ -627,6 +649,42 @@ const hasNearTransit = (property) => {
   return /metro|subway|railway|rail\s*station|train\s*station|near\s*(?:the\s*)?(?:metro|railway|station)/.test(text);
 };
 
+const normalizeSearchValue = (value = '') => String(value).trim().toLowerCase();
+const normalizeCityKey = (value = '') => normalizeSearchValue(value).replace(/[^a-z]/g, '');
+const normalizePinCode = (value = '') => String(value || '').replace(/\D/g, '').slice(0, 6);
+const formatLocationLabel = (location, pinCode) => {
+  const locationText = String(location || '').replace(/\s*,?\s*\d{6}\s*$/, '').trim() || 'Location not specified';
+  return pinCode ? `${locationText} - PIN ${pinCode}` : locationText;
+};
+const buildLocationKey = (location, pinCode) => `${normalizeSearchValue(location)}__${normalizePinCode(pinCode)}`;
+const getCityRule = (city) => CITY_PIN_RULES[normalizeCityKey(city)];
+const extractPinCode = (property) => normalizePinCode(
+  property.pinCode ||
+  property.zipCode ||
+  property.zip ||
+  property.postalCode ||
+  property.address?.zip ||
+  property.address?.zipCode ||
+  property.location
+);
+const propertyMatchesCityFilter = (property, cityFilter) => {
+  if (cityFilter === 'all') return true;
+
+  const rule = getCityRule(cityFilter);
+  const propertyCityKey = normalizeCityKey(property.city);
+  const propertyPinCode = extractPinCode(property);
+
+  if (!rule) {
+    return propertyCityKey === normalizeCityKey(cityFilter);
+  }
+
+  const cityAliases = [rule.label, ...(rule.aliases || [])].map(normalizeCityKey);
+  const matchesCityName = cityAliases.includes(propertyCityKey);
+  const matchesPinPrefix = propertyPinCode.startsWith(rule.pinPrefix);
+
+  return matchesCityName || matchesPinPrefix;
+};
+
 const TenantProperty = () => {
   const { darkMode } = useDarkMode();
   const { t } = useLanguage();
@@ -641,10 +699,9 @@ const TenantProperty = () => {
   const [sortBy, setSortBy] = useState('title');
   const [priceRange, setPriceRange] = useState([0, 50000]);
   const [propertyTypeFilter, setPropertyTypeFilter] = useState('all');
-  const [minBedrooms, setMinBedrooms] = useState('0');
-  const [minBathrooms, setMinBathrooms] = useState('0');
+  const [bhkFilter, setBhkFilter] = useState('all');
   const [cityFilter, setCityFilter] = useState('all');
-  const [minArea, setMinArea] = useState('');
+  const [locationFilter, setLocationFilter] = useState('all');
   const [petFriendlyOnly, setPetFriendlyOnly] = useState(false);
   const [furnishedOnly, setFurnishedOnly] = useState(false);
   const [availableOnly, setAvailableOnly] = useState(true);
@@ -677,7 +734,18 @@ const TenantProperty = () => {
           }
 
           const city =
-            typeof prop.address === 'object' ? (prop.address.city || '') : '';
+            typeof prop.address === 'object'
+              ? (prop.address.city || prop.city || '')
+              : (prop.city || '');
+          const pinCode = normalizePinCode(
+            prop.pinCode ||
+            prop.zipCode ||
+            prop.zip ||
+            prop.postalCode ||
+            prop.address?.zip ||
+            prop.address?.zipCode ||
+            locationString
+          );
           const rawPrice = Number(prop.price || prop.rent || 0);
 
           return {
@@ -686,6 +754,8 @@ const TenantProperty = () => {
             price: `₹${rawPrice}/month`,
             priceValue: rawPrice,
             location: locationString,
+            locationKey: buildLocationKey(locationString, pinCode),
+            pinCode,
             city: city.trim(),
             description: prop.description || 'No description available',
             image: prop.images && prop.images.length > 0 ? prop.images[0] : 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect width="400" height="300" fill="%23e5e7eb"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="24" fill="%239ca3af"%3ENo Image%3C/text%3E%3C/svg%3E',
@@ -780,10 +850,21 @@ const TenantProperty = () => {
   const extractPrice = (property) =>
     property.priceValue ?? (parseInt(String(property.price).replace(/[^0-9]/g, ''), 10) || 0);
 
-  const cityOptions = useMemo(() => {
-    const cities = [...new Set(properties.map(p => p.city).filter(Boolean))].sort();
-    return cities;
-  }, [properties]);
+  const locationOptions = useMemo(() => {
+    if (cityFilter === 'all') return [];
+
+    return [...new Map(
+      properties
+        .filter((property) => propertyMatchesCityFilter(property, cityFilter) && property.locationKey)
+        .map((property) => [
+          property.locationKey,
+          {
+            value: property.locationKey,
+            label: formatLocationLabel(property.location, property.pinCode),
+          }
+        ])
+    ).values()].sort((a, b) => a.label.localeCompare(b.label));
+  }, [cityFilter, properties]);
 
   const priceSliderMax = useMemo(() => {
     const maxP = properties.reduce((m, p) => Math.max(m, extractPrice(p)), 0);
@@ -793,10 +874,9 @@ const TenantProperty = () => {
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (propertyTypeFilter !== 'all') count++;
-    if (minBedrooms !== '0') count++;
-    if (minBathrooms !== '0') count++;
+    if (bhkFilter !== 'all') count++;
     if (cityFilter !== 'all') count++;
-    if (minArea) count++;
+    if (locationFilter !== 'all') count++;
     if (petFriendlyOnly) count++;
     if (furnishedOnly) count++;
     if (swimmingPoolOnly) count++;
@@ -805,16 +885,19 @@ const TenantProperty = () => {
     if (!availableOnly) count++;
     if (priceRange[0] > 0 || priceRange[1] < priceSliderMax) count++;
     return count;
-  }, [propertyTypeFilter, minBedrooms, minBathrooms, cityFilter, minArea, petFriendlyOnly, furnishedOnly, swimmingPoolOnly, gardenOnly, nearTransitOnly, availableOnly, priceRange, priceSliderMax]);
+  }, [propertyTypeFilter, bhkFilter, cityFilter, locationFilter, petFriendlyOnly, furnishedOnly, swimmingPoolOnly, gardenOnly, nearTransitOnly, availableOnly, priceRange, priceSliderMax]);
+
+  useEffect(() => {
+    setLocationFilter('all');
+  }, [cityFilter]);
 
   const resetAllFilters = useCallback(() => {
     setSearchTerm('');
     setFilter('all');
     setPropertyTypeFilter('all');
-    setMinBedrooms('0');
-    setMinBathrooms('0');
+    setBhkFilter('all');
     setCityFilter('all');
-    setMinArea('');
+    setLocationFilter('all');
     setPetFriendlyOnly(false);
     setFurnishedOnly(false);
     setSwimmingPoolOnly(false);
@@ -823,29 +906,34 @@ const TenantProperty = () => {
     setAvailableOnly(true);
     setSortBy('title');
     setPriceRange([0, priceSliderMax]);
-  }, [properties, priceSliderMax]);
+  }, [priceSliderMax]);
 
   const filteredAndSortedProperties = useMemo(() => {
-    const search = searchTerm.toLowerCase().trim();
-    const minBeds = parseInt(minBedrooms, 10) || 0;
-    const minBaths = parseInt(minBathrooms, 10) || 0;
-    const minAreaNum = parseInt(minArea, 10) || 0;
+    const search = normalizeSearchValue(searchTerm);
 
     let filtered = properties.filter(property => {
-      const matchesSearch = !search ||
-        property.title.toLowerCase().includes(search) ||
-        property.location.toLowerCase().includes(search) ||
-        property.city.toLowerCase().includes(search) ||
-        property.propertyType.includes(search);
+      const searchableText = [
+        property.title,
+        property.location,
+        property.city,
+        property.propertyType,
+        property.description,
+        ...(property.amenities || []),
+      ]
+        .map(normalizeSearchValue)
+        .join(' ');
+
+      const matchesSearch = !search || searchableText.includes(search);
 
       const price = extractPrice(property);
       const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
 
       const matchesType = propertyTypeFilter === 'all' || property.propertyType === propertyTypeFilter;
-      const matchesBeds = property.bedrooms >= minBeds;
-      const matchesBaths = property.bathrooms >= minBaths;
-      const matchesCity = cityFilter === 'all' || property.city.toLowerCase() === cityFilter.toLowerCase();
-      const matchesArea = !minAreaNum || property.area >= minAreaNum;
+      const matchesBhk =
+        bhkFilter === 'all' ||
+        (bhkFilter === '4plus' ? property.bedrooms >= 4 : property.bedrooms === Number(bhkFilter));
+      const matchesCity = propertyMatchesCityFilter(property, cityFilter);
+      const matchesLocation = locationFilter === 'all' || property.locationKey === locationFilter;
       const matchesPet = !petFriendlyOnly || property.petFriendly;
       const matchesFurnished = !furnishedOnly || property.furnished;
       const matchesPool = !swimmingPoolOnly || hasSwimmingPool(property);
@@ -854,13 +942,13 @@ const TenantProperty = () => {
       const matchesAvailable = !availableOnly || property.available;
 
       if (filter === 'favorite') {
-        return matchesSearch && property.favorite && matchesPrice && matchesType && matchesBeds &&
-          matchesBaths && matchesCity && matchesArea && matchesPet && matchesFurnished &&
+        return matchesSearch && property.favorite && matchesPrice && matchesType && matchesBhk &&
+          matchesCity && matchesLocation && matchesPet && matchesFurnished &&
           matchesPool && matchesGarden && matchesTransit && matchesAvailable;
       }
 
-      return matchesSearch && matchesPrice && matchesType && matchesBeds && matchesBaths &&
-        matchesCity && matchesArea && matchesPet && matchesFurnished &&
+      return matchesSearch && matchesPrice && matchesType && matchesBhk &&
+        matchesCity && matchesLocation && matchesPet && matchesFurnished &&
         matchesPool && matchesGarden && matchesTransit && matchesAvailable;
     });
 
@@ -884,7 +972,7 @@ const TenantProperty = () => {
     return filtered;
   }, [
     properties, searchTerm, filter, sortBy, priceRange, propertyTypeFilter,
-    minBedrooms, minBathrooms, cityFilter, minArea, petFriendlyOnly, furnishedOnly,
+    bhkFilter, cityFilter, locationFilter, petFriendlyOnly, furnishedOnly,
     swimmingPoolOnly, gardenOnly, nearTransitOnly, availableOnly
   ]);
 
@@ -994,7 +1082,7 @@ const TenantProperty = () => {
 
             {showAdvancedFilters && (
               <div className={`mt-4 pt-4 border-t border-dashed space-y-5 animate-fadeIn ${darkMode ? 'border-slate-600' : 'border-gray-200'}`}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
                     <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>{t('filters.propertyType')}</label>
                     <select value={propertyTypeFilter} onChange={(e) => setPropertyTypeFilter(e.target.value)} className={`w-full border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all ${selectCls}`}>
@@ -1004,27 +1092,18 @@ const TenantProperty = () => {
                     </select>
                   </div>
                   <div>
-                    <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>{t('filters.bedrooms')}</label>
-                    <select value={minBedrooms} onChange={(e) => setMinBedrooms(e.target.value)} className={`w-full border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all ${selectCls}`}>
-                      {BEDROOM_OPTIONS.map(opt => (
-                        <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>{t('filters.bathrooms')}</label>
-                    <select value={minBathrooms} onChange={(e) => setMinBathrooms(e.target.value)} className={`w-full border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all ${selectCls}`}>
-                      {BATHROOM_OPTIONS.map(opt => (
-                        <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
+                    <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>BHK</label>
+                    <select value={bhkFilter} onChange={(e) => setBhkFilter(e.target.value)} className={`w-full border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all ${selectCls}`}>
+                      {BHK_OPTIONS.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
                       ))}
                     </select>
                   </div>
                   <div>
                     <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>{t('filters.city')}</label>
                     <select value={cityFilter} onChange={(e) => setCityFilter(e.target.value)} className={`w-full border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all ${selectCls}`}>
-                      <option value="all">{t('filters.allCities')}</option>
-                      {cityOptions.map(city => (
-                        <option key={city} value={city}>{city}</option>
+                      {CITY_OPTIONS.map((city) => (
+                        <option key={city.value} value={city.value}>{city.label}</option>
                       ))}
                     </select>
                   </div>
@@ -1032,15 +1111,18 @@ const TenantProperty = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
-                    <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>{t('filters.minArea')}</label>
-                    <input
-                      type="number"
-                      min="0"
-                      placeholder={t('filters.minAreaPlaceholder')}
-                      value={minArea}
-                      onChange={(e) => setMinArea(e.target.value)}
-                      className={`w-full border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all ${selectCls}`}
-                    />
+                    <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>Location</label>
+                    <select
+                      value={locationFilter}
+                      onChange={(e) => setLocationFilter(e.target.value)}
+                      disabled={cityFilter === 'all'}
+                      className={`w-full border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all disabled:opacity-60 disabled:cursor-not-allowed ${selectCls}`}
+                    >
+                      <option value="all">{cityFilter === 'all' ? 'Choose a city first' : 'All locations'}</option>
+                      {locationOptions.map((location) => (
+                        <option key={location.value} value={location.value}>{location.label}</option>
+                      ))}
+                    </select>
                   </div>
                   <div className="flex flex-wrap items-end gap-4 sm:col-span-2">
                     <label className={`flex items-center gap-2 cursor-pointer ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>
