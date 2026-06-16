@@ -624,6 +624,23 @@ const BHK_OPTIONS = [
   { value: '4plus', label: '4+ BHK' },
 ];
 
+const BEDROOM_OPTIONS = [
+  { value: '0', label: 'Any Bedrooms' },
+  { value: '1', label: '1 Bedroom' },
+  { value: '2', label: '2 Bedrooms' },
+  { value: '3', label: '3 Bedrooms' },
+  { value: '4', label: '4 Bedrooms' },
+  { value: '5', label: '5+ Bedrooms' },
+];
+
+const BATHROOM_OPTIONS = [
+  { value: '0', label: 'Any Bathrooms' },
+  { value: '1', label: '1 Bathroom' },
+  { value: '2', label: '2 Bathrooms' },
+  { value: '3', label: '3 Bathrooms' },
+  { value: '4', label: '4+ Bathrooms' },
+];
+
 const propertySearchText = (property) =>
   [
     ...(property.amenities || []),
@@ -699,7 +716,8 @@ const TenantProperty = () => {
   const [sortBy, setSortBy] = useState('title');
   const [priceRange, setPriceRange] = useState([0, 50000]);
   const [propertyTypeFilter, setPropertyTypeFilter] = useState('all');
-  const [bhkFilter, setBhkFilter] = useState('all');
+  const [bedroomsFilter, setBedroomsFilter] = useState('0');
+  const [bathroomsFilter, setBathroomsFilter] = useState('0');
   const [cityFilter, setCityFilter] = useState('all');
   const [locationFilter, setLocationFilter] = useState('all');
   const [petFriendlyOnly, setPetFriendlyOnly] = useState(false);
@@ -874,7 +892,8 @@ const TenantProperty = () => {
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (propertyTypeFilter !== 'all') count++;
-    if (bhkFilter !== 'all') count++;
+    if (bedroomsFilter !== '0') count++;
+    if (bathroomsFilter !== '0') count++;
     if (cityFilter !== 'all') count++;
     if (locationFilter !== 'all') count++;
     if (petFriendlyOnly) count++;
@@ -885,7 +904,7 @@ const TenantProperty = () => {
     if (!availableOnly) count++;
     if (priceRange[0] > 0 || priceRange[1] < priceSliderMax) count++;
     return count;
-  }, [propertyTypeFilter, bhkFilter, cityFilter, locationFilter, petFriendlyOnly, furnishedOnly, swimmingPoolOnly, gardenOnly, nearTransitOnly, availableOnly, priceRange, priceSliderMax]);
+  }, [propertyTypeFilter, bedroomsFilter, bathroomsFilter, cityFilter, locationFilter, petFriendlyOnly, furnishedOnly, swimmingPoolOnly, gardenOnly, nearTransitOnly, availableOnly, priceRange, priceSliderMax]);
 
   useEffect(() => {
     setLocationFilter('all');
@@ -895,7 +914,8 @@ const TenantProperty = () => {
     setSearchTerm('');
     setFilter('all');
     setPropertyTypeFilter('all');
-    setBhkFilter('all');
+    setBedroomsFilter('0');
+    setBathroomsFilter('0');
     setCityFilter('all');
     setLocationFilter('all');
     setPetFriendlyOnly(false);
@@ -929,9 +949,10 @@ const TenantProperty = () => {
       const matchesPrice = price >= priceRange[0] && price <= priceRange[1];
 
       const matchesType = propertyTypeFilter === 'all' || property.propertyType === propertyTypeFilter;
-      const matchesBhk =
-        bhkFilter === 'all' ||
-        (bhkFilter === '4plus' ? property.bedrooms >= 4 : property.bedrooms === Number(bhkFilter));
+      const minBedrooms = parseInt(bedroomsFilter, 10) || 0;
+      const minBathrooms = parseInt(bathroomsFilter, 10) || 0;
+      const matchesBedrooms = property.bedrooms >= minBedrooms;
+      const matchesBathrooms = property.bathrooms >= minBathrooms;
       const matchesCity = propertyMatchesCityFilter(property, cityFilter);
       const matchesLocation = locationFilter === 'all' || property.locationKey === locationFilter;
       const matchesPet = !petFriendlyOnly || property.petFriendly;
@@ -942,13 +963,13 @@ const TenantProperty = () => {
       const matchesAvailable = !availableOnly || property.available;
 
       if (filter === 'favorite') {
-        return matchesSearch && property.favorite && matchesPrice && matchesType && matchesBhk &&
-          matchesCity && matchesLocation && matchesPet && matchesFurnished &&
+        return matchesSearch && property.favorite && matchesPrice && matchesType && matchesBedrooms &&
+          matchesBathrooms && matchesCity && matchesLocation && matchesPet && matchesFurnished &&
           matchesPool && matchesGarden && matchesTransit && matchesAvailable;
       }
 
-      return matchesSearch && matchesPrice && matchesType && matchesBhk &&
-        matchesCity && matchesLocation && matchesPet && matchesFurnished &&
+      return matchesSearch && matchesPrice && matchesType && matchesBedrooms &&
+        matchesBathrooms && matchesCity && matchesLocation && matchesPet && matchesFurnished &&
         matchesPool && matchesGarden && matchesTransit && matchesAvailable;
     });
 
@@ -972,7 +993,7 @@ const TenantProperty = () => {
     return filtered;
   }, [
     properties, searchTerm, filter, sortBy, priceRange, propertyTypeFilter,
-    bhkFilter, cityFilter, locationFilter, petFriendlyOnly, furnishedOnly,
+    bedroomsFilter, bathroomsFilter, cityFilter, locationFilter, petFriendlyOnly, furnishedOnly,
     swimmingPoolOnly, gardenOnly, nearTransitOnly, availableOnly
   ]);
 
@@ -1082,7 +1103,7 @@ const TenantProperty = () => {
 
             {showAdvancedFilters && (
               <div className={`mt-4 pt-4 border-t border-dashed space-y-5 animate-fadeIn ${darkMode ? 'border-slate-600' : 'border-gray-200'}`}>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
                     <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>{t('filters.propertyType')}</label>
                     <select value={propertyTypeFilter} onChange={(e) => setPropertyTypeFilter(e.target.value)} className={`w-full border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all ${selectCls}`}>
@@ -1092,9 +1113,17 @@ const TenantProperty = () => {
                     </select>
                   </div>
                   <div>
-                    <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>BHK</label>
-                    <select value={bhkFilter} onChange={(e) => setBhkFilter(e.target.value)} className={`w-full border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all ${selectCls}`}>
-                      {BHK_OPTIONS.map(opt => (
+                    <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>Bedrooms</label>
+                    <select value={bedroomsFilter} onChange={(e) => setBedroomsFilter(e.target.value)} className={`w-full border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all ${selectCls}`}>
+                      {BEDROOM_OPTIONS.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-slate-300' : 'text-gray-700'}`}>Bathrooms</label>
+                    <select value={bathroomsFilter} onChange={(e) => setBathroomsFilter(e.target.value)} className={`w-full border-2 rounded-xl px-4 py-3 focus:outline-none focus:ring-4 transition-all ${selectCls}`}>
+                      {BATHROOM_OPTIONS.map(opt => (
                         <option key={opt.value} value={opt.value}>{opt.label}</option>
                       ))}
                     </select>
