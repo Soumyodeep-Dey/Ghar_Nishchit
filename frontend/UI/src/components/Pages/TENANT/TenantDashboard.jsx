@@ -44,9 +44,8 @@ const StatCard = React.memo(({ icon: Icon, title, value, change, trend, color, p
           <div className={`p-3 rounded-2xl bg-gradient-to-br ${th.iconBg} backdrop-blur-sm border ${th.iconBorder}`}>
             {Icon && <Icon className={`w-6 h-6 ${th.iconColor}`} />}
           </div>
-          <div className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-widest backdrop-blur-sm border ${
-            trend === 'up' ? th.trendUp : th.trendDown
-          }`}>
+          <div className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-widest backdrop-blur-sm border ${trend === 'up' ? th.trendUp : th.trendDown
+            }`}>
             <TrendIcon className="w-3 h-3" />
             <span>{change}</span>
           </div>
@@ -66,21 +65,18 @@ const StatCard = React.memo(({ icon: Icon, title, value, change, trend, color, p
 const PropertyCard = React.memo(({ property, onRemove, removeConfirmId, onConfirmRemove, onCancelRemove }) => {
   const { darkMode } = useDarkMode();
   return (
-    <div className={`rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden group hover:scale-105 border ${
-      darkMode ? 'bg-slate-800 border-slate-700 hover:shadow-amber-500/10' : 'bg-white border-gray-100 hover:shadow-amber-500/20'
-    }`}>
+    <div className={`rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden group hover:scale-105 border ${darkMode ? 'bg-slate-800 border-slate-700 hover:shadow-amber-500/10' : 'bg-white border-gray-100 hover:shadow-amber-500/20'
+      }`}>
       <div className="relative overflow-hidden">
         <img src={property.image} alt={property.title}
           className="w-full h-48 object-cover transition-all duration-700 group-hover:scale-110" loading="lazy" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <div className={`absolute bottom-4 left-4 px-4 py-2 rounded-full font-semibold shadow-lg text-white ${
-          darkMode ? 'bg-gradient-to-r from-amber-500 to-amber-600' : 'bg-gradient-to-r from-amber-500 to-amber-600'
-        }`}>{property.price}</div>
+        <div className={`absolute bottom-4 left-4 px-4 py-2 rounded-full font-semibold shadow-lg text-white ${darkMode ? 'bg-gradient-to-r from-amber-500 to-amber-600' : 'bg-gradient-to-r from-amber-500 to-amber-600'
+          }`}>{property.price}</div>
       </div>
       <div className="p-6">
-        <h3 className={`font-bold text-xl mb-2 transition-colors duration-300 ${
-          darkMode ? 'text-slate-100 group-hover:text-amber-400' : 'text-gray-800 group-hover:text-amber-600'
-        }`}>{property.title}</h3>
+        <h3 className={`font-bold text-xl mb-2 transition-colors duration-300 ${darkMode ? 'text-slate-100 group-hover:text-amber-400' : 'text-gray-800 group-hover:text-amber-600'
+          }`}>{property.title}</h3>
         <p className={`mb-3 flex items-center ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>
           <Star className={`h-4 w-4 mr-2 ${darkMode ? 'text-yellow-400' : 'text-yellow-500'}`} />
           {property.location}
@@ -96,15 +92,13 @@ const PropertyCard = React.memo(({ property, onRemove, removeConfirmId, onConfir
                 Confirm
               </button>
               <button onClick={onCancelRemove}
-                className={`text-sm px-4 py-2 rounded-lg ${
-                  darkMode ? 'bg-slate-700 text-slate-200 hover:bg-slate-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}>Cancel</button>
+                className={`text-sm px-4 py-2 rounded-lg ${darkMode ? 'bg-slate-700 text-slate-200 hover:bg-slate-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}>Cancel</button>
             </div>
           ) : (
             <button onClick={() => onConfirmRemove(property.id)}
-              className={`transition-colors duration-200 p-2 hover:scale-110 ${
-                darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'
-              }`} aria-label={`Remove ${property.title} from favorites`}>
+              className={`transition-colors duration-200 p-2 hover:scale-110 ${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'
+                }`} aria-label={`Remove ${property.title} from favorites`}>
               <Heart className="h-5 w-5" />
             </button>
           )}
@@ -121,24 +115,21 @@ const NotificationItem = React.memo(({ notification, onMarkAsRead, onDelete }) =
   const { darkMode } = useDarkMode();
   const typeIcon = {
     maintenance: <Wrench className={`h-6 w-6 ${darkMode ? 'text-orange-400' : 'text-orange-500'}`} />,
-    payment:     <CreditCard className={`h-6 w-6 ${darkMode ? 'text-amber-400' : 'text-amber-500'}`} />,
-    general:     <Bell className={`h-6 w-6 ${darkMode ? 'text-yellow-400' : 'text-yellow-500'}`} />,
+    payment: <CreditCard className={`h-6 w-6 ${darkMode ? 'text-amber-400' : 'text-amber-500'}`} />,
+    general: <Bell className={`h-6 w-6 ${darkMode ? 'text-yellow-400' : 'text-yellow-500'}`} />,
   };
   return (
     <div
-      className={`relative p-4 rounded-xl border-l-4 cursor-pointer transition-all duration-300 shadow-md hover:shadow-xl ${
-        darkMode ? 'bg-slate-800' : 'bg-white'
-      } ${
-        notification.read
+      className={`relative p-4 rounded-xl border-l-4 cursor-pointer transition-all duration-300 shadow-md hover:shadow-xl ${darkMode ? 'bg-slate-800' : 'bg-white'
+        } ${notification.read
           ? (darkMode ? 'border-slate-600' : 'border-gray-300')
           : (darkMode ? 'border-amber-500' : 'border-amber-500')
-      } hover:scale-105 group`}
+        } hover:scale-105 group`}
       onClick={() => onMarkAsRead(notification.id)}
     >
       <div className="flex items-start">
-        <div className={`p-2 rounded-full shadow-md group-hover:scale-110 transition-transform duration-300 ${
-          darkMode ? 'bg-slate-700' : 'bg-white'
-        }`}>{typeIcon[notification.type] || typeIcon.general}</div>
+        <div className={`p-2 rounded-full shadow-md group-hover:scale-110 transition-transform duration-300 ${darkMode ? 'bg-slate-700' : 'bg-white'
+          }`}>{typeIcon[notification.type] || typeIcon.general}</div>
         <div className="flex-1 ml-4">
           <h4 className={`font-semibold mb-1 ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>{notification.title}</h4>
           <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-gray-600'}`}>{notification.message}</p>
@@ -151,9 +142,8 @@ const NotificationItem = React.memo(({ notification, onMarkAsRead, onDelete }) =
         </div>
         <button
           onClick={(e) => { e.stopPropagation(); onDelete(notification.id); }}
-          className={`ml-2 p-2 hover:scale-110 transition-all duration-200 ${
-            darkMode ? 'text-slate-400 hover:text-red-400' : 'text-gray-400 hover:text-red-600'
-          }`}
+          className={`ml-2 p-2 hover:scale-110 transition-all duration-200 ${darkMode ? 'text-slate-400 hover:text-red-400' : 'text-gray-400 hover:text-red-600'
+            }`}
           aria-label="Delete notification">
           <X className="h-5 w-5" />
         </button>
@@ -181,9 +171,8 @@ const Modal = React.memo(({ isOpen, onClose, title, children, size = 'md' }) => 
         className={`${darkMode ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-2xl ${sizeClasses[size]} w-full max-h-[90vh] overflow-y-auto m-4`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className={`sticky top-0 ${darkMode ? 'bg-slate-800/95' : 'bg-white/95'} backdrop-blur-sm border-b ${
-          darkMode ? 'border-slate-700' : 'border-gray-200'
-        } p-6 rounded-t-2xl`}>
+        <div className={`sticky top-0 ${darkMode ? 'bg-slate-800/95' : 'bg-white/95'} backdrop-blur-sm border-b ${darkMode ? 'border-slate-700' : 'border-gray-200'
+          } p-6 rounded-t-2xl`}>
           <div className="flex justify-between items-center">
             <h3 className={`text-2xl font-bold ${darkMode ? 'text-slate-100' : 'text-gray-800'}`}>{title}</h3>
             <button onClick={onClose}
@@ -203,9 +192,8 @@ const Modal = React.memo(({ isOpen, onClose, title, children, size = 'md' }) => 
 // Skeleton card — shown while data is fetching
 // ---------------------------------------------------------------------------
 const SkeletonCard = ({ isDark }) => (
-  <div className={`rounded-3xl p-6 border animate-pulse ${
-    isDark ? 'bg-slate-900/80 border-slate-800' : 'bg-white border-slate-100'
-  }`}>
+  <div className={`rounded-3xl p-6 border animate-pulse ${isDark ? 'bg-slate-900/80 border-slate-800' : 'bg-white border-slate-100'
+    }`}>
     <div className={`h-10 w-10 rounded-xl mb-4 ${isDark ? 'bg-slate-700' : 'bg-gray-200'}`} />
     <div className={`h-6 w-24 rounded mb-2 ${isDark ? 'bg-slate-700' : 'bg-gray-200'}`} />
     <div className={`h-4 w-32 rounded ${isDark ? 'bg-slate-700/60' : 'bg-gray-100'}`} />
@@ -216,20 +204,18 @@ const SkeletonCard = ({ isDark }) => (
 // Error banner
 // ---------------------------------------------------------------------------
 const ErrorBanner = ({ message, onRetry, isDark }) => (
-  <div className={`flex items-center justify-between gap-4 px-5 py-4 rounded-2xl border ${
-    isDark
-      ? 'bg-red-900/30 border-red-700/50 text-red-300'
-      : 'bg-red-50 border-red-200 text-red-700'
-  }`}>
+  <div className={`flex items-center justify-between gap-4 px-5 py-4 rounded-2xl border ${isDark
+    ? 'bg-red-900/30 border-red-700/50 text-red-300'
+    : 'bg-red-50 border-red-200 text-red-700'
+    }`}>
     <div className="flex items-center gap-3">
       <AlertCircle className="w-5 h-5 flex-shrink-0" />
       <span className="text-sm font-medium">{message}</span>
     </div>
     <button
       onClick={onRetry}
-      className={`flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg transition-colors ${
-        isDark ? 'bg-red-800/50 hover:bg-red-700/60' : 'bg-red-100 hover:bg-red-200'
-      }`}
+      className={`flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-lg transition-colors ${isDark ? 'bg-red-800/50 hover:bg-red-700/60' : 'bg-red-100 hover:bg-red-200'
+        }`}
     >
       <RefreshCw className="w-3.5 h-3.5" />
       Retry
@@ -243,19 +229,19 @@ const ErrorBanner = ({ message, onRetry, isDark }) => (
 const TenantDashboard = () => {
   const { darkMode } = useDarkMode();
   const { t } = useLanguage();
-  const navigate  = useNavigate();
-  const location  = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [currentSection, setCurrentSection] = useState('Dashboard');
-  const [isLoading,  setIsLoading]  = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
 
   // All data from real API — no hardcoded mock objects
-  const [profile,             setProfile]             = useState(null);
+  const [profile, setProfile] = useState(null);
   const [favouriteProperties, setFavouriteProperties] = useState([]);
-  const [notifications,       setNotifications]       = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [maintenanceRequests, setMaintenanceRequests] = useState([]);
-  const [paymentHistory,      setPaymentHistory]      = useState([]);
+  const [paymentHistory, setPaymentHistory] = useState([]);
 
   // -------------------------------------------------------------------------
   // Coordinated parallel fetch
@@ -277,7 +263,7 @@ const TenantDashboard = () => {
       ]);
 
       setFavouriteProperties(
-        favResult.status   === 'fulfilled' && Array.isArray(favResult.value)   ? favResult.value   : []
+        favResult.status === 'fulfilled' && Array.isArray(favResult.value) ? favResult.value : []
       );
       setNotifications(
         notifResult.status === 'fulfilled' && Array.isArray(notifResult.value) ? notifResult.value : []
@@ -286,7 +272,7 @@ const TenantDashboard = () => {
         maintResult.status === 'fulfilled' && Array.isArray(maintResult.value) ? maintResult.value : []
       );
       setPaymentHistory(
-        payResult.status   === 'fulfilled' && Array.isArray(payResult.value)   ? payResult.value   : []
+        payResult.status === 'fulfilled' && Array.isArray(payResult.value) ? payResult.value : []
       );
 
       [favResult, notifResult, maintResult, payResult].forEach((r, i) => {
@@ -374,7 +360,7 @@ const TenantDashboard = () => {
             <div className={`h-10 w-64 rounded-xl mx-auto animate-pulse ${darkMode ? 'bg-slate-800' : 'bg-white'}`} />
             <div className={`h-5 w-96 rounded mx-auto animate-pulse ${darkMode ? 'bg-slate-800/60' : 'bg-slate-100'}`} />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
-              {[0,1,2,3].map(i => <SkeletonCard key={i} isDark={darkMode} />)}
+              {[0, 1, 2, 3].map(i => <SkeletonCard key={i} isDark={darkMode} />)}
             </div>
             <div className={`h-48 w-full rounded-3xl animate-pulse ${darkMode ? 'bg-slate-900/60' : 'bg-white'}`} />
           </main>
@@ -427,9 +413,10 @@ const TenantDashboard = () => {
             {/* Tab Navigation */}
             <div className={`flex flex-wrap gap-4 mb-8 ${tc.tabBg} p-3 rounded-3xl backdrop-blur-xl border ${tc.tabBorder}`}>
               {[
-                { key: 'overview',    labelKey: 'tenant.overview',    icon: BarChart3, action: 'tab' },
-                { key: 'properties',  labelKey: 'sidebar.properties',  icon: Building2, action: 'navigate', route: '/tenant/properties' },
-                { key: 'maintenance', labelKey: 'sidebar.maintenance', icon: Wrench,    action: 'navigate', route: '/tenant/maintenance' },
+                { key: 'overview', labelKey: 'tenant.overview', icon: BarChart3, action: 'tab' },
+                { key: 'properties', labelKey: 'sidebar.properties', icon: Building2, action: 'navigate', route: '/tenant/properties' },
+                { key: 'maintenance', labelKey: 'sidebar.maintenance', icon: Wrench, action: 'navigate', route: '/tenant/maintenance' },
+                { key: 'payments', labelKey: 'sidebar.payments', icon: CreditCard, action: 'navigate', route: '/tenant/payment' },
               ].map(({ key, labelKey, icon: Icon, action, route }) => (
                 <button
                   key={key}
@@ -437,12 +424,11 @@ const TenantDashboard = () => {
                     if (action === 'tab') { setCurrentSection('Dashboard'); navigate('/tenant'); }
                     else navigate(route);
                   }}
-                  className={`flex items-center space-x-3 px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-widest ${
-                    (action === 'tab' && location.pathname === '/tenant') ||
+                  className={`flex items-center space-x-3 px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-widest ${(action === 'tab' && location.pathname === '/tenant') ||
                     (action === 'navigate' && location.pathname === route)
-                      ? `${tc.tabActive} ${tc.tabActiveText} shadow-[0_10px_30px_rgba(245,158,11,0.3)]`
-                      : tc.tabInactive
-                  }`}
+                    ? `${tc.tabActive} ${tc.tabActiveText} shadow-[0_10px_30px_rgba(245,158,11,0.3)]`
+                    : tc.tabInactive
+                    }`}
                 >
                   {Icon && <Icon className="w-5 h-5" />}
                   <span className="font-semibold">{t(labelKey)}</span>
@@ -459,9 +445,9 @@ const TenantDashboard = () => {
                   <h2 className={`text-3xl font-black ${tc.textPrimary} mb-8`}>{t('tenant.quickActions')}</h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {[
-                      { id: 'viewProps', labelKey: 'tenant.viewProperties', descKey: 'tenant.browseRentals', icon: Building2, color: tc.buttonPrimary,   onClick: () => navigate('/tenant/properties') },
+                      { id: 'viewProps', labelKey: 'tenant.viewProperties', descKey: 'tenant.browseRentals', icon: Building2, color: tc.buttonPrimary, onClick: () => navigate('/tenant/properties') },
                       { id: 'maint', labelKey: 'tenant.requestMaintenance', descKey: 'tenant.reportIssues', icon: Wrench, color: tc.buttonPrimary, onClick: () => navigate('/tenant/maintenance') },
-                      { id: 'notif', labelKey: 'tenant.viewNotifications', descKey: 'tenant.checkAlerts', icon: Bell, color: tc.buttonSecondary, onClick: () => setCurrentSection('Notifications') },
+                      { id: 'payments', labelKey: 'sections.paymentHistory', descKey: 'search.paymentHistory', icon: CreditCard, color: tc.buttonPrimary, onClick: () => navigate('/tenant/payment') },
                     ].map((action) => (
                       <button key={action.id} onClick={action.onClick}
                         className={`group relative p-8 bg-gradient-to-br ${action.color} rounded-2xl text-white font-black shadow-[0_20px_50px_rgba(245,158,11,0.2)] text-base hover:-translate-y-1 transition-all duration-300`}
