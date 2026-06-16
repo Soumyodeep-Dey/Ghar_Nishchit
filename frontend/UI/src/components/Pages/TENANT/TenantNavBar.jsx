@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Search, Bell, Sun, Moon, User, Settings, Languages, LogOut, ChevronDown, X, MessageSquare, Wrench, CreditCard, Home, Building2, Heart } from 'lucide-react';
+import { Bell, Sun, Moon, User, Settings, Languages, LogOut, ChevronDown, X, MessageSquare, Wrench, CreditCard, Home, Building2, Heart } from 'lucide-react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../../services/api.js';
@@ -40,8 +40,6 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [languageDialogOpen, setLanguageDialogOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   // Redirect to login if no valid session.
   const [user, setUser] = useState(() => readUserFromStorage());
@@ -60,28 +58,28 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
     try {
       const data = await api.getNotifications();
       const iconMap = {
-        inquiry:     MessageSquare,
+        inquiry: MessageSquare,
         maintenance: Wrench,
-        payment:     CreditCard,
-        general:     Bell,
-        message:     MessageSquare,
+        payment: CreditCard,
+        general: Bell,
+        message: MessageSquare,
       };
       const colorMap = {
-        inquiry:     'primary',
+        inquiry: 'primary',
         maintenance: 'warning',
-        payment:     'success',
-        general:     'primary',
-        message:     'primary',
+        payment: 'success',
+        general: 'primary',
+        message: 'primary',
       };
       const mapped = (Array.isArray(data) ? data : []).map((n) => ({
-        id:      n.id || n._id,
-        type:    n.type,
-        icon:    iconMap[n.type] || Bell,
-        title:   n.title,
+        id: n.id || n._id,
+        type: n.type,
+        icon: iconMap[n.type] || Bell,
+        title: n.title,
         message: n.message,
-        time:    n.time || new Date(n.createdAt).toLocaleString(),
-        isRead:  n.read,
-        color:   colorMap[n.type] || 'primary',
+        time: n.time || new Date(n.createdAt).toLocaleString(),
+        isRead: n.read,
+        color: colorMap[n.type] || 'primary',
         relatedId: n.relatedId,
       }));
       setNotifications(mapped);
@@ -113,16 +111,15 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
   }, []);
 
   const profileDropdownRef = useRef(null);
-  const notificationsRef   = useRef(null);
-  const searchRef          = useRef(null);
+  const notificationsRef = useRef(null);
 
   const sectionIcons = {
-    Dashboard:   Home,
-    Properties:  Building2,
-    Favorites:   Heart,
-    Payments:    CreditCard,
+    Dashboard: Home,
+    Properties: Building2,
+    Favorites: Heart,
+    Payments: CreditCard,
     Maintenance: Wrench,
-    Messages:    MessageSquare,
+    Messages: MessageSquare,
   };
   const getCurrentSectionIcon = () => sectionIcons[currentSection] || Home;
 
@@ -146,7 +143,7 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
       console.error('Failed to mark as read:', err);
     }
     setIsNotificationsOpen(false); // Close dropdown
-    
+
     // Redirect logic
     if (notification.type === 'inquiry' || notification.type === 'message') {
       navigate('/tenant/messages', { state: { activeInquiryId: notification.relatedId } });
@@ -160,25 +157,6 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
     } catch (err) {
       console.error('Failed to mark all as read:', err);
     }
-  };
-
-  // Search suggestions — each entry navigates on click.
-  const searchSuggestions = [
-    { labelKey: 'search.myProperty',          route: '/tenant/properties' },
-    { labelKey: 'search.paymentHistory',      route: '/tenant/payment' },
-    { labelKey: 'search.maintenanceRequests', route: '/tenant/maintenance' },
-    { labelKey: 'search.messages',             route: '/tenant/messages' },
-    { labelKey: 'search.rentReceipt',         route: '/tenant/payment' },
-  ];
-
-  const filteredSuggestions = searchSuggestions.filter(s =>
-    t(s.labelKey).toLowerCase().includes(searchQuery.toLowerCase()) && searchQuery.length > 0
-  );
-
-  const handleSuggestionClick = (suggestion) => {
-    setSearchQuery(t(suggestion.labelKey));
-    setIsSearchFocused(false);
-    navigate(suggestion.route);
   };
 
   const handleLogout = () => {
@@ -214,47 +192,6 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
                   {t(SECTION_SUBTITLE_KEYS[currentSection] || 'sections.overviewAnalytics')}
                 </p>
               </div>
-            </div>
-          </div>
-
-          {/* Search Bar */}
-          <div className="hidden md:flex flex-1 max-w-xl mx-8 relative">
-            <div className="relative w-full">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-4">
-                <Search className="h-4 w-4 text-gray-400" />
-              </div>
-              <input
-                ref={searchRef}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-                placeholder={t('common.searchProperties')}
-                className={`w-full pl-11 pr-4 py-2.5 border-2 rounded-2xl focus:outline-none transition-all font-medium ${theme.searchBg} ${theme.searchFocus} ${theme.textPrimary} placeholder-slate-400`}
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-              {isSearchFocused && filteredSuggestions.length > 0 && (
-                <div className={`absolute top-full left-0 right-0 mt-2 rounded-2xl shadow-xl border z-50 ${theme.dropdown}`}>
-                  {filteredSuggestions.map((suggestion, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleSuggestionClick(suggestion)}
-                      className={`w-full px-4 py-3 text-left text-sm font-medium flex items-center justify-between ${theme.textPrimary} ${theme.dropdownHover}`}
-                    >
-                      <span>{t(suggestion.labelKey)}</span>
-                      <span className="text-xs text-gray-400 dark:text-gray-500">{t('common.go')}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
 
@@ -328,9 +265,8 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
                         return (
                           <div
                             key={notification.id}
-                            className={`p-4 cursor-pointer border-l-4 ${theme.dropdownHover} ${
-                              notification.isRead ? 'border-transparent' : theme.unreadBorder
-                            }`}
+                            className={`p-4 cursor-pointer border-l-4 ${theme.dropdownHover} ${notification.isRead ? 'border-transparent' : theme.unreadBorder
+                              }`}
                             onClick={() => markAsRead(notification)}
                           >
                             <div className="flex items-start space-x-3">
@@ -338,9 +274,8 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
                                 <IconComponent className="h-4 w-4" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className={`font-bold truncate ${
-                                  notification.isRead ? theme.textSecondary : theme.textPrimary
-                                }`}>
+                                <p className={`font-bold truncate ${notification.isRead ? theme.textSecondary : theme.textPrimary
+                                  }`}>
                                   {notification.title}
                                 </p>
                                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
@@ -443,28 +378,6 @@ const TenantNavBar = ({ currentSection = 'Dashboard' }) => {
       </div>
 
       <LanguageDialog open={languageDialogOpen} onClose={() => setLanguageDialogOpen(false)} />
-
-      {/* Mobile Search */}
-      <div className="md:hidden px-4 pb-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search..."
-            className={`w-full pl-10 pr-4 py-2.5 border-2 rounded-2xl focus:outline-none transition-all font-medium ${theme.searchBg} ${theme.searchFocus} ${theme.textPrimary} placeholder-slate-400`}
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-      </div>
     </nav>
   );
 };
