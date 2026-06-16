@@ -690,6 +690,7 @@ const propertyMatchesCityFilter = (property, cityFilter) => {
   const rule = getCityRule(cityFilter);
   const propertyCityKey = normalizeCityKey(property.city);
   const propertyPinCode = extractPinCode(property);
+  const propertyLocationText = normalizeCityKey(property.location);
 
   if (!rule) {
     return propertyCityKey === normalizeCityKey(cityFilter);
@@ -697,9 +698,10 @@ const propertyMatchesCityFilter = (property, cityFilter) => {
 
   const cityAliases = [rule.label, ...(rule.aliases || [])].map(normalizeCityKey);
   const matchesCityName = cityAliases.includes(propertyCityKey);
+  const matchesLocationText = cityAliases.some((alias) => alias && propertyLocationText.includes(alias));
   const matchesPinPrefix = propertyPinCode.startsWith(rule.pinPrefix);
 
-  return matchesCityName || matchesPinPrefix;
+  return matchesCityName || matchesLocationText || matchesPinPrefix;
 };
 
 const TenantProperty = () => {
