@@ -9,7 +9,7 @@ import {
 // framer-motion removed to reduce animation overhead
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../../../useDarkMode.js';
-import api from '../../../services/api.js';
+import api, { resolveUserId } from '../../../services/api.js';
 import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import { getDashboardTheme, dotPatternStyle } from '../../../styles/dashboardTheme.js';
 import { getStoredUser } from '../../../services/authService.js';
@@ -85,6 +85,7 @@ const LandlordDashboard = () => {
   });
   // Monthly revenue from active lease contracts (via /tenants/stats)
   const [monthlyRevenue, setMonthlyRevenue] = useState(null);
+  const [maintenanceStats, setMaintenanceStats] = useState({ total: 0, pending: 0, inProgress: 0 });
   const [profile, setProfile] = useState(() => getStoredUser());
 
   const updateSection = useCallback((path) => {
@@ -144,13 +145,13 @@ const LandlordDashboard = () => {
       {
         icon: Wrench,
         title: 'Maintenance Requests',
-        value: properties.reduce((acc, p) => acc + (p.maintenanceRequests || 0), 0) || 0,
-        change: '-0%',
-        trend: 'down',
+        value: maintenanceStats.total || 0,
+        change: maintenanceStats.pending > 0 ? `${maintenanceStats.pending} pending` : '0 pending',
+        trend: maintenanceStats.pending > 0 ? 'down' : 'up',
         color: isDarkMode ? 'from-slate-700 to-slate-800' : 'from-slate-800 to-slate-900'
       }
     ];
-  }, [isDarkMode, properties, tenantStats.activeTenants, monthlyRevenue]);
+  }, [isDarkMode, properties, tenantStats.activeTenants, monthlyRevenue, maintenanceStats]);
 
   // Load properties on mount
   useEffect(() => {
@@ -165,7 +166,7 @@ const LandlordDashboard = () => {
           // not authenticated or endpoint failed
         }
 
-        const userId = profile?._id || profile?.id || profile?.userId;
+        const userId = resolveUserId(profile);
         let remote = [];
 
         if (userId) {
@@ -189,6 +190,15 @@ const LandlordDashboard = () => {
             }
           } catch (statsErr) {
             console.warn('Could not load tenant stats:', statsErr);
+          }
+
+          try {
+            const maintStats = await api.getMaintenanceStats(userId);
+            if (mounted && maintStats?.success) {
+              setMaintenanceStats(maintStats.data);
+            }
+          } catch (maintErr) {
+            console.warn('Could not load maintenance stats:', maintErr);
           }
         } else {
             remote = await api.getProperties();

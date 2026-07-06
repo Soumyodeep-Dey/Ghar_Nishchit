@@ -4,6 +4,16 @@ import User from '../models/user.model.js';
 import Contract from '../models/contract.model.js';
 import Inquiry from '../models/inquiry.model.js';
 import Notification from '../models/notification.model.js';
+import {
+    resolveUserId,
+    requireTenantSelf,
+    requireLandlordSelf,
+    requireMaintenanceAccess,
+    requirePropertyOwner,
+    requireLandlordOfRequest,
+    requireMaintenanceWriteAccess,
+    sanitizeMaintenanceUpdate,
+} from '../utils/maintenanceAccess.js';
 
 const createNotificationSafe = async ({ userId, title, message, type = 'maintenance', relatedId = null }) => {
     if (!userId) return;
@@ -34,8 +44,8 @@ export const createMaintenanceRequest = async (req, res) => {
             });
         }
 
-        // Get tenant from JWT token
-        const tenantId = req.user?.userId || req.user?.id || req.user?._id;
+        // Get tenant from JWT token — tenants only create requests for themselves
+        const tenantId = resolveUserId(req.user);
         if (!tenantId) {
             return res.status(401).json({ success: false, message: 'Authentication required' });
         }
@@ -45,6 +55,10 @@ export const createMaintenanceRequest = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Tenant not found' });
         }
 
+        if (tenantDoc.role !== 'tenant' && req.user?.role !== 'tenant') {
+            return res.status(403).json({ success: false, message: 'Only tenants can create maintenance requests' });
+        }
+
         // Auto-resolve property & landlord from active contract, fall back to latest inquiry
         let propertyId = null;
         let landlordId = null;
@@ -52,7 +66,7 @@ export const createMaintenanceRequest = async (req, res) => {
 
         const activeContract = await Contract.findOne({ tenant: tenantId, status: 'active' })
             .sort({ createdAt: -1 });
-        
+
         if (activeContract) {
             propertyId = activeContract.property;
             landlordId = activeContract.landlord;
@@ -78,6 +92,9 @@ export const createMaintenanceRequest = async (req, res) => {
         if (!propertyDoc) {
             return res.status(404).json({ success: false, message: 'Property not found' });
         }
+
+        // Always assign to the property owner (postedBy)
+        landlordId = propertyDoc.postedBy;
 
         // Create maintenance request
         const maintenanceRequest = new Maintenance({
@@ -129,10 +146,13 @@ export const createMaintenanceRequest = async (req, res) => {
 export const getLandlordMaintenanceRequests = async (req, res) => {
     try {
         const { landlordId } = req.params;
+        const authLandlordId = requireLandlordSelf(req, res, landlordId);
+        if (!authLandlordId) return;
+
         const { status, priority, property, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
 
-        // Build filter query
-        const filter = { landlord: landlordId };
+        // Scope to authenticated landlord — only their properties' requests
+        const filter = { landlord: authLandlordId };
 
         if (status && status !== 'All') {
             filter.status = status;
@@ -175,10 +195,13 @@ export const getLandlordMaintenanceRequests = async (req, res) => {
 export const getTenantMaintenanceRequests = async (req, res) => {
     try {
         const { tenantId } = req.params;
+        const authTenantId = requireTenantSelf(req, res, tenantId);
+        if (!authTenantId) return;
+
         const { status, priority, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
 
-        // Build filter query
-        const filter = { tenant: tenantId };
+        // Scope to authenticated tenant — only their own requests
+        const filter = { tenant: authTenantId };
 
         if (status && status !== 'All') {
             filter.status = status;
@@ -230,6 +253,8 @@ export const getMaintenanceRequestById = async (req, res) => {
             });
         }
 
+        if (!requireMaintenanceAccess(req, res, maintenanceRequest)) return;
+
         res.status(200).json({
             success: true,
             data: maintenanceRequest
@@ -260,41 +285,51 @@ export const updateMaintenanceRequest = async (req, res) => {
             });
         }
 
+        if (!requireMaintenanceWriteAccess(req, res, maintenanceRequest)) return;
+
+        const sanitizedUpdate = sanitizeMaintenanceUpdate(req.user, maintenanceRequest, updateData);
+        if (Object.keys(sanitizedUpdate).length === 0) {
+            return res.status(403).json({
+                success: false,
+                message: 'Not authorized to update these fields'
+            });
+        }
+
         const previousStatus = maintenanceRequest.status;
 
         // Track status changes
-        if (updateData.status && updateData.status !== maintenanceRequest.status) {
+        if (sanitizedUpdate.status && sanitizedUpdate.status !== maintenanceRequest.status) {
             maintenanceRequest.history.push({
                 type: 'status',
-                description: `Status changed from ${maintenanceRequest.status} to ${updateData.status}`,
+                description: `Status changed from ${maintenanceRequest.status} to ${sanitizedUpdate.status}`,
                 timestamp: new Date()
             });
         }
 
         // Track assignment changes
-        if (updateData.assignedTo && updateData.assignedTo !== maintenanceRequest.assignedTo) {
+        if (sanitizedUpdate.assignedTo && sanitizedUpdate.assignedTo !== maintenanceRequest.assignedTo) {
             maintenanceRequest.history.push({
                 type: 'assignment',
-                description: `Assigned to ${updateData.assignedTo}`,
+                description: `Assigned to ${sanitizedUpdate.assignedTo}`,
                 timestamp: new Date()
             });
         }
 
         // Update fields
-        Object.keys(updateData).forEach(key => {
+        Object.keys(sanitizedUpdate).forEach(key => {
             if (key !== 'history' && key !== 'comments') {
-                maintenanceRequest[key] = updateData[key];
+                maintenanceRequest[key] = sanitizedUpdate[key];
             }
         });
 
         maintenanceRequest.updatedAt = new Date();
         await maintenanceRequest.save();
 
-        if (updateData.status && updateData.status !== previousStatus) {
+        if (sanitizedUpdate.status && sanitizedUpdate.status !== previousStatus) {
             await createNotificationSafe({
                 userId: maintenanceRequest.tenant,
                 title: 'Maintenance Status Updated',
-                message: `Your request "${maintenanceRequest.title}" is now ${updateData.status}.`,
+                message: `Your request "${maintenanceRequest.title}" is now ${sanitizedUpdate.status}.`,
                 relatedId: maintenanceRequest._id
             });
         }
@@ -336,6 +371,8 @@ export const updateStatus = async (req, res) => {
                 message: 'Maintenance request not found'
             });
         }
+
+        if (!requireLandlordOfRequest(req, res, maintenanceRequest)) return;
 
         const oldStatus = maintenanceRequest.status;
         maintenanceRequest.status = status;
@@ -394,9 +431,12 @@ export const addComment = async (req, res) => {
             });
         }
 
+        if (!requireMaintenanceAccess(req, res, maintenanceRequest)) return;
+
+        const authId = resolveUserId(req.user);
         const comment = {
             author,
-            authorId,
+            authorId: authorId || authId,
             text,
             timestamp: new Date(),
             attachments: attachments || []
@@ -459,6 +499,8 @@ export const assignTechnician = async (req, res) => {
             });
         }
 
+        if (!requireLandlordOfRequest(req, res, maintenanceRequest)) return;
+
         maintenanceRequest.assignedTo = assignedTo;
         if (assignedToContact) {
             maintenanceRequest.assignedToContact = assignedToContact;
@@ -501,7 +543,7 @@ export const deleteMaintenanceRequest = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const maintenanceRequest = await Maintenance.findByIdAndDelete(id);
+        const maintenanceRequest = await Maintenance.findById(id);
 
         if (!maintenanceRequest) {
             return res.status(404).json({
@@ -509,6 +551,10 @@ export const deleteMaintenanceRequest = async (req, res) => {
                 message: 'Maintenance request not found'
             });
         }
+
+        if (!requireMaintenanceAccess(req, res, maintenanceRequest)) return;
+
+        await Maintenance.findByIdAndDelete(id);
 
         res.status(200).json({
             success: true,
@@ -530,18 +576,21 @@ export const getMaintenanceStats = async (req, res) => {
     try {
         const { landlordId } = req.params;
 
-        const totalRequests = await Maintenance.countDocuments({ landlord: landlordId });
-        const pendingRequests = await Maintenance.countDocuments({ landlord: landlordId, status: 'Pending' });
-        const inProgressRequests = await Maintenance.countDocuments({ landlord: landlordId, status: 'In Progress' });
-        const completedRequests = await Maintenance.countDocuments({ landlord: landlordId, status: 'Completed' });
-        const highPriorityRequests = await Maintenance.countDocuments({ landlord: landlordId, priority: 'High' });
+        const authLandlordId = requireLandlordSelf(req, res, landlordId);
+        if (!authLandlordId) return;
+
+        const totalRequests = await Maintenance.countDocuments({ landlord: authLandlordId });
+        const pendingRequests = await Maintenance.countDocuments({ landlord: authLandlordId, status: 'Pending' });
+        const inProgressRequests = await Maintenance.countDocuments({ landlord: authLandlordId, status: 'In Progress' });
+        const completedRequests = await Maintenance.countDocuments({ landlord: authLandlordId, status: 'Completed' });
+        const highPriorityRequests = await Maintenance.countDocuments({ landlord: authLandlordId, priority: 'High' });
 
         // Calculate average response time (mock calculation - you can implement actual logic)
         const avgResponseTime = 2.4;
 
         // Calculate total estimated cost
         const costResult = await Maintenance.aggregate([
-            { $match: { landlord: landlordId } },
+            { $match: { landlord: authLandlordId } },
             { $group: { _id: null, totalCost: { $sum: '$estimatedCost' } } }
         ]);
         const totalCost = costResult.length > 0 ? costResult[0].totalCost : 0;
@@ -577,7 +626,10 @@ export const getMaintenanceByProperty = async (req, res) => {
     try {
         const { propertyId } = req.params;
 
-        const maintenanceRequests = await Maintenance.find({ property: propertyId })
+        const property = await requirePropertyOwner(req, res, propertyId);
+        if (!property) return;
+
+        const maintenanceRequests = await Maintenance.find({ property: property._id })
             .populate('tenant', 'name email phone')
             .sort({ createdAt: -1 });
 

@@ -81,6 +81,24 @@ async function request(path, options = {}, retried = false) {
     }
 }
 
+/** Resolve Mongo/user id from profile or stored user object. */
+export const resolveUserId = (profile) => {
+    if (!profile) return '';
+    const id = profile._id || profile.id || profile.userId;
+    return id != null ? String(id) : '';
+};
+
+/** Normalize maintenance list responses ({ success, data } or raw array). */
+export const unwrapMaintenanceList = (response) => {
+    if (Array.isArray(response)) return response;
+    if (response?.success && Array.isArray(response.data)) return response.data;
+    if (Array.isArray(response?.data)) return response.data;
+    return [];
+};
+
+/** Normalize single maintenance item responses. */
+export const unwrapMaintenanceItem = (response) => response?.data ?? response;
+
 const api = {
     // -------------------------------------------------------------------------
     // Properties
