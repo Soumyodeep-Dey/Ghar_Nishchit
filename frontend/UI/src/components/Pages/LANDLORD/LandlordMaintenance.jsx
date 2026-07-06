@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import LandlordSideBar from './LandlordSideBar';
 import LandlordNavBar from './LandlordNavBar';
 import { useDarkMode } from '../../../useDarkMode.js';
-import api from '../../../services/api';
+import api, { resolveUserId } from '../../../services/api';
 import { useNavigate } from 'react-router-dom';
 import {
   Wrench, Plus, Search, MoreVertical, Edit, Trash2, Eye, Calendar, User, Clock, AlertCircle, CheckCircle, XCircle, Play, Pause, FileText, ImageIcon, Download, Phone, MessageCircle, Flag, RefreshCw, TrendingUp, Activity, IndianRupee, Home, Building2, Users, Zap, Droplets, Shield, AirVent, Monitor, ArrowUp, ArrowDown, X, Share2, Bell,
@@ -1242,7 +1242,9 @@ const LandlordMaintenance = () => {
   const sidebarWidthClass = '[margin-left:var(--sidebar-width,18rem)]';
 
   // Resolve landlord ID from profile first, then localStorage fallback
-  const [landlordId, setLandlordId] = useState(localStorage.getItem('userId') || localStorage.getItem('landlordId') || '');
+  const [landlordId, setLandlordId] = useState(
+    () => resolveUserId({ _id: localStorage.getItem('userId') || localStorage.getItem('landlordId') })
+  );
 
   // State management
   const [maintenanceRequests, setMaintenanceRequests] = useState([]);
@@ -1274,7 +1276,7 @@ const LandlordMaintenance = () => {
       if (landlordId) return;
       try {
         const profile = await api.getProfile();
-        const resolvedId = profile?.id || profile?._id || '';
+        const resolvedId = resolveUserId(profile);
         if (resolvedId) {
           setLandlordId(resolvedId);
           localStorage.setItem('userId', resolvedId);

@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar';
 import TenantNavBar from './TenantNavBar';
-import api from '../../../services/api.js';
+import api, { resolveUserId, unwrapMaintenanceList, unwrapMaintenanceItem } from '../../../services/api.js';
 import { showErrorToast, showSuccessToast, showInfoToast } from '../../../utils/toast.jsx';
 import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import {
@@ -346,15 +346,11 @@ const TenantMaintenance = () => {
       try {
         setIsLoading(true);
         const profile = await api.getProfile();
+        const tenantId = resolveUserId(profile);
 
-        if (profile && profile.id) {
-          const maintenanceResponse = await api.getTenantMaintenanceRequests(profile.id);
-          const maintenanceData = Array.isArray(maintenanceResponse)
-            ? maintenanceResponse
-            : (Array.isArray(maintenanceResponse?.data) ? maintenanceResponse.data : []);
-          const transformedRequests = Array.isArray(maintenanceData)
-            ? maintenanceData.map(normalizeRequest)
-            : [];
+        if (tenantId) {
+          const maintenanceResponse = await api.getTenantMaintenanceRequests(tenantId);
+          const transformedRequests = unwrapMaintenanceList(maintenanceResponse).map(normalizeRequest);
           setRequests(transformedRequests);
         }
       } catch (error) {
@@ -406,7 +402,6 @@ const TenantMaintenance = () => {
 
     try {
       setIsSubmitting(true);
-      const profile = await api.getProfile();
 
       const uploadedAttachments = newRequest.attachments.length > 0
         ? await Promise.all(newRequest.attachments.map(file => new Promise((resolve, reject) => {
@@ -427,14 +422,12 @@ const TenantMaintenance = () => {
         title: newRequest.title,
         description: newRequest.description,
         priority: newRequest.priority,
-        issueType: newRequest.title,
-        reportedBy: profile.id,
-        status: 'Pending',
+        category: 'general',
         attachments: uploadedAttachments
       };
 
       const createdResponse = await api.createMaintenanceRequest(requestData);
-      const createdRequest = createdResponse?.data || createdResponse;
+      const createdRequest = unwrapMaintenanceItem(createdResponse);
       setRequests(prev => [normalizeRequest(createdRequest), ...prev]);
       setNewRequest({ title: '', description: '', priority: 'Medium', attachments: [] });
       setShowNewRequestForm(false);

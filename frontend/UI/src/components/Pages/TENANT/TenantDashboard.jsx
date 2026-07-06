@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useDarkMode } from '../../../useDarkMode.js';
 import TenantSideBar from './TenantSideBar.jsx';
 import TenantNavBar from './TenantNavBar.jsx';
-import api from '../../../services/api.js';
+import api, { resolveUserId, unwrapMaintenanceList } from '../../../services/api.js';
 import { showErrorToast } from '../../../utils/toast.jsx';
 import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -253,13 +253,13 @@ const TenantDashboard = () => {
       const profileData = await api.getProfile();
       setProfile(profileData);
 
-      const tenantId = profileData?.id;
+      const tenantId = resolveUserId(profileData);
 
       const [favResult, notifResult, maintResult, payResult] = await Promise.allSettled([
-        api.getFavouriteProperties(tenantId),
-        api.getTenantNotifications(tenantId),
-        api.getTenantMaintenanceRequests(tenantId),
-        api.getTenantPaymentHistory(tenantId),
+        tenantId ? api.getFavouriteProperties(tenantId) : Promise.resolve([]),
+        tenantId ? api.getTenantNotifications(tenantId) : Promise.resolve([]),
+        tenantId ? api.getTenantMaintenanceRequests(tenantId) : Promise.resolve([]),
+        tenantId ? api.getTenantPaymentHistory(tenantId) : Promise.resolve([]),
       ]);
 
       setFavouriteProperties(
@@ -269,7 +269,7 @@ const TenantDashboard = () => {
         notifResult.status === 'fulfilled' && Array.isArray(notifResult.value) ? notifResult.value : []
       );
       setMaintenanceRequests(
-        maintResult.status === 'fulfilled' && Array.isArray(maintResult.value) ? maintResult.value : []
+        maintResult.status === 'fulfilled' ? unwrapMaintenanceList(maintResult.value) : []
       );
       setPaymentHistory(
         payResult.status === 'fulfilled' && Array.isArray(payResult.value) ? payResult.value : []

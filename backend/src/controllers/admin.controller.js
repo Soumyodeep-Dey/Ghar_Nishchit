@@ -148,8 +148,27 @@ export const deleteContract = async (req, res) => {
 export const updateMaintenanceStatus = async (req, res) => {
   try {
     const { status } = req.body;
-    const request = await Maintenance.findByIdAndUpdate(req.params.id, { status }, { new: true });
-    if (!request) return res.status(404).json({ success: false, message: 'Maintenance request not found' });
+    if (!status) {
+      return res.status(400).json({ success: false, message: 'Status is required' });
+    }
+
+    const request = await Maintenance.findById(req.params.id);
+    if (!request) {
+      return res.status(404).json({ success: false, message: 'Maintenance request not found' });
+    }
+
+    const oldStatus = request.status;
+    if (status !== oldStatus) {
+      request.status = status;
+      request.history.push({
+        type: 'status',
+        description: `Status changed from ${oldStatus} to ${status} (admin)`,
+        timestamp: new Date()
+      });
+      request.updatedAt = new Date();
+      await request.save();
+    }
+
     res.status(200).json({ success: true, request });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
