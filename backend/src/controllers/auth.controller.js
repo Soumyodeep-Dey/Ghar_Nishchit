@@ -16,6 +16,7 @@ const buildUserData = (user) => ({
   email: user.email,
   phone: user.phone,
   role: user.role,
+  profilePicture: user.profilePicture || '',
 });
 
 const generateTokens = (user) => {
@@ -121,7 +122,7 @@ export const loginUser = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ error: "Invalid email or password" });
     }
-    if (user.status !== "active") {
+    if (["suspended", "banned"].includes(user.status)) {
       return res.status(403).json({ error: "Account is not active" });
     }
 
@@ -164,7 +165,7 @@ export const refreshAccessToken = async (req, res) => {
     if (!user) {
       return res.status(401).json({ error: "User not found" });
     }
-    if (user.status !== "active") {
+    if (["suspended", "banned"].includes(user.status)) {
       return res.status(403).json({ error: "Account is not active" });
     }
 

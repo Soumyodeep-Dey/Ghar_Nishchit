@@ -39,7 +39,7 @@ export default function Login() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const { email, password } = formData;
 
@@ -52,33 +52,27 @@ export default function Login() {
     const apiUrl = `${import.meta.env.VITE_BACKEND_URL}/api/auth/login`;
 
     // EXACT mirror of original logic to ensure backend compatibility
-    fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || "Login failed.");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        const { user } = data;
-        setAuthSession(data);
-        showSuccessToast("Login successful!");
-        setTimeout(() => navigate(getRoleDashboardPath(user)), 1000);
-      })
-      .catch((err) => {
-        console.error("Login Error Details:", err);
-        showErrorToast("Error during login. Please check credentials.");
-      })
-      .finally(() => {
-        setLoading(false);
+    try {
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Login failed.");
+
+      const destination = getRoleDashboardPath(data.user);
+      if (destination === '/') throw new Error('Your account does not have a supported role.');
+
+      setAuthSession(data);
+      showSuccessToast("Login successful!");
+      navigate(destination, { replace: true });
+    } catch (err) {
+      console.error("Login Error Details:", err);
+      showErrorToast(err.message || "Error during login. Please check credentials.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

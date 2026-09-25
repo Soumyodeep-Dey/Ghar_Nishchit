@@ -23,7 +23,7 @@ export const verifyToken = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({ error: "Account no longer exists" });
     }
-    if (user.status !== "active") {
+    if (["suspended", "banned"].includes(user.status)) {
       return res.status(403).json({ error: "Account is not active" });
     }
     req.user = { userId: user._id.toString(), role: user.role };

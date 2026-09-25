@@ -15,7 +15,7 @@ import AdminPayments    from './Admin/AdminPayments';
 import AdminContracts   from './Admin/AdminContracts';
 import AdminBroadcast   from './Admin/AdminBroadcast';
 import AdminSupport     from './Admin/AdminSupport';
-import { clearAuthSession } from '../../services/authService.js';
+import { clearAuthSession, getStoredUser } from '../../services/authService.js';
 
 const NAV = [
   { id: 'overview',     label: 'Overview',     icon: LayoutDashboard },
@@ -33,6 +33,10 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const adminUser = getStoredUser() || {};
+  const adminName = adminUser.name || adminUser.email || 'Administrator';
+  const adminInitial = adminName.trim().charAt(0).toUpperCase() || 'A';
+  const adminRole = adminUser.role === 'admin' ? 'Administrator' : 'Authenticated User';
 
   const {
     data, loading,
@@ -44,12 +48,6 @@ export default function AdminDashboard() {
     updateSupportStatus,
     replyToSupport,
   } = useAdminData();
-
-  // Guard — only admin can view
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  if (user.role !== 'admin' || user.email !== 'ritam@gmail.com') {
-    navigate('/'); return null;
-  }
 
   const logout = () => {
     clearAuthSession();
@@ -71,7 +69,7 @@ export default function AdminDashboard() {
         <div className="p-2 bg-indigo-500 rounded-xl"><Shield size={20} /></div>
         <div>
           <p className="font-bold text-sm leading-none">GharNishchit</p>
-          <p className="text-xs text-indigo-300 mt-0.5">Master Control</p>
+          <p className="text-xs text-indigo-300 mt-0.5">Admin Console</p>
         </div>
         {mobile && (
           <button onClick={() => setSidebarOpen(false)} className="ml-auto p-1 hover:bg-white/10 rounded-lg"><X size={18} /></button>
@@ -102,10 +100,10 @@ export default function AdminDashboard() {
       {/* Admin info */}
       <div className="p-4 border-t border-white/10">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-sm font-bold">R</div>
+          <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-sm font-bold">{adminInitial}</div>
           <div>
-            <p className="text-xs font-semibold">Ritam</p>
-            <p className="text-xs text-indigo-400">Super Admin</p>
+            <p className="text-xs font-semibold truncate max-w-36" title={adminName}>{adminName}</p>
+            <p className="text-xs text-indigo-400">{adminRole}</p>
           </div>
         </div>
         <button onClick={logout} className="w-full flex items-center justify-center gap-2 py-2 bg-red-600/80 hover:bg-red-600 rounded-xl text-sm font-medium transition">

@@ -2,6 +2,7 @@ import 'dotenv/config';
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import User from '../src/models/user.model.js';
+import { resolveMongoConnectionString } from '../src/db/mongoUri.js';
 
 const required = ['MONGODB_URI', 'ADMIN_EMAIL', 'ADMIN_PASSWORD', 'ADMIN_PHONE'];
 const missing = required.filter((name) => !process.env[name]);
@@ -11,8 +12,8 @@ if (missing.length) {
 }
 
 try {
-  const uri = process.env.MONGODB_URI.trim().replace(/\/+$/, '');
-  await mongoose.connect(`${uri}/gharNishchit`);
+  const uri = await resolveMongoConnectionString(process.env.MONGODB_URI.trim());
+  await mongoose.connect(uri, { dbName: 'gharNishchit' });
   const email = process.env.ADMIN_EMAIL.toLowerCase().trim();
   const password = await bcrypt.hash(process.env.ADMIN_PASSWORD, 12);
   const admin = await User.findOneAndUpdate(

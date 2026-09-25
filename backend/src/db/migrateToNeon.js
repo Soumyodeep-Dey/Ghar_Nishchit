@@ -11,9 +11,9 @@
  */
 
 import mongoose from 'mongoose';
-import dns from 'dns';
 import dotenv from 'dotenv';
 import { query } from './neon.js';
+import { resolveMongoConnectionString } from './mongoUri.js';
 
 // ── Models ──────────────────────────────────────────────────────────────────
 import User from '../models/user.model.js';
@@ -23,12 +23,11 @@ import Visit from '../models/visit.model.js';
 import Favorite from '../models/favourites.model.js';
 
 dotenv.config();
-dns.setServers(['1.1.1.1', '8.8.8.8']);
 
 // ── Connect MongoDB ──────────────────────────────────────────────────────────
 const connectMongo = async () => {
-  const mongoUri = process.env.MONGODB_URI?.trim().replace(/\/+$/, '');
-  await mongoose.connect(`${mongoUri}/gharNishchit`);
+  const mongoUri = await resolveMongoConnectionString(process.env.MONGODB_URI?.trim());
+  await mongoose.connect(mongoUri, { dbName: 'gharNishchit' });
   console.log('[Migrate] MongoDB connected ✔');
 };
 

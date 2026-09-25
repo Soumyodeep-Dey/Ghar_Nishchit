@@ -21,7 +21,6 @@ export default defineConfig(() => {
         react: path.join(uiNodeModules, 'react'),
         'react-dom': path.join(uiNodeModules, 'react-dom'),
         'lucide-react': path.join(uiNodeModules, 'lucide-react'),
-        '@google/generative-ai': path.join(uiNodeModules, '@google/generative-ai'),
         'framer-motion': path.join(uiNodeModules, 'framer-motion'),
         'react-router-dom': path.join(uiNodeModules, 'react-router-dom'),
       },
@@ -41,11 +40,13 @@ export default defineConfig(() => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
-            react: ['react', 'react-dom', 'react-router-dom'],
-            motion: ['framer-motion'],
-            icons: ['@heroicons/react', 'lucide-react', 'react-icons'],
-            toast: ['react-toastify'],
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return undefined;
+            if (id.includes('react-dom') || id.includes('react-router-dom') || /node_modules[\\/]react[\\/]/.test(id)) return 'react';
+            if (id.includes('framer-motion')) return 'motion';
+            if (id.includes('@heroicons') || id.includes('lucide-react') || id.includes('react-icons')) return 'icons';
+            if (id.includes('react-toastify')) return 'toast';
+            return undefined;
           },
         },
       },

@@ -33,7 +33,7 @@ export default function UpdateLandlordProfile() {
       const token = localStorage.getItem('authToken') || localStorage.getItem('token');
 
       // Use a simple endpoint that's likely to exist and respond quickly
-      const response = await fetch('http://localhost:3000/api/auth/profile', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/auth/profile`, {
         method: 'HEAD', // Just check if server responds, don't need data
         signal: controller.signal,
         // Add cache control to prevent caching of status check
@@ -103,7 +103,7 @@ export default function UpdateLandlordProfile() {
         };
 
         // Send update request to API
-        const response = await fetch('http://localhost:3000/api/auth/profile', {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/auth/profile`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -165,7 +165,7 @@ export default function UpdateLandlordProfile() {
         // Only try to fetch from API if server is online
         if (serverStatus === 'online') {
           // Fetch user data from API
-          const response = await fetch('http://localhost:3000/api/auth/profile', {
+          const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/auth/profile`, {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -334,7 +334,7 @@ export default function UpdateLandlordProfile() {
       // Only attempt to send to server if it's online
       if (serverStatus === 'online') {
         // Send update request to API
-        const response = await fetch('http://localhost:3000/api/auth/profile', {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || ''}/api/auth/profile`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -423,7 +423,7 @@ export default function UpdateLandlordProfile() {
         // Update server status to offline since we can't connect
         setServerStatus('offline');
 
-        setMessage('Connection Error: Cannot connect to the server (ERR_CONNECTION_REFUSED). The backend server may not be running at http://localhost:3000. Your changes have been saved locally.');
+        setMessage('Connection Error: Cannot connect to the backend server. Your changes have been saved locally.');
 
         // Since we can't reach the server, update local storage directly
         try {
@@ -533,7 +533,7 @@ export default function UpdateLandlordProfile() {
               <AlertTriangle className="h-5 w-5 mr-2 flex-shrink-0" />
               <div>
                 <p className="font-medium">Connection Error: Backend server is not running</p>
-                <p className="text-sm">Unable to connect to http://localhost:3000 (ERR_CONNECTION_REFUSED). Your changes will be saved locally and will sync when the server is available again.</p>
+                <p className="text-sm">Unable to connect to the backend server. Your changes will be saved locally and will sync when the server is available again.</p>
                 <p className="text-xs mt-1 text-amber-800">Please ensure the backend server is running at the correct port.</p>
               </div>
             </div>
