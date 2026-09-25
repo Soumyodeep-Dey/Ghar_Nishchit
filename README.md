@@ -1,211 +1,124 @@
-<p align="center">
-  <img src="https://img.shields.io/badge/version-2.0-blue.svg" alt="Version" />
-  <img src="https://img.shields.io/badge/license-ISC-green.svg" alt="License" />
-  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" />
-  <img src="https://img.shields.io/badge/platform-web-lightgrey.svg" alt="Platform" />
-</p>
+# Ghar Nishchit
 
-# Ghar Nishchit 2.0
+## 1. Project Overview
+Ghar Nishchit is a full-stack rental-management application for tenants, landlords, and administrators. It combines property discovery, enquiries, visits, contracts, maintenance, notifications, support, and Razorpay payments in a React frontend and Express modular monolith.
 
-Ghar Nishchit is a full-stack rental platform for tenants, landlords, and admins. This README reflects the code that is currently implemented in `backend`, `frontend/UI`, and `Ai`.
+## 2. Problem Being Solved
+Rental workflows are fragmented across listing sites, messaging, documents, maintenance calls, and payment records. This project puts those workflows behind role-specific dashboards.
 
-## What Is Implemented
+## 3. Functional Requirements
+- Tenants register, browse/favourite properties, contact landlords, schedule visits, review contracts, request maintenance, and pay.
+- Landlords manage properties, enquiries, contracts, tenants, maintenance, and subscriptions.
+- Administrators review users, properties, contracts, maintenance, payments, support, and broadcasts.
 
-### Frontend
+## 4. Non-Functional Requirements
+Current priorities are access control, validation, responsive UI, payment integrity, and recoverable data synchronization. Formal SLOs, capacity targets, and recovery objectives are **Not currently implemented**.
 
-- Public landing page and authentication screens for login, signup, and forgot password
-- Role-based tenant, landlord, and admin routes
-- Tenant pages for properties, messages, maintenance, payments, profile updates, contracts, and help/support
-- Landlord pages for properties, messages, maintenance, payments, tenants, profile updates, and help/support
-- Global chatbot widget loaded from the `Ai` module
-- Dark mode provider, language provider, toast notifications, and React Query caching
+## 5. Tech Stack
+- React 19, Vite 8, React Router, TanStack Query, Tailwind, Recharts, Framer Motion.
+- Node.js, Express 5, Mongoose, Zod, JWT, bcryptjs.
+- MongoDB primary; Neon/PostgreSQL partial secondary projection.
+- Razorpay and server-side Google Gemini integration.
+- Playwright smoke tests; backend automated tests are **Not currently implemented**.
 
-### Backend
+## 6. High-Level System Architecture
+The current system is a frontend/backend modular monolith. MongoDB is authoritative. Selected records are copied to Neon using direct writes or a MongoDB outbox worker.
 
-- Express API with route groups for auth, users, properties, favourites, tenants, maintenance, inquiries, notifications, payments, landlord payments, visits, contracts, support, and admin
-- JWT-based authentication and refresh flow
-- MongoDB persistence through Mongoose
-- Neon/Postgres access for the transactional outbox flow
-- Razorpay order creation, payment verification, and webhook handlers for tenant and landlord payments
-- Background outbox worker started with the server
-
-## Tech Stack
-
-### Frontend (`frontend/UI`)
-
-- React 19
-- Vite 7
-- React Router DOM 7
-- React Query
-- Tailwind CSS
-- Firebase
-- Framer Motion
-- React Toastify
-- Google Generative AI SDK
-
-### Backend (`backend`)
-
-- Node.js + Express 5
-- MongoDB + Mongoose
-- PostgreSQL client via `pg`
-- JWT authentication
-- bcryptjs
-- Razorpay
-- dotenv and CORS
-- Zod
-
-## Repository Structure
-
-```text
-Ghar_Nishchit/
-├── backend/
-│   └── src/
-│       ├── app.js
-│       ├── index.js
-│       ├── controllers/
-│       ├── db/
-│       ├── middlewares/
-│       ├── models/
-│       ├── routes/
-│       ├── utils/
-│       └── validations/
-├── frontend/
-│   └── UI/
-│       └── src/
-│           ├── App.jsx
-│           ├── components/
-│           ├── services/
-│           ├── styles/
-│           ├── utils/
-│           └── i18n/
-└── Ai/
-    ├── Chatbot.jsx
-    ├── bot.md
-    └── list_models.js
+## 7. Architecture Diagram
+```mermaid
+flowchart LR
+  U[Browser] --> SPA[React/Vite SPA]
+  SPA -->|REST + Bearer JWT| API[Express modular monolith]
+  API --> M[(MongoDB primary)]
+  API --> P[(Neon partial projection)]
+  API --> R[Razorpay]
+  API --> G[Google Gemini]
+  M --> W[In-process outbox worker]
+  W --> P
 ```
 
-## Visual Diagram
+## 8. Request/Data Flow
+Login validates a MongoDB password hash and returns JWTs. Protected requests verify the token, reload the current user, enforce account status, and enforce role. Controllers read/write MongoDB; selected writes are mirrored to Neon. Razorpay signatures are checked before payment confirmation.
 
-For a quicker high-level view of the system structure, open the architecture diagram here:
+## 9. Database Design
+MongoDB collections cover users, properties, favourites, enquiries, visits, contracts, maintenance, payments, landlord payments, notifications, support, and outbox jobs. Embedded replies/history suit document retrieval; references model ownership. Neon contains incomplete projections and is not the authentication source.
 
-[Eraser Git Diagrammer](https://eraser.io/git-diagrammer?diagramId=CwHRAeH2658QdmUqyfq6)
+## 10. API Architecture
+REST groups under `/api` include auth, users, properties, favourites, tenants, maintenance, inquiries, notifications, payments, landlord-payments, visits, contracts, support, admin, and AI. REST matches the resource-oriented workflows. Versioning and OpenAPI are **Not currently implemented**.
 
-## Quick Start
+## 11. Authentication & Authorization Flow
+Public signup permits tenant/landlord roles. Admins are provisioned by script. Access tokens last one hour and refresh tokens 72 hours. Protected requests reload the MongoDB user and reject suspended/banned accounts. Backend RBAC is authoritative. Tokens remain in `localStorage`, an acknowledged XSS trade-off.
 
-### Prerequisites
+## 12. Important Engineering Decisions
+- Modular monolith: low operational cost while domains stay separated by routes/controllers/models.
+- MongoDB primary: the implementation and nested maintenance/message structures were built around Mongoose; Neon is not falsely presented as authoritative.
+- REST: simple fit for CRUD workflows and browser/tool clients.
+- JWT plus user lookup: current status/role changes apply before token expiry.
+- Contract outbox: isolates the primary write from Neon availability, within the limits of an in-process worker.
+- TanStack Query: server-state caching without a larger global-state framework.
 
-- Node.js 18+
-- npm
-- MongoDB connection string
-- Neon database connection string
+## 13. Alternatives Considered
+PostgreSQL-only storage offers stronger relational integrity but needs a deliberate migration. Cookie sessions improve token protection but require session storage and CSRF controls. Microservices/brokers add unjustified operational cost at current scale. Direct browser Gemini was removed because it exposed the key.
 
-### Backend
+## 14. Trade-offs
+The monolith is easy to run but scales workloads together. MongoDB supports evolving documents but relationships rely on application logic. JWTs reduce session state but localStorage increases XSS impact. Dual persistence introduces consistency risk.
 
-```bash
+## 15. Security Considerations
+Implemented: bcrypt, server-side RBAC/ownership checks, account-status enforcement, auth validation, CORS allowlist, 2 MB body limits, rate limiting, and Razorpay HMAC checks. Refresh rotation, HttpOnly cookies, Helmet/CSP, distributed limiting, comprehensive schemas, a secrets manager, and security tests are **Not currently implemented**. See [Security](docs/SECURITY.md).
+
+## 16. Error Handling & Reliability
+The API has global structured error handling, JSON 404s, signature checks, and a retrying contract outbox. Error shapes still vary, direct Neon writes can diverge, and graceful shutdown/dead-letter recovery are **Not currently implemented**.
+
+## 17. Performance Considerations
+Lazy routes and vendor chunks reduce frontend work. Indexes cover geolocation and selected maintenance/payment paths. Risks include unpaginated lists, in-memory admin analytics, N+1 payment filtering, and large embedded documents. See [Performance](docs/PERFORMANCE.md).
+
+## 18. Current Bottlenecks
+- Admin dashboard loads complete collections.
+- Several list endpoints lack pagination.
+- Landlord payment filtering queries inside loops.
+- HTTP and outbox work share one Node process.
+- Cross-database writes lack full reconciliation.
+
+## 19. Scalability Strategy
+Add pagination, database aggregation, query measurement, compound indexes, structured telemetry, and a separately runnable worker first. Add API replicas, load balancing, and shared caching/rate limiting only after measurements justify them.
+
+## 20. Production Readiness
+This is suitable for development and case-study use, not asserted production readiness. Deployment manifests, CI/CD, backups, monitoring, graceful shutdown, migration automation, and recovery tests are **Not currently implemented**. See [Production Readiness](docs/PRODUCTION_READINESS.md).
+
+## 21. Known Limitations
+- Incomplete MongoDB/Neon synchronization.
+- No backend test suite or API contract.
+- LocalStorage refresh tokens are not rotated/revoked.
+- Firebase login was removed because backend identity exchange was incomplete.
+- Payment price derivation/idempotency require more work.
+- No measured benchmarks.
+
+## 22. Future Architecture
+Keep the modular monolith until measured load requires stateless API replicas, a separately deployed worker, shared limiter/cache, managed backups, object storage, centralized telemetry, and CDN-hosted static assets. These are proposals, not current capabilities.
+
+## 23. How to Run Locally
+```powershell
 cd backend
+Copy-Item .env.example .env -ErrorAction Stop # only when .env does not exist
+# Configure MongoDB and secrets
 npm install
+npm run create-admin # optional
 npm run dev
 ```
-
-### Frontend
-
-```bash
+```powershell
 cd frontend/UI
 npm install
 npm run dev
 ```
+Frontend: `http://localhost:5173`; backend: `http://localhost:5000`. Never commit `.env` files.
 
-### Local URLs
+## 24. Interview Questions & Answers
+See [Interview Questions](docs/INTERVIEW_QUESTIONS.md) for 30 repository-specific questions.
 
-- Frontend: `http://localhost:5173`
-- Backend: `http://localhost:5000`
-
-## Environment Variables
-
-### Backend (`backend/.env`)
-
-```env
-PORT=5000
-FRONTEND_URL=http://localhost:5173
-MONGODB_URI=your_mongodb_connection_string
-NEONDB_URL=your_neon_database_connection_string
-JWT_SECRET=your_jwt_secret
-JWT_REFRESH_SECRET=your_refresh_secret
-RAZORPAY_KEY_ID=your_razorpay_key_id
-RAZORPAY_KEY_SECRET=your_razorpay_key_secret
-RAZORPAY_WEBHOOK_SECRET=your_razorpay_webhook_secret
-```
-
-### Frontend (`frontend/UI/.env`)
-
-```env
-VITE_BACKEND_URL=http://localhost:5000
-VITE_API_BASE=http://localhost:5000
-VITE_GEMINI_API_KEY=your_gemini_api_key
-VITE_FIREBASE_API_KEY=your_firebase_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
-VITE_FIREBASE_PROJECT_ID=your_firebase_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
-VITE_FIREBASE_APP_ID=your_firebase_app_id
-VITE_FIREBASE_MEASUREMENT_ID=your_firebase_measurement_id
-```
-
-If `VITE_GEMINI_API_KEY` is missing, the chatbot will warn at runtime.
-
-## Scripts
-
-### Backend
-
-- `npm run dev` - start the backend with nodemon
-- `npm start` - start the backend with Node.js
-
-### Frontend
-
-- `npm run dev` - start the Vite dev server
-- `npm run build` - build for production
-- `npm run preview` - preview the production build locally
-- `npm run lint` - run ESLint
-
-## API Modules
-
-The backend currently mounts these route groups:
-
-- `auth`
-- `users`
-- `properties`
-- `favourites`
-- `tenants`
-- `maintenance`
-- `inquiries`
-- `notifications`
-- `payments`
-- `landlord-payments`
-- `visits`
-- `contracts`
-- `support`
-- `admin`
-
-## AI Module
-
-The `Ai` folder currently contains:
-
-- `Chatbot.jsx` - in-app chatbot UI and Gemini integration
-- `bot.md` - assistant behavior baseline
-- `list_models.js` - helper script for listing Gemini models
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push the branch
-5. Open a pull request
-
-## License
-
-Licensed under ISC. See [LICENSE](LICENSE).
-
-<p align="center">
-  <b>Built for renters and landlords who need a simpler workflow.</b>
-</p>
+## Engineering Documents
+- [System Design](docs/SYSTEM_DESIGN.md)
+- [Engineering Decisions](docs/ENGINEERING_DECISIONS.md)
+- [Performance](docs/PERFORMANCE.md)
+- [Security](docs/SECURITY.md)
+- [Interview Questions](docs/INTERVIEW_QUESTIONS.md)
+- [Production Readiness](docs/PRODUCTION_READINESS.md)
