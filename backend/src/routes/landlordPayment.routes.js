@@ -18,7 +18,7 @@
  *   app.use('/api/landlord-payments', landlordPaymentRouter);
  */
 import express from 'express';
-import { verifyToken } from '../middlewares/auth.middleware.js';
+import { verifyToken, requireRole } from '../middlewares/auth.middleware.js';
 import {
   createLandlordOrder,
   verifyLandlordPayment,
@@ -29,7 +29,7 @@ import {
 const router = express.Router();
 
 // All routes require a valid JWT
-router.use(verifyToken);
+router.use(verifyToken, requireRole('landlord'));
 
 // Payment history & stats
 router.get('/',       getLandlordPayments);      // GET  /api/landlord-payments

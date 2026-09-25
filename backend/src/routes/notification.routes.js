@@ -1,5 +1,5 @@
 import express from 'express';
-import { verifyToken } from '../middlewares/auth.middleware.js';
+import { verifyToken, requireRole } from '../middlewares/auth.middleware.js';
 import {
   getNotifications,
   markAsRead,
@@ -14,7 +14,7 @@ const router = express.Router();
 router.use(verifyToken);
 
 router.get('/',               getNotifications);    // GET  /api/notifications
-router.post('/',              createNotification);  // POST /api/notifications
+router.post('/',              requireRole('admin'), createNotification);
 router.patch('/read-all',     markAllAsRead);       // PATCH /api/notifications/read-all
 router.patch('/:id/read',     markAsRead);          // PATCH /api/notifications/:id/read
 router.delete('/:id',         deleteNotification);  // DELETE /api/notifications/:id

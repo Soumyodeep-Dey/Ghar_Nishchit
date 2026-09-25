@@ -125,8 +125,8 @@ const api = {
     // -------------------------------------------------------------------------
     getProfile:      ()     => request('/auth/profile', { method: 'GET' }),
     updateProfile:   (data) => request('/auth/profile', { method: 'PUT', body: JSON.stringify(data) }),
-    changePassword:  ({ email, oldPassword, newPassword }) =>
-        request('/auth/change-password', { method: 'POST', body: JSON.stringify({ email, oldPassword, newPassword }) }),
+    changePassword:  ({ oldPassword, newPassword }) =>
+        request('/auth/change-password', { method: 'POST', body: JSON.stringify({ oldPassword, newPassword }) }),
 
     // -------------------------------------------------------------------------
     // Tenants (for landlords)

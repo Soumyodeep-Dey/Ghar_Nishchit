@@ -98,6 +98,9 @@ export const deleteUser = async (req, res) => {
 export const updateUserStatus = async (req, res) => {
   try {
     const { status } = req.body; // 'active' | 'suspended' | 'banned'
+    if (!['active', 'suspended', 'banned'].includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid user status' });
+    }
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { status },
@@ -123,6 +126,12 @@ export const deleteProperty = async (req, res) => {
 export const updatePropertyStatus = async (req, res) => {
   try {
     const { status, featured } = req.body;
+    if (status !== undefined && !['Available', 'Occupied', 'Maintenance', 'Pending'].includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid property status' });
+    }
+    if (featured !== undefined && typeof featured !== 'boolean') {
+      return res.status(400).json({ success: false, message: 'featured must be a boolean' });
+    }
     const update = {};
     if (status !== undefined) update.status = status;
     if (featured !== undefined) update.featured = featured;
@@ -179,6 +188,12 @@ export const updateMaintenanceStatus = async (req, res) => {
 export const broadcastNotification = async (req, res) => {
   try {
     const { title, message, targetRole } = req.body; // targetRole: 'all' | 'tenant' | 'landlord'
+    if (typeof title !== 'string' || !title.trim() || title.length > 120 || typeof message !== 'string' || !message.trim() || message.length > 2000) {
+      return res.status(400).json({ success: false, message: 'Valid title and message are required' });
+    }
+    if (!['all', 'tenant', 'landlord'].includes(targetRole)) {
+      return res.status(400).json({ success: false, message: 'Invalid target role' });
+    }
     let users;
     if (targetRole === 'all') {
       users = await User.find().select('_id');

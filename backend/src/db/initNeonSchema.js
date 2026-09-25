@@ -23,7 +23,7 @@ const createTables = async () => {
       name          VARCHAR(255) NOT NULL,
       phone         VARCHAR(20)  NOT NULL UNIQUE,
       email         VARCHAR(255) UNIQUE,
-      role          VARCHAR(10)  NOT NULL CHECK (role IN ('tenant', 'landlord')),
+      role          VARCHAR(10)  NOT NULL CHECK (role IN ('tenant', 'landlord', 'admin')),
       password      TEXT         NOT NULL,
       profile_picture TEXT       DEFAULT '',
       created_at    TIMESTAMPTZ  DEFAULT NOW()

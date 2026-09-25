@@ -3,7 +3,6 @@ import { Navigate } from 'react-router-dom';
 import {
   getAccessToken,
   getStoredUser,
-  isAdminSession,
   isTokenExpired,
   hasValidRefreshToken,
   refreshSession,
@@ -24,14 +23,6 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
     let active = true;
 
     (async () => {
-      if (isAdminSession()) {
-        if (active) {
-          setUser(getStoredUser() || {});
-          setStatus('authorized');
-        }
-        return;
-      }
-
       const accessToken = getAccessToken();
       if (accessToken && !isTokenExpired(accessToken)) {
         if (active) {

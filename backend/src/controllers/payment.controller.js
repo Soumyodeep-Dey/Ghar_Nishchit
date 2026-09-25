@@ -232,7 +232,7 @@ export const verifyPayment = async (req, res) => {
       .digest('hex');
 
     if (digest !== razorpay_signature) {
-      await Payment.findByIdAndUpdate(paymentDbId, { status: 'Failed' });
+      await Payment.findOneAndUpdate({ _id: paymentDbId, tenantId }, { status: 'Failed' });
       return res.status(400).json({ message: 'Payment verification failed — signature mismatch.' });
     }
 
@@ -346,16 +346,18 @@ export const getPayments = async (req, res) => {
 export const createPayment = async (req, res) => {
   try {
     const tenantId = req.user?.userId;
-    const { propertyId, amount, status, paymentMethod, dueDate, note } = req.body;
+    const { propertyId, amount, paymentMethod, dueDate, note } = req.body;
+    if (!Number.isFinite(Number(amount)) || Number(amount) <= 0) {
+      return res.status(400).json({ message: 'amount must be a positive number' });
+    }
     const payment = await Payment.create({
       tenantId,
       propertyId,
       amount,
-      status,
+      status: 'Pending',
       paymentMethod,
       dueDate,
       note,
-      paidAt: status === 'Paid' ? new Date() : undefined,
     });
 
     // Dual-write to NeonDB
@@ -370,12 +372,21 @@ export const createPayment = async (req, res) => {
 
 export const updatePaymentStatus = async (req, res) => {
   try {
-    const tenantId = req.user?.userId;
     const { status } = req.body;
+    if (!['Pending', 'Overdue', 'Failed'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status transition' });
+    }
+    const existing = await Payment.findById(req.params.id).select('propertyId');
+    if (!existing) return res.status(404).json({ message: 'Payment not found' });
+    if (req.user.role !== 'admin') {
+      const property = existing.propertyId
+        ? await Property.findOne({ _id: existing.propertyId, postedBy: req.user.userId }).select('_id').lean()
+        : null;
+      if (!property) return res.status(403).json({ message: 'Not authorized to update this payment' });
+    }
     const update = { status };
-    if (status === 'Paid') update.paidAt = new Date();
     const payment = await Payment.findOneAndUpdate(
-      { _id: req.params.id, tenantId },
+      { _id: req.params.id },
       update,
       { new: true }
     );

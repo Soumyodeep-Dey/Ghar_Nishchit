@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { verifyToken } from '../middlewares/auth.middleware.js';
+import { verifyToken, requireRole } from '../middlewares/auth.middleware.js';
 import {
     getMyTenants,
     getTenantById,
@@ -8,12 +8,13 @@ import {
 } from '../controllers/tenant.controller.js';
 
 const router = Router();
+router.use(verifyToken, requireRole('landlord'));
 
 // All tenant routes require authentication
 // Only landlords should access these endpoints (could add role check middleware)
-router.get('/', verifyToken, getMyTenants);
-router.get('/stats', verifyToken, getTenantStats);
-router.delete('/:tenantId', verifyToken, removeTenant);
-router.get('/:tenantId', verifyToken, getTenantById);
+router.get('/', getMyTenants);
+router.get('/stats', getTenantStats);
+router.delete('/:tenantId', removeTenant);
+router.get('/:tenantId', getTenantById);
 
 export default router;

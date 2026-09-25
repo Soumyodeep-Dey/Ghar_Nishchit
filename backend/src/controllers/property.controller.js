@@ -198,6 +198,11 @@ export const deleteProperty = async (req, res) => {
 export const getUsersWhoFavourited = async (req, res) => {
   try {
     const { propertyId } = req.params;
+    const property = await Property.findById(propertyId).select('postedBy').lean();
+    if (!property) return res.status(404).json({ message: 'Property not found' });
+    if (req.user.role !== 'admin' && String(property.postedBy) !== String(req.user.userId)) {
+      return res.status(403).json({ message: 'Only the property owner can view interested users' });
+    }
     // Find all Favorite docs where properties array contains propertyId
     const favs = await Favorite.find({ properties: mongoose.Types.ObjectId.createFromHexString(propertyId) }).populate('seeker', 'name email');
     // Map to seekers (users)

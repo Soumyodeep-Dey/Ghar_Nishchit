@@ -177,6 +177,15 @@ export const updateContractStatus = async (req, res) => {
 
         const contract = await Contract.findById(id);
         if (!contract) return res.status(404).json({ message: 'Contract not found' });
+        if (String(contract.tenant) !== String(req.user.userId)) {
+            return res.status(403).json({ message: 'Only the assigned tenant can update this contract' });
+        }
+        if (!['active', 'cancelled'].includes(status)) {
+            return res.status(400).json({ message: 'Tenant may only accept or cancel a pending contract' });
+        }
+        if (contract.status !== 'pending') {
+            return res.status(409).json({ message: 'Only pending contracts can be updated' });
+        }
 
         if (status === 'active') {
             // Accepting one lease should make all other non-final contracts

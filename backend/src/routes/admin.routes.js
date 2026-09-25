@@ -1,4 +1,6 @@
 import express from 'express';
+import { verifyToken, requireRole } from '../middlewares/auth.middleware.js';
+import { writeRateLimit } from '../middlewares/rateLimit.middleware.js';
 import {
   getDashboardData,
   deleteUser,
@@ -16,6 +18,9 @@ import {
 } from '../controllers/support.controller.js';
 
 const router = express.Router();
+
+router.use(verifyToken, requireRole('admin'));
+router.use((req, res, next) => ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) ? writeRateLimit(req, res, next) : next());
 
 // Dashboard
 router.get('/dashboard', getDashboardData);

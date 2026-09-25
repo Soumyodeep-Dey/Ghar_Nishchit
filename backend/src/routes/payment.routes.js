@@ -1,5 +1,5 @@
 import express from 'express';
-import { verifyToken } from '../middlewares/auth.middleware.js';
+import { verifyToken, requireRole } from '../middlewares/auth.middleware.js';
 import {
   getPayments,
   createPayment,
@@ -18,15 +18,15 @@ const router = express.Router();
 router.use(verifyToken);
 
 // Existing routes (unchanged)
-router.get('/landlord-revenue', getLandlordRevenue); // GET  /api/payments/landlord-revenue
-router.get('/landlord-tenant-payments', getLandlordTenantPayments); // GET  /api/payments/landlord-tenant-payments
-router.get('/',             getPayments);         // GET  /api/payments
-router.get('/stats',        getPaymentStats);     // GET  /api/payments/stats
-router.post('/',            createPayment);       // POST /api/payments  (manual entry)
-router.patch('/:id/status', updatePaymentStatus); // PATCH /api/payments/:id/status
+router.get('/landlord-revenue', requireRole('landlord'), getLandlordRevenue);
+router.get('/landlord-tenant-payments', requireRole('landlord'), getLandlordTenantPayments);
+router.get('/',             requireRole('tenant'), getPayments);
+router.get('/stats',        requireRole('tenant'), getPaymentStats);
+router.post('/',            requireRole('tenant'), createPayment);
+router.patch('/:id/status', requireRole('landlord', 'admin'), updatePaymentStatus);
 
 // Razorpay gateway routes
-router.post('/create-order', createOrder);   // POST /api/payments/create-order
-router.post('/verify',       verifyPayment); // POST /api/payments/verify
+router.post('/create-order', requireRole('tenant'), createOrder);
+router.post('/verify',       requireRole('tenant'), verifyPayment);
 
 export default router;

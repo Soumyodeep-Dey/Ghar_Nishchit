@@ -12,7 +12,7 @@ import {
     getMaintenanceStats,
     getMaintenanceByProperty
 } from '../controllers/maintenance.controller.js';
-import { verifyToken } from '../middlewares/auth.middleware.js';
+import { verifyToken, requireRole } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
@@ -20,19 +20,19 @@ const router = express.Router();
 router.use(verifyToken);
 
 // Create new maintenance request (requires auth to identify tenant)
-router.post('/', createMaintenanceRequest);
+router.post('/', requireRole('tenant'), createMaintenanceRequest);
 
 // Get maintenance requests by landlord
-router.get('/landlord/:landlordId', getLandlordMaintenanceRequests);
+router.get('/landlord/:landlordId', requireRole('landlord', 'admin'), getLandlordMaintenanceRequests);
 
 // Get maintenance requests by tenant
-router.get('/tenant/:tenantId', getTenantMaintenanceRequests);
+router.get('/tenant/:tenantId', requireRole('tenant', 'admin'), getTenantMaintenanceRequests);
 
 // Get maintenance statistics for landlord dashboard
-router.get('/stats/:landlordId', getMaintenanceStats);
+router.get('/stats/:landlordId', requireRole('landlord', 'admin'), getMaintenanceStats);
 
 // Get maintenance requests by property
-router.get('/property/:propertyId', getMaintenanceByProperty);
+router.get('/property/:propertyId', requireRole('landlord', 'admin'), getMaintenanceByProperty);
 
 // Get single maintenance request by ID
 router.get('/:id', getMaintenanceRequestById);
@@ -41,13 +41,13 @@ router.get('/:id', getMaintenanceRequestById);
 router.put('/:id', updateMaintenanceRequest);
 
 // Update status only
-router.patch('/:id/status', updateStatus);
+router.patch('/:id/status', requireRole('landlord', 'admin'), updateStatus);
 
 // Add comment to maintenance request
 router.post('/:id/comment', addComment);
 
 // Assign technician/service provider
-router.patch('/:id/assign', assignTechnician);
+router.patch('/:id/assign', requireRole('landlord', 'admin'), assignTechnician);
 
 // Delete maintenance request
 router.delete('/:id', deleteMaintenanceRequest);

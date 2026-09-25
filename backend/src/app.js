@@ -15,6 +15,9 @@ import visitRoutes              from './routes/visit.routes.js';
 import adminRoutes              from './routes/admin.routes.js';
 import contractRoutes           from './routes/contract.routes.js';
 import supportRoutes            from './routes/support.routes.js';
+import aiRoutes                 from './routes/ai.routes.js';
+import { globalErrorHandler }   from './middlewares/error.middleware.js';
+import { writeRateLimit }       from './middlewares/rateLimit.middleware.js';
 import { handleWebhook }        from './controllers/payment.controller.js';
 import { handleLandlordWebhook } from './controllers/landlordPayment.controller.js';
 dotenv.config();
@@ -23,7 +26,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: [process.env.FRONTEND_URL, 'http://localhost:5173'],
+    origin: [process.env.FRONTEND_URL, 'http://localhost:5173'].filter(Boolean),
     credentials: true,
   })
 );
@@ -36,12 +39,10 @@ app.use(
 app.post('/api/payments/webhook', express.raw({ type: 'application/json' }), handleWebhook);
 app.post('/api/landlord-payments/webhook', express.raw({ type: 'application/json' }), handleLandlordWebhook);
 
-// Landlord subscription payment webhook
-app.post('/api/landlord-payments/webhook', express.raw({ type: 'application/json' }), handleLandlordWebhook);
-
 // ── Global body parsing (all routes below get parsed JSON) ───────────────────
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
+app.use((req, res, next) => ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) ? writeRateLimit(req, res, next) : next());
 
 app.get('/', (_req, res) => {
   res.status(200).json({ status: 'success', message: 'API is running' });
@@ -62,10 +63,9 @@ app.use('/api/visits',            visitRoutes);
 app.use('/api/admin',         adminRoutes);
 app.use('/api/contracts',         contractRoutes);
 app.use('/api/support',           supportRoutes);
+app.use('/api/ai',                aiRoutes);
 
-app.use((err, _req, res, _next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Something went wrong!' });
-});
+app.use((_req, res) => res.status(404).json({ message: 'Route not found' }));
+app.use(globalErrorHandler);
 
 export { app };

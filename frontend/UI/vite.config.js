@@ -1,13 +1,12 @@
-import { defineConfig, loadEnv } from 'vite'
+import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => {
-  const uiEnv = loadEnv(mode, __dirname, '');
-  const aiEnv = loadEnv(mode, path.resolve(__dirname, '../../Ai'), '');
-  const geminiApiKey = aiEnv.VITE_GEMINI_API_KEY || uiEnv.VITE_GEMINI_API_KEY || '';
-  const geminiModel = aiEnv.VITE_GEMINI_MODEL || uiEnv.VITE_GEMINI_MODEL || 'gemini-1.5-flash';
+export default defineConfig(() => {
   const uiNodeModules = path.resolve(__dirname, 'node_modules');
   const aiRoot = path.resolve(__dirname, '../../Ai');
 
@@ -27,10 +26,6 @@ export default defineConfig(({ mode }) => {
         'react-router-dom': path.join(uiNodeModules, 'react-router-dom'),
       },
     },
-    define: {
-      'import.meta.env.VITE_GEMINI_API_KEY': JSON.stringify(geminiApiKey),
-      'import.meta.env.VITE_GEMINI_MODEL': JSON.stringify(geminiModel),
-    },
     server: {
       fs: {
         allow: ['../..']
@@ -48,7 +43,6 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks: {
             react: ['react', 'react-dom', 'react-router-dom'],
-            firebase: ['firebase/app', 'firebase/auth'],
             motion: ['framer-motion'],
             icons: ['@heroicons/react', 'lucide-react', 'react-icons'],
             toast: ['react-toastify'],

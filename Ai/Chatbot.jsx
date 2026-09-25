@@ -1,13 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Bot, Loader2, RotateCcw, Volume2, VolumeX } from 'lucide-react';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import { useDarkMode } from '@ui/useDarkMode.js';
 import { getDashboardTheme, dotPatternStyle } from '@ui/styles/dashboardTheme.js';
-import { GEMINI_API_KEY, GEMINI_MODEL, SYSTEM_PROMPT, QUICK_PROMPTS } from './config.js';
-
-const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
+import { QUICK_PROMPTS } from './config.js';
 
 const INITIAL_MESSAGE = {
   role: 'model',
@@ -24,9 +21,6 @@ const formatApiError = (error) => {
   if (message.includes('429') || message.toLowerCase().includes('quota')) {
     return 'The AI service is temporarily rate-limited. Please wait about 30 seconds and try again, or check your Gemini API quota in Google AI Studio.';
   }
-  if (message.includes('404') || message.toLowerCase().includes('not found')) {
-    return `Model "${GEMINI_MODEL}" is not available for your API key. Set VITE_GEMINI_MODEL=gemini-1.5-flash in your .env and restart the dev server.`;
-  }
   return 'Something went wrong. Please try again in a moment.';
 };
 
@@ -42,7 +36,6 @@ const Chatbot = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const messagesEndRef = useRef(null);
-  const chatRef = useRef(null);
   const inFlightRef = useRef(false);
 
   useEffect(() => {
@@ -88,22 +81,9 @@ const Chatbot = () => {
   }, [messages, isOpen]);
 
   const resetChat = () => {
-    chatRef.current = null;
     inFlightRef.current = false;
     setIsLoading(false);
     setMessages([INITIAL_MESSAGE]);
-  };
-
-  const getChatSession = () => {
-    if (!genAI) return null;
-    if (!chatRef.current) {
-      const model = genAI.getGenerativeModel({
-        model: GEMINI_MODEL,
-        systemInstruction: SYSTEM_PROMPT,
-      });
-      chatRef.current = model.startChat({ history: [] });
-    }
-    return chatRef.current;
   };
 
   const sendMessage = async (text) => {
@@ -116,22 +96,16 @@ const Chatbot = () => {
     setInput('');
 
     try {
-      if (!GEMINI_API_KEY || !genAI) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: 'model',
-            content:
-              'Gemini API key is missing. Add VITE_GEMINI_API_KEY to Ai/.env or frontend/UI/.env, then restart the dev server.',
-          },
-        ]);
-        return;
-      }
-
-      const chat = getChatSession();
-      const result = await chat.sendMessage(trimmed);
-      const response = await result.response;
-      const replyText = response.text();
+      const rawBase = import.meta.env.VITE_BACKEND_URL || '';
+      const base = rawBase.replace(/\/+$/, '');
+      const response = await fetch(`${base}/api/ai/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: trimmed }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || 'AI request failed');
+      const replyText = data.reply;
 
       setMessages((prev) => [
         ...prev,

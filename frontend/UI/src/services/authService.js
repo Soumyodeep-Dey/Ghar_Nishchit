@@ -1,7 +1,6 @@
 const ACCESS_KEY = 'token';
 const REFRESH_KEY = 'refreshToken';
 const USER_KEY = 'user';
-const ADMIN_BYPASS_TOKEN = 'admin-token-bypass';
 
 const isViteDev =
   typeof import.meta !== 'undefined' &&
@@ -59,10 +58,8 @@ export const clearAuthSession = () => {
   localStorage.removeItem(USER_KEY);
 };
 
-export const isAdminSession = () => getAccessToken() === ADMIN_BYPASS_TOKEN;
-
 export const isTokenExpired = (token) => {
-  if (!token || token === ADMIN_BYPASS_TOKEN) return false;
+  if (!token) return false;
   const payload = decodeJwtPayload(token);
   if (!payload?.exp) return true;
   return payload.exp * 1000 <= Date.now();
@@ -114,10 +111,6 @@ export const refreshSession = async () => {
 };
 
 export const restoreSession = async () => {
-  if (isAdminSession()) {
-    return getStoredUser();
-  }
-
   const accessToken = getAccessToken();
   if (accessToken && !isTokenExpired(accessToken)) {
     return getStoredUser();
@@ -133,8 +126,6 @@ export const restoreSession = async () => {
 };
 
 export const ensureValidAccessToken = async () => {
-  if (isAdminSession()) return getAccessToken();
-
   const accessToken = getAccessToken();
   if (accessToken && !isTokenExpired(accessToken)) {
     return accessToken;

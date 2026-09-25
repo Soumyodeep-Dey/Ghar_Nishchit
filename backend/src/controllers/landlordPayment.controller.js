@@ -137,7 +137,7 @@ export const verifyLandlordPayment = async (req, res) => {
       .digest('hex');
 
     if (digest !== razorpay_signature) {
-      await LandlordPayment.findByIdAndUpdate(paymentDbId, { status: 'Failed' });
+      await LandlordPayment.findOneAndUpdate({ _id: paymentDbId, landlordId }, { status: 'Failed' });
       return res.status(400).json({ message: 'Payment verification failed — signature mismatch.' });
     }
 

@@ -121,6 +121,9 @@ export const loginUser = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ error: "Invalid email or password" });
     }
+    if (user.status !== "active") {
+      return res.status(403).json({ error: "Account is not active" });
+    }
 
     const { accessToken, refreshToken, token } = generateTokens(user);
     const userData = buildUserData(user);
@@ -160,6 +163,9 @@ export const refreshAccessToken = async (req, res) => {
     const user = await User.findById(verified.userId);
     if (!user) {
       return res.status(401).json({ error: "User not found" });
+    }
+    if (user.status !== "active") {
+      return res.status(403).json({ error: "Account is not active" });
     }
 
     const tokens = generateTokens(user);
@@ -265,16 +271,16 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-// Change password using email and old password (no auth token required)
+// Change the authenticated user's password after confirming the old password.
 export const changePassword = async (req, res) => {
   try {
-    const { email, oldPassword, newPassword } = req.body;
+    const { oldPassword, newPassword } = req.body;
 
-    if (!email || !oldPassword || !newPassword) {
-      return res.status(400).json({ error: "email, oldPassword and newPassword are required" });
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ error: "oldPassword and newPassword are required" });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findById(req.user.userId);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
