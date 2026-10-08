@@ -1,15 +1,14 @@
 import pg from 'pg';
 import dotenv from 'dotenv';
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const { Pool } = pg;
+const connectionString = process.env.NEONDB_URL?.trim();
 
-if (!process.env.NEONDB_URL) {
-  console.error('[NeonDB] ERROR: NEONDB_URL is not defined in .env');
-}
+export const isNeonConfigured = Boolean(connectionString);
 
 const pool = new Pool({
-  connectionString: process.env.NEONDB_URL,
+  connectionString,
   ssl: { rejectUnauthorized: false },
   max: 10,                  // max pool connections
   idleTimeoutMillis: 30000,
@@ -28,6 +27,11 @@ pool.on('error', (err) => {
  * Run a parameterised query against NeonDB.
  * Usage: const { rows } = await query('SELECT * FROM users WHERE id=$1', [id]);
  */
-export const query = (text, params) => pool.query(text, params);
+export const query = (text, params) => {
+  if (!isNeonConfigured) {
+    throw new Error('NEONDB_URL is not configured');
+  }
+  return pool.query(text, params);
+};
 
 export default pool;

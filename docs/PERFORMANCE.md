@@ -2,6 +2,8 @@
 
 No benchmark numbers are currently claimed.
 
+Every HTTP completion is currently logged with route, status, request ID, and duration. This is diagnostic timing, not a benchmark or percentile measurement.
+
 ## Metrics
 - API latency: p50, p95, p99 by route.
 - Throughput: successful requests/second.

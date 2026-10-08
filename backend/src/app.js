@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import dotenv from 'dotenv';
 import propertyRoutes           from './routes/property.routes.js';
 import userRoutes               from './routes/user.routes.js';
@@ -20,9 +21,15 @@ import { globalErrorHandler }   from './middlewares/error.middleware.js';
 import { writeRateLimit }       from './middlewares/rateLimit.middleware.js';
 import { handleWebhook }        from './controllers/payment.controller.js';
 import { handleLandlordWebhook } from './controllers/landlordPayment.controller.js';
+import { getLiveness, getReadiness } from './controllers/health.controller.js';
+import { requestContext } from './middlewares/requestContext.middleware.js';
 dotenv.config();
 
 const app = express();
+
+app.disable('x-powered-by');
+app.use(requestContext);
+app.use(helmet());
 
 app.use(
   cors({
@@ -47,6 +54,8 @@ app.use((req, res, next) => ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.meth
 app.get('/', (_req, res) => {
   res.status(200).json({ status: 'success', message: 'API is running' });
 });
+app.get('/health/live', getLiveness);
+app.get('/health/ready', getReadiness);
 
 // ── Route mounting ───────────────────────────────────────────────────────────
 app.use('/api/properties',        propertyRoutes);
@@ -65,7 +74,11 @@ app.use('/api/contracts',         contractRoutes);
 app.use('/api/support',           supportRoutes);
 app.use('/api/ai',                aiRoutes);
 
-app.use((_req, res) => res.status(404).json({ message: 'Route not found' }));
+app.use((req, res) => res.status(404).json({
+  status: 'fail',
+  message: 'Route not found',
+  requestId: req.requestId,
+}));
 app.use(globalErrorHandler);
 
 export { app };

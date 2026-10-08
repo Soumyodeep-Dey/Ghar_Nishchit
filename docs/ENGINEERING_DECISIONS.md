@@ -15,6 +15,9 @@
 | TanStack Query | Fits server-owned cacheable state | Some screens still use manual fetching/local state |
 | Backend Gemini proxy | Keeps secret and rate control off the browser | Adds backend dependency and latency |
 | Razorpay HMAC | Payment success cannot be trusted from client fields alone | Idempotency/reconciliation still incomplete |
+| Separate liveness/readiness | A live process is not necessarily safe to receive traffic; Mongo is required while Neon degradation is reported without taking the authoritative Mongo API offline | Readiness semantics must be revisited if Neon becomes authoritative |
+| JSON logs + request IDs | Machine-readable events and response correlation are useful before adopting a logging vendor | Existing controller logs are not fully migrated and logs are not centrally shipped |
+| Bounded graceful shutdown | Stops new HTTP work and lets the current outbox batch finish before closing database pools | Shutdown behavior still needs an integration test under active traffic |
 
 ## Alternatives Considered
 - PostgreSQL-only: preferred if the team commits to relational ownership; rejected as an immediate rewrite.

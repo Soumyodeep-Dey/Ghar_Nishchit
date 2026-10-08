@@ -1,4 +1,4 @@
-import AppError from '../utils/AppError.js';
+import { logger } from '../utils/logger.js';
 
 /**
  * Global Express Error Handling Middleware
@@ -17,7 +17,8 @@ export const globalErrorHandler = (err, req, res, next) => {
     return res.status(400).json({
       status: 'fail',
       message: 'Validation failed',
-      errors: formattedErrors
+      errors: formattedErrors,
+      requestId: req.requestId,
     });
   }
 
@@ -25,14 +26,16 @@ export const globalErrorHandler = (err, req, res, next) => {
   if (err.name === 'JsonWebTokenError') {
     return res.status(401).json({
       status: 'fail',
-      message: 'Invalid authorization token. Please login again.'
+      message: 'Invalid authorization token. Please login again.',
+      requestId: req.requestId,
     });
   }
 
   if (err.name === 'TokenExpiredError') {
     return res.status(401).json({
       status: 'fail',
-      message: 'Authorization token has expired. Please login again.'
+      message: 'Authorization token has expired. Please login again.',
+      requestId: req.requestId,
     });
   }
 
@@ -40,7 +43,8 @@ export const globalErrorHandler = (err, req, res, next) => {
   if (err.name === 'CastError') {
     return res.status(400).json({
       status: 'fail',
-      message: `Invalid format for field ${err.path}: "${err.value}"`
+      message: `Invalid format for field ${err.path}: "${err.value}"`,
+      requestId: req.requestId,
     });
   }
 
@@ -50,24 +54,27 @@ export const globalErrorHandler = (err, req, res, next) => {
     if (err.isOperational) {
       return res.status(err.statusCode).json({
         status: err.status,
-        message: err.message
+        message: err.message,
+        requestId: req.requestId,
       });
     }
 
     // Unhandled technical database or internal library errors
-    console.error('[PRODUCTION FATAL ERROR] 💥:', err);
+    logger.error('unhandled_request_error', { requestId: req.requestId, err });
     return res.status(500).json({
       status: 'error',
-      message: 'An unexpected internal error occurred'
+      message: 'An unexpected internal error occurred',
+      requestId: req.requestId,
     });
   } else {
     // In development/staging, log entire stacks for easy debugging
-    console.error('[DEV ERROR] 💥:', err);
+    logger.error('request_error', { requestId: req.requestId, err });
     return res.status(err.statusCode).json({
       status: err.status,
       message: err.message,
       stack: err.stack,
-      error: err
+      error: err,
+      requestId: req.requestId,
     });
   }
 };

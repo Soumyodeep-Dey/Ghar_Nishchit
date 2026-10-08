@@ -10,6 +10,7 @@
 - In-process outbox worker: polls MongoDB every 10 seconds and syncs contracts to Neon, 10 jobs per batch, maximum five attempts.
 - Razorpay: order creation, callback signature verification, signed webhooks.
 - Gemini: backend proxy with timeout and process-local limiting.
+- Operations baseline: Helmet headers, request IDs, structured request logs, liveness/readiness probes, and bounded graceful shutdown.
 
 ### Database Architecture
 MongoDB uses references for users/properties/contracts/payments and embedded arrays for inquiry replies and maintenance comments/history. Existing indexes include property geospatial, maintenance access paths, user uniqueness, payment/order identifiers, notification user, and outbox polling. Neon foreign keys exist only between its own projections; Mongo property IDs cannot have PostgreSQL FKs.
@@ -27,6 +28,7 @@ MongoDB uses references for users/properties/contracts/payments and embedded arr
 - Gemini unavailable: chatbot returns 502/504 without affecting rental workflows.
 - Worker process stops: contract projections lag until restart.
 - Multiple API replicas: every replica would poll the same outbox without leases; unsafe today.
+- Neon unavailable: readiness reports `degraded` rather than removing the API from service because MongoDB is authoritative; affected projection/reporting paths can still fail.
 
 ### Bottlenecks
 Unpaginated collections, full admin reads, application-memory analytics, N+1 landlord payment filtering, growing embedded arrays, and HTTP/worker co-location.
@@ -37,13 +39,13 @@ Unpaginated collections, full admin reads, application-memory analytics, N+1 lan
 Cache public property searches and stable dashboard summaries only after measuring hit rate. Never cache authorization decisions longer than account-status expectations. Redis is **Not currently implemented**.
 
 ### Horizontal Scaling and Load Balancing
-Make shutdown/health checks production-safe, separate the worker, externalize rate-limit state, then place stateless API replicas behind a managed load balancer. Sticky sessions are unnecessary with Bearer JWTs. A load balancer is **Not currently implemented**.
+Health checks and bounded shutdown now provide the single-instance baseline. Before horizontal scaling, separate the worker and add job leases, externalize rate-limit state, then place stateless API replicas behind a managed load balancer. Sticky sessions are unnecessary with Bearer JWTs. A load balancer is **Not currently implemented**.
 
 ### Database Scaling
 First paginate and fix queries/indexes. Next use managed Mongo connection pooling, backups, point-in-time recovery, and read replicas for suitable read traffic. Decide whether to retire Neon projections or complete a PostgreSQL migration; do not maintain two indefinite sources of truth.
 
 ### Observability
-Add request IDs, structured redacted logs, RED metrics (rate/errors/duration), process/database metrics, traces for Mongo/Neon/Razorpay, dashboards, alerts, and outbox-lag/dead-letter monitoring. These are **Not currently implemented**.
+Request IDs and structured, sensitive-key-redacted HTTP/lifecycle logs are implemented. RED metrics, process/database metrics, distributed traces, centralized log shipping, dashboards, alerts, and outbox-lag/dead-letter monitoring are **Not currently implemented**.
 
 ### Architecture for 100 Users
 Current single API and managed Mongo are sufficient after correctness fixes, backups, tests, health checks, and basic monitoring. Avoid new infrastructure.

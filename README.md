@@ -19,7 +19,7 @@ Current priorities are access control, validation, responsive UI, payment integr
 - Node.js, Express 5, Mongoose, Zod, JWT, bcryptjs.
 - MongoDB primary; Neon/PostgreSQL partial secondary projection.
 - Razorpay and server-side Google Gemini integration.
-- Playwright smoke tests; backend automated tests are **Not currently implemented**.
+- Playwright smoke tests and a small Node/Supertest backend HTTP suite.
 
 ## 6. High-Level System Architecture
 The current system is a frontend/backend modular monolith. MongoDB is authoritative. Selected records are copied to Neon using direct writes or a MongoDB outbox worker.
@@ -64,10 +64,10 @@ PostgreSQL-only storage offers stronger relational integrity but needs a deliber
 The monolith is easy to run but scales workloads together. MongoDB supports evolving documents but relationships rely on application logic. JWTs reduce session state but localStorage increases XSS impact. Dual persistence introduces consistency risk.
 
 ## 15. Security Considerations
-Implemented: bcrypt, server-side RBAC/ownership checks, account-status enforcement, auth validation, CORS allowlist, 2 MB body limits, rate limiting, and Razorpay HMAC checks. Refresh rotation, HttpOnly cookies, Helmet/CSP, distributed limiting, comprehensive schemas, a secrets manager, and security tests are **Not currently implemented**. See [Security](docs/SECURITY.md).
+Implemented: bcrypt, server-side RBAC/ownership checks, account-status enforcement, auth validation, Helmet security headers, a CORS allowlist, 2 MB body limits, rate limiting, and Razorpay HMAC checks. Refresh rotation, HttpOnly cookies, distributed limiting, comprehensive schemas, a secrets manager, and security regression tests are **Not currently implemented**. See [Security](docs/SECURITY.md).
 
 ## 16. Error Handling & Reliability
-The API has global structured error handling, JSON 404s, signature checks, and a retrying contract outbox. Error shapes still vary, direct Neon writes can diverge, and graceful shutdown/dead-letter recovery are **Not currently implemented**.
+The API has global structured error handling, traceable JSON 404s, signature checks, a retrying contract outbox, dependency-aware health endpoints, and bounded graceful shutdown. Error shapes still vary, direct Neon writes can diverge, and dead-letter recovery is **Not currently implemented**.
 
 ## 17. Performance Considerations
 Lazy routes and vendor chunks reduce frontend work. Indexes cover geolocation and selected maintenance/payment paths. Risks include unpaginated lists, in-memory admin analytics, N+1 payment filtering, and large embedded documents. See [Performance](docs/PERFORMANCE.md).
@@ -83,7 +83,7 @@ Lazy routes and vendor chunks reduce frontend work. Indexes cover geolocation an
 Add pagination, database aggregation, query measurement, compound indexes, structured telemetry, and a separately runnable worker first. Add API replicas, load balancing, and shared caching/rate limiting only after measurements justify them.
 
 ## 20. Production Readiness
-This is suitable for development and case-study use, not asserted production readiness. Deployment manifests, CI/CD, backups, monitoring, graceful shutdown, migration automation, and recovery tests are **Not currently implemented**. See [Production Readiness](docs/PRODUCTION_READINESS.md).
+This is suitable for development and case-study use, not asserted production readiness. A CI workflow, health endpoints, structured request logs, and graceful shutdown now provide a baseline. Deployment manifests, backups, metrics/alerts, migration automation, and recovery tests are **Not currently implemented**. See [Production Readiness](docs/PRODUCTION_READINESS.md).
 
 ## 21. Known Limitations
 - Incomplete MongoDB/Neon synchronization.
@@ -102,6 +102,7 @@ cd backend
 Copy-Item .env.example .env -ErrorAction Stop # only when .env does not exist
 # Configure MongoDB and secrets
 npm install
+npm test
 npm run create-admin # optional
 npm run dev
 ```
@@ -112,13 +113,11 @@ npm run dev
 ```
 Frontend: `http://localhost:5173`; backend: `http://localhost:5000`. Never commit `.env` files.
 
-## 24. Interview Questions & Answers
-See [Interview Questions](docs/INTERVIEW_QUESTIONS.md) for 30 repository-specific questions.
+Operational probes: `GET /health/live` confirms the process is responsive; `GET /health/ready` requires MongoDB and reports Neon degradation separately because MongoDB is authoritative.
 
 ## Engineering Documents
 - [System Design](docs/SYSTEM_DESIGN.md)
 - [Engineering Decisions](docs/ENGINEERING_DECISIONS.md)
 - [Performance](docs/PERFORMANCE.md)
 - [Security](docs/SECURITY.md)
-- [Interview Questions](docs/INTERVIEW_QUESTIONS.md)
 - [Production Readiness](docs/PRODUCTION_READINESS.md)

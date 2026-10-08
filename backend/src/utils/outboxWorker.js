@@ -1,7 +1,10 @@
 import Outbox from '../models/outbox.model.js';
 import { query as neonQuery } from '../db/neon.js';
+import { logger } from './logger.js';
 
 let isRunning = false;
+let intervalId = null;
+let activeRun = null;
 
 const toDate = (d) => d ? new Date(d).toISOString().split('T')[0] : null;
 
@@ -48,10 +51,7 @@ const syncContractToNeon = async (c) => {
   );
 };
 
-export const startOutboxWorker = () => {
-  console.log('[Outbox Worker] Starting background sync worker loop 🕒');
-  
-  setInterval(async () => {
+const processBatch = async () => {
     if (isRunning) return; // Guard against overlapping runs
     isRunning = true;
 
@@ -72,19 +72,46 @@ export const startOutboxWorker = () => {
           job.status = 'completed';
           job.lastError = null;
           await job.save();
-          console.log(`[Outbox Worker] Synced job ${job._id} successfully (Aggregate ID: ${job.aggregateId})`);
+          logger.info('outbox_job_completed', {
+            jobId: job._id.toString(),
+            aggregateId: job.aggregateId,
+          });
         } catch (jobError) {
           job.retries += 1;
           job.status = 'failed';
           job.lastError = jobError.message;
           await job.save();
-          console.error(`[Outbox Worker] Job ${job._id} failed (Attempt ${job.retries}/5): ${jobError.message}`);
+          logger.error('outbox_job_failed', {
+            jobId: job._id.toString(),
+            attempt: job.retries,
+            err: jobError,
+          });
         }
       }
     } catch (err) {
-      console.error('[Outbox Worker] Unexpected database polling exception:', err.message);
+      logger.error('outbox_poll_failed', { err });
     } finally {
       isRunning = false;
     }
-  }, 10000); // Runs every 10 seconds
+};
+
+export const startOutboxWorker = () => {
+  if (intervalId) return;
+
+  logger.info('outbox_worker_started', { intervalMs: 10000 });
+  intervalId = setInterval(() => {
+    activeRun = processBatch().finally(() => {
+      activeRun = null;
+    });
+  }, 10000);
+};
+
+export const stopOutboxWorker = async () => {
+  if (intervalId) {
+    clearInterval(intervalId);
+    intervalId = null;
+  }
+
+  if (activeRun) await activeRun;
+  logger.info('outbox_worker_stopped');
 };
