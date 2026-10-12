@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { createElement, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../../useDarkMode';
 import {
@@ -47,7 +47,7 @@ export default function AdminDashboard() {
     broadcast,
     updateSupportStatus,
     replyToSupport,
-  } = useAdminData();
+  } = useAdminData(activeTab);
 
   const logout = () => {
     clearAuthSession();
@@ -78,7 +78,7 @@ export default function AdminDashboard() {
 
       {/* Nav */}
       <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-        {NAV.map(({ id, label, icon: Icon }) => {
+        {NAV.map(({ id, label, icon }) => {
           const badge = id === 'maintenance' && slaBreaches > 0 ? slaBreaches
             : id === 'support' && openSupport > 0 ? openSupport : null;
           return (
@@ -87,7 +87,7 @@ export default function AdminDashboard() {
               onClick={() => { setActiveTab(id); setSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${activeTab === id ? 'bg-indigo-500 text-white shadow-lg' : 'text-indigo-200 hover:bg-white/10 hover:text-white'}`}
             >
-              <Icon size={18} />
+              {createElement(icon, { size: 18 })}
               <span className="flex-1 text-left">{label}</span>
               {badge && (
                 <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">{badge}</span>
@@ -135,7 +135,7 @@ export default function AdminDashboard() {
           <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"><Menu size={20} /></button>
           <div className="flex-1">
             <h1 className="font-bold text-lg">{tabTitle}</h1>
-            {data && <p className="text-xs text-gray-500 dark:text-gray-400">{data.analytics?.totalUsers} users · {data.properties?.length} properties</p>}
+            {data && <p className="text-xs text-gray-500 dark:text-gray-400">{data.analytics?.totalUsers} users · {data.analytics?.totalProperties} properties</p>}
           </div>
           {slaBreaches > 0 && (
             <button onClick={() => setActiveTab('maintenance')} className="flex items-center gap-2 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl text-xs font-semibold border border-red-200 dark:border-red-800 hover:bg-red-100 transition">

@@ -18,6 +18,9 @@
 | Separate liveness/readiness | A live process is not necessarily safe to receive traffic; Mongo is required while Neon degradation is reported without taking the authoritative Mongo API offline | Readiness semantics must be revisited if Neon becomes authoritative |
 | JSON logs + request IDs | Machine-readable events and response correlation are useful before adopting a logging vendor | Existing controller logs are not fully migrated and logs are not centrally shipped |
 | Bounded graceful shutdown | Stops new HTTP work and lets the current outbox batch finish before closing database pools | Shutdown behavior still needs an integration test under active traffic |
+| Lazy admin sections + database aggregation | Avoids transferring seven full collections for every tab and removes repeated in-memory scans for overview metrics | Section lists remain unpaginated and the legacy all-data response remains for compatibility |
+| Opt-in pagination | Enables bounded property reads without silently breaking frontend callers that currently expect raw arrays | Legacy calls remain unbounded until consumers migrate to the paginated envelope |
+| Batched payment attribution | Preserves legacy payments without property IDs while replacing per-payment contract queries with set-based lookups | The fallback ownership rule is still more complex than storing an explicit landlord ID on every payment |
 
 ## Alternatives Considered
 - PostgreSQL-only: preferred if the team commits to relational ownership; rejected as an immediate rewrite.

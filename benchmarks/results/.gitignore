@@ -1,0 +1,4 @@
+*.json
+!.gitkeep
+!README.md
+

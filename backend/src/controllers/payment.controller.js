@@ -405,16 +405,31 @@ export const updatePaymentStatus = async (req, res) => {
 export const getPaymentStats = async (req, res) => {
   try {
     const tenantId = req.user?.userId;
-    const all = await Payment.find({ tenantId }).lean();
-    const stats = {
-      total:           all.length,
-      paid:            all.filter(p => p.status === 'Paid').length,
-      pending:         all.filter(p => p.status === 'Pending').length,
-      overdue:         all.filter(p => p.status === 'Overdue').length,
-      failed:          all.filter(p => p.status === 'Failed').length,
-      totalAmountPaid: all.filter(p => p.status === 'Paid').reduce((s, p) => s + p.amount, 0),
-    };
-    return res.status(200).json(stats);
+    const [stats = {}] = await Payment.aggregate([
+      { $match: { tenantId: new mongoose.Types.ObjectId(tenantId) } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          paid: { $sum: { $cond: [{ $eq: ['$status', 'Paid'] }, 1, 0] } },
+          pending: { $sum: { $cond: [{ $eq: ['$status', 'Pending'] }, 1, 0] } },
+          overdue: { $sum: { $cond: [{ $eq: ['$status', 'Overdue'] }, 1, 0] } },
+          failed: { $sum: { $cond: [{ $eq: ['$status', 'Failed'] }, 1, 0] } },
+          totalAmountPaid: {
+            $sum: { $cond: [{ $eq: ['$status', 'Paid'] }, { $ifNull: ['$amount', 0] }, 0] },
+          },
+        },
+      },
+      { $project: { _id: 0 } },
+    ]);
+    return res.status(200).json({
+      total: stats.total || 0,
+      paid: stats.paid || 0,
+      pending: stats.pending || 0,
+      overdue: stats.overdue || 0,
+      failed: stats.failed || 0,
+      totalAmountPaid: stats.totalAmountPaid || 0,
+    });
   } catch (err) {
     console.error('[getPaymentStats] ERROR:', err.message);
     return res.status(500).json({ message: 'Failed to fetch payment stats' });
@@ -426,28 +441,58 @@ export const getPaymentStats = async (req, res) => {
 // 2. Matches if propertyId is null/missing and note contains a contract ID belonging to the landlord.
 // 3. Matches if propertyId is null/missing and the tenant only has contracts with THIS landlord.
 export const filterLandlordPayments = async (payments, landlordId, propertyIds) => {
+  const landlordKey = landlordId.toString();
+  const propertyIdSet = new Set(propertyIds.map((id) => id.toString()));
+  const contractIds = new Set();
+  const tenantIds = new Set();
+
+  for (const payment of payments) {
+    const propertyId = payment.propertyId?._id || payment.propertyId;
+    if (propertyId || !payment.tenantId) continue;
+    const contractMatch = payment.note?.match(/contract:([a-f0-9]{24})/i);
+    if (contractMatch) contractIds.add(contractMatch[1]);
+    else tenantIds.add((payment.tenantId?._id || payment.tenantId).toString());
+  }
+
+  const [referencedContracts, tenantContracts] = await Promise.all([
+    contractIds.size
+      ? Contract.find({ _id: { $in: [...contractIds] } }).select('_id landlord').lean()
+      : [],
+    tenantIds.size
+      ? Contract.find({ tenant: { $in: [...tenantIds] } }).select('tenant landlord').lean()
+      : [],
+  ]);
+
+  const referencedContractLandlord = new Map(
+    referencedContracts.map((contract) => [contract._id.toString(), contract.landlord?.toString()])
+  );
+  const landlordsByTenant = new Map();
+  for (const contract of tenantContracts) {
+    const tenantKey = contract.tenant?.toString();
+    if (!tenantKey) continue;
+    if (!landlordsByTenant.has(tenantKey)) landlordsByTenant.set(tenantKey, new Set());
+    if (contract.landlord) landlordsByTenant.get(tenantKey).add(contract.landlord.toString());
+  }
+
   const filtered = [];
   for (const p of payments) {
     const pPropId = p.propertyId?._id || p.propertyId;
-    if (pPropId && propertyIds.some(id => id.toString() === pPropId.toString())) {
+    if (pPropId && propertyIdSet.has(pPropId.toString())) {
       filtered.push(p);
       continue;
     }
     if (!pPropId) {
       const match = p.note?.match(/contract:([a-f0-9]{24})/i);
       if (match) {
-        const contractId = match[1];
-        const contract = await Contract.findById(contractId).select('landlord').lean();
-        if (contract && contract.landlord?.toString() === landlordId.toString()) {
+        if (referencedContractLandlord.get(match[1]) === landlordKey) {
           filtered.push(p);
         }
         continue;
       }
       const tenantId = p.tenantId?._id || p.tenantId;
       if (tenantId) {
-        const tenantContracts = await Contract.find({ tenant: tenantId }).select('landlord').lean();
-        const landlords = [...new Set(tenantContracts.map(c => c.landlord?.toString()).filter(Boolean))];
-        if (landlords.length === 1 && landlords[0] === landlordId.toString()) {
+        const landlords = landlordsByTenant.get(tenantId.toString()) || new Set();
+        if (landlords.size === 1 && landlords.has(landlordKey)) {
           filtered.push(p);
         }
       }
@@ -505,15 +550,13 @@ export const getLandlordRevenue = async (req, res) => {
       });
     }
 
-    const rawPaidPayments = await Payment.find(paidQuery).lean();
-    const paidPayments = await filterLandlordPayments(rawPaidPayments, landlordId, propertyIds);
-
-    const pendingQuery = {
-      status: 'Pending',
+    const rawPayments = await Payment.find({
+      status: { $in: ['Paid', 'Pending'] },
       $or: paidQuery.$or,
-    };
-    const rawPendingPayments = await Payment.find(pendingQuery).lean();
-    const pendingPayments = await filterLandlordPayments(rawPendingPayments, landlordId, propertyIds);
+    }).lean();
+    const landlordPayments = await filterLandlordPayments(rawPayments, landlordId, propertyIds);
+    const paidPayments = landlordPayments.filter((payment) => payment.status === 'Paid');
+    const pendingPayments = landlordPayments.filter((payment) => payment.status === 'Pending');
 
     const totalRevenue = paidPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
     const pendingAmount = pendingPayments.reduce((sum, p) => sum + (p.amount || 0), 0);

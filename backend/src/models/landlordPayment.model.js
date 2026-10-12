@@ -76,4 +76,6 @@ const landlordPaymentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+landlordPaymentSchema.index({ landlordId: 1, createdAt: -1 });
+
 export default mongoose.model('LandlordPayment', landlordPaymentSchema);

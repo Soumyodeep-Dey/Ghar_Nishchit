@@ -31,7 +31,7 @@ MongoDB uses references for users/properties/contracts/payments and embedded arr
 - Neon unavailable: readiness reports `degraded` rather than removing the API from service because MongoDB is authoritative; affected projection/reporting paths can still fail.
 
 ### Bottlenecks
-Unpaginated collections, full admin reads, application-memory analytics, N+1 landlord payment filtering, growing embedded arrays, and HTTP/worker co-location.
+Admin sections now load independently and overview analytics run in MongoDB; landlord payment attribution now batches contract lookups. Remaining bottlenecks include unpaginated admin/legacy lists, several other unpaginated collections, growing embedded arrays, compatibility access to the full dashboard payload, and HTTP/worker co-location.
 
 ## PROPOSED FUTURE ARCHITECTURE
 

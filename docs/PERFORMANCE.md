@@ -20,20 +20,37 @@ Suggested scenarios: public property browse/search; authenticated tenant dashboa
 
 ## Reproducible Commands
 ```powershell
-# Example only; install k6 separately and provide a script before running.
-k6 run -e BASE_URL=http://localhost:5000 -e ACCESS_TOKEN=... benchmarks/api.js
+# Dependency-free repository runner. Writes JSON under benchmarks/results/YYYY-MM-DD/.
+$env:BENCH_BASE_URL = 'http://localhost:5000'
+$env:BENCH_DATASET_SIZE = 'properties=1000;users=500'
+$env:BENCH_TOPOLOGY = 'local API; local MongoDB'
+$env:BENCH_COMMIT = (git rev-parse HEAD)
+node benchmarks/api-benchmark.mjs --path=/api/properties?page=1`&limit=24 --warmup=60 --duration=300 --concurrency=10
+
+# Authenticated scenario; the token is not persisted in the result.
+$env:BENCH_TOKEN = '<test-account-access-token>'
+node benchmarks/api-benchmark.mjs --path=/api/admin/dashboard?section=overview --warmup=60 --duration=300 --concurrency=10
 
 # Quick endpoint smoke load
-npx autocannon -c 10 -d 30 http://localhost:5000/api/properties
+npx autocannon -c 10 -d 30 'http://localhost:5000/api/properties?page=1&limit=24'
 
 # Built frontend
 npx lighthouse http://localhost:4173 --output=json --output-path=benchmarks/results/lighthouse.json
 ```
 
-Benchmark automation scripts are **Not currently implemented** because authenticated fixtures and isolated test data are not yet available.
+The repository runner records p50/p95/p99, throughput, status counts, transport failures, error rate, concurrency, duration, command, declared dataset/topology, and load-generator environment. Controlled benchmark results, server CPU/memory capture, automated test-data fixtures, Mongo slow-query exports, and Lighthouse results are **Not currently available**.
+
+## Implemented Query Improvements
+
+- Property browse and location search accept opt-in `page`/`limit` pagination with a maximum page size of 100; requests without pagination preserve the legacy array response.
+- Admin overview metrics are computed with MongoDB aggregation/count queries rather than loading every document into Node.js.
+- The frontend requests only the active admin section; the no-`section` compatibility API still returns the legacy full payload.
+- Landlord payment attribution batches contract lookups into at most two queries per filtering pass rather than querying inside the payment loop.
+- Tenant and landlord payment summaries use database aggregation instead of loading complete histories.
+- Compound indexes were added for property ownership/status, contract landlord/tenant access, and payment owner/status/time access paths. Index effectiveness must still be verified with production-like `explain` output.
 
 ## Result Record Template
 Store each run separately under `benchmarks/results/YYYY-MM-DD/` and record: commit SHA, date/timezone, OS/CPU/RAM, Node/tool versions, deployment topology, database tier/region, dataset counts, duration, warm-up, concurrency/arrival rate, exact command, p50/p95/p99, RPS, errors, CPU/memory, database timings, and raw result filename. Never invent missing values.
 
 ## Optimization Order
-Measure → paginate → remove N+1 queries → move analytics into database aggregation → validate indexes with explain plans → reduce payloads → tune pools → consider caching/replicas only when evidence remains.
+Run a controlled baseline → migrate remaining consumers to pagination → profile other query fan-out → validate indexes with explain plans → reduce payloads → tune pools → consider caching/replicas only when evidence remains.

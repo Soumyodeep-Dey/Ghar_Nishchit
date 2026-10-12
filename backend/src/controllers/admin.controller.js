@@ -7,78 +7,126 @@ import Inquiry from '../models/inquiry.model.js';
 import SupportRequest from '../models/supportRequest.model.js';
 import Notification from '../models/notification.model.js';
 
+const dashboardLoaders = {
+  users: () => User.find().select('-password').sort({ createdAt: -1 }).lean(),
+  properties: () => Property.find().populate('postedBy', 'name email').sort({ createdAt: -1 }).lean(),
+  contracts: () => Contract.find().populate('tenant landlord property').sort({ createdAt: -1 }).lean(),
+  maintenance: () => Maintenance.find().populate('tenant landlord property', 'name email title').sort({ createdAt: -1 }).lean(),
+  payments: () => Payment.find().populate('tenantId', 'name email').populate('propertyId', 'title').sort({ createdAt: -1 }).lean(),
+  inquiries: () => Inquiry.find().populate('seeker landlord', 'name email').populate('property', 'title').sort({ contactTime: -1 }).lean(),
+  supportRequests: () => SupportRequest.find().populate('user', 'name email role').sort({ createdAt: -1 }).lean(),
+};
+
+const countByStatus = (field, statuses) => Object.fromEntries(
+  statuses.map((status) => [
+    status,
+    { $sum: { $cond: [{ $eq: [`$${field}`, status] }, 1, 0] } },
+  ])
+);
+
+const getMonthlySeries = (rows, valueField = 'count') => new Map(
+  rows.map((row) => [row._id, row[valueField]])
+);
+
+const getAdminAnalytics = async () => {
+  const now = new Date();
+  const firstMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 5, 1));
+  const slaBreachThreshold = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const monthGroup = { $dateToString: { format: '%Y-%m', date: '$createdAt', timezone: 'UTC' } };
+
+  const [
+    [userStats = {}],
+    [propertyStats = {}],
+    [contractStats = {}],
+    [paymentStats = {}],
+    slaBreaches,
+    openSupportRequests,
+    userGrowth,
+    propertyGrowth,
+    paymentGrowth,
+  ] = await Promise.all([
+    User.aggregate([{ $group: { _id: null, totalUsers: { $sum: 1 }, ...countByStatus('role', ['landlord', 'tenant']) } }]),
+    Property.aggregate([{ $group: { _id: null, totalProperties: { $sum: 1 }, ...countByStatus('status', ['Occupied', 'Available', 'Pending']) } }]),
+    Contract.aggregate([{ $group: { _id: null, totalContracts: { $sum: 1 }, ...countByStatus('status', ['active']) } }]),
+    Payment.aggregate([{
+      $group: {
+        _id: null,
+        totalRevenue: { $sum: { $cond: [{ $eq: ['$status', 'Paid'] }, { $ifNull: ['$amount', 0] }, 0] } },
+        pendingPayments: { $sum: { $cond: [{ $eq: ['$status', 'Pending'] }, { $ifNull: ['$amount', 0] }, 0] } },
+        failedPayments: { $sum: { $cond: [{ $eq: ['$status', 'Failed'] }, 1, 0] } },
+      },
+    }]),
+    Maintenance.countDocuments({ status: { $in: ['Pending', 'In Progress'] }, createdAt: { $lt: slaBreachThreshold } }),
+    SupportRequest.countDocuments({ status: 'open' }),
+    User.aggregate([
+      { $match: { createdAt: { $gte: firstMonth } } },
+      { $group: { _id: monthGroup, count: { $sum: 1 } } },
+    ]),
+    Property.aggregate([
+      { $match: { createdAt: { $gte: firstMonth } } },
+      { $group: { _id: monthGroup, count: { $sum: 1 } } },
+    ]),
+    Payment.aggregate([
+      { $match: { createdAt: { $gte: firstMonth }, status: 'Paid' } },
+      { $group: { _id: monthGroup, amount: { $sum: { $ifNull: ['$amount', 0] } } } },
+    ]),
+  ]);
+
+  const usersByMonth = getMonthlySeries(userGrowth);
+  const propertiesByMonth = getMonthlySeries(propertyGrowth);
+  const paymentsByMonth = getMonthlySeries(paymentGrowth, 'amount');
+  const monthlyGrowth = Array.from({ length: 6 }, (_, index) => {
+    const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 5 + index, 1));
+    const key = date.toISOString().slice(0, 7);
+    return {
+      month: date.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' }),
+      users: usersByMonth.get(key) || 0,
+      properties: propertiesByMonth.get(key) || 0,
+      payments: paymentsByMonth.get(key) || 0,
+    };
+  });
+
+  return {
+    totalUsers: userStats.totalUsers || 0,
+    totalLandlords: userStats.landlord || 0,
+    totalTenants: userStats.tenant || 0,
+    totalProperties: propertyStats.totalProperties || 0,
+    totalContracts: contractStats.totalContracts || 0,
+    activeContracts: contractStats.active || 0,
+    totalRevenue: paymentStats.totalRevenue || 0,
+    pendingPayments: paymentStats.pendingPayments || 0,
+    failedPayments: paymentStats.failedPayments || 0,
+    occupiedProperties: propertyStats.Occupied || 0,
+    availableProperties: propertyStats.Available || 0,
+    pendingProperties: propertyStats.Pending || 0,
+    slaBreaches,
+    openSupportRequests,
+    monthlyGrowth,
+  };
+};
+
 // ── Dashboard Overview ────────────────────────────────────────────────────
 export const getDashboardData = async (req, res) => {
   try {
-    const [users, properties, contracts, maintenance, payments, inquiries, supportRequests] = await Promise.all([
-      User.find().select('-password').sort({ createdAt: -1 }),
-      Property.find().populate('postedBy', 'name email').sort({ createdAt: -1 }),
-      Contract.find().populate('tenant landlord property').sort({ createdAt: -1 }),
-      Maintenance.find().populate('tenant landlord property', 'name email title').sort({ createdAt: -1 }),
-      Payment.find().populate('tenantId', 'name email').populate('propertyId', 'title').sort({ createdAt: -1 }),
-      Inquiry.find().populate('seeker landlord', 'name email').populate('property', 'title').sort({ contactTime: -1 }),
-      SupportRequest.find().populate('user', 'name email role').sort({ createdAt: -1 }),
-    ]);
-
-    // SLA breaches: Open/In Progress maintenance older than 7 days
-    const slaBreachThreshold = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const slaBreaches = maintenance.filter(m =>
-      ['Pending', 'In Progress'].includes(m.status) && new Date(m.createdAt) < slaBreachThreshold
-    );
-
-    // Financial summary
-    const totalRevenue = payments.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.amount, 0);
-    const pendingPayments = payments.filter(p => p.status === 'Pending').reduce((sum, p) => sum + p.amount, 0);
-    const failedPayments = payments.filter(p => p.status === 'Failed').length;
-
-    // Property occupancy
-    const occupiedProperties = properties.filter(p => p.status === 'Occupied').length;
-    const availableProperties = properties.filter(p => p.status === 'Available').length;
-
-    // Monthly growth data (last 6 months)
-    const monthlyGrowth = [];
-    for (let i = 5; i >= 0; i--) {
-      const date = new Date();
-      date.setMonth(date.getMonth() - i);
-      const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
-      const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-      const monthName = date.toLocaleString('default', { month: 'short' });
-      monthlyGrowth.push({
-        month: monthName,
-        users: users.filter(u => new Date(u.createdAt) >= monthStart && new Date(u.createdAt) <= monthEnd).length,
-        properties: properties.filter(p => new Date(p.createdAt) >= monthStart && new Date(p.createdAt) <= monthEnd).length,
-        payments: payments.filter(p => p.status === 'Paid' && new Date(p.createdAt) >= monthStart && new Date(p.createdAt) <= monthEnd).reduce((s, p) => s + p.amount, 0),
-      });
+    const section = req.query.section;
+    if (section === 'overview') {
+      return res.status(200).json({ success: true, analytics: await getAdminAnalytics() });
     }
 
-    const activeContracts = contracts.filter(c => c.status === 'active').length;
+    if (section) {
+      const loader = dashboardLoaders[section];
+      if (!loader) return res.status(400).json({ success: false, message: 'Invalid dashboard section' });
+      return res.status(200).json({ success: true, [section]: await loader() });
+    }
 
-    res.status(200).json({
+    // Compatibility path for older clients. New clients request one section at a time.
+    const entries = await Promise.all(
+      Object.entries(dashboardLoaders).map(async ([key, loader]) => [key, await loader()])
+    );
+    return res.status(200).json({
       success: true,
-      users,
-      properties,
-      contracts,
-      maintenance,
-      payments,
-      inquiries,
-      supportRequests,
-      analytics: {
-        totalUsers: users.length,
-        totalLandlords: users.filter(u => u.role === 'landlord').length,
-        totalTenants: users.filter(u => u.role === 'tenant').length,
-        totalContracts: contracts.length,
-        activeContracts,
-        totalRevenue,
-        pendingPayments,
-        failedPayments,
-        occupiedProperties,
-        availableProperties,
-        pendingProperties: properties.filter(p => p.status === 'Pending').length,
-        slaBreaches: slaBreaches.length,
-        slaBreachList: slaBreaches,
-        openSupportRequests: supportRequests.filter(s => s.status === 'open').length,
-        monthlyGrowth,
-      }
+      ...Object.fromEntries(entries),
+      analytics: await getAdminAnalytics(),
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

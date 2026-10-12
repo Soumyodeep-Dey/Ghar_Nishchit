@@ -20,4 +20,7 @@ const contractSchema = new mongoose.Schema({
   customClauses: { type: String, default: '' }
 }, { timestamps: true });
 
+contractSchema.index({ landlord: 1, status: 1 });
+contractSchema.index({ tenant: 1, landlord: 1 });
+
 export default mongoose.model('Contract', contractSchema);

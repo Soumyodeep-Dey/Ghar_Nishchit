@@ -5,11 +5,11 @@ Status definitions: **PASS** has repository/reproducible evidence; **PARTIAL** e
 | Area | Status | Evidence / gap |
 |---|---|---|
 | Security | PARTIAL | bcrypt, RBAC, validation, rate limits, HMAC; see `SECURITY.md` gaps |
-| Performance | NOT TESTED | Build passes; no load/Lighthouse results recorded |
+| Performance | NOT TESTED | Reproducible API runner and query improvements exist; no controlled load/Lighthouse results recorded |
 | Scalability | FAIL | Single API/worker and process-local limiter; no load balancer |
 | Reliability | PARTIAL | Global errors, contract retries, health probes, and bounded shutdown; mixed dual writes remain |
 | Observability | PARTIAL | JSON request/lifecycle logs and request IDs; no centralized logs, metrics, traces, or alerts |
-| Testing | PARTIAL | Five backend HTTP tests plus limited Playwright smoke coverage; business authorization/integration coverage remains weak |
+| Testing | PARTIAL | Five backend HTTP tests, four performance-path unit tests, and limited Playwright smoke coverage; business authorization/integration coverage remains weak |
 | Deployment | FAIL | No production manifest or infrastructure code |
 | Backups | NOT TESTED | No repository backup/restore evidence |
 | Database migrations | PARTIAL | Manual Neon initializer/migration; no version/rollback system |
@@ -38,6 +38,6 @@ npm test
 npm audit --omit=dev --audit-level=high
 ```
 
-Last locally reproduced on 2026-10-09: backend tests passed (5/5), backend production dependency audit reported zero known vulnerabilities, and the frontend production build completed. Frontend lint still reports 29 errors and three warnings; it is not represented as passing.
+Last performance-phase verification on 2026-10-12: backend tests passed (9/9) and the frontend production build completed. No load-test or Lighthouse result is claimed. The existing frontend lint debt is not represented as passing.
 
 No item should be promoted to PASS without a linked file, command output, or stored test result.

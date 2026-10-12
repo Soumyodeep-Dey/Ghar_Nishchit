@@ -1,6 +1,7 @@
 import Property from '../models/property.model.js';
 import Favorite from '../models/favourites.model.js';
 import mongoose from 'mongoose';
+import { paginationMeta, paginationRequested, parsePagination } from '../utils/pagination.js';
 
 // Helper to resolve user id from different shapes
 const resolveUserId = (user) => {
@@ -92,8 +93,17 @@ export const createProperty = async (req, res) => {
 // Get all properties
 export const getAllProperties = async (req, res) => {
   try {
-    const properties = await Property.find().populate('postedBy', 'name email');
-    res.status(200).json(properties);
+    const query = Property.find().sort({ createdAt: -1 }).populate('postedBy', 'name email').lean();
+    if (!paginationRequested(req.query)) {
+      return res.status(200).json(await query);
+    }
+
+    const paging = parsePagination(req.query);
+    const [properties, total] = await Promise.all([
+      query.skip(paging.skip).limit(paging.limit),
+      Property.countDocuments(),
+    ]);
+    return res.status(200).json({ data: properties, pagination: paginationMeta(paging, total) });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -227,8 +237,17 @@ export const searchPropertiesByLocation = async (req, res) => {
     if (zip) {
       query["address.zip"] = zip;
     }
-    const properties = await Property.find(query).populate('postedBy', 'name email');
-    res.status(200).json(properties);
+    const findQuery = Property.find(query).sort({ createdAt: -1 }).populate('postedBy', 'name email').lean();
+    if (!paginationRequested(req.query)) {
+      return res.status(200).json(await findQuery);
+    }
+
+    const paging = parsePagination(req.query);
+    const [properties, total] = await Promise.all([
+      findQuery.skip(paging.skip).limit(paging.limit),
+      Property.countDocuments(query),
+    ]);
+    return res.status(200).json({ data: properties, pagination: paginationMeta(paging, total) });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

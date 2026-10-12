@@ -42,5 +42,7 @@ const propertySchema = new mongoose.Schema({
 });
 
 propertySchema.index({ location: '2dsphere' });
+propertySchema.index({ postedBy: 1, createdAt: -1 });
+propertySchema.index({ status: 1, createdAt: -1 });
 
 export default mongoose.model('Property', propertySchema);

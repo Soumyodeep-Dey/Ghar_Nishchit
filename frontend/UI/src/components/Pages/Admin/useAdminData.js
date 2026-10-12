@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { showErrorToast, showSuccessToast, showConfirmToast } from '../../../utils/toast';
 import { ensureValidAccessToken } from '../../../services/authService.js';
 
@@ -13,6 +13,28 @@ const getApiBase = () => {
     (isViteDev ? '' : 'http://localhost:5000');
   const trimmed = (raw || '').replace(/\/+$/, '');
   return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+};
+
+const EMPTY = {
+  success: false,
+  users: [], properties: [], contracts: [],
+  maintenance: [], payments: [], inquiries: [], supportRequests: [],
+  analytics: {
+    totalUsers: 0, totalLandlords: 0, totalTenants: 0, totalProperties: 0,
+    totalRevenue: 0, pendingPayments: 0, failedPayments: 0,
+    occupiedProperties: 0, availableProperties: 0,
+    slaBreaches: 0, monthlyGrowth: [],
+  },
+};
+
+const SECTION_BY_TAB = {
+  users: 'users',
+  properties: 'properties',
+  contracts: 'contracts',
+  maintenance: 'maintenance',
+  payments: 'payments',
+  broadcast: 'inquiries',
+  support: 'supportRequests',
 };
 
 async function adminRequest(path, options = {}) {
@@ -36,40 +58,43 @@ async function adminRequest(path, options = {}) {
   return body;
 }
 
-export function useAdminData() {
-  const [data, setData] = useState(null);
+export function useAdminData(activeTab = 'overview') {
+  const [data, setData] = useState(EMPTY);
   const [loading, setLoading] = useState(true);
+  const overviewLoaded = useRef(false);
 
-  const EMPTY = {
-    success: false,
-    users: [], properties: [], contracts: [],
-    maintenance: [], payments: [], inquiries: [], supportRequests: [],
-    analytics: {
-      totalUsers: 0, totalLandlords: 0, totalTenants: 0,
-      totalRevenue: 0, pendingPayments: 0, failedPayments: 0,
-      occupiedProperties: 0, availableProperties: 0,
-      slaBreaches: 0, slaBreachList: [], monthlyGrowth: [],
-    }
-  };
-
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async ({ refreshOverview = true } = {}) => {
+    setLoading(true);
     try {
-      const result = await adminRequest('/admin/dashboard');
-      if (result.success) setData(result);
-      else {
-        showErrorToast(result.message || 'Failed to load admin data');
-        setData(EMPTY);
+      const section = SECTION_BY_TAB[activeTab];
+      const [overview, sectionData] = await Promise.all([
+        refreshOverview || !overviewLoaded.current
+          ? adminRequest('/admin/dashboard?section=overview')
+          : Promise.resolve(null),
+        section ? adminRequest(`/admin/dashboard?section=${section}`) : Promise.resolve(null),
+      ]);
+
+      if ((overview && !overview.success) || (sectionData && !sectionData.success)) {
+        throw new Error(overview?.message || sectionData?.message || 'Failed to load admin data');
       }
+
+      if (overview) overviewLoaded.current = true;
+
+      setData((current) => ({
+        ...current,
+        ...(overview || {}),
+        ...(sectionData || {}),
+        success: true,
+      }));
     } catch (e) {
       console.error('[Admin] fetch error:', e);
       showErrorToast(e.message || 'Cannot reach server — check backend is running');
-      setData(EMPTY);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [activeTab]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { fetchData({ refreshOverview: false }); }, [fetchData]);
 
   const deleteUser = (id) => {
     showConfirmToast('Delete this user permanently?', async () => {

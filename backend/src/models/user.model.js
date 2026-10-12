@@ -11,4 +11,6 @@ const userSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+userSchema.index({ role: 1, createdAt: -1 });
+
 export default mongoose.model("User", userSchema);

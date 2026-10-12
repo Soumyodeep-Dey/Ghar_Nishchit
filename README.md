@@ -19,7 +19,7 @@ Current priorities are access control, validation, responsive UI, payment integr
 - Node.js, Express 5, Mongoose, Zod, JWT, bcryptjs.
 - MongoDB primary; Neon/PostgreSQL partial secondary projection.
 - Razorpay and server-side Google Gemini integration.
-- Playwright smoke tests and a small Node/Supertest backend HTTP suite.
+- Playwright smoke tests and a Node/Supertest backend HTTP/unit suite.
 
 ## 6. High-Level System Architecture
 The current system is a frontend/backend modular monolith. MongoDB is authoritative. Selected records are copied to Neon using direct writes or a MongoDB outbox worker.
@@ -70,17 +70,17 @@ Implemented: bcrypt, server-side RBAC/ownership checks, account-status enforceme
 The API has global structured error handling, traceable JSON 404s, signature checks, a retrying contract outbox, dependency-aware health endpoints, and bounded graceful shutdown. Error shapes still vary, direct Neon writes can diverge, and dead-letter recovery is **Not currently implemented**.
 
 ## 17. Performance Considerations
-Lazy routes and vendor chunks reduce frontend work. Indexes cover geolocation and selected maintenance/payment paths. Risks include unpaginated lists, in-memory admin analytics, N+1 payment filtering, and large embedded documents. See [Performance](docs/PERFORMANCE.md).
+Lazy routes and vendor chunks reduce frontend work. Admin overview metrics use MongoDB aggregation, admin tabs load their collections on demand, landlord payment attribution uses batched lookups, and property browse/search supports opt-in pagination. Compound indexes cover the corresponding ownership/status/time access paths. Unpaginated compatibility paths and large embedded documents remain risks. See [Performance](docs/PERFORMANCE.md).
 
 ## 18. Current Bottlenecks
-- Admin dashboard loads complete collections.
-- Several list endpoints lack pagination.
-- Landlord payment filtering queries inside loops.
+- Admin section lists are still unpaginated after they are loaded on demand.
+- Several non-property list endpoints lack pagination.
+- Legacy clients can still request the complete admin dashboard payload.
 - HTTP and outbox work share one Node process.
 - Cross-database writes lack full reconciliation.
 
 ## 19. Scalability Strategy
-Add pagination, database aggregation, query measurement, compound indexes, structured telemetry, and a separately runnable worker first. Add API replicas, load balancing, and shared caching/rate limiting only after measurements justify them.
+Extend pagination to the remaining lists, validate the new compound indexes with query plans, run controlled benchmarks, add structured metrics, and separate the worker first. Add API replicas, load balancing, and shared caching/rate limiting only after measurements justify them.
 
 ## 20. Production Readiness
 This is suitable for development and case-study use, not asserted production readiness. A CI workflow, health endpoints, structured request logs, and graceful shutdown now provide a baseline. Deployment manifests, backups, metrics/alerts, migration automation, and recovery tests are **Not currently implemented**. See [Production Readiness](docs/PRODUCTION_READINESS.md).

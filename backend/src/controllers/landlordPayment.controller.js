@@ -16,6 +16,7 @@
 import Razorpay         from 'razorpay';
 import crypto           from 'crypto';
 import LandlordPayment  from '../models/landlordPayment.model.js';
+import mongoose from 'mongoose';
 
 // ── Razorpay client (reuses the same key pair as tenant gateway) ─────────────
 let razorpay;
@@ -240,24 +241,41 @@ export const getLandlordPayments = async (req, res) => {
 export const getLandlordPaymentStats = async (req, res) => {
   try {
     const landlordId = req.user?.userId;
-    const all        = await LandlordPayment.find({ landlordId }).lean();
+    const landlordObjectId = new mongoose.Types.ObjectId(landlordId);
+    const [[counts = {}], latestPaid] = await Promise.all([
+      LandlordPayment.aggregate([
+        { $match: { landlordId: landlordObjectId } },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: 1 },
+            paid: { $sum: { $cond: [{ $eq: ['$status', 'Paid'] }, 1, 0] } },
+            pending: { $sum: { $cond: [{ $eq: ['$status', 'Pending'] }, 1, 0] } },
+            failed: { $sum: { $cond: [{ $eq: ['$status', 'Failed'] }, 1, 0] } },
+            totalAmountSpent: {
+              $sum: { $cond: [{ $eq: ['$status', 'Paid'] }, { $ifNull: ['$totalAmount', 0] }, 0] },
+            },
+          },
+        },
+        { $project: { _id: 0 } },
+      ]),
+      LandlordPayment.findOne({ landlordId, status: 'Paid' })
+        .sort({ paidAt: -1, createdAt: -1 })
+        .select('planName paidAt createdAt')
+        .lean(),
+    ]);
 
-    const paidPayments = all
-      .filter(p => p.status === 'Paid')
-      .sort((a, b) => new Date(b.paidAt || b.createdAt) - new Date(a.paidAt || a.createdAt));
-
-    const latestPaid = paidPayments[0];
     const activePlan = latestPaid ? latestPaid.planName : null;
     const nextRenewalDate = latestPaid
       ? new Date(new Date(latestPaid.paidAt || latestPaid.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()
       : null;
 
     const stats = {
-      total:              all.length,
-      paid:               paidPayments.length,
-      pending:            all.filter(p => p.status === 'Pending').length,
-      failed:             all.filter(p => p.status === 'Failed').length,
-      totalAmountSpent:   paidPayments.reduce((s, p) => s + p.totalAmount, 0),
+      total:              counts.total || 0,
+      paid:               counts.paid || 0,
+      pending:            counts.pending || 0,
+      failed:             counts.failed || 0,
+      totalAmountSpent:   counts.totalAmountSpent || 0,
       activePlan,
       nextRenewalDate,
     };
