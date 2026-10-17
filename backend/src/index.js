@@ -63,8 +63,7 @@ connectDB()
   .then(() => {
     server = app.listen(PORT, () => {
       logger.info('server_started', { port: PORT });
-      // Boot background transactional outbox sync worker
-      startOutboxWorker();
+      if (process.env.RUN_OUTBOX_WORKER !== 'false') startOutboxWorker();
     });
   })
   .catch((err) => {

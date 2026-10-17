@@ -6,6 +6,8 @@ import Payment from '../models/payment.model.js';
 import Inquiry from '../models/inquiry.model.js';
 import SupportRequest from '../models/supportRequest.model.js';
 import Notification from '../models/notification.model.js';
+import Outbox from '../models/outbox.model.js';
+import mongoose from 'mongoose';
 
 const dashboardLoaders = {
   users: () => User.find().select('-password').sort({ createdAt: -1 }).lean(),
@@ -260,5 +262,56 @@ export const broadcastNotification = async (req, res) => {
     res.status(200).json({ success: true, sent: notifications.length });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ── Outbox Operations ─────────────────────────────────────────────────────
+export const getOutboxJobs = async (req, res) => {
+  try {
+    const allowedStatuses = ['pending', 'processing', 'completed', 'failed', 'dead_letter'];
+    const status = req.query.status || 'dead_letter';
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid outbox status' });
+    }
+    const limit = Math.min(Math.max(Number.parseInt(req.query.limit, 10) || 25, 1), 100);
+    const [jobs, counts] = await Promise.all([
+      Outbox.find({ status }).sort({ createdAt: -1 }).limit(limit).lean(),
+      Outbox.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+    ]);
+    return res.status(200).json({
+      success: true,
+      jobs,
+      counts: Object.fromEntries(counts.map(({ _id, count }) => [_id, count])),
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const retryOutboxJob = async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid outbox job ID' });
+    }
+    const job = await Outbox.findOneAndUpdate(
+      { _id: req.params.id, status: { $in: ['failed', 'dead_letter'] } },
+      {
+        $set: {
+          status: 'pending',
+          retries: 0,
+          lastError: null,
+          nextAttemptAt: null,
+          lockedAt: null,
+          lockedBy: null,
+        },
+      },
+      { new: true }
+    );
+    if (!job) {
+      return res.status(404).json({ success: false, message: 'Retryable outbox job not found' });
+    }
+    return res.status(200).json({ success: true, job });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
   }
 };

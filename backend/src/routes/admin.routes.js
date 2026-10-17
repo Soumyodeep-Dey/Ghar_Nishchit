@@ -10,6 +10,8 @@ import {
   deleteContract,
   updateMaintenanceStatus,
   broadcastNotification,
+  getOutboxJobs,
+  retryOutboxJob,
 } from '../controllers/admin.controller.js';
 import {
   getAllSupportRequests,
@@ -41,6 +43,10 @@ router.put('/maintenance-status/:id', updateMaintenanceStatus);
 
 // Broadcast notification
 router.post('/broadcast', broadcastNotification);
+
+// Outbox operations and dead-letter recovery
+router.get('/outbox', getOutboxJobs);
+router.post('/outbox/:id/retry', retryOutboxJob);
 
 // Help / support requests
 router.get('/support', getAllSupportRequests);

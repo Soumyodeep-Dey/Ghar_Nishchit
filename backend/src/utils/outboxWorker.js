@@ -1,14 +1,35 @@
+import { randomUUID } from 'node:crypto';
+import os from 'node:os';
 import Outbox from '../models/outbox.model.js';
 import { query as neonQuery } from '../db/neon.js';
 import { logger } from './logger.js';
+
+const MAX_RETRIES = 5;
+const BATCH_SIZE = 10;
+const POLL_INTERVAL_MS = Number(process.env.OUTBOX_POLL_INTERVAL_MS) || 10000;
+const LEASE_DURATION_MS = Number(process.env.OUTBOX_LEASE_DURATION_MS) || 60000;
+const RETRY_BASE_DELAY_MS = Number(process.env.OUTBOX_RETRY_BASE_DELAY_MS) || 10000;
+const WORKER_ID = process.env.OUTBOX_WORKER_ID || `${os.hostname()}-${process.pid}-${randomUUID().slice(0, 8)}`;
 
 let isRunning = false;
 let intervalId = null;
 let activeRun = null;
 
-const toDate = (d) => d ? new Date(d).toISOString().split('T')[0] : null;
+const toDate = (date) => date ? new Date(date).toISOString().split('T')[0] : null;
 
-const syncContractToNeon = async (c) => {
+export const retryDelayMs = (attempt, baseDelayMs = RETRY_BASE_DELAY_MS) => (
+  baseDelayMs * (2 ** Math.max(0, attempt - 1))
+);
+
+export const failureState = (attempt, now = Date.now()) => {
+  if (attempt >= MAX_RETRIES) return { status: 'dead_letter', nextAttemptAt: null };
+  return {
+    status: 'failed',
+    nextAttemptAt: new Date(now + retryDelayMs(attempt)),
+  };
+};
+
+const syncContractToNeon = async (contract) => {
   await neonQuery(
     `INSERT INTO contracts (
        id, tenant_id, landlord_id, property_id, type, duration,
@@ -29,81 +50,121 @@ const syncContractToNeon = async (c) => {
        custom_clauses     = EXCLUDED.custom_clauses,
        updated_at         = NOW()`,
     [
-      c._id.toString(),
-      c.tenant?.toString(),
-      c.landlord?.toString(),
-      c.property?.toString(),
-      c.type || 'lease',
-      Number(c.duration),
-      Number(c.rentAmount),
-      Number(c.securityDeposit),
-      toDate(c.startDate),
-      toDate(c.endDate),
-      c.status || 'pending',
-      c.terms?.petsAllowed       ?? false,
-      c.terms?.smokingAllowed    ?? false,
-      c.terms?.sublettingAllowed ?? false,
-      c.terms?.earlyTermination  ?? false,
-      c.customClauses || '',
-      c.createdAt ? new Date(c.createdAt).toISOString() : new Date().toISOString(),
-      c.updatedAt ? new Date(c.updatedAt).toISOString() : new Date().toISOString(),
+      contract._id.toString(),
+      contract.tenant?.toString(),
+      contract.landlord?.toString(),
+      contract.property?.toString(),
+      contract.type || 'lease',
+      Number(contract.duration),
+      Number(contract.rentAmount),
+      Number(contract.securityDeposit),
+      toDate(contract.startDate),
+      toDate(contract.endDate),
+      contract.status || 'pending',
+      contract.terms?.petsAllowed ?? false,
+      contract.terms?.smokingAllowed ?? false,
+      contract.terms?.sublettingAllowed ?? false,
+      contract.terms?.earlyTermination ?? false,
+      contract.customClauses || '',
+      contract.createdAt ? new Date(contract.createdAt).toISOString() : new Date().toISOString(),
+      contract.updatedAt ? new Date(contract.updatedAt).toISOString() : new Date().toISOString(),
     ]
   );
 };
 
-const processBatch = async () => {
-    if (isRunning) return; // Guard against overlapping runs
-    isRunning = true;
-
-    try {
-      // Fetch up to 10 pending or failed outbox jobs
-      const jobs = await Outbox.find({
-        status: { $in: ['pending', 'failed'] },
-        retries: { $lt: 5 }
-      }).sort({ createdAt: 1 }).limit(10);
-
-      for (const job of jobs) {
-        try {
-          if (job.action === 'sync_contract') {
-            await syncContractToNeon(job.payload);
-          }
-
-          // Mark job as successfully synced
-          job.status = 'completed';
-          job.lastError = null;
-          await job.save();
-          logger.info('outbox_job_completed', {
-            jobId: job._id.toString(),
-            aggregateId: job.aggregateId,
-          });
-        } catch (jobError) {
-          job.retries += 1;
-          job.status = 'failed';
-          job.lastError = jobError.message;
-          await job.save();
-          logger.error('outbox_job_failed', {
-            jobId: job._id.toString(),
-            attempt: job.retries,
-            err: jobError,
-          });
-        }
-      }
-    } catch (err) {
-      logger.error('outbox_poll_failed', { err });
-    } finally {
-      isRunning = false;
-    }
+const claimNextJob = async () => {
+  const now = new Date();
+  const expiredLease = new Date(now.getTime() - LEASE_DURATION_MS);
+  return Outbox.findOneAndUpdate(
+    {
+      retries: { $lt: MAX_RETRIES },
+      $or: [
+        {
+          status: { $in: ['pending', 'failed'] },
+          $or: [
+            { nextAttemptAt: null },
+            { nextAttemptAt: { $exists: false } },
+            { nextAttemptAt: { $lte: now } },
+          ],
+        },
+        { status: 'processing', lockedAt: { $lt: expiredLease } },
+      ],
+    },
+    {
+      $set: { status: 'processing', lockedAt: now, lockedBy: WORKER_ID },
+    },
+    { new: true, sort: { createdAt: 1 } }
+  );
 };
 
-export const startOutboxWorker = () => {
-  if (intervalId) return;
+const processJob = async (job) => {
+  try {
+    if (job.action !== 'sync_contract') throw new Error(`Unsupported outbox action: ${job.action}`);
+    await syncContractToNeon(job.payload);
 
-  logger.info('outbox_worker_started', { intervalMs: 10000 });
-  intervalId = setInterval(() => {
-    activeRun = processBatch().finally(() => {
-      activeRun = null;
+    job.status = 'completed';
+    job.lastError = null;
+    job.nextAttemptAt = null;
+    job.lockedAt = null;
+    job.lockedBy = null;
+    await job.save();
+    logger.info('outbox_job_completed', {
+      jobId: job._id.toString(),
+      aggregateId: job.aggregateId,
+      workerId: WORKER_ID,
     });
-  }, 10000);
+  } catch (err) {
+    job.retries += 1;
+    const state = failureState(job.retries);
+    job.status = state.status;
+    job.nextAttemptAt = state.nextAttemptAt;
+    job.lastError = String(err.message || err).slice(0, 2000);
+    job.lockedAt = null;
+    job.lockedBy = null;
+    await job.save();
+    logger.error('outbox_job_failed', {
+      jobId: job._id.toString(),
+      attempt: job.retries,
+      terminal: job.status === 'dead_letter',
+      workerId: WORKER_ID,
+      err,
+    });
+  }
+};
+
+const processBatch = async () => {
+  if (isRunning) return;
+  isRunning = true;
+  try {
+    for (let processed = 0; processed < BATCH_SIZE; processed += 1) {
+      const job = await claimNextJob();
+      if (!job) break;
+      await processJob(job);
+    }
+  } catch (err) {
+    logger.error('outbox_poll_failed', { workerId: WORKER_ID, err });
+  } finally {
+    isRunning = false;
+  }
+};
+
+const runBatch = () => {
+  if (activeRun) return activeRun;
+  activeRun = processBatch().finally(() => {
+    activeRun = null;
+  });
+  return activeRun;
+};
+
+export const startOutboxWorker = ({ runImmediately = true } = {}) => {
+  if (intervalId) return;
+  logger.info('outbox_worker_started', {
+    workerId: WORKER_ID,
+    intervalMs: POLL_INTERVAL_MS,
+    leaseDurationMs: LEASE_DURATION_MS,
+  });
+  if (runImmediately) runBatch();
+  intervalId = setInterval(runBatch, POLL_INTERVAL_MS);
 };
 
 export const stopOutboxWorker = async () => {
@@ -111,7 +172,6 @@ export const stopOutboxWorker = async () => {
     clearInterval(intervalId);
     intervalId = null;
   }
-
   if (activeRun) await activeRun;
-  logger.info('outbox_worker_stopped');
+  logger.info('outbox_worker_stopped', { workerId: WORKER_ID });
 };

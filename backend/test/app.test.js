@@ -48,3 +48,30 @@ test('unknown routes return a traceable JSON 404', async () => {
   assert.equal(response.body.requestId, response.headers['x-request-id']);
 });
 
+test('metrics stay hidden unless explicitly enabled and authenticated', async () => {
+  const previousEnabled = process.env.METRICS_ENABLED;
+  const previousToken = process.env.METRICS_TOKEN;
+  try {
+    delete process.env.METRICS_ENABLED;
+    let response = await request(app).get('/metrics');
+    assert.equal(response.status, 404);
+
+    process.env.METRICS_ENABLED = 'true';
+    process.env.METRICS_TOKEN = 'test-metrics-token';
+    response = await request(app).get('/metrics');
+    assert.equal(response.status, 401);
+
+    response = await request(app)
+      .get('/metrics')
+      .set('authorization', 'Bearer test-metrics-token');
+    assert.equal(response.status, 200);
+    assert.match(response.text, /ghar_nishchit_http_requests_total/);
+    assert.match(response.text, /process_resident_memory_bytes/);
+  } finally {
+    if (previousEnabled === undefined) delete process.env.METRICS_ENABLED;
+    else process.env.METRICS_ENABLED = previousEnabled;
+    if (previousToken === undefined) delete process.env.METRICS_TOKEN;
+    else process.env.METRICS_TOKEN = previousToken;
+  }
+});
+

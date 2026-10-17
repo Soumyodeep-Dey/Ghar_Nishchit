@@ -11,7 +11,7 @@
 | JWT + database user lookup | Keeps API calls token-based while enforcing current role/status | Database lookup on each request; refresh token remains client-held |
 | bcrypt cost 10 | Established password hashing with acceptable development latency | Cost must be benchmarked for production hardware |
 | Backend RBAC | Client routes are UX only; server owns authorization | Requires consistent middleware/ownership checks |
-| Contract outbox | Neon failure must not roll back authoritative Mongo contract | In-process polling and no leasing/dead-letter UI |
+| Leased contract outbox | Neon failure must not roll back authoritative Mongo contracts; atomic claims allow safe worker competition | Contract/outbox creation is not one Mongo transaction, and only contract projection uses the outbox |
 | TanStack Query | Fits server-owned cacheable state | Some screens still use manual fetching/local state |
 | Backend Gemini proxy | Keeps secret and rate control off the browser | Adds backend dependency and latency |
 | Razorpay HMAC | Payment success cannot be trusted from client fields alone | Idempotency/reconciliation still incomplete |
@@ -21,6 +21,9 @@
 | Lazy admin sections + database aggregation | Avoids transferring seven full collections for every tab and removes repeated in-memory scans for overview metrics | Section lists remain unpaginated and the legacy all-data response remains for compatibility |
 | Opt-in pagination | Enables bounded property reads without silently breaking frontend callers that currently expect raw arrays | Legacy calls remain unbounded until consumers migrate to the paginated envelope |
 | Batched payment attribution | Preserves legacy payments without property IDs while replacing per-payment contract queries with set-based lookups | The fallback ownership rule is still more complex than storing an explicit landlord ID on every payment |
+| Protected pull metrics | Prometheus-format text is vendor-neutral and easy to scrape while a bearer token avoids public process/backlog exposure | No scraper, dashboard, alert rules, or centralized retention are included |
+| Separate API and worker entrypoints | Keeps the modular monolith while allowing HTTP and projection work to scale/restart independently | Adds another process to operate; inline mode remains the local default |
+| Docker Compose baseline | Makes the three-process topology reproducible without claiming a cloud platform | Local env-file secrets and single-host Compose are not a production orchestrator |
 
 ## Alternatives Considered
 - PostgreSQL-only: preferred if the team commits to relational ownership; rejected as an immediate rewrite.

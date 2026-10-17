@@ -22,7 +22,7 @@ Current priorities are access control, validation, responsive UI, payment integr
 - Playwright smoke tests and a Node/Supertest backend HTTP/unit suite.
 
 ## 6. High-Level System Architecture
-The current system is a frontend/backend modular monolith. MongoDB is authoritative. Selected records are copied to Neon using direct writes or a MongoDB outbox worker.
+The current system is a frontend/backend modular monolith. MongoDB is authoritative. Selected records are copied to Neon using direct writes or a leased MongoDB outbox worker that can run inside the API process or as a separate process.
 
 ## 7. Architecture Diagram
 ```mermaid
@@ -33,7 +33,7 @@ flowchart LR
   API --> P[(Neon partial projection)]
   API --> R[Razorpay]
   API --> G[Google Gemini]
-  M --> W[In-process outbox worker]
+  M --> W[Leased outbox worker]
   W --> P
 ```
 
@@ -54,7 +54,7 @@ Public signup permits tenant/landlord roles. Admins are provisioned by script. A
 - MongoDB primary: the implementation and nested maintenance/message structures were built around Mongoose; Neon is not falsely presented as authoritative.
 - REST: simple fit for CRUD workflows and browser/tool clients.
 - JWT plus user lookup: current status/role changes apply before token expiry.
-- Contract outbox: isolates the primary write from Neon availability, within the limits of an in-process worker.
+- Contract outbox: atomic leases prevent duplicate concurrent claims; exponential retries terminate in an admin-retryable dead-letter state.
 - TanStack Query: server-state caching without a larger global-state framework.
 
 ## 13. Alternatives Considered
@@ -67,7 +67,7 @@ The monolith is easy to run but scales workloads together. MongoDB supports evol
 Implemented: bcrypt, server-side RBAC/ownership checks, account-status enforcement, auth validation, Helmet security headers, a CORS allowlist, 2 MB body limits, rate limiting, and Razorpay HMAC checks. Refresh rotation, HttpOnly cookies, distributed limiting, comprehensive schemas, a secrets manager, and security regression tests are **Not currently implemented**. See [Security](docs/SECURITY.md).
 
 ## 16. Error Handling & Reliability
-The API has global structured error handling, traceable JSON 404s, signature checks, a retrying contract outbox, dependency-aware health endpoints, and bounded graceful shutdown. Error shapes still vary, direct Neon writes can diverge, and dead-letter recovery is **Not currently implemented**.
+The API has global structured error handling, traceable JSON 404s, signature checks, leased outbox retries/dead-letter recovery, dependency-aware health endpoints, and bounded graceful shutdown. Error shapes still vary and direct Neon writes can diverge.
 
 ## 17. Performance Considerations
 Lazy routes and vendor chunks reduce frontend work. Admin overview metrics use MongoDB aggregation, admin tabs load their collections on demand, landlord payment attribution uses batched lookups, and property browse/search supports opt-in pagination. Compound indexes cover the corresponding ownership/status/time access paths. Unpaginated compatibility paths and large embedded documents remain risks. See [Performance](docs/PERFORMANCE.md).
@@ -76,14 +76,14 @@ Lazy routes and vendor chunks reduce frontend work. Admin overview metrics use M
 - Admin section lists are still unpaginated after they are loaded on demand.
 - Several non-property list endpoints lack pagination.
 - Legacy clients can still request the complete admin dashboard payload.
-- HTTP and outbox work share one Node process.
+- HTTP and outbox work share one process by default, although a standalone worker entrypoint and container are available.
 - Cross-database writes lack full reconciliation.
 
 ## 19. Scalability Strategy
-Extend pagination to the remaining lists, validate the new compound indexes with query plans, run controlled benchmarks, add structured metrics, and separate the worker first. Add API replicas, load balancing, and shared caching/rate limiting only after measurements justify them.
+Extend pagination to the remaining lists, validate indexes with query plans, run controlled benchmarks, and deploy the standalone worker mode. API replicas are then technically possible, but load balancing and shared rate limiting are still required before calling the topology horizontally scalable.
 
 ## 20. Production Readiness
-This is suitable for development and case-study use, not asserted production readiness. A CI workflow, health endpoints, structured request logs, and graceful shutdown now provide a baseline. Deployment manifests, backups, metrics/alerts, migration automation, and recovery tests are **Not currently implemented**. See [Production Readiness](docs/PRODUCTION_READINESS.md).
+This is suitable for development and case-study use, not asserted production readiness. CI, container manifests, health endpoints, protected Prometheus-format metrics, structured request logs, leased outbox recovery, and graceful shutdown provide a baseline. A live deployment, backups, dashboards/alerts, migration automation, and recovery drills are **Not currently implemented**. See [Production Readiness](docs/PRODUCTION_READINESS.md).
 
 ## 21. Known Limitations
 - Incomplete MongoDB/Neon synchronization.
@@ -114,6 +114,15 @@ npm run dev
 Frontend: `http://localhost:5173`; backend: `http://localhost:5000`. Never commit `.env` files.
 
 Operational probes: `GET /health/live` confirms the process is responsive; `GET /health/ready` requires MongoDB and reports Neon degradation separately because MongoDB is authoritative.
+
+Container topology (API, standalone outbox worker, Nginx-hosted SPA):
+
+```powershell
+# Configure backend/.env first. Docker Desktop must be running.
+docker compose up --build
+```
+
+Metrics are disabled by default. Set `METRICS_ENABLED=true` and a strong `METRICS_TOKEN`, then scrape `GET /metrics` with `Authorization: Bearer <token>`. Admins can inspect and retry terminal outbox jobs through `/api/admin/outbox` and `/api/admin/outbox/:id/retry`.
 
 ## Engineering Documents
 - [System Design](docs/SYSTEM_DESIGN.md)

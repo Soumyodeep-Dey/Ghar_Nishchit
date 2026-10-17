@@ -17,6 +17,8 @@ This document records controls and gaps; it does not claim the application is se
 | API exposure | Admin/user APIs require admin RBAC | Public property endpoints intentionally expose listings; document fields |
 | Logging | Structured request/lifecycle logs redact sensitive key names and carry request IDs | Many legacy controller logs remain; centralized retention and field-level review are missing |
 | Payments | Razorpay HMAC callback/webhook verification | Add idempotency/event ledger and server-derived prices |
+| Operational endpoints | Health checks expose only status; metrics are disabled by default and require a bearer token | Store/rotate the metrics token through deployment secrets and restrict network access as defense in depth |
+| Containers | API runs as the non-root `node` user; frontend is static Nginx | Compose uses a local env file; image scanning/signing and runtime hardening are not implemented |
 
 ## OWASP-Oriented Concerns
 - Broken access control: materially improved with RBAC, but requires regression tests.

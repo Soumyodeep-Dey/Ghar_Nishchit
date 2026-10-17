@@ -4,6 +4,7 @@ dotenv.config({ quiet: true });
 
 const { Pool } = pg;
 const connectionString = process.env.NEONDB_URL?.trim();
+const queryTimeoutMs = Number(process.env.NEON_QUERY_TIMEOUT_MS) || 10000;
 
 export const isNeonConfigured = Boolean(connectionString);
 
@@ -13,6 +14,8 @@ const pool = new Pool({
   max: 10,                  // max pool connections
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,
+  query_timeout: queryTimeoutMs,
+  statement_timeout: queryTimeoutMs,
 });
 
 pool.on('connect', () => {

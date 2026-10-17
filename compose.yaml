@@ -1,0 +1,38 @@
+services:
+  api:
+    build:
+      context: ./backend
+    env_file:
+      - ./backend/.env
+    environment:
+      NODE_ENV: production
+      FRONTEND_URL: http://localhost:8080
+      RUN_OUTBOX_WORKER: "false"
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: ./backend
+    command: ["npm", "run", "worker"]
+    env_file:
+      - ./backend/.env
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: frontend/UI/Dockerfile
+      args:
+        VITE_API_BASE: ${PUBLIC_API_URL:-http://localhost:5000}
+        VITE_BACKEND_URL: ${PUBLIC_API_URL:-http://localhost:5000}
+    ports:
+      - "8080:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+

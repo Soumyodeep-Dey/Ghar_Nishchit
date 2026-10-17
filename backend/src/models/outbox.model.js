@@ -22,7 +22,7 @@ const outboxSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['pending', 'completed', 'failed'],
+      enum: ['pending', 'processing', 'completed', 'failed', 'dead_letter'],
       default: 'pending',
       index: true
     },
@@ -34,6 +34,18 @@ const outboxSchema = new mongoose.Schema(
     lastError: {
       type: String,
       default: null
+    },
+    nextAttemptAt: {
+      type: Date,
+      default: null
+    },
+    lockedAt: {
+      type: Date,
+      default: null
+    },
+    lockedBy: {
+      type: String,
+      default: null
     }
   },
   {
@@ -42,7 +54,8 @@ const outboxSchema = new mongoose.Schema(
 );
 
 // Compound index to quickly pull next jobs to process
-outboxSchema.index({ status: 1, retries: 1, createdAt: 1 });
+outboxSchema.index({ status: 1, nextAttemptAt: 1, retries: 1, createdAt: 1 });
+outboxSchema.index({ status: 1, lockedAt: 1 });
 
 const Outbox = mongoose.model('Outbox', outboxSchema);
 

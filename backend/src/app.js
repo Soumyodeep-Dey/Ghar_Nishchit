@@ -23,6 +23,7 @@ import { handleWebhook }        from './controllers/payment.controller.js';
 import { handleLandlordWebhook } from './controllers/landlordPayment.controller.js';
 import { getLiveness, getReadiness } from './controllers/health.controller.js';
 import { requestContext } from './middlewares/requestContext.middleware.js';
+import { getMetrics } from './controllers/metrics.controller.js';
 dotenv.config();
 
 const app = express();
@@ -56,6 +57,7 @@ app.get('/', (_req, res) => {
 });
 app.get('/health/live', getLiveness);
 app.get('/health/ready', getReadiness);
+app.get('/metrics', getMetrics);
 
 // ── Route mounting ───────────────────────────────────────────────────────────
 app.use('/api/properties',        propertyRoutes);
