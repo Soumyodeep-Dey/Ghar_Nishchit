@@ -79,19 +79,6 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
     return sectionIcons[currentSection] || Home;
   };
 
-  // ── Persist read IDs in localStorage so they survive page reload ──
-  const STORAGE_KEY = 'landlord_read_notification_ids';
-
-  const getReadIds = () => {
-    try {
-      return new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
-    } catch { return new Set(); }
-  };
-
-  const saveReadIds = (set) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([...set]));
-  };
-
   // ── Fetch real notifications from the DB ─────────────────────────────────
   const [notifications, setNotifications] = useState([]);
 
@@ -133,7 +120,6 @@ const LandlordNavBar = ({ currentSection = 'Dashboard' }) => {
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;

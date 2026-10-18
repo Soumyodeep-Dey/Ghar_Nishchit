@@ -7,7 +7,7 @@ import api from '../../../services/api';
 import {
   Users, Search, MoreVertical, Edit, Trash2, Eye, Calendar, User, Clock, CheckCircle, XCircle, AlertCircle, Phone, Mail, MessageCircle, Star, IndianRupee, Home, Building2, FileText, Download, Send, ArrowUp, ArrowDown, X, BadgeCheck, Info, Video, UserPlus, Crown
 } from 'lucide-react';
-// eslint-disable-next-line no-unused-vars
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { showConfirmToast } from '../../../utils/toast.jsx';
 
@@ -709,7 +709,7 @@ const ContractModal = ({ isOpen, onClose, tenant, onSendContract }) => {
                 { key: 'lease', label: 'Lease Agreement', icon: FileText },
                 { key: 'rental', label: 'Rental Contract', icon: Home },
                 { key: 'sublease', label: 'Sublease', icon: Users }
-                // eslint-disable-next-line no-unused-vars
+
               ].map(({ key, label, icon: IconComponent }) => (
                 <motion.button
                   key={key}
@@ -946,7 +946,7 @@ const TenantDetailModal = ({ isOpen, onClose, tenant, initialTab = 'profile' }) 
               { key: 'visits', label: 'Visits', icon: Calendar },
               { key: 'contracts', label: 'Contracts', icon: FileText },
               { key: 'communication', label: 'Messages', icon: MessageCircle }
-              // eslint-disable-next-line no-unused-vars
+
             ].map(({ key, label, icon: IconComponent }) => (
               <motion.button
                 key={key}

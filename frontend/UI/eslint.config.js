@@ -23,7 +23,15 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'no-unused-vars': ['error', {
+        varsIgnorePattern: '^([A-Z_]|motion$)',
+        argsIgnorePattern: '^[A-Z_]',
+        caughtErrorsIgnorePattern: '^_',
+      }],
     },
+  },
+  {
+    files: ['src/i18n/LanguageContext.jsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
   },
 ])

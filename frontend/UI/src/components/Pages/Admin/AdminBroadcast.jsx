@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Megaphone, Send } from 'lucide-react';
-import { showSuccessToast, showErrorToast } from '../../../utils/toast';
+import { showErrorToast } from '../../../utils/toast';
 
 export default function AdminBroadcast({ inquiries = [], broadcast }) {
   const [title, setTitle] = useState('');

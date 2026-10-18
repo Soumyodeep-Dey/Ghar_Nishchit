@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Building2, Users, Wallet, Settings, MessageSquare, ChevronLeft, Crown, Sparkles, LogOut, LifeBuoy } from 'lucide-react';
-// eslint-disable-next-line no-unused-vars
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDarkMode } from '../../../useDarkMode.js';
 import { showConfirmToast } from '../../../utils/toast.jsx';
@@ -107,7 +107,7 @@ const LandlordSideBar = ({ onSectionChange }) => {
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isCollapsed, menuItems, handleNavigation]);
+  }, [isCollapsed, menuItems, handleNavigation, t]);
 
   const handleItemClick = (item) => handleNavigation(item.route, t(item.labelKey));
   const handleTooltip = (itemId, show) => isCollapsed && setShowTooltip(show ? itemId : null);
@@ -278,7 +278,7 @@ const LandlordSideBar = ({ onSectionChange }) => {
         <div className="flex-1 relative min-h-0">
           <div className="absolute inset-0 sidebar-scrollable" style={{ overflowY: 'auto', overflowX: 'hidden', padding: '24px 12px' }}>
             <div className="space-y-3">
-              {menuItems.map((item, index) => (
+              {menuItems.map((item) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, x: -30 }}

@@ -7,7 +7,7 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "test": "node --test test/app.test.js test/metrics.test.js test/outboxWorker.test.js test/pagination.test.js test/paymentFiltering.test.js test/paymentIntegrity.test.js test/paymentController.test.js",
+    "test": "node --test test/app.test.js test/authorization.test.js test/metrics.test.js test/outboxWorker.test.js test/pagination.test.js test/paymentFiltering.test.js test/paymentIntegrity.test.js test/paymentController.test.js",
     "check": "node --check src/index.js && node --check src/worker.js && node --check src/db/runNeonMigrations.js && npm test",
     "benchmark:api": "node ../benchmarks/api-benchmark.mjs",
     "migrate:neon": "node src/db/runNeonMigrations.js",

@@ -12,24 +12,6 @@ import {
   Bell, CreditCard, Star, X, AlertCircle, RefreshCw
 } from 'lucide-react';
 
-const ITEMS_PER_PAGE = 4;
-
-// ---------------------------------------------------------------------------
-// usePagination
-// ---------------------------------------------------------------------------
-const usePagination = (items, itemsPerPage = ITEMS_PER_PAGE) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(items.length / itemsPerPage);
-  const paginatedItems = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return items.slice(start, start + itemsPerPage);
-  }, [items, currentPage, itemsPerPage]);
-  useEffect(() => {
-    if (currentPage > totalPages && totalPages > 0) setCurrentPage(1);
-  }, [currentPage, totalPages]);
-  return { currentPage, totalPages, paginatedItems, setCurrentPage };
-};
-
 // ---------------------------------------------------------------------------
 // StatCard — no decorative animation on static text
 // ---------------------------------------------------------------------------

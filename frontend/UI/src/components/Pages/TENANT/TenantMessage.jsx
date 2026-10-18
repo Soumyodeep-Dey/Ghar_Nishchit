@@ -284,7 +284,6 @@ const TenantMessage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
   const [pendingContract, setPendingContract] = useState(null);
   const [showContractModal, setShowContractModal] = useState(false);
   const [accepting, setAccepting] = useState(false);
@@ -292,7 +291,6 @@ const TenantMessage = () => {
 
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
-  const typingTimer = useRef(null);
   // Guard so the location.state effect fires exactly once per navigation
   const processedNavState = useRef(false);
   // Always-current snapshot of inquiries, without being a reactive dependency
@@ -492,7 +490,7 @@ const TenantMessage = () => {
         newList.unshift(updatedInq);
         return newList;
       });
-    } catch (err) {
+    } catch (_err) {
       setMessages(prev => prev.filter(m => m._id !== optimistic._id));
       showErrorToast('Failed to send message');
       setNewMessage(text);
@@ -639,7 +637,6 @@ const TenantMessage = () => {
                       <MessageBubble key={msg._id || idx} msg={msg} darkMode={darkMode} />
                     ))
                   )}
-                  {isTyping && <TypingIndicator />}
                   <div ref={messagesEndRef} />
                 </div>
 

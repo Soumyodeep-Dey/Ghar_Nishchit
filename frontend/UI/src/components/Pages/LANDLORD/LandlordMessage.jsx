@@ -9,29 +9,6 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Custom Hooks
-const useLocalStorage = (key, initialValue) => {
-  const [storedValue, setStoredValue] = useState(() => {
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch {
-      return initialValue;
-    }
-  });
-
-  const setValue = (value) => {
-    try {
-      setStoredValue(value);
-      window.localStorage.setItem(key, JSON.stringify(value));
-    } catch {
-      console.error('Error saving to localStorage');
-    }
-  };
-
-  return [storedValue, setValue];
-};
-
 // Animated Components
 const AnimatedCard = ({ children, delay = 0, className = '', ...props }) => {
   return (
@@ -572,7 +549,7 @@ const LandlordMessage = () => {
   // ── Real data state ──────────────────────────────────────────────────────────
   const [inquiries, setInquiries] = useState([]);          // list of inquiry threads
   const [messages, setMessages] = useState([]);             // messages of active thread
-  const [isLoadingInquiries, setIsLoadingInquiries] = useState(true);
+  const [, setIsLoadingInquiries] = useState(true);
   const [isSending, setIsSending] = useState(false);
 
   // Shape an inquiry into the "conversation" format the existing UI expects
@@ -833,7 +810,7 @@ const LandlordMessage = () => {
         newList.unshift(updatedInq);
         return newList;
       });
-    } catch (err) {
+    } catch (_err) {
       setMessages(prev => prev.filter(m => m.id !== optimistic.id));
       showErrorToast('Failed to send message');
     } finally {

@@ -19,7 +19,7 @@ const useLocalStorage = (key, initialValue) => {
     try {
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
+    } catch {
       return initialValue;
     }
   });
@@ -101,7 +101,7 @@ const useNotification = () => {
 };
 
 // Animated Components
-const AnimatedCard = ({ children, delay = 0, className = '', darkMode, ...props }) => {
+const AnimatedCard = ({ children, delay = 0, className = '', ...props }) => {
   const [ref, isVisible] = useIntersectionObserver({ threshold: 0.1 });
 
   return (
@@ -258,7 +258,6 @@ const PaymentMethodCard = ({ method, isSelected, onSelect, onEdit, onDelete, dar
 
 // Subscription Plan Card Component
 const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular = false, darkMode }) => {
-  const [isHovered, setIsHovered] = useState(false);
   const isCurrentPlan = currentPlan?.id === plan.id;
   const canUpgrade = currentPlan && plan.tier > currentPlan.tier;
   const canDowngrade = currentPlan && plan.tier < currentPlan.tier;
@@ -266,8 +265,6 @@ const SubscriptionPlanCard = ({ plan, currentPlan, onSelect, onUpgrade, popular 
   return (
     <motion.div
       whileHover={{ scale: 1.02, y: -10 }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       className={`relative p-8 rounded-3xl border-2 transition-all duration-500 overflow-hidden ${popular
         ? darkMode
           ? 'border-amber-500 bg-gradient-to-br from-amber-400/10 to-amber-500/10'

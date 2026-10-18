@@ -4,7 +4,7 @@ import { AlertTriangle, Clock, CheckCircle, ChevronDown } from 'lucide-react';
 const PRIORITY_COLORS = { High: 'text-red-600 bg-red-50', Medium: 'text-amber-600 bg-amber-50', Low: 'text-green-600 bg-green-50' };
 const STATUS_COLORS = { Pending: 'bg-amber-100 text-amber-700', 'In Progress': 'bg-blue-100 text-blue-700', Completed: 'bg-green-100 text-green-700', Cancelled: 'bg-gray-100 text-gray-500', 'On Hold': 'bg-purple-100 text-purple-700' };
 
-export default function AdminMaintenance({ maintenance = [], analytics, actions }) {
+export default function AdminMaintenance({ maintenance = [], actions }) {
   const [filter, setFilter] = useState('all');
 
   const SLA_DAYS = 7;

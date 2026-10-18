@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Building2, Wallet, Settings, ChevronLeft, Crown, Sparkles, LogOut, MessageSquare, FileText, LifeBuoy } from 'lucide-react';
-// eslint-disable-next-line no-unused-vars
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDarkMode } from '../../../useDarkMode.js';
 import { showConfirmToast } from '../../../utils/toast.jsx';

@@ -4,7 +4,7 @@ import { IndianRupee, CheckCircle, Clock, XCircle, AlertCircle, Download } from 
 const STATUS_ICONS = { Paid: CheckCircle, Pending: Clock, Overdue: AlertCircle, Failed: XCircle };
 const STATUS_COLORS = { Paid: 'text-green-600 bg-green-50', Pending: 'text-amber-600 bg-amber-50', Overdue: 'text-orange-600 bg-orange-50', Failed: 'text-red-600 bg-red-50' };
 
-export default function AdminPayments({ payments = [], analytics }) {
+export default function AdminPayments({ payments = [] }) {
   const [statusFilter, setStatusFilter] = useState('all');
 
   const filtered = payments.filter(p => statusFilter === 'all' || p.status === statusFilter);
