@@ -45,6 +45,8 @@ function detectPaymentMethod(razorpay_payment_id) {
 
 export default function RazorpayCheckout({
   propertyId,
+  contractId,
+  paymentType = 'rent',
   amount,
   dueDate,
   note,
@@ -73,7 +75,14 @@ export default function RazorpayCheckout({
       // ── 2. Create order on our backend via api.js ────────────────
       // api.createRazorpayOrder uses the same fetch + auth header as all
       // other api.js calls — no axios, no duplicate token logic.
-      const orderData = await api.createRazorpayOrder({ propertyId, amount, dueDate, note });
+      const orderData = await api.createRazorpayOrder({
+        propertyId,
+        contractId,
+        paymentType,
+        amount,
+        dueDate,
+        note,
+      });
 
       // ── 3. Open Razorpay Checkout Popup ───────────────────────
       const options = {

@@ -3,8 +3,21 @@ import dotenv from 'dotenv';
 dotenv.config({ quiet: true });
 
 const { Pool } = pg;
-const connectionString = process.env.NEONDB_URL?.trim();
+const rawConnectionString = process.env.NEONDB_URL?.trim();
+const normalizeConnectionString = (value) => {
+  if (!value) return value;
+  const url = new URL(value);
+  // pg currently treats sslmode=require as verify-full and warns that this
+  // alias will weaken in its next major release. Make the intended certificate
+  // and hostname verification explicit now.
+  if (url.searchParams.get('sslmode') === 'require') {
+    url.searchParams.set('sslmode', 'verify-full');
+  }
+  return url.toString();
+};
+const connectionString = normalizeConnectionString(rawConnectionString);
 const queryTimeoutMs = Number(process.env.NEON_QUERY_TIMEOUT_MS) || 10000;
+const connectionTimeoutMs = Number(process.env.NEON_CONNECT_TIMEOUT_MS) || 20000;
 
 export const isNeonConfigured = Boolean(connectionString);
 
@@ -13,7 +26,7 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false },
   max: 10,                  // max pool connections
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
+  connectionTimeoutMillis: connectionTimeoutMs,
   query_timeout: queryTimeoutMs,
   statement_timeout: queryTimeoutMs,
 });

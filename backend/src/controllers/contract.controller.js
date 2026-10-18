@@ -4,6 +4,7 @@ import Notification from '../models/notification.model.js';
 import User from '../models/user.model.js';
 import AppError from '../utils/AppError.js';
 import Outbox from '../models/outbox.model.js';
+import mongoose from 'mongoose';
 
 export const sendContract = async (req, res, next) => {
     try {
@@ -28,42 +29,43 @@ export const sendContract = async (req, res, next) => {
             throw new AppError('An active lease already exists for this tenant and property.', 409);
         }
 
-        // Keep only the latest pending draft before creating a new one.
-        await Contract.updateMany(
-            {
-                tenant: tenantId,
-                property: propertyId,
-                status: 'pending'
-            },
-            { $set: { status: 'cancelled' } }
-        );
-
         const endDate = new Date(new Date(startDate).setMonth(new Date(startDate).getMonth() + duration));
+        let contract;
+        await mongoose.connection.transaction(async (session) => {
+            // Contract mutations and the projection event commit together. This
+            // requires MongoDB replica-set/Atlas transaction support.
+            await Contract.updateMany(
+                {
+                    tenant: tenantId,
+                    property: propertyId,
+                    status: 'pending'
+                },
+                { $set: { status: 'cancelled' } },
+                { session }
+            );
 
-        const contract = new Contract({
-            tenant: tenantId,
-            landlord: landlordId,
-            property: propertyId,
-            type: contractType,
-            duration,
-            rentAmount,
-            securityDeposit,
-            startDate: new Date(startDate),
-            endDate,
-            status: 'pending',
-            terms,
-            customClauses
-        });
+            [contract] = await Contract.create([{
+                tenant: tenantId,
+                landlord: landlordId,
+                property: propertyId,
+                type: contractType,
+                duration,
+                rentAmount,
+                securityDeposit,
+                startDate: new Date(startDate),
+                endDate,
+                status: 'pending',
+                terms,
+                customClauses
+            }], { session });
 
-        await contract.save();
-
-        // Queue task to MongoDB Outbox
-        await Outbox.create({
-            aggregateType: 'Contract',
-            aggregateId: contract._id,
-            action: 'sync_contract',
-            payload: contract.toObject(),
-            status: 'pending'
+            await Outbox.create([{
+                aggregateType: 'Contract',
+                aggregateId: contract._id,
+                action: 'sync_contract',
+                payload: contract.toObject(),
+                status: 'pending'
+            }], { session });
         });
 
         res.status(201).json(contract);
@@ -175,42 +177,45 @@ export const updateContractStatus = async (req, res) => {
         const { status } = req.body;
         // status could be 'active' if accepted by tenant
 
-        const contract = await Contract.findById(id);
-        if (!contract) return res.status(404).json({ message: 'Contract not found' });
-        if (String(contract.tenant) !== String(req.user.userId)) {
-            return res.status(403).json({ message: 'Only the assigned tenant can update this contract' });
-        }
         if (!['active', 'cancelled'].includes(status)) {
             return res.status(400).json({ message: 'Tenant may only accept or cancel a pending contract' });
         }
-        if (contract.status !== 'pending') {
-            return res.status(409).json({ message: 'Only pending contracts can be updated' });
-        }
 
-        if (status === 'active') {
-            // Accepting one lease should make all other non-final contracts
-            // for the same tenant + property inactive.
-            await Contract.updateMany(
-                {
-                    tenant: contract.tenant,
-                    property: contract.property,
-                    _id: { $ne: contract._id },
-                    status: { $in: ['pending', 'active'] }
-                },
-                { $set: { status: 'cancelled' } }
-            );
-        }
+        let contract;
+        await mongoose.connection.transaction(async (session) => {
+            contract = await Contract.findById(id).session(session);
+            if (!contract) throw new AppError('Contract not found', 404);
+            if (String(contract.tenant) !== String(req.user.userId)) {
+                throw new AppError('Only the assigned tenant can update this contract', 403);
+            }
+            if (contract.status !== 'pending') {
+                throw new AppError('Only pending contracts can be updated', 409);
+            }
 
-        contract.status = status;
-        await contract.save();
+            if (status === 'active') {
+                // Accepting one lease should make all other non-final contracts
+                // for the same tenant + property inactive.
+                await Contract.updateMany(
+                    {
+                        tenant: contract.tenant,
+                        property: contract.property,
+                        _id: { $ne: contract._id },
+                        status: { $in: ['pending', 'active'] }
+                    },
+                    { $set: { status: 'cancelled' } },
+                    { session }
+                );
+            }
 
-        // Queue task to MongoDB Outbox
-        await Outbox.create({
-            aggregateType: 'Contract',
-            aggregateId: contract._id,
-            action: 'sync_contract',
-            payload: contract.toObject(),
-            status: 'pending'
+            contract.status = status;
+            await contract.save({ session });
+            await Outbox.create([{
+                aggregateType: 'Contract',
+                aggregateId: contract._id,
+                action: 'sync_contract',
+                payload: contract.toObject(),
+                status: 'pending'
+            }], { session });
         });
 
         if (status === 'active') {
@@ -236,6 +241,6 @@ export const updateContractStatus = async (req, res) => {
         res.status(200).json(contract);
 
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(error.statusCode || 500).json({ message: error.message });
     }
 };

@@ -22,5 +22,9 @@ const contractSchema = new mongoose.Schema({
 
 contractSchema.index({ landlord: 1, status: 1 });
 contractSchema.index({ tenant: 1, landlord: 1 });
+contractSchema.index(
+  { tenant: 1, property: 1 },
+  { unique: true, partialFilterExpression: { status: 'active' } }
+);
 
 export default mongoose.model('Contract', contractSchema);

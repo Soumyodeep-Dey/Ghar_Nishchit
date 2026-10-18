@@ -62,7 +62,6 @@ const landlordPaymentSchema = new mongoose.Schema(
     // Razorpay IDs (populated on success)
     razorpayOrderId: {
       type:  String,
-      index: true,
     },
     razorpayPaymentId: {
       type: String,
@@ -77,5 +76,13 @@ const landlordPaymentSchema = new mongoose.Schema(
 );
 
 landlordPaymentSchema.index({ landlordId: 1, createdAt: -1 });
+landlordPaymentSchema.index(
+  { razorpayOrderId: 1 },
+  { unique: true, partialFilterExpression: { razorpayOrderId: { $type: 'string' } } }
+);
+landlordPaymentSchema.index(
+  { razorpayPaymentId: 1 },
+  { unique: true, partialFilterExpression: { razorpayPaymentId: { $type: 'string' } } }
+);
 
 export default mongoose.model('LandlordPayment', landlordPaymentSchema);

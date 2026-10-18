@@ -22,7 +22,7 @@ Current priorities are access control, validation, responsive UI, payment integr
 - Playwright smoke tests and a Node/Supertest backend HTTP/unit suite.
 
 ## 6. High-Level System Architecture
-The current system is a frontend/backend modular monolith. MongoDB is authoritative. Selected records are copied to Neon using direct writes or a leased MongoDB outbox worker that can run inside the API process or as a separate process.
+The current system is a frontend/backend modular monolith. MongoDB is authoritative. Contract changes and their outbox records commit in one MongoDB transaction, then a leased worker projects them to Neon. Other selected records still use direct best-effort Neon writes.
 
 ## 7. Architecture Diagram
 ```mermaid
@@ -38,7 +38,7 @@ flowchart LR
 ```
 
 ## 8. Request/Data Flow
-Login validates a MongoDB password hash and returns JWTs. Protected requests verify the token, reload the current user, enforce account status, and enforce role. Controllers read/write MongoDB; selected writes are mirrored to Neon. Razorpay signatures are checked before payment confirmation.
+Login validates a MongoDB password hash and returns JWTs. Protected requests verify the token, reload the current user, enforce account status, and enforce role. Controllers read/write MongoDB; selected writes are mirrored to Neon. Razorpay signatures use constant-time comparison, callbacks bind the internal record to the gateway order, and a durable webhook ledger suppresses replayed events.
 
 ## 9. Database Design
 MongoDB collections cover users, properties, favourites, enquiries, visits, contracts, maintenance, payments, landlord payments, notifications, support, and outbox jobs. Embedded replies/history suit document retrieval; references model ownership. Neon contains incomplete projections and is not the authentication source.
@@ -54,7 +54,8 @@ Public signup permits tenant/landlord roles. Admins are provisioned by script. A
 - MongoDB primary: the implementation and nested maintenance/message structures were built around Mongoose; Neon is not falsely presented as authoritative.
 - REST: simple fit for CRUD workflows and browser/tool clients.
 - JWT plus user lookup: current status/role changes apply before token expiry.
-- Contract outbox: atomic leases prevent duplicate concurrent claims; exponential retries terminate in an admin-retryable dead-letter state.
+- Transactional contract outbox: the authoritative contract mutation and projection event commit together; atomic leases prevent duplicate concurrent claims and retries terminate in an admin-retryable dead-letter state.
+- Payment idempotency: unique gateway IDs, order-bound state transitions, and a webhook-event ledger prevent repeated callbacks from repeating side effects.
 - TanStack Query: server-state caching without a larger global-state framework.
 
 ## 13. Alternatives Considered
@@ -64,7 +65,7 @@ PostgreSQL-only storage offers stronger relational integrity but needs a deliber
 The monolith is easy to run but scales workloads together. MongoDB supports evolving documents but relationships rely on application logic. JWTs reduce session state but localStorage increases XSS impact. Dual persistence introduces consistency risk.
 
 ## 15. Security Considerations
-Implemented: bcrypt, server-side RBAC/ownership checks, account-status enforcement, auth validation, Helmet security headers, a CORS allowlist, 2 MB body limits, rate limiting, and Razorpay HMAC checks. Refresh rotation, HttpOnly cookies, distributed limiting, comprehensive schemas, a secrets manager, and security regression tests are **Not currently implemented**. See [Security](docs/SECURITY.md).
+Implemented: bcrypt, server-side RBAC/ownership checks, account-status enforcement, auth validation, Helmet security headers, a CORS allowlist, 2 MB body limits, rate limiting, Razorpay HMAC checks, replay-resistant payment transitions, and focused signature tests. Refresh rotation, HttpOnly cookies, distributed limiting, comprehensive schemas, a secrets manager, and broad authorization security tests are **Not currently implemented**. See [Security](docs/SECURITY.md).
 
 ## 16. Error Handling & Reliability
 The API has global structured error handling, traceable JSON 404s, signature checks, leased outbox retries/dead-letter recovery, dependency-aware health endpoints, and bounded graceful shutdown. Error shapes still vary and direct Neon writes can diverge.
@@ -83,14 +84,14 @@ Lazy routes and vendor chunks reduce frontend work. Admin overview metrics use M
 Extend pagination to the remaining lists, validate indexes with query plans, run controlled benchmarks, and deploy the standalone worker mode. API replicas are then technically possible, but load balancing and shared rate limiting are still required before calling the topology horizontally scalable.
 
 ## 20. Production Readiness
-This is suitable for development and case-study use, not asserted production readiness. CI, container manifests, health endpoints, protected Prometheus-format metrics, structured request logs, leased outbox recovery, and graceful shutdown provide a baseline. A live deployment, backups, dashboards/alerts, migration automation, and recovery drills are **Not currently implemented**. See [Production Readiness](docs/PRODUCTION_READINESS.md).
+This is suitable for development and case-study use, not asserted production readiness. CI, container manifests, health endpoints, protected Prometheus-format metrics, structured request logs, transactional contract outbox recovery, versioned Neon migrations, and graceful shutdown provide a baseline. A live deployment, backups, dashboards/alerts, automated migration execution, and recovery drills are **Not currently implemented**. See [Production Readiness](docs/PRODUCTION_READINESS.md).
 
 ## 21. Known Limitations
 - Incomplete MongoDB/Neon synchronization.
-- No backend test suite or API contract.
+- Backend coverage is focused and does not yet exercise live databases, Razorpay, or the complete authorization matrix; there is no OpenAPI contract.
 - LocalStorage refresh tokens are not rotated/revoked.
 - Firebase login was removed because backend identity exchange was incomplete.
-- Payment price derivation/idempotency require more work.
+- Tenant Razorpay amounts are derived from active leases; landlord subscription pricing is still supplied by the client and requires a server-owned plan catalogue.
 - No measured benchmarks.
 
 ## 22. Future Architecture
@@ -101,8 +102,10 @@ Keep the modular monolith until measured load requires stateless API replicas, a
 cd backend
 Copy-Item .env.example .env -ErrorAction Stop # only when .env does not exist
 # Configure MongoDB and secrets
+# Contract writes require Atlas or a MongoDB replica set because they use transactions.
 npm install
 npm test
+npm run migrate:neon # when NEONDB_URL is configured
 npm run create-admin # optional
 npm run dev
 ```
@@ -112,6 +115,8 @@ npm install
 npm run dev
 ```
 Frontend: `http://localhost:5173`; backend: `http://localhost:5000`. Never commit `.env` files.
+
+Neon compute wake-up can exceed a short connection timeout. The backend defaults `NEON_CONNECT_TIMEOUT_MS` to 20 seconds; increase it only if network reachability succeeds but a cold database still times out. `sslmode=require` in a Neon URL is normalized to explicit `sslmode=verify-full` to retain certificate and hostname verification without the `pg` compatibility warning.
 
 Operational probes: `GET /health/live` confirms the process is responsive; `GET /health/ready` requires MongoDB and reports Neon degradation separately because MongoDB is authoritative.
 

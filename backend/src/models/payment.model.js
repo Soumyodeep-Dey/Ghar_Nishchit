@@ -47,7 +47,6 @@ const paymentSchema = new mongoose.Schema(
     razorpayOrderId: {
       type: String,
       default: null,
-      index: true,
     },
     razorpayPaymentId: {
       type: String,
@@ -59,6 +58,14 @@ const paymentSchema = new mongoose.Schema(
 
 paymentSchema.index({ propertyId: 1, status: 1, createdAt: -1 });
 paymentSchema.index({ tenantId: 1, status: 1, createdAt: -1 });
+paymentSchema.index(
+  { razorpayOrderId: 1 },
+  { unique: true, partialFilterExpression: { razorpayOrderId: { $type: 'string' } } }
+);
+paymentSchema.index(
+  { razorpayPaymentId: 1 },
+  { unique: true, partialFilterExpression: { razorpayPaymentId: { $type: 'string' } } }
+);
 
 const Payment = mongoose.model('Payment', paymentSchema);
 export default Payment;

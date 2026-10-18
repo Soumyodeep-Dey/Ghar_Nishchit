@@ -11,10 +11,11 @@
 | JWT + database user lookup | Keeps API calls token-based while enforcing current role/status | Database lookup on each request; refresh token remains client-held |
 | bcrypt cost 10 | Established password hashing with acceptable development latency | Cost must be benchmarked for production hardware |
 | Backend RBAC | Client routes are UX only; server owns authorization | Requires consistent middleware/ownership checks |
-| Leased contract outbox | Neon failure must not roll back authoritative Mongo contracts; atomic claims allow safe worker competition | Contract/outbox creation is not one Mongo transaction, and only contract projection uses the outbox |
+| Transactional leased contract outbox | Contract state and its projection event must either both commit or both roll back; atomic claims allow safe worker competition | Requires Atlas/replica-set transactions, and only contract projection uses the outbox |
 | TanStack Query | Fits server-owned cacheable state | Some screens still use manual fetching/local state |
 | Backend Gemini proxy | Keeps secret and rate control off the browser | Adds backend dependency and latency |
-| Razorpay HMAC | Payment success cannot be trusted from client fields alone | Idempotency/reconciliation still incomplete |
+| Razorpay HMAC + idempotent transitions | Payment success cannot be trusted from client fields; order binding, unique gateway IDs, and a durable event ledger prevent replayed callbacks from repeating side effects | Live gateway/reconciliation tests are absent and landlord plan prices remain client-supplied |
+| Forward-only Neon migrations | Ordered SQL, checksums, transactions, and an advisory lock make schema changes reproducible and prevent concurrent runners | Migrations are not automatically deployed and destructive down-migrations are intentionally absent |
 | Separate liveness/readiness | A live process is not necessarily safe to receive traffic; Mongo is required while Neon degradation is reported without taking the authoritative Mongo API offline | Readiness semantics must be revisited if Neon becomes authoritative |
 | JSON logs + request IDs | Machine-readable events and response correlation are useful before adopting a logging vendor | Existing controller logs are not fully migrated and logs are not centrally shipped |
 | Bounded graceful shutdown | Stops new HTTP work and lets the current outbox batch finish before closing database pools | Shutdown behavior still needs an integration test under active traffic |

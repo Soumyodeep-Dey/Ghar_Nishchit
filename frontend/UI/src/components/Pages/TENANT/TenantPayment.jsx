@@ -284,11 +284,14 @@ const TenantPayment = () => {
   }, []);
 
   // ── Derived props for RazorpayCheckout ───────────────────────────
-  // propertyId is intentionally left undefined for manual payments —
-  // the backend createOrder accepts it as optional.
+  // The backend treats the active contract as the price authority. The
+  // fallback values below remain only for old UI state; checkout rejects an
+  // amount that does not match the active lease.
   const checkoutProps = selectedPayment
     ? {
         propertyId: selectedPayment.propertyId || selectedPayment.property?._id || undefined,
+        contractId: selectedPayment.contractId || undefined,
+        paymentType: selectedPayment.contractId ? 'move_in' : 'rent',
         amount:     selectedPayment.amount,
         dueDate:    selectedPayment.dueDate || selectedPayment.date,
         note:       selectedPayment.contractId
@@ -297,6 +300,8 @@ const TenantPayment = () => {
       }
     : {
         propertyId: undefined,   // optional — backend handles null gracefully
+        contractId: undefined,
+        paymentType: 'rent',
         amount:     Number(manualAmount),
         dueDate:    new Date().toISOString(),
         note:       manualNote,
@@ -478,11 +483,12 @@ const TenantPayment = () => {
                     Powered by Razorpay — Your preferred method is auto-selected at checkout.
                   </p>
                   <button
-                    onClick={() => openModal(null)}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl text-lg font-semibold mt-4 flex items-center justify-center transition-colors"
+                    onClick={() => upcomingPayments[0] && openModal(upcomingPayments[0])}
+                    disabled={upcomingPayments.length === 0}
+                    className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-4 rounded-xl text-lg font-semibold mt-4 flex items-center justify-center transition-colors"
                   >
                     <IndianRupee className="h-6 w-6 mr-2" />
-                    Pay Now via Razorpay
+                    {upcomingPayments.length > 0 ? 'Pay Next Rent via Razorpay' : 'No Rent Due'}
                   </button>
                 </div>
               </div>

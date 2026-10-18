@@ -16,7 +16,7 @@ This document records controls and gaps; it does not claim the application is se
 | Dependencies | CI audits production dependencies; backend production audit reports zero known vulnerabilities on 2026-10-09 | Tailwind 3 build-time dependencies still have advisories; migrate deliberately rather than forcing Tailwind 4 |
 | API exposure | Admin/user APIs require admin RBAC | Public property endpoints intentionally expose listings; document fields |
 | Logging | Structured request/lifecycle logs redact sensitive key names and carry request IDs | Many legacy controller logs remain; centralized retention and field-level review are missing |
-| Payments | Razorpay HMAC callback/webhook verification | Add idempotency/event ledger and server-derived prices |
+| Payments | Constant-time Razorpay HMAC verification, internal-record/order binding, unique gateway IDs, replay ledger, no state mutation on invalid signatures, and active-lease-derived tenant charges | Landlord subscription prices remain client-supplied; add a server-owned plan catalogue and live gateway/reconciliation tests |
 | Operational endpoints | Health checks expose only status; metrics are disabled by default and require a bearer token | Store/rotate the metrics token through deployment secrets and restrict network access as defense in depth |
 | Containers | API runs as the non-root `node` user; frontend is static Nginx | Compose uses a local env file; image scanning/signing and runtime hardening are not implemented |
 

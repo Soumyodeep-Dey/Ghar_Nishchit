@@ -14,9 +14,18 @@
  *     (webhook is mounted BEFORE express.json() in app.js — see NOTE below)
  */
 import Razorpay         from 'razorpay';
-import crypto           from 'crypto';
 import LandlordPayment  from '../models/landlordPayment.model.js';
 import mongoose from 'mongoose';
+import {
+  verifyRazorpayPaymentSignature,
+  verifyRazorpayWebhookSignature,
+  webhookEventId,
+} from '../utils/paymentIntegrity.js';
+import {
+  claimWebhookEvent,
+  completeWebhookEvent,
+  failWebhookEvent,
+} from '../utils/webhookLedger.js';
 
 // ── Razorpay client (reuses the same key pair as tenant gateway) ─────────────
 let razorpay;
@@ -131,19 +140,47 @@ export const verifyLandlordPayment = async (req, res) => {
       planName,
     } = req.body;
 
-    // HMAC-SHA256 signature check — same algorithm as tenant flow
-    const digest = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-      .digest('hex');
+    if (!landlordId || !paymentDbId || !razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({ message: 'Required payment verification fields are missing.' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(paymentDbId)) {
+      return res.status(400).json({ message: 'Invalid payment record ID.' });
+    }
+    if (!process.env.RAZORPAY_KEY_SECRET) {
+      return res.status(503).json({ message: 'Payment verification is not configured.' });
+    }
 
-    if (digest !== razorpay_signature) {
-      await LandlordPayment.findOneAndUpdate({ _id: paymentDbId, landlordId }, { status: 'Failed' });
+    const signatureIsValid = verifyRazorpayPaymentSignature({
+      secret: process.env.RAZORPAY_KEY_SECRET,
+      orderId: razorpay_order_id,
+      paymentId: razorpay_payment_id,
+      signature: razorpay_signature,
+    });
+    if (!signatureIsValid) {
       return res.status(400).json({ message: 'Payment verification failed — signature mismatch.' });
     }
 
+    const existing = await LandlordPayment.findOne({
+      _id: paymentDbId,
+      landlordId,
+      razorpayOrderId: razorpay_order_id,
+    });
+    if (!existing) return res.status(404).json({ message: 'Payment record or order not found' });
+    if (existing.status === 'Paid') {
+      if (existing.razorpayPaymentId !== razorpay_payment_id) {
+        return res.status(409).json({ message: 'Order has already been paid using a different payment ID.' });
+      }
+      return res.status(200).json({ message: 'Subscription payment was already verified', payment: existing });
+    }
+
     const updated = await LandlordPayment.findOneAndUpdate(
-      { _id: paymentDbId, landlordId },
+      {
+        _id: paymentDbId,
+        landlordId,
+        razorpayOrderId: razorpay_order_id,
+        status: { $ne: 'Paid' },
+        $or: [{ razorpayPaymentId: null }, { razorpayPaymentId: razorpay_payment_id }],
+      },
       {
         status:            'Paid',
         paidAt:            new Date(),
@@ -155,7 +192,17 @@ export const verifyLandlordPayment = async (req, res) => {
     );
 
     if (!updated) {
-      return res.status(404).json({ message: 'Payment record not found' });
+      const concurrent = await LandlordPayment.findOne({
+        _id: paymentDbId,
+        landlordId,
+        razorpayOrderId: razorpay_order_id,
+        razorpayPaymentId: razorpay_payment_id,
+        status: 'Paid',
+      });
+      if (concurrent) {
+        return res.status(200).json({ message: 'Subscription payment was already verified', payment: concurrent });
+      }
+      return res.status(409).json({ message: 'Payment state changed; refresh before retrying.' });
     }
 
     return res.status(200).json({
@@ -165,6 +212,9 @@ export const verifyLandlordPayment = async (req, res) => {
 
   } catch (err) {
     console.error('[verifyLandlordPayment] ERROR:', err.message);
+    if (err?.code === 11000) {
+      return res.status(409).json({ message: 'Razorpay payment ID has already been recorded.' });
+    }
     return res.status(500).json({ message: 'Payment verification error', detail: err.message });
   }
 };
@@ -180,39 +230,56 @@ export const verifyLandlordPayment = async (req, res) => {
 //   );
 // ─────────────────────────────────────────────────────────────────────────────
 export const handleLandlordWebhook = async (req, res) => {
+  let ledgerEvent = null;
   try {
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
     const signature     = req.headers['x-razorpay-signature'];
-    const bodyStr       = req.body.toString();
+    const body           = req.body;
 
-    const expectedSig = crypto
-      .createHmac('sha256', webhookSecret)
-      .update(bodyStr)
-      .digest('hex');
-
-    if (expectedSig !== signature) {
+    if (!webhookSecret) return res.status(503).json({ message: 'Webhook verification is not configured' });
+    if (!verifyRazorpayWebhookSignature({ secret: webhookSecret, body, signature })) {
       return res.status(400).json({ message: 'Invalid webhook signature' });
     }
 
+    const bodyStr = body.toString();
     const event = JSON.parse(bodyStr);
+    const eventId = webhookEventId({ body, headerEventId: req.headers['x-razorpay-event-id'] });
+    const claim = await claimWebhookEvent({
+      consumer: 'landlord_payment',
+      eventId,
+      eventType: event.event || 'unknown',
+    });
+    if (!claim.claimed) {
+      if (claim.event?.status === 'completed') {
+        return res.status(200).json({ received: true, duplicate: true });
+      }
+      return res.status(409).json({ received: false, message: 'Webhook event is already processing' });
+    }
+    ledgerEvent = claim.event;
 
     if (event.event === 'payment.captured') {
       const rp = event.payload.payment.entity;
       await LandlordPayment.findOneAndUpdate(
-        { razorpayOrderId: rp.order_id },
+        {
+          razorpayOrderId: rp.order_id,
+          status: { $ne: 'Paid' },
+          $or: [{ razorpayPaymentId: null }, { razorpayPaymentId: rp.id }],
+        },
         { status: 'Paid', paidAt: new Date(rp.created_at * 1000), razorpayPaymentId: rp.id }
       );
     }
     if (event.event === 'payment.failed') {
       const rp = event.payload.payment.entity;
       await LandlordPayment.findOneAndUpdate(
-        { razorpayOrderId: rp.order_id },
+        { razorpayOrderId: rp.order_id, status: { $ne: 'Paid' } },
         { status: 'Failed' }
       );
     }
 
+    await completeWebhookEvent(ledgerEvent);
     return res.status(200).json({ received: true });
   } catch (err) {
+    if (ledgerEvent) await failWebhookEvent(ledgerEvent, err).catch(() => {});
     console.error('[handleLandlordWebhook] ERROR:', err.message);
     return res.status(500).json({ message: 'Webhook processing failed' });
   }

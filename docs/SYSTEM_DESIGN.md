@@ -7,7 +7,7 @@
 - Express modular monolith: REST API, authentication/RBAC, business workflows, integrations.
 - MongoDB: authoritative application and authentication store.
 - Neon/PostgreSQL: partial projection of users, payments, contracts, visits, favourites.
-- Leased outbox worker: polls MongoDB, atomically claims jobs, syncs contracts to Neon, applies exponential backoff, and dead-letters after five attempts. It can run inline or through `npm run worker`.
+- Transactional leased outbox: Mongo commits contract state and the outbox event together; a worker atomically claims jobs, syncs contracts to Neon, applies exponential backoff, and dead-letters after five attempts. It can run inline or through `npm run worker`.
 - Razorpay: order creation, callback signature verification, signed webhooks.
 - Gemini: backend proxy with timeout and process-local limiting.
 - Operations baseline: Helmet headers, request IDs, structured request logs, liveness/readiness probes, protected Prometheus-format RED/process/outbox metrics, and bounded graceful shutdown.
@@ -17,8 +17,8 @@ MongoDB uses references for users/properties/contracts/payments and embedded arr
 
 ### Important Flows
 1. Login: credentials → Mongo user/password → JWT pair → localStorage → Bearer token → user/status/role recheck.
-2. Contract: landlord writes Mongo contract and outbox job → worker upserts Neon later.
-3. Payment: authenticated order request → Razorpay → client callback/webhook HMAC → Mongo status → Neon best-effort sync.
+2. Contract: landlord changes contract + creates outbox job in one Mongo transaction → worker upserts Neon later.
+3. Tenant payment: authenticated request → active lease determines amount → Razorpay → order-bound callback or durable idempotent webhook → Mongo status transition → Neon best-effort sync.
 4. Maintenance: tenant creates request tied to property/landlord → participants access it → landlord controls status/assignment.
 
 ### Failure Scenarios
@@ -28,6 +28,8 @@ MongoDB uses references for users/properties/contracts/payments and embedded arr
 - Gemini unavailable: chatbot returns 502/504 without affecting rental workflows.
 - Worker process stops: contract projections lag until restart; expired leases are recoverable when a worker returns.
 - Multiple workers: atomic leases prevent simultaneous claims; lease behavior still lacks a live multi-process integration test.
+- Mongo standalone deployment: contract writes fail because transactional outbox correctness requires replica-set/Atlas transactions.
+- Duplicate Razorpay webhook: the event ledger returns success for completed events, rejects concurrently processing duplicates, and permits failed/expired events to retry.
 - Neon unavailable: readiness reports `degraded` rather than removing the API from service because MongoDB is authoritative; affected projection/reporting paths can still fail.
 
 ### Bottlenecks

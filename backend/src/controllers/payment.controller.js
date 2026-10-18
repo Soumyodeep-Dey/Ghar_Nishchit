@@ -1,5 +1,4 @@
 import Razorpay from 'razorpay';
-import crypto  from 'crypto';
 import Payment from '../models/payment.model.js';
 import Property from '../models/property.model.js';
 import Contract from '../models/contract.model.js';
@@ -7,6 +6,16 @@ import Notification from '../models/notification.model.js';
 import User from '../models/user.model.js';
 import mongoose from 'mongoose';
 import { query as neonQuery } from '../db/neon.js';
+import {
+  verifyRazorpayPaymentSignature,
+  verifyRazorpayWebhookSignature,
+  webhookEventId,
+} from '../utils/paymentIntegrity.js';
+import {
+  claimWebhookEvent,
+  completeWebhookEvent,
+  failWebhookEvent,
+} from '../utils/webhookLedger.js';
 
 const resolveUserId = (user) => {
   if (!user) return null;
@@ -138,13 +147,14 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    const { propertyId, amount, dueDate, note } = req.body;
+    const { propertyId, amount, dueDate, note, contractId, paymentType = 'rent' } = req.body;
 
     if (!amount || Number(amount) <= 0) {
       return res.status(400).json({ message: 'amount is required and must be > 0' });
     }
 
-    // Validate propertyId only if provided, else attempt fallback to active contract property
+    // Validate propertyId only if provided, then bind the charge to an active
+    // contract. Client-provided amounts are never used as the price authority.
     let safePropertyId = null;
     if (propertyId) {
       if (mongoose.Types.ObjectId.isValid(propertyId)) {
@@ -152,18 +162,35 @@ export const createOrder = async (req, res) => {
       } else {
         return res.status(400).json({ message: `Invalid propertyId: "${propertyId}"` });
       }
-    } else {
-      try {
-        const activeContract = await Contract.findOne({ tenant: tenantId, status: 'active' }).select('property').lean();
-        if (activeContract && activeContract.property) {
-          safePropertyId = activeContract.property;
-        }
-      } catch (err) {
-        console.warn('[createOrder] Fallback contract lookup warning:', err.message);
-      }
     }
 
-    const amountInPaise = Math.round(Number(amount) * 100);
+    const inferredContractId = contractId || note?.match(/contract:([a-f0-9]{24})/i)?.[1];
+    if (inferredContractId && !mongoose.Types.ObjectId.isValid(inferredContractId)) {
+      return res.status(400).json({ message: 'Invalid contractId' });
+    }
+    const contractFilter = { tenant: tenantId, status: 'active' };
+    if (inferredContractId) contractFilter._id = inferredContractId;
+    if (safePropertyId) contractFilter.property = safePropertyId;
+    const activeContract = await Contract.findOne(contractFilter).sort({ updatedAt: -1 }).lean();
+    if (!activeContract) {
+      return res.status(409).json({ message: 'An active lease is required before creating a rent payment.' });
+    }
+
+    safePropertyId = activeContract.property;
+    const isMoveIn = paymentType === 'move_in' || Boolean(inferredContractId && note?.startsWith('Move-in:'));
+    const authoritativeAmount = Number(activeContract.rentAmount)
+      + (isMoveIn ? Number(activeContract.securityDeposit || 0) : 0);
+    if (!Number.isFinite(authoritativeAmount) || authoritativeAmount <= 0) {
+      return res.status(409).json({ message: 'The active lease has no valid payable amount.' });
+    }
+    if (Math.abs(Number(amount) - authoritativeAmount) > 0.009) {
+      return res.status(409).json({
+        message: 'Payment amount does not match the active lease.',
+        expectedAmount: authoritativeAmount,
+      });
+    }
+
+    const amountInPaise = Math.round(authoritativeAmount * 100);
     const receipt = `r_${Date.now().toString(36)}_${String(tenantId).slice(-6)}`.slice(0, 40);
 
     const rzpOrder = await razorpay.orders.create({
@@ -178,11 +205,13 @@ export const createOrder = async (req, res) => {
 
     const paymentDoc = {
       tenantId:        tenantId,
-      amount:          Number(amount),
+      amount:          authoritativeAmount,
       status:          'Pending',
       paymentMethod:   'Razorpay',
       razorpayOrderId: rzpOrder.id,
-      note:            note ?? '',
+      note:            isMoveIn
+        ? `Move-in payment | contract:${activeContract._id}`
+        : `Rent payment | contract:${activeContract._id}`,
     };
     if (safePropertyId) paymentDoc.propertyId = safePropertyId;
     if (dueDate)         paymentDoc.dueDate    = new Date(dueDate);
@@ -226,18 +255,48 @@ export const verifyPayment = async (req, res) => {
       paymentMethod,
     } = req.body;
 
-    const digest = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-      .digest('hex');
+    if (!tenantId || !paymentDbId || !razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({ message: 'Required payment verification fields are missing.' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(paymentDbId)) {
+      return res.status(400).json({ message: 'Invalid payment record ID.' });
+    }
+    if (!process.env.RAZORPAY_KEY_SECRET) {
+      return res.status(503).json({ message: 'Payment verification is not configured.' });
+    }
 
-    if (digest !== razorpay_signature) {
-      await Payment.findOneAndUpdate({ _id: paymentDbId, tenantId }, { status: 'Failed' });
+    const signatureIsValid = verifyRazorpayPaymentSignature({
+      secret: process.env.RAZORPAY_KEY_SECRET,
+      orderId: razorpay_order_id,
+      paymentId: razorpay_payment_id,
+      signature: razorpay_signature,
+    });
+
+    if (!signatureIsValid) {
       return res.status(400).json({ message: 'Payment verification failed — signature mismatch.' });
     }
 
+    const existing = await Payment.findOne({
+      _id: paymentDbId,
+      tenantId,
+      razorpayOrderId: razorpay_order_id,
+    });
+    if (!existing) return res.status(404).json({ message: 'Payment record or order not found' });
+    if (existing.status === 'Paid') {
+      if (existing.razorpayPaymentId !== razorpay_payment_id) {
+        return res.status(409).json({ message: 'Order has already been paid using a different payment ID.' });
+      }
+      return res.status(200).json({ message: 'Payment was already verified', payment: existing });
+    }
+
     const updated = await Payment.findOneAndUpdate(
-      { _id: paymentDbId, tenantId },
+      {
+        _id: paymentDbId,
+        tenantId,
+        razorpayOrderId: razorpay_order_id,
+        status: { $ne: 'Paid' },
+        $or: [{ razorpayPaymentId: null }, { razorpayPaymentId: razorpay_payment_id }],
+      },
       {
         status:            'Paid',
         paidAt:            new Date(),
@@ -248,7 +307,19 @@ export const verifyPayment = async (req, res) => {
       { new: true }
     );
 
-    if (!updated) return res.status(404).json({ message: 'Payment record not found' });
+    if (!updated) {
+      const concurrent = await Payment.findOne({
+        _id: paymentDbId,
+        tenantId,
+        razorpayOrderId: razorpay_order_id,
+        razorpayPaymentId: razorpay_payment_id,
+        status: 'Paid',
+      });
+      if (concurrent) {
+        return res.status(200).json({ message: 'Payment was already verified', payment: concurrent });
+      }
+      return res.status(409).json({ message: 'Payment state changed; refresh before retrying.' });
+    }
 
     // Dual-write to NeonDB
     await syncPaymentToNeon(updated);
@@ -258,6 +329,9 @@ export const verifyPayment = async (req, res) => {
 
   } catch (err) {
     console.error('[verifyPayment] ERROR:', err.message);
+    if (err?.code === 11000) {
+      return res.status(409).json({ message: 'Razorpay payment ID has already been recorded.' });
+    }
     return res.status(500).json({ message: 'Payment verification error', detail: err.message });
   }
 };
@@ -266,26 +340,41 @@ export const verifyPayment = async (req, res) => {
 // WEBHOOK → POST /api/payments/webhook
 // ─────────────────────────────────────────────────────────────────────────────
 export const handleWebhook = async (req, res) => {
+  let ledgerEvent = null;
   try {
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
     const signature     = req.headers['x-razorpay-signature'];
-    const bodyStr       = req.body.toString();
+    const body           = req.body;
 
-    const expectedSig = crypto
-      .createHmac('sha256', webhookSecret)
-      .update(bodyStr)
-      .digest('hex');
-
-    if (expectedSig !== signature) {
+    if (!webhookSecret) return res.status(503).json({ message: 'Webhook verification is not configured' });
+    if (!verifyRazorpayWebhookSignature({ secret: webhookSecret, body, signature })) {
       return res.status(400).json({ message: 'Invalid webhook signature' });
     }
 
+    const bodyStr = body.toString();
     const event = JSON.parse(bodyStr);
+    const eventId = webhookEventId({ body, headerEventId: req.headers['x-razorpay-event-id'] });
+    const claim = await claimWebhookEvent({
+      consumer: 'tenant_payment',
+      eventId,
+      eventType: event.event || 'unknown',
+    });
+    if (!claim.claimed) {
+      if (claim.event?.status === 'completed') {
+        return res.status(200).json({ received: true, duplicate: true });
+      }
+      return res.status(409).json({ received: false, message: 'Webhook event is already processing' });
+    }
+    ledgerEvent = claim.event;
 
     if (event.event === 'payment.captured') {
       const rp = event.payload.payment.entity;
       const captured = await Payment.findOneAndUpdate(
-        { razorpayOrderId: rp.order_id },
+        {
+          razorpayOrderId: rp.order_id,
+          status: { $ne: 'Paid' },
+          $or: [{ razorpayPaymentId: null }, { razorpayPaymentId: rp.id }],
+        },
         { status: 'Paid', paidAt: new Date(rp.created_at * 1000), razorpayPaymentId: rp.id },
         { new: true }
       );
@@ -297,15 +386,17 @@ export const handleWebhook = async (req, res) => {
     if (event.event === 'payment.failed') {
       const rp = event.payload.payment.entity;
       const failed = await Payment.findOneAndUpdate(
-        { razorpayOrderId: rp.order_id },
+        { razorpayOrderId: rp.order_id, status: { $ne: 'Paid' } },
         { status: 'Failed' },
         { new: true }
       );
       if (failed) await syncPaymentToNeon(failed);
     }
 
+    await completeWebhookEvent(ledgerEvent);
     return res.status(200).json({ received: true });
   } catch (err) {
+    if (ledgerEvent) await failWebhookEvent(ledgerEvent, err).catch(() => {});
     console.error('[handleWebhook] ERROR:', err.message);
     return res.status(500).json({ message: 'Webhook processing failed' });
   }
