@@ -4,6 +4,7 @@ import { User, Mail, Lock, Phone, Eye, EyeOff, ArrowLeft, Home, Sparkles, Shield
 import { useDarkMode } from '../../useDarkMode.js';
 import { showSuccessToast, showErrorToast } from '../../utils/toast.jsx';
 import { setAuthSession, getRoleDashboardPath } from '../../services/authService.js';
+import { getApiBase } from '../../services/apiBase.js';
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ export default function SignUp() {
 
     setLoading(true);
     try {
-      const apiUrl = `${import.meta.env.VITE_BACKEND_URL}/api/auth/register`;
+      const apiUrl = `${getApiBase()}/auth/register`;
       const response = await fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -4,6 +4,7 @@ import { Mail, Lock, Eye, EyeOff, ArrowLeft, Home, Sparkles } from 'lucide-react
 import { useDarkMode } from '../../useDarkMode.js';
 import { showSuccessToast, showErrorToast } from '../../utils/toast.jsx';
 import { setAuthSession, restoreSession, getRoleDashboardPath } from '../../services/authService.js';
+import { getApiBase } from '../../services/apiBase.js';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ export default function Login() {
     }
 
     setLoading(true);
-    const apiUrl = `${import.meta.env.VITE_BACKEND_URL}/api/auth/login`;
+    const apiUrl = `${getApiBase()}/auth/login`;
 
     // EXACT mirror of original logic to ensure backend compatibility
     try {

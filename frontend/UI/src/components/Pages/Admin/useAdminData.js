@@ -1,19 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { showErrorToast, showSuccessToast, showConfirmToast } from '../../../utils/toast';
 import { ensureValidAccessToken } from '../../../services/authService.js';
-
-const isViteDev =
-  typeof import.meta !== 'undefined' &&
-  import.meta.env &&
-  import.meta.env.DEV === true;
-
-const getApiBase = () => {
-  const raw =
-    (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_BACKEND_URL) ||
-    (isViteDev ? '' : 'http://localhost:5000');
-  const trimmed = (raw || '').replace(/\/+$/, '');
-  return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
-};
+import { getApiBase } from '../../../services/apiBase.js';
 
 const EMPTY = {
   success: false,

@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { Buffer } from 'node:buffer';
 
-const apiOrigin = 'http://localhost:5000';
 const dashboardByRole = {
   tenant: '/tenant',
   landlord: '/landlord',
@@ -17,7 +16,7 @@ const jwt = (role) => {
 };
 
 const mockApi = async (page, { role = 'tenant', loginStatus = 200 } = {}) => {
-  await page.route(`${apiOrigin}/api/**`, async (route) => {
+  await page.route('**/api/**', async (route) => {
     const requestUrl = new URL(route.request().url());
     if (requestUrl.pathname === '/api/auth/login') {
       if (loginStatus !== 200) {

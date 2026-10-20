@@ -1,19 +1,8 @@
+import { getApiBase } from './apiBase.js';
+
 const ACCESS_KEY = 'token';
 const REFRESH_KEY = 'refreshToken';
 const USER_KEY = 'user';
-
-const isViteDev =
-  typeof import.meta !== 'undefined' &&
-  import.meta.env &&
-  import.meta.env.DEV === true;
-
-const getApiBase = () => {
-  const raw =
-    (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_BACKEND_URL) ||
-    (isViteDev ? '' : 'http://localhost:5000');
-  const trimmed = (raw || '').replace(/\/+$/, '');
-  return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
-};
 
 const decodeJwtPayload = (token) => {
   try {
