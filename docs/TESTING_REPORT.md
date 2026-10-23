@@ -22,7 +22,7 @@ This document records what was executed, how it was executed, and what the evide
 | Databases used by automated suite | None; unit/HTTP tests isolate database-dependent behavior |
 | Browser test data | Deterministic mocked API responses; no user or production data is changed |
 
-The earlier migration verification used the configured Neon instance. The MongoDB and Neon integration suites were not run because dedicated `TEST_MONGODB_URI` and `TEST_NEONDB_URL` values are not configured.
+The earlier migration verification used the configured Neon instance. A guarded database integration suite and disposable GitHub Actions topology were added on 2026-10-23. Local execution remains **NOT TESTED** because Docker Desktop's Linux engine was unavailable; a successful hosted integration run has not yet been observed.
 
 ## How We Test
 
@@ -74,7 +74,7 @@ The browser scenarios cover the landing page, tenant/landlord/admin login redire
 | Backend full dependency audit | `cd backend; npm audit --audit-level=high` | **FAIL** | 3 high-severity development-tool findings through `nodemon`/`chokidar`/`braces`. npm's proposed forced fix is a breaking downgrade and was not applied automatically. |
 | Frontend full dependency audit | `cd frontend/UI; npm audit --audit-level=high` | **FAIL** | 8 development/build-tool findings: 2 moderate and 6 high, through Tailwind's dependency chain and `source-map-js`. Forced Tailwind 4 migration was not applied automatically. |
 | Neon migration application | `cd backend; npm run migrate:neon` | **PASS** | On 2026-10-18 migrations `001` and `002` applied successfully; an immediate second run skipped both, proving version/checksum-based idempotency for that database. |
-| Live MongoDB/Neon integration | Dedicated test-database suite | **NOT TESTED** | No dedicated test database URLs are configured. Running mutation tests against the normal environment could damage real data. |
+| Live MongoDB/PostgreSQL integration | `cd backend; npm run test:integration` | **NOT TESTED** | A guarded suite and disposable CI databases are configured, but no database-backed run has yet been observed. The runner rejects database names without the `_test` suffix. See `INTEGRATION_TESTING.md`. |
 | Code coverage | Coverage-instrumented test run | **NOT TESTED** | No coverage provider or enforceable line/branch threshold is configured. Passing test counts must not be interpreted as percentage coverage. |
 | Razorpay checkout/webhook integration | Provider sandbox suite | **NOT TESTED** | Signature logic is tested, but no provider sandbox credentials/test workflow were executed. |
 | Gemini integration | Provider integration suite | **NOT TESTED** | No deterministic provider test was run; availability, quota, timeout, and response quality remain unverified. |
@@ -107,7 +107,7 @@ The evidence does **not** justify calling the product production-ready, secure, 
 
 ## Recommended Next Test Gates
 
-1. Provision disposable MongoDB and Neon test databases and add integration tests for signup/login, ownership authorization, contract transactions, webhook-ledger uniqueness, and concurrent outbox leasing.
+1. Run the new disposable MongoDB/PostgreSQL CI gate and retain its successful run as evidence; then extend it with transaction rollback fault injection.
 2. Add Razorpay sandbox tests for successful, failed, duplicate, reordered, and forged callback scenarios.
 3. Start the complete stack from built Docker images and run the browser suite against the real API rather than mocks.
 4. Seed a documented dataset, then run the existing API benchmark at fixed concurrency and record p50/p95/p99, throughput, error rate, CPU, memory, and database latency in a dated results file.

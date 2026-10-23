@@ -72,7 +72,7 @@ const syncContractToNeon = async (contract) => {
   );
 };
 
-const claimNextJob = async () => {
+export const claimNextJob = async () => {
   const now = new Date();
   const expiredLease = new Date(now.getTime() - LEASE_DURATION_MS);
   return Outbox.findOneAndUpdate(

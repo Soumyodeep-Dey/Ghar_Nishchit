@@ -46,9 +46,62 @@ jobs:
       - run: npm run test:e2e
       - run: npm audit --omit=dev --audit-level=high
 
+  integration:
+    runs-on: ubuntu-24.04
+    needs: backend
+    env:
+      NODE_ENV: test
+      JWT_SECRET: ci-only-integration-access-secret
+      JWT_REFRESH_SECRET: ci-only-integration-refresh-secret
+      TEST_MONGODB_URI: mongodb://127.0.0.1:27017/ghar_nishchit_test?replicaSet=rs0&directConnection=true
+      TEST_NEONDB_URL: postgresql://test:test@127.0.0.1:5432/ghar_nishchit_test?sslmode=disable
+      NEONDB_URL: postgresql://test:test@127.0.0.1:5432/ghar_nishchit_test?sslmode=disable
+      RUN_OUTBOX_WORKER: false
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: ghar_nishchit_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U test -d ghar_nishchit_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - name: Start single-node MongoDB replica set
+        run: |
+          docker run --detach --name mongo-integration --publish 27017:27017 mongo:8 --replSet rs0 --bind_ip_all
+          for attempt in {1..60}; do
+            if docker exec mongo-integration mongosh --quiet --eval "db.adminCommand('ping').ok"; then break; fi
+            if [ "$attempt" -eq 60 ]; then docker logs mongo-integration; exit 1; fi
+            sleep 1
+          done
+          docker exec mongo-integration mongosh --quiet --eval 'rs.initiate({_id:"rs0",members:[{_id:0,host:"127.0.0.1:27017"}]})'
+          for attempt in {1..60}; do
+            if docker exec mongo-integration mongosh --quiet --eval "db.hello().isWritablePrimary" | grep true; then break; fi
+            if [ "$attempt" -eq 60 ]; then docker logs mongo-integration; exit 1; fi
+            sleep 1
+          done
+      - run: npm run migrate:neon
+      - run: npm run test:integration
+
   containers:
     runs-on: ubuntu-24.04
-    needs: [backend, frontend]
+    needs: [backend, frontend, integration]
     steps:
       - uses: actions/checkout@v7
       - run: docker build --tag ghar-nishchit-api:ci ./backend

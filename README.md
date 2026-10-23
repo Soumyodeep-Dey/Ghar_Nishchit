@@ -135,4 +135,5 @@ Metrics are disabled by default. Set `METRICS_ENABLED=true` and a strong `METRIC
 - [Performance](docs/PERFORMANCE.md)
 - [Security](docs/SECURITY.md)
 - [Testing and Product Assessment](docs/TESTING_REPORT.md)
+- [Database Integration Testing](docs/INTEGRATION_TESTING.md)
 - [Production Readiness](docs/PRODUCTION_READINESS.md)

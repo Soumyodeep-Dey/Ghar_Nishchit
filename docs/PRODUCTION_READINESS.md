@@ -9,12 +9,12 @@ Status definitions: **PASS** has repository/reproducible evidence; **PARTIAL** e
 | Scalability | PARTIAL | API/worker can run separately and workers use atomic leases; limiter remains process-local and no load balancer exists |
 | Reliability | PARTIAL | Global errors, health probes, bounded shutdown, transactional contract outbox, leased retries, dead-letter state, and idempotent payment callbacks; non-contract Neon writes remain best effort |
 | Observability | PARTIAL | JSON logs, request IDs, protected RED/process/outbox metrics; no centralized logs, database timings, traces, dashboards, or alerts |
-| Testing | PARTIAL | 23 backend tests and 7 deterministic Chrome flows pass; lint/build pass. Live database/provider, transaction, lease-concurrency, and real-stack browser integration remain untested; see `TESTING_REPORT.md` |
+| Testing | PARTIAL | 23 backend tests and 7 deterministic Chrome flows pass; a guarded database integration suite now covers auth persistence, contract/outbox transactions, migrations, and lease concurrency, but its first hosted run is not yet observed. Provider and real-stack browser integration remain untested; see `TESTING_REPORT.md` |
 | Deployment | PARTIAL | API/worker and SPA Dockerfiles plus validated Compose configuration; image build/live deployment not tested |
 | Backups | NOT TESTED | No repository backup/restore evidence |
 | Database migrations | PARTIAL | Ordered transactional Neon SQL migrations have checksums and an advisory lock; apply and idempotent re-run succeeded against the configured Neon database on 2026-10-18, but automatic deployment and down migrations are absent |
 | Secrets management | PARTIAL | Ignored env files and example; no managed store/rotation |
-| CI/CD | PARTIAL | GitHub Actions installs, tests/builds, and audits production dependencies; no deployment stage or observed run yet |
+| CI/CD | PARTIAL | GitHub Actions installs, unit-tests, lint/builds, runs mocked browser tests, provisions disposable integration databases, audits production dependencies, and builds images; no deployment stage or observed fully green run yet |
 | Monitoring | PARTIAL | Authenticated Prometheus-format endpoint exists; scraper, dashboards, alert rules, and notification routing are not implemented |
 | Logging | PARTIAL | Structured request/lifecycle logs with request IDs and sensitive-key redaction; legacy logs and shipping remain |
 | Health checks | PARTIAL | `/health/live` is tested; `/health/ready` checks Mongo and reports optional Neon degradation but lacks deployed probe evidence |

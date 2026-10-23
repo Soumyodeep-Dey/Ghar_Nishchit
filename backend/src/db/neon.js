@@ -16,6 +16,9 @@ const normalizeConnectionString = (value) => {
   return url.toString();
 };
 const connectionString = normalizeConnectionString(rawConnectionString);
+const sslMode = connectionString
+  ? new URL(connectionString).searchParams.get('sslmode')
+  : null;
 const queryTimeoutMs = Number(process.env.NEON_QUERY_TIMEOUT_MS) || 10000;
 const connectionTimeoutMs = Number(process.env.NEON_CONNECT_TIMEOUT_MS) || 20000;
 
@@ -23,7 +26,9 @@ export const isNeonConfigured = Boolean(connectionString);
 
 const pool = new Pool({
   connectionString,
-  ssl: { rejectUnauthorized: false },
+  // Neon requires TLS. Disposable local PostgreSQL used by integration tests
+  // explicitly opts out with sslmode=disable.
+  ssl: sslMode === 'disable' ? false : { rejectUnauthorized: false },
   max: 10,                  // max pool connections
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: connectionTimeoutMs,
