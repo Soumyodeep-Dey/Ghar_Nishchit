@@ -22,7 +22,7 @@ This document records what was executed, how it was executed, and what the evide
 | Databases used by automated suite | None; unit/HTTP tests isolate database-dependent behavior |
 | Browser test data | Deterministic mocked API responses; no user or production data is changed |
 
-The earlier migration verification used the configured Neon instance. A guarded database integration suite and disposable GitHub Actions topology were added on 2026-10-23. Local execution remains **NOT TESTED** because Docker Desktop's Linux engine was unavailable; a successful hosted integration run has not yet been observed.
+The earlier migration verification used the configured Neon instance. A guarded database integration suite and disposable GitHub Actions topology were added on 2026-10-23. On 2026-11-03, the suite was run locally with Node.js `v22.23.2`, Docker Desktop server `29.9.2`, MongoDB 7.0 as a single-node replica set, and PostgreSQL 17. Both migrations succeeded and all 5 integration tests passed. The disposable databases started empty and contained only fixtures created by the suite. A successful run of the revised hosted integration job has not yet been observed.
 
 ## How We Test
 
@@ -74,7 +74,7 @@ The browser scenarios cover the landing page, tenant/landlord/admin login redire
 | Backend full dependency audit | `cd backend; npm audit --audit-level=high` | **FAIL** | 3 high-severity development-tool findings through `nodemon`/`chokidar`/`braces`. npm's proposed forced fix is a breaking downgrade and was not applied automatically. |
 | Frontend full dependency audit | `cd frontend/UI; npm audit --audit-level=high` | **FAIL** | 8 development/build-tool findings: 2 moderate and 6 high, through Tailwind's dependency chain and `source-map-js`. Forced Tailwind 4 migration was not applied automatically. |
 | Neon migration application | `cd backend; npm run migrate:neon` | **PASS** | On 2026-10-18 migrations `001` and `002` applied successfully; an immediate second run skipped both, proving version/checksum-based idempotency for that database. |
-| Live MongoDB/PostgreSQL integration | `cd backend; npm run test:integration` | **NOT TESTED** | A guarded suite and disposable CI databases are configured, but no database-backed run has yet been observed. The runner rejects database names without the `_test` suffix. See `INTEGRATION_TESTING.md`. |
+| Live MongoDB/PostgreSQL integration | `cd backend; npm run migrate:neon; npm run test:integration` | **PASS** | On 2026-11-03 both migrations succeeded and 5/5 tests passed against disposable MongoDB 7.0 and PostgreSQL 17 databases. This covers stored auth/account state, authorization, MongoDB transactions, outbox lease concurrency/recovery, and webhook deduplication. The runner rejects database names without the `_test` suffix. See `INTEGRATION_TESTING.md`. |
 | Code coverage | Coverage-instrumented test run | **NOT TESTED** | No coverage provider or enforceable line/branch threshold is configured. Passing test counts must not be interpreted as percentage coverage. |
 | Razorpay checkout/webhook integration | Provider sandbox suite | **NOT TESTED** | Signature logic is tested, but no provider sandbox credentials/test workflow were executed. |
 | Gemini integration | Provider integration suite | **NOT TESTED** | No deterministic provider test was run; availability, quota, timeout, and response quality remain unverified. |
@@ -83,7 +83,7 @@ The browser scenarios cover the landing page, tenant/landlord/admin login redire
 | Runtime resources/startup | CPU, memory, and timed application startup under controlled load | **NOT TESTED** | No production-like container or repeatable monitoring setup was available. |
 | Lighthouse | Lighthouse against a production-like deployment | **NOT TESTED** | No stable production-like deployment was available. Build success is not a substitute for Core Web Vitals. |
 | Backup/restore | Restore drill | **NOT TESTED** | No backup artifact, recovery environment, RPO/RTO, or restore drill exists in the repository. |
-| CI workflow execution | GitHub Actions run | **NOT TESTED** | CI now declares lint, build, browser, backend, audit, and image-build gates, but a hosted run has not been observed from this environment. |
+| CI workflow execution | GitHub Actions run | **NOT TESTED** | The first hosted integration job was observed failing before tests because floating `mongo:8` would not start on the runner's Linux 6.19+ kernel. CI is now pinned to MongoDB 7.0 and the same topology passes locally, but the revised hosted workflow still needs a successful rerun. |
 
 ## Defects and Risks Found
 
@@ -91,7 +91,7 @@ The browser scenarios cover the landing page, tenant/landlord/admin login redire
 2. Frontend lint initially reported 29 errors and 2 warnings. Stale imports, unused state/listeners, and lint configuration for intentional JSX/provider patterns were corrected; lint now passes.
 3. Full npm audits still report vulnerabilities in development/build dependencies. Production-only audits are clean, but developer/CI exposure is not zero. Breaking forced upgrades require a separate compatibility change and regression pass.
 4. The admin production chunk is approximately 433 kB uncompressed (about 120 kB gzip). This is not proof of poor user experience, but it is the largest route chunk and a candidate for further lazy splitting before scale.
-5. Integration coverage remains the largest evidence gap: database transactions, concurrent outbox leasing, real login persistence, payment-provider callbacks, and AI-provider behavior are not exercised end to end.
+5. Database transactions, concurrent outbox leasing, and real login persistence now have disposable-database integration coverage. Payment-provider callbacks, AI-provider behavior, and browser-to-real-API flows remain unverified end to end.
 
 ## What We Can Say About the Product
 
@@ -101,13 +101,14 @@ The repository has a credible engineering baseline for continued development and
 - the React application lint-checks, creates a production bundle, and performs the principal role-routing flows in a real browser under controlled API responses;
 - production runtime dependencies have no currently reported npm advisories at high severity or above;
 - the SQL migration mechanism has been exercised against Neon and shown to be idempotent;
+- the disposable-database suite passes stored authentication, authorization, transaction, outbox-concurrency, and webhook-deduplication scenarios;
 - CI and container definitions exist, and Compose configuration is syntactically valid.
 
-The evidence does **not** justify calling the product production-ready, secure, scalable, or fast. Those claims require live end-to-end tests, isolated database transaction/concurrency tests, provider sandbox tests, container execution, load and Lighthouse measurements, monitoring evidence, and a backup/restore drill. At present, the strongest accurate description is: **a buildable, testable pre-production application with useful reliability controls and clearly identified integration and operations gaps**.
+The evidence does **not** justify calling the product production-ready, secure, scalable, or fast. Those claims still require provider sandbox tests, browser-to-real-API tests, production-like container execution, load and Lighthouse measurements, monitoring evidence, and a backup/restore drill. At present, the strongest accurate description is: **a buildable, testable pre-production application with useful reliability controls and clearly identified integration and operations gaps**.
 
 ## Recommended Next Test Gates
 
-1. Run the new disposable MongoDB/PostgreSQL CI gate and retain its successful run as evidence; then extend it with transaction rollback fault injection.
+1. Rerun the revised MongoDB 7.0/PostgreSQL 17 GitHub Actions gate and retain its successful hosted run as evidence; then extend it with transaction rollback fault injection.
 2. Add Razorpay sandbox tests for successful, failed, duplicate, reordered, and forged callback scenarios.
 3. Start the complete stack from built Docker images and run the browser suite against the real API rather than mocks.
 4. Seed a documented dataset, then run the existing API benchmark at fixed concurrency and record p50/p95/p99, throughput, error rate, CPU, memory, and database latency in a dated results file.

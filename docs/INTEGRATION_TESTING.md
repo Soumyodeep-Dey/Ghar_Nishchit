@@ -17,7 +17,7 @@ The suite drops the configured MongoDB database and deletes rows from the config
 The `integration` GitHub Actions job creates:
 
 - a PostgreSQL 17 service database named `ghar_nishchit_test`;
-- a single-node MongoDB 8 replica set named `rs0`, required for transaction behavior;
+- a single-node MongoDB 7.0 replica set named `rs0`, required for transaction behavior and pinned because MongoDB 8 is currently incompatible with the GitHub runner's Linux 6.19+ kernel;
 - the backend process under Node.js 22 with test-only JWT secrets.
 
 The job applies the real ordered PostgreSQL migrations before running the integration suite. The container-build job waits for this gate in addition to the unit and frontend gates.
@@ -57,4 +57,4 @@ The exact CI provisioning commands are maintained in `.github/workflows/ci.yml`.
 
 ## Evidence Status
 
-Implementation and syntax validation were completed on 2026-10-23. A local database-backed execution is **NOT TESTED** because the Docker Desktop Linux engine was unavailable. Do not mark the integration gate PASS until a GitHub Actions run completes successfully; record that run URL and commit in `TESTING_REPORT.md` when it does.
+Local verification on 2026-11-03 used disposable MongoDB 7.0 and PostgreSQL 17 containers. Both migrations completed and all 5 integration tests passed, including the MongoDB transaction and concurrency scenarios. The first hosted run had stopped before the tests because MongoDB 8 is incompatible with Linux kernel 6.19 and newer. CI now uses MongoDB 7.0, but the revised hosted gate remains **NOT TESTED** until a new GitHub Actions run completes successfully. Record that run URL and commit in `TESTING_REPORT.md` when it does.
